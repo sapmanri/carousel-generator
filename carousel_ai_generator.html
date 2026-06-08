@@ -480,8 +480,7 @@ function renderOhouse(slide, i, img, folio, tag) {
 }
 
 async function exportSlides() {
-  const cards = document.querySelectorAll('.slide-card');
-  if (!cards.length) return;
+  if (!generatedSlides.length) return;
   const btn = document.querySelector('.btn-primary');
   const orig = btn.textContent;
   btn.disabled = true;
@@ -491,15 +490,15 @@ async function exportSlides() {
 
   const modal = document.createElement('div');
   modal.id = 'exportModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;overflow-y:auto;padding:24px 16px';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;overflow-y:auto;padding:24px 16px';
   document.body.appendChild(modal);
 
   const inner = document.createElement('div');
   inner.style.cssText = 'max-width:540px;margin:0 auto';
   modal.appendChild(inner);
 
-  const header = document.createElement('div');
-  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:16px';
+  const hdr = document.createElement('div');
+  hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:16px';
   const hint = document.createElement('p');
   hint.style.cssText = 'font-family:sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4)';
   hint.textContent = '우클릭 → 이미지로 저장';
@@ -507,66 +506,219 @@ async function exportSlides() {
   closeBtn.textContent = '닫기';
   closeBtn.style.cssText = 'background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:5px 14px;border-radius:2px;cursor:pointer;font-size:11px;font-family:sans-serif';
   closeBtn.onclick = () => modal.remove();
-  header.appendChild(hint);
-  header.appendChild(closeBtn);
-  inner.appendChild(header);
+  hdr.appendChild(hint); hdr.appendChild(closeBtn);
+  inner.appendChild(hdr);
 
   const grid = document.createElement('div');
   grid.style.cssText = 'display:flex;flex-direction:column;gap:12px';
   inner.appendChild(grid);
 
-  // 오프스크린 컨테이너 — 정사각형 고정 크기로 클론 렌더
-  const offscreen = document.createElement('div');
-  offscreen.style.cssText = 'position:fixed;left:-9999px;top:0;width:540px;height:540px;overflow:hidden;z-index:-1';
-  document.body.appendChild(offscreen);
+  const SIZE = 1080;
 
-  for (let i = 0; i < cards.length; i++) {
-    btn.textContent = '변환 중 ' + (i+1) + '/' + cards.length + '...';
+  for (let i = 0; i < generatedSlides.length; i++) {
+    btn.textContent = '변환 중 ' + (i+1) + '/' + generatedSlides.length + '...';
+
+    const slide = generatedSlides[i];
+    const imgData = (slide.image_index != null) ? images[slide.image_index]?.dataUrl : null;
+
     try {
-      // 슬라이드 클론을 540x540 고정 크기로 오프스크린에 배치
-      const clone = cards[i].cloneNode(true);
-      clone.style.cssText = 'width:540px;height:540px;position:absolute;top:0;left:0;overflow:hidden;border-radius:0';
-      // 내부 slide-canvas도 540x540으로
-      const cv = clone.querySelector('.slide-canvas, .oh-canvas');
-      if (cv) { cv.style.width = '540px'; cv.style.height = '540px'; }
-      // 배경 이미지 cover 처리
-      clone.querySelectorAll('img.slide-bg-img, img.oh-bg').forEach(img => {
-        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center';
-      });
-      // split 레이아웃 이미지
-      clone.querySelectorAll('.feature-image-wrap img, [style*="flex:0 0"] img').forEach(img => {
-        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center';
-      });
-      offscreen.innerHTML = '';
-      offscreen.appendChild(clone);
-
-      await new Promise(r => setTimeout(r, 80)); // 렌더 대기
-
-      const canvas = await html2canvas(offscreen, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        width: 540,
-        height: 540,
-      });
+      const dataUrl = await renderSlideToCanvas(slide, i, imgData, SIZE);
 
       const label = document.createElement('p');
       label.style.cssText = 'font-family:sans-serif;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:5px;letter-spacing:0.08em';
       label.textContent = 'SLIDE ' + String(i+1).padStart(2,'0');
       const img = document.createElement('img');
-      img.src = canvas.toDataURL('image/png');
-      img.style.cssText = 'width:100%;aspect-ratio:1/1;display:block;border-radius:2px';
+      img.src = dataUrl;
+      img.style.cssText = 'width:100%;display:block;border-radius:2px';
       const wrap = document.createElement('div');
-      wrap.appendChild(label);
-      wrap.appendChild(img);
+      wrap.appendChild(label); wrap.appendChild(img);
       grid.appendChild(wrap);
-    } catch(e) { console.error('slide ' + (i+1) + ':', e); }
+    } catch(e) { console.error(e); }
   }
 
-  document.body.removeChild(offscreen);
   btn.textContent = orig;
   btn.disabled = false;
+}
+
+async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
+  const canvas = document.createElement('canvas');
+  canvas.width = SIZE; canvas.height = SIZE;
+  const ctx = canvas.getContext('2d');
+  const style = document.getElementById('metaStyle').value;
+  const accent = slide.accent_color || '#b87a6e';
+  const tag = document.getElementById('metaTag').value;
+
+  // 배경 이미지 — cover 방식으로 정확히 그리기
+  async function drawBgImage(dataUrl, overlayType) {
+    if (!dataUrl) return;
+    return new Promise((res) => {
+      const img = new Image();
+      img.onload = () => {
+        // cover: 이미지 비율 유지하며 canvas 꽉 채우기
+        const scale = Math.max(SIZE / img.width, SIZE / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        const x = (SIZE - w) / 2;
+        const y = (SIZE - h) / 2;
+        ctx.drawImage(img, x, y, w, h);
+
+        // overlay gradient
+        const grad = ctx.createLinearGradient(0, 0, 0, SIZE);
+        if (overlayType === 'overlay_bottom') {
+          grad.addColorStop(0, 'rgba(0,0,0,0)');
+          grad.addColorStop(0.45, 'rgba(0,0,0,0)');
+          grad.addColorStop(1, 'rgba(10,8,6,0.78)');
+        } else if (overlayType === 'overlay_top') {
+          grad.addColorStop(0, 'rgba(10,8,6,0.72)');
+          grad.addColorStop(0.5, 'rgba(0,0,0,0)');
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+        } else if (overlayType === 'overlay_left') {
+          const gl = ctx.createLinearGradient(0,0,SIZE,0);
+          gl.addColorStop(0, 'rgba(10,8,6,0.75)');
+          gl.addColorStop(0.6, 'rgba(0,0,0,0)');
+          ctx.fillStyle = gl; ctx.fillRect(0,0,SIZE,SIZE);
+        } else if (overlayType === 'dark_full') {
+          ctx.fillStyle = 'rgba(10,8,6,0.45)'; ctx.fillRect(0,0,SIZE,SIZE);
+        }
+        if (overlayType !== 'overlay_left') {
+          ctx.fillStyle = grad; ctx.fillRect(0,0,SIZE,SIZE);
+        }
+        res();
+      };
+      img.onerror = res;
+      img.src = dataUrl;
+    });
+  }
+
+  // 폰트 설정
+  const serifFont = '"Noto Serif KR", Georgia, serif';
+  const sansFont = '"Noto Sans KR", "Helvetica Neue", Arial, sans-serif';
+
+  function setFont(size, weight, family) {
+    ctx.font = weight + ' ' + size + 'px ' + family;
+  }
+
+  function wrapText(text, maxW) {
+    const words = text.split('');
+    const lines = [];
+    let cur = '';
+    for (const ch of words) {
+      const test = cur + ch;
+      if (ctx.measureText(test).width > maxW && cur) {
+        lines.push(cur); cur = ch;
+      } else { cur = test; }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  }
+
+  const isDark = slide.type === 'closing';
+  const isSplit = slide.layout === 'split_bottom';
+  const isPull = slide.layout === 'pull_quote' || slide.type === 'pull_quote';
+  const isNike = style === 'nike';
+  const pad = 54;
+
+  if (isPull) {
+    // 텍스트 전용 슬라이드
+    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle = accent; ctx.fillRect(pad, pad+40, 4, 96);
+    setFont(64, '300', serifFont);
+    ctx.fillStyle = '#1a1a1a';
+    const lines = wrapText(slide.headline || '', SIZE - pad*2 - 20);
+    lines.forEach((l, i) => ctx.fillText(l, pad+20, pad+80+i*72));
+    setFont(36, '300', serifFont);
+    ctx.fillStyle = '#888580'; ctx.font = 'italic 300 36px ' + serifFont;
+    const blines = wrapText(slide.body || '', SIZE - pad*2 - 20);
+    const startY = pad + 80 + lines.length * 72 + 20;
+    blines.forEach((l,i) => ctx.fillText(l, pad+20, startY+i*46));
+
+  } else if (isDark) {
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
+    setFont(28, '400', sansFont);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.letterSpacing = '8px';
+    ctx.fillText('SAPMANRI', pad, pad+40);
+    ctx.fillStyle = accent; ctx.fillRect(pad, pad+70, 4, 80);
+    setFont(isNike ? 96 : 80, isNike ? '700' : '300', isNike ? sansFont : serifFont);
+    ctx.fillStyle = '#fff';
+    const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
+    const lines = wrapText(hl, SIZE - pad*2 - 20);
+    lines.forEach((l,i) => ctx.fillText(l, pad+16, pad+160+i*(isNike?108:96)));
+    ctx.font = 'italic 300 36px ' + serifFont;
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    const startY = pad + 160 + lines.length * (isNike?108:96) + 16;
+    const blines = wrapText(slide.body||'', SIZE-pad*2);
+    blines.forEach((l,i) => ctx.fillText(l, pad, startY+i*48));
+    setFont(26, '400', sansFont);
+    ctx.fillStyle = accent;
+    ctx.fillText(tag, pad, SIZE-pad);
+
+  } else if (isSplit) {
+    // 상단 이미지 + 하단 텍스트
+    const splitY = Math.round(SIZE * 0.56);
+    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,SIZE,SIZE);
+    if (imgDataUrl) {
+      await new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.max(SIZE/img.width, splitY/img.height);
+          const w = img.width*scale, h = img.height*scale;
+          ctx.save(); ctx.beginPath(); ctx.rect(0,0,SIZE,splitY); ctx.clip();
+          ctx.drawImage(img,(SIZE-w)/2,(splitY-h)/2,w,h);
+          ctx.restore(); res();
+        };
+        img.onerror = res; img.src = imgDataUrl;
+      });
+    }
+    const textY = splitY + 36;
+    setFont(26, '400', sansFont); ctx.fillStyle = accent;
+    ctx.fillText((slide.label||'').toUpperCase(), pad, textY);
+    setFont(isNike?80:72, isNike?'700':'300', isNike?sansFont:serifFont);
+    ctx.fillStyle = '#1a1a1a';
+    const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
+    const lines = wrapText(hl, SIZE-pad*2);
+    lines.forEach((l,i) => ctx.fillText(l, pad, textY+50+i*(isNike?90:80)));
+    ctx.font = 'italic 300 34px '+serifFont; ctx.fillStyle = '#888';
+    const blines = wrapText(slide.body||'', SIZE-pad*2);
+    const by = textY+50+lines.length*(isNike?90:80)+16;
+    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*46));
+
+  } else {
+    // 풀블리드 이미지 슬라이드 (cover, feature)
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
+    await drawBgImage(imgDataUrl, slide.layout);
+
+    const isTop = slide.text_position === 'top_left';
+    const textY = isTop ? pad + 40 : SIZE - 380;
+
+    if (slide.type === 'cover') {
+      setFont(26, '400', sansFont); ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText('SAPMANRI', pad, pad+36);
+    } else {
+      setFont(26, '400', sansFont); ctx.fillStyle = accent;
+      ctx.fillText((slide.label||'').toUpperCase(), pad, textY);
+    }
+
+    const hlY = slide.type === 'cover' ? SIZE-300 : textY+50;
+    setFont(isNike?96:86, isNike?'700':'300', isNike?sansFont:serifFont);
+    ctx.fillStyle = '#fff';
+    const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
+    const lines = wrapText(hl, SIZE-pad*2);
+    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*(isNike?108:96)));
+    ctx.font = 'italic 300 36px '+serifFont; ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    const blines = wrapText(slide.body||'', SIZE-pad*2);
+    const by = hlY+lines.length*(isNike?108:96)+20;
+    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*48));
+  }
+
+  // 폴리오
+  setFont(24, '400', sansFont);
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.4)';
+  ctx.textAlign = 'right';
+  ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), SIZE-pad, SIZE-pad);
+  ctx.textAlign = 'left';
+
+  return canvas.toDataURL('image/png');
 }
 
 function toggleCaption() {
