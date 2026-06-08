@@ -480,58 +480,69 @@ function renderOhouse(slide, i, img, folio, tag) {
 }
 
 async function exportSlides() {
-  const cards = document.querySelectorAll('.slide-card');
-  if (!cards.length) return;
+  if (!generatedSlides.length) return;
   const btn = document.querySelector('.btn-primary');
   const orig = btn.textContent;
   btn.disabled = true;
 
-  for (let i = 0; i < cards.length; i++) {
-    btn.textContent = '저장 중 ' + (i+1) + '/' + cards.length + '...';
+  // 540px 히든 렌더 컨테이너 생성
+  const hiddenWrap = document.createElement('div');
+  hiddenWrap.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;display:flex;flex-direction:column;gap:0';
+  document.body.appendChild(hiddenWrap);
+
+  // 각 슬라이드를 540x540으로 히든 렌더
+  const RENDER_SIZE = 540;
+  const hiddenCards = [];
+
+  for (let i = 0; i < generatedSlides.length; i++) {
+    const slide = generatedSlides[i];
+    const imgData = (slide.image_index != null) ? images[slide.image_index]?.dataUrl : null;
+    // renderSlide로 HTML 생성
+    const tmp = document.createElement('div');
+    tmp.style.cssText = `width:${RENDER_SIZE}px;height:${RENDER_SIZE}px;flex-shrink:0;overflow:hidden;position:relative`;
+    tmp.innerHTML = renderSlideInner(slide, i, imgData);
+    hiddenWrap.appendChild(tmp);
+    hiddenCards.push(tmp);
+  }
+
+  await new Promise(r => setTimeout(r, 300)); // 폰트/이미지 로드 대기
+
+  for (let i = 0; i < hiddenCards.length; i++) {
+    btn.textContent = '저장 중 ' + (i+1) + '/' + hiddenCards.length + '...';
     try {
-      const card = cards[i];
-      // 카드를 임시로 정사각형 고정 크기로 변경
-      const prevStyle = card.getAttribute('style') || '';
-      const size = card.offsetWidth;
-      card.style.width = size + 'px';
-      card.style.height = size + 'px';
-      card.style.minWidth = size + 'px';
-      card.style.minHeight = size + 'px';
-
-      // 내부 이미지들 cover 강제
-      card.querySelectorAll('img').forEach(img => {
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        img.style.objectPosition = 'center';
-      });
-
-      await new Promise(r => setTimeout(r, 50));
-
-      const canvas = await html2canvas(card, {
-        scale: 3,
+      const canvas = await html2canvas(hiddenCards[i], {
+        scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
-        width: size,
-        height: size,
-        scrollX: 0,
-        scrollY: 0,
+        width: RENDER_SIZE,
+        height: RENDER_SIZE,
       });
-
-      // 스타일 복원
-      card.setAttribute('style', prevStyle);
-
       const link = document.createElement('a');
       link.download = 'sapmanri_slide_' + String(i+1).padStart(2,'0') + '.png';
       link.href = canvas.toDataURL('image/png');
       link.click();
       await new Promise(r => setTimeout(r, 400));
-    } catch(e) { console.error('slide ' + (i+1) + ':', e); }
+    } catch(e) { console.error(e); }
   }
 
+  document.body.removeChild(hiddenWrap);
   btn.textContent = orig;
   btn.disabled = false;
+}
+
+// 슬라이드 내부 HTML만 반환 (renderSlide 기반)
+function renderSlideInner(slide, i, imgData) {
+  const style = document.getElementById('metaStyle').value;
+  const folio = slide.folio || String(i+1).padStart(2,'0') + ' — ' + String(generatedSlides.length).padStart(2,'0');
+  const accent = slide.accent_color || '#b87a6e';
+  const tag = document.getElementById('metaTag').value;
+
+  // renderSlide 함수를 재활용해서 slide-card 내부 slide-canvas HTML만 추출
+  const tmpDiv = document.createElement('div');
+  tmpDiv.style.cssText = 'width:540px;height:540px;position:relative';
+  tmpDiv.innerHTML = renderSlide(slide, i).replace(/<div class="slide-card"[^>]*>/, '').replace(/<\/div>$/, '');
+  return tmpDiv.innerHTML;
 }
 
 async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
