@@ -480,23 +480,54 @@ function renderOhouse(slide, i, img, folio, tag) {
 }
 
 async function exportSlides() {
-  if (!generatedSlides.length) return;
+  const cards = document.querySelectorAll('.slide-card');
+  if (!cards.length) return;
   const btn = document.querySelector('.btn-primary');
   const orig = btn.textContent;
   btn.disabled = true;
 
-  for (let i = 0; i < generatedSlides.length; i++) {
-    btn.textContent = '저장 중 ' + (i+1) + '/' + generatedSlides.length + '...';
-    const slide = generatedSlides[i];
-    const imgData = (slide.image_index != null) ? images[slide.image_index]?.dataUrl : null;
+  for (let i = 0; i < cards.length; i++) {
+    btn.textContent = '저장 중 ' + (i+1) + '/' + cards.length + '...';
     try {
-      const dataUrl = await renderSlideToCanvas(slide, i, imgData, 1080);
+      const card = cards[i];
+      // 카드를 임시로 정사각형 고정 크기로 변경
+      const prevStyle = card.getAttribute('style') || '';
+      const size = card.offsetWidth;
+      card.style.width = size + 'px';
+      card.style.height = size + 'px';
+      card.style.minWidth = size + 'px';
+      card.style.minHeight = size + 'px';
+
+      // 내부 이미지들 cover 강제
+      card.querySelectorAll('img').forEach(img => {
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        img.style.objectPosition = 'center';
+      });
+
+      await new Promise(r => setTimeout(r, 50));
+
+      const canvas = await html2canvas(card, {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        width: size,
+        height: size,
+        scrollX: 0,
+        scrollY: 0,
+      });
+
+      // 스타일 복원
+      card.setAttribute('style', prevStyle);
+
       const link = document.createElement('a');
       link.download = 'sapmanri_slide_' + String(i+1).padStart(2,'0') + '.png';
-      link.href = dataUrl;
+      link.href = canvas.toDataURL('image/png');
       link.click();
-      await new Promise(r => setTimeout(r, 300));
-    } catch(e) { console.error(e); }
+      await new Promise(r => setTimeout(r, 400));
+    } catch(e) { console.error('slide ' + (i+1) + ':', e); }
   }
 
   btn.textContent = orig;
