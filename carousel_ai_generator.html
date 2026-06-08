@@ -217,8 +217,15 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="carousel-section" id="carouselSection">
   <div class="section-label">생성된 캐러셀</div>
   <div class="slides-row" id="slidesRow"></div>
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 0 4px">
+    <span style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap">PNG 텍스트 크기</span>
+    <input type="range" id="textScaleSlider" min="0.5" max="1.5" step="0.05" value="1.0"
+      style="flex:1;accent-color:var(--accent);cursor:pointer"
+      oninput="updateTextScale(this.value)">
+    <span id="textScaleVal" style="font-size:10px;color:var(--canvas);min-width:32px;text-align:right">1.0×</span>
+  </div>
   <div class="action-row">
-    <button class="action-btn btn-primary" onclick="exportSlides()">PNG 저장 안내</button>
+    <button class="action-btn btn-primary" onclick="exportSlides()">PNG 저장</button>
     <button class="action-btn btn-secondary" onclick="toggleCaption()">인스타 캡션</button>
   </div>
   <div class="caption-box" id="captionBox">
@@ -248,11 +255,29 @@ window.addEventListener('load', () => {
     const status = document.getElementById('apiKeyStatus');
     if (status) status.style.color = '#7ec98a';
   }
+  // 텍스트 스케일 복원
+  try {
+    const savedScale = localStorage.getItem('png_text_scale');
+    if (savedScale) {
+      textScale = parseFloat(savedScale);
+      const slider = document.getElementById('textScaleSlider');
+      const label = document.getElementById('textScaleVal');
+      if (slider) slider.value = textScale;
+      if (label) label.textContent = textScale.toFixed(2) + '×';
+    }
+  } catch(e) {}
 });
+
+function updateTextScale(val) {
+  textScale = parseFloat(val);
+  document.getElementById('textScaleVal').textContent = textScale.toFixed(2) + '×';
+  try { localStorage.setItem('png_text_scale', textScale); } catch(e) {}
+}
 
 let images = [];
 let generatedSlides = [];
 let generatedCaption = '';
+let textScale = 1.0;
 
 // ── upload ──
 const uploadZone = document.getElementById('uploadZone');
@@ -657,8 +682,8 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
   const isSplit = slide.layout === 'split_bottom';
   const isPull = slide.layout === 'pull_quote' || slide.type === 'pull_quote';
   const isNike = style === 'nike';
-  // CSS 슬라이드 카드 220px 기준 → 1080px Canvas 비율 4.9
-  const R = SIZE / 220;
+  // CSS 슬라이드 카드 220px 기준 → 1080px Canvas 비율, textScale로 조정
+  const R = (SIZE / 220) * textScale;
   const pad = Math.round(14 * R);  // CSS padding 14px
 
   if (isPull) {
