@@ -155,6 +155,17 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .caption-title{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
 .caption-text{font-family:var(--serif);font-size:13px;font-style:italic;line-height:1.85;color:rgba(255,255,255,0.7);white-space:pre-wrap}
 .caption-hint{font-size:9px;color:rgba(255,255,255,0.2);margin-top:8px;letter-spacing:0.06em;text-transform:uppercase}
+
+/* ── 모바일 반응형 ── */
+@media (max-width: 600px) {
+  body{padding:16px 12px}
+  .form-grid{grid-template-columns:1fr}
+  .image-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+  .slides-row{grid-template-columns:repeat(2,1fr);gap:8px}
+  .action-row{flex-direction:column}
+  .action-btn{width:100%}
+  .header{flex-direction:column;gap:4px}
+}
 </style>
 
 </head>
@@ -232,6 +243,24 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
     <div class="caption-title">Instagram Caption</div>
     <div class="caption-text" id="captionText"></div>
     <div class="caption-hint">텍스트 선택 후 복사하세요</div>
+  </div>
+</div>
+
+<!-- iOS PNG 저장 모달 -->
+<div id="iosModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);flex-direction:column;align-items:center;justify-content:center;padding:16px">
+  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+      <span id="iosModalCount" style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4)"></span>
+      <button onclick="closeIosModal()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;padding:4px 8px">✕</button>
+    </div>
+    <img id="iosModalImg" style="width:100%;max-width:420px;aspect-ratio:1/1;object-fit:contain;border-radius:4px" />
+    <p style="font-size:11px;color:rgba(255,255,255,0.45);text-align:center;line-height:1.7;letter-spacing:0.04em">
+      이미지를 <strong style="color:rgba(255,255,255,0.75)">길게 눌러</strong> 사진 앱에 저장하세요
+    </p>
+    <div style="display:flex;gap:10px;width:100%">
+      <button id="iosPrevBtn" onclick="iosModalPrev()" style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:2px;color:rgba(255,255,255,0.6);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">◀ 이전</button>
+      <button id="iosNextBtn" onclick="iosModalNext()" style="flex:1;padding:12px;background:rgba(255,255,255,0.9);border:none;border-radius:2px;color:#1a1a1a;font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">다음 ▶</button>
+    </div>
   </div>
 </div>
 
@@ -532,37 +561,88 @@ function imgToCoverCanvas(dataUrl, S) {
   });
 }
 
+// iOS 판별
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+// 렌더된 PNG dataURL 캐시
+let _iosPngs = [];
+let _iosIdx = 0;
+
 async function exportSlides() {
   if (!generatedSlides.length) return;
   const btn = document.querySelector('.btn-primary');
   const orig = btn.textContent;
   btn.disabled = true;
-  btn.textContent = '폰트 로딩 중...';
+  btn.textContent = '렌더링 중...';
 
-  // 폰트 로딩 보장
   try { await document.fonts.ready; } catch(e) {}
-
   const SIZE = 1080;
 
+  // 모든 슬라이드 미리 렌더
+  _iosPngs = [];
   for (let i = 0; i < generatedSlides.length; i++) {
-    btn.textContent = '저장 중 ' + (i+1) + '/' + generatedSlides.length + '...';
+    btn.textContent = '렌더링 ' + (i+1) + '/' + generatedSlides.length + '...';
     const slide = generatedSlides[i];
-    // objectUrl이 있으면 우선 사용 (Canvas Image 로딩 더 안정적)
-    const imgDataUrl = (slide.image_index != null && images[slide.image_index])
+    const imgSrc = (slide.image_index != null && images[slide.image_index])
       ? (images[slide.image_index].objectUrl || images[slide.image_index].dataUrl) : null;
-
     try {
-      const canvas = await renderSlideToCanvas(slide, i, imgDataUrl, SIZE);
-      const link = document.createElement('a');
-      link.download = 'sapmanri_slide_' + String(i+1).padStart(2,'0') + '.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      await new Promise(r => setTimeout(r, 400));
-    } catch(e) { console.error('export error slide ' + i, e); }
+      const canvas = await renderSlideToCanvas(slide, i, imgSrc, SIZE);
+      _iosPngs.push(canvas.toDataURL('image/png'));
+    } catch(e) { _iosPngs.push(null); console.error(e); }
   }
 
   btn.textContent = orig;
   btn.disabled = false;
+
+  if (isIOS) {
+    // iOS: 모달로 한 장씩 보여주기
+    _iosIdx = 0;
+    openIosModal();
+  } else {
+    // 데스크탑: 기존 일괄 다운로드
+    for (let i = 0; i < _iosPngs.length; i++) {
+      if (!_iosPngs[i]) continue;
+      const link = document.createElement('a');
+      link.download = 'sapmanri_slide_' + String(i+1).padStart(2,'0') + '.png';
+      link.href = _iosPngs[i];
+      link.click();
+      await new Promise(r => setTimeout(r, 400));
+    }
+  }
+}
+
+function openIosModal() {
+  const modal = document.getElementById('iosModal');
+  modal.style.display = 'flex';
+  updateIosModal();
+}
+
+function updateIosModal() {
+  const img = document.getElementById('iosModalImg');
+  const count = document.getElementById('iosModalCount');
+  const prevBtn = document.getElementById('iosPrevBtn');
+  const nextBtn = document.getElementById('iosNextBtn');
+  img.src = _iosPngs[_iosIdx] || '';
+  count.textContent = (_iosIdx+1) + ' / ' + _iosPngs.length;
+  prevBtn.style.opacity = _iosIdx === 0 ? '0.3' : '1';
+  prevBtn.disabled = _iosIdx === 0;
+  if (_iosIdx === _iosPngs.length - 1) {
+    nextBtn.textContent = '완료 ✓';
+    nextBtn.onclick = closeIosModal;
+  } else {
+    nextBtn.textContent = '다음 ▶';
+    nextBtn.onclick = iosModalNext;
+  }
+}
+
+function iosModalNext() {
+  if (_iosIdx < _iosPngs.length - 1) { _iosIdx++; updateIosModal(); }
+}
+function iosModalPrev() {
+  if (_iosIdx > 0) { _iosIdx--; updateIosModal(); }
+}
+function closeIosModal() {
+  document.getElementById('iosModal').style.display = 'none';
 }
 
 function renderSlideWithImages(slide, i, imgArr) {
@@ -702,6 +782,8 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
 
   } else if (isDark) {
     ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
+    // closing 슬라이드도 이미지 있으면 어둡게 깔기
+    if (imgDataUrl) await drawBgImage(imgDataUrl, 'dark_full');
     setFont(Math.round(7*R), '400', sansFont);
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     ctx.fillText('SAPMANRI', pad, pad+Math.round(10*R));
