@@ -344,7 +344,7 @@ async function analyzeImage(dataUrl, topic, style) {
   const base64 = dataUrl.split(',')[1];
   const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
   const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey()},
+    method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514', max_tokens:600,
       messages:[{ role:'user', content:[
@@ -366,7 +366,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText) {
   const imageData = images.map((img,i) => ({ index:i, analysis:img.analysis||{} }));
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
-    headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey()},
+    headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514',
       max_tokens:2000,
