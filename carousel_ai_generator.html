@@ -505,6 +505,19 @@ async function exportSlides() {
     hiddenCards.push(tmp);
   }
 
+  // 히든 컨테이너 내 모든 이미지를 절대위치 + cover로 강제 변환
+  hiddenWrap.querySelectorAll('img').forEach(img => {
+    const parent = img.parentElement;
+    const pw = parent.offsetWidth || RENDER_SIZE;
+    const ph = parent.offsetHeight || RENDER_SIZE;
+    img.style.position = 'absolute';
+    img.style.inset = '0';
+    img.style.objectFit = 'cover';
+    img.style.objectPosition = 'center';
+    img.style.width = pw + 'px';
+    img.style.height = ph + 'px';
+  });
+
   await new Promise(r => setTimeout(r, 300)); // 폰트/이미지 로드 대기
 
   for (let i = 0; i < hiddenCards.length; i++) {
