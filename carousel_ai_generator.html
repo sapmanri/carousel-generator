@@ -264,12 +264,19 @@ fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
 function handleFiles(files) {
   Array.from(files).slice(0, 6 - images.length).forEach(file => {
+    const objectUrl = URL.createObjectURL(file);
     const reader = new FileReader();
-    reader.onload = ev => { images.push({ file, dataUrl: ev.target.result, analysis: null }); renderThumbs(); updateBtn(); };
+    reader.onload = ev => {
+      images.push({ file, dataUrl: ev.target.result, objectUrl, analysis: null });
+      renderThumbs(); updateBtn();
+    };
     reader.readAsDataURL(file);
   });
 }
-function removeImg(i) { images.splice(i, 1); renderThumbs(); updateBtn(); }
+function removeImg(i) {
+  if (images[i]?.objectUrl) URL.revokeObjectURL(images[i].objectUrl);
+  images.splice(i, 1); renderThumbs(); updateBtn();
+}
 function renderThumbs() {
   document.getElementById('imageGrid').innerHTML = images.map((img, i) => `
     <div class="img-thumb" id="thumb-${i}">
@@ -412,7 +419,9 @@ function renderCarousel(slides) {
 
 function renderSlide(slide, i) {
   const style = document.getElementById('metaStyle').value;
-  const img = slide.image_index!=null ? images[slide.image_index]?.dataUrl : null;
+  // 미리보기는 objectUrl 사용 (base64보다 빠르고 안정적)
+  const imgObj = slide.image_index!=null ? images[slide.image_index] : null;
+  const img = imgObj ? (imgObj.objectUrl || imgObj.dataUrl) : null;
   const folio = slide.folio || `0${i+1} — 0${generatedSlides.length}`;
   const accent = slide.accent_color || '#b87a6e';
   const tag = document.getElementById('metaTag').value;
@@ -648,45 +657,46 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
   const isSplit = slide.layout === 'split_bottom';
   const isPull = slide.layout === 'pull_quote' || slide.type === 'pull_quote';
   const isNike = style === 'nike';
-  const pad = 54;
+  // CSS 슬라이드 카드 220px 기준 → 1080px Canvas 비율 4.9
+  const R = SIZE / 220;
+  const pad = Math.round(14 * R);  // CSS padding 14px
 
   if (isPull) {
-    // 텍스트 전용 슬라이드
     ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,SIZE,SIZE);
-    ctx.fillStyle = accent; ctx.fillRect(pad, pad+40, 4, 96);
-    setFont(64, '300', serifFont);
+    ctx.fillStyle = accent; ctx.fillRect(pad, pad+Math.round(40*R), Math.round(2*R), Math.round(28*R));
+    setFont(Math.round(19*R), '300', serifFont);
     ctx.fillStyle = '#1a1a1a';
-    const lines = wrapText(slide.headline || '', SIZE - pad*2 - 20);
-    lines.forEach((l, i) => ctx.fillText(l, pad+20, pad+80+i*72));
-    setFont(36, '300', serifFont);
-    ctx.fillStyle = '#888580'; ctx.font = 'italic 300 36px ' + serifFont;
-    const blines = wrapText(slide.body || '', SIZE - pad*2 - 20);
-    const startY = pad + 80 + lines.length * 72 + 20;
-    blines.forEach((l,i) => ctx.fillText(l, pad+20, startY+i*46));
+    const lines = wrapText(slide.headline || '', SIZE - pad*2 - 10);
+    lines.forEach((l, i) => ctx.fillText(l, pad+Math.round(10*R), pad+Math.round(80*R)+i*Math.round(26*R*1.3)));
+    ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
+    ctx.fillStyle = '#888580';
+    const blines = wrapText(slide.body || '', SIZE - pad*2 - 10);
+    const startY = pad + Math.round(80*R) + lines.length * Math.round(26*R*1.3) + Math.round(10*R);
+    blines.forEach((l,i) => ctx.fillText(l, pad+Math.round(10*R), startY+i*Math.round(9*R*1.65)));
 
   } else if (isDark) {
     ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
-    setFont(28, '400', sansFont);
+    setFont(Math.round(7*R), '400', sansFont);
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.letterSpacing = '8px';
-    ctx.fillText('SAPMANRI', pad, pad+40);
-    ctx.fillStyle = accent; ctx.fillRect(pad, pad+70, 4, 80);
-    setFont(isNike ? 96 : 80, isNike ? '700' : '300', isNike ? sansFont : serifFont);
+    ctx.fillText('SAPMANRI', pad, pad+Math.round(10*R));
+    ctx.fillStyle = accent; ctx.fillRect(pad, pad+Math.round(20*R), Math.round(2*R), Math.round(28*R));
+    const hlSize = isNike ? Math.round(32*R) : Math.round(24*R);
+    setFont(hlSize, isNike ? '700' : '300', isNike ? sansFont : serifFont);
     ctx.fillStyle = '#fff';
     const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
-    const lines = wrapText(hl, SIZE - pad*2 - 20);
-    lines.forEach((l,i) => ctx.fillText(l, pad+16, pad+160+i*(isNike?108:96)));
-    ctx.font = 'italic 300 36px ' + serifFont;
+    const lines = wrapText(hl, SIZE - pad*2 - 10);
+    const hlY = pad + Math.round(65*R);
+    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.05)));
+    ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    const startY = pad + 160 + lines.length * (isNike?108:96) + 16;
+    const startY = hlY + lines.length * Math.round(hlSize*1.05) + Math.round(8*R);
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    blines.forEach((l,i) => ctx.fillText(l, pad, startY+i*48));
-    setFont(26, '400', sansFont);
+    blines.forEach((l,i) => ctx.fillText(l, pad, startY+i*Math.round(9*R*1.65)));
+    setFont(Math.round(7*R), '400', sansFont);
     ctx.fillStyle = accent;
     ctx.fillText(tag, pad, SIZE-pad);
 
   } else if (isSplit) {
-    // 상단 이미지 + 하단 텍스트
     const splitY = Math.round(SIZE * 0.56);
     ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,SIZE,SIZE);
     if (imgDataUrl) {
@@ -702,52 +712,55 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
         img.onerror = res; img.src = imgDataUrl;
       });
     }
-    const textY = splitY + 36;
-    setFont(26, '400', sansFont); ctx.fillStyle = accent;
-    ctx.fillText((slide.label||'').toUpperCase(), pad, textY);
-    setFont(isNike?80:72, isNike?'700':'300', isNike?sansFont:serifFont);
+    const textY = splitY + Math.round(10*R);
+    setFont(Math.round(7*R), '400', sansFont); ctx.fillStyle = accent;
+    ctx.fillText((slide.label||'').toUpperCase(), pad, textY + Math.round(8*R));
+    const hlSize = isNike ? Math.round(20*R) : Math.round(20*R);
+    setFont(hlSize, isNike?'700':'300', isNike?sansFont:serifFont);
     ctx.fillStyle = '#1a1a1a';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
     const lines = wrapText(hl, SIZE-pad*2);
-    lines.forEach((l,i) => ctx.fillText(l, pad, textY+50+i*(isNike?90:80)));
-    ctx.font = 'italic 300 34px '+serifFont; ctx.fillStyle = '#888';
+    const hlY = textY + Math.round(20*R);
+    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.15)));
+    ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont; ctx.fillStyle = '#888';
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    const by = textY+50+lines.length*(isNike?90:80)+16;
-    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*46));
+    const by = hlY + lines.length*Math.round(hlSize*1.15) + Math.round(6*R);
+    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.65)));
 
   } else {
-    // 풀블리드 이미지 슬라이드 (cover, feature)
     ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
     await drawBgImage(imgDataUrl, slide.layout);
 
     const isTop = slide.text_position === 'top_left';
-    const textY = isTop ? pad + 40 : SIZE - 380;
+    const hlSize = isNike ? Math.round(30*R) : Math.round(28*R);
+    const textY = isTop ? pad + Math.round(16*R) : SIZE - Math.round(16*R) - Math.round(hlSize * 1.0) - Math.round(9*R*1.65*2) - Math.round(40*R);
 
     if (slide.type === 'cover') {
-      setFont(26, '400', sansFont); ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.fillText('SAPMANRI', pad, pad+36);
+      setFont(Math.round(7*R), '400', sansFont); ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText('SAPMANRI', pad, pad + Math.round(10*R));
     } else {
-      setFont(26, '400', sansFont); ctx.fillStyle = accent;
+      setFont(Math.round(7*R), '400', sansFont); ctx.fillStyle = accent;
       ctx.fillText((slide.label||'').toUpperCase(), pad, textY);
     }
 
-    const hlY = slide.type === 'cover' ? SIZE-300 : textY+50;
-    setFont(isNike?96:86, isNike?'700':'300', isNike?sansFont:serifFont);
+    const hlY = slide.type === 'cover' ? SIZE - Math.round(hlSize*1.0) - Math.round(9*R*1.65*2) - Math.round(30*R) : textY + Math.round(14*R);
+    setFont(hlSize, isNike?'700':'300', isNike?sansFont:serifFont);
     ctx.fillStyle = '#fff';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
     const lines = wrapText(hl, SIZE-pad*2);
-    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*(isNike?108:96)));
-    ctx.font = 'italic 300 36px '+serifFont; ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*0.95)));
+    ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    const by = hlY+lines.length*(isNike?108:96)+20;
-    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*48));
+    const by = hlY + lines.length*Math.round(hlSize*0.95) + Math.round(6*R);
+    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.65)));
   }
 
   // 폴리오
-  setFont(24, '400', sansFont);
-  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.4)';
+  setFont(Math.round(7*R), '400', sansFont);
+  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.3)';
   ctx.textAlign = 'right';
-  ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), SIZE-pad, SIZE-pad);
+  ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), SIZE-Math.round(10*R), SIZE-Math.round(8*R));
   ctx.textAlign = 'left';
 
   return canvas;
