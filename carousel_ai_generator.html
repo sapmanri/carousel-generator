@@ -521,23 +521,25 @@ async function exportSlides() {
     try {
       const card = cards[i];
       const rect = card.getBoundingClientRect();
-      const size = Math.round(Math.max(rect.width, rect.height));
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
       const canvas = await html2canvas(card, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
-        width: size,
-        height: size,
-        windowWidth: size,
-        windowHeight: size,
+        width: w,
+        height: h,
       });
-      // 1:1 정사각형으로 크롭
+      // 정사각형 canvas로 변환
+      const size = Math.max(canvas.width, canvas.height);
       const out = document.createElement('canvas');
-      out.width = size * 2;
-      out.height = size * 2;
+      out.width = size;
+      out.height = size;
       const ctx = out.getContext('2d');
-      ctx.drawImage(canvas, 0, 0, size*2, size*2, 0, 0, size*2, size*2);
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(canvas, 0, 0);
 
       const label = document.createElement('p');
       label.style.cssText = 'font-family:sans-serif;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:5px;letter-spacing:0.08em';
