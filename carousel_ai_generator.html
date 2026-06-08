@@ -667,12 +667,12 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     setFont(Math.round(19*R), '300', serifFont);
     ctx.fillStyle = '#1a1a1a';
     const lines = wrapText(slide.headline || '', SIZE - pad*2 - 10);
-    lines.forEach((l, i) => ctx.fillText(l, pad+Math.round(10*R), pad+Math.round(80*R)+i*Math.round(26*R*1.3)));
+    lines.forEach((l, i) => ctx.fillText(l, pad+Math.round(10*R), pad+Math.round(80*R)+i*Math.round(26*R*1.5)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
     ctx.fillStyle = '#888580';
     const blines = wrapText(slide.body || '', SIZE - pad*2 - 10);
-    const startY = pad + Math.round(80*R) + lines.length * Math.round(26*R*1.3) + Math.round(10*R);
-    blines.forEach((l,i) => ctx.fillText(l, pad+Math.round(10*R), startY+i*Math.round(9*R*1.65)));
+    const startY = pad + Math.round(80*R) + lines.length * Math.round(26*R*1.5) + Math.round(10*R);
+    blines.forEach((l,i) => ctx.fillText(l, pad+Math.round(10*R), startY+i*Math.round(9*R*1.9)));
 
   } else if (isDark) {
     ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
@@ -686,12 +686,12 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
     const lines = wrapText(hl, SIZE - pad*2 - 10);
     const hlY = pad + Math.round(65*R);
-    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.05)));
+    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.25)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    const startY = hlY + lines.length * Math.round(hlSize*1.05) + Math.round(8*R);
+    const startY = hlY + lines.length * Math.round(hlSize*1.25) + Math.round(8*R);
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    blines.forEach((l,i) => ctx.fillText(l, pad, startY+i*Math.round(9*R*1.65)));
+    blines.forEach((l,i) => ctx.fillText(l, pad, startY+i*Math.round(9*R*1.9)));
     setFont(Math.round(7*R), '400', sansFont);
     ctx.fillStyle = accent;
     ctx.fillText(tag, pad, SIZE-pad);
@@ -721,11 +721,11 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
     const lines = wrapText(hl, SIZE-pad*2);
     const hlY = textY + Math.round(20*R);
-    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.15)));
+    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.3)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont; ctx.fillStyle = '#888';
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    const by = hlY + lines.length*Math.round(hlSize*1.15) + Math.round(6*R);
-    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.65)));
+    const by = hlY + lines.length*Math.round(hlSize*1.3) + Math.round(6*R);
+    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
 
   } else {
     ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
@@ -748,12 +748,12 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     ctx.fillStyle = '#fff';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
     const lines = wrapText(hl, SIZE-pad*2);
-    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*0.95)));
+    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.2)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
     ctx.fillStyle = 'rgba(255,255,255,0.8)';
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    const by = hlY + lines.length*Math.round(hlSize*0.95) + Math.round(6*R);
-    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.65)));
+    const by = hlY + lines.length*Math.round(hlSize*1.2) + Math.round(6*R);
+    blines.slice(0,3).forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
   }
 
   // 폴리오
