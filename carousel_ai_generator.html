@@ -485,25 +485,24 @@ async function exportSlides() {
   const btn = document.querySelector('.btn-primary');
   const orig = btn.textContent;
   btn.disabled = true;
-  btn.textContent = '이미지 변환 중...';
 
   const existing = document.getElementById('exportModal');
   if (existing) existing.remove();
 
   const modal = document.createElement('div');
   modal.id = 'exportModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;overflow-y:auto;padding:24px 16px';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;overflow-y:auto;padding:24px 16px';
   document.body.appendChild(modal);
 
   const inner = document.createElement('div');
-  inner.style.cssText = 'max-width:560px;margin:0 auto';
+  inner.style.cssText = 'max-width:540px;margin:0 auto';
   modal.appendChild(inner);
 
   const header = document.createElement('div');
   header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:16px';
   const hint = document.createElement('p');
   hint.style.cssText = 'font-family:sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4)';
-  hint.textContent = '우클릭 또는 길게 눌러서 저장';
+  hint.textContent = '우클릭 → 이미지로 저장';
   const closeBtn = document.createElement('button');
   closeBtn.textContent = '닫기';
   closeBtn.style.cssText = 'background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:5px 14px;border-radius:2px;cursor:pointer;font-size:11px;font-family:sans-serif';
@@ -516,44 +515,48 @@ async function exportSlides() {
   grid.style.cssText = 'display:flex;flex-direction:column;gap:12px';
   inner.appendChild(grid);
 
+  // 오프스크린 컨테이너 — 정사각형 고정 크기로 클론 렌더
+  const offscreen = document.createElement('div');
+  offscreen.style.cssText = 'position:fixed;left:-9999px;top:0;width:540px;height:540px;overflow:hidden;z-index:-1';
+  document.body.appendChild(offscreen);
+
   for (let i = 0; i < cards.length; i++) {
     btn.textContent = '변환 중 ' + (i+1) + '/' + cards.length + '...';
     try {
-      const card = cards[i];
-      const rect = card.getBoundingClientRect();
-      const w = Math.round(rect.width);
-      const h = Math.round(rect.height);
-      const canvas = await html2canvas(card, {
+      // 슬라이드 클론을 540x540 고정 크기로 오프스크린에 배치
+      const clone = cards[i].cloneNode(true);
+      clone.style.cssText = 'width:540px;height:540px;position:absolute;top:0;left:0;overflow:hidden;border-radius:0';
+      // 내부 slide-canvas도 540x540으로
+      const cv = clone.querySelector('.slide-canvas, .oh-canvas');
+      if (cv) { cv.style.width = '540px'; cv.style.height = '540px'; }
+      offscreen.innerHTML = '';
+      offscreen.appendChild(clone);
+
+      await new Promise(r => setTimeout(r, 80)); // 렌더 대기
+
+      const canvas = await html2canvas(offscreen, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
-        width: w,
-        height: h,
+        width: 540,
+        height: 540,
       });
-      // 정사각형 canvas로 변환
-      const size = Math.max(canvas.width, canvas.height);
-      const out = document.createElement('canvas');
-      out.width = size;
-      out.height = size;
-      const ctx = out.getContext('2d');
-      ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(canvas, 0, 0);
 
       const label = document.createElement('p');
       label.style.cssText = 'font-family:sans-serif;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:5px;letter-spacing:0.08em';
       label.textContent = 'SLIDE ' + String(i+1).padStart(2,'0');
       const img = document.createElement('img');
-      img.src = out.toDataURL('image/png');
-      img.style.cssText = 'width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:2px;display:block';
+      img.src = canvas.toDataURL('image/png');
+      img.style.cssText = 'width:100%;aspect-ratio:1/1;display:block;border-radius:2px';
       const wrap = document.createElement('div');
       wrap.appendChild(label);
       wrap.appendChild(img);
       grid.appendChild(wrap);
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error('slide ' + (i+1) + ':', e); }
   }
 
+  document.body.removeChild(offscreen);
   btn.textContent = orig;
   btn.disabled = false;
 }
