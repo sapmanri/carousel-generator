@@ -758,19 +758,26 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
 
     const isTop = slide.text_position === 'top_left';
     const hlSize = isNike ? Math.round(26*R) : Math.round(22*R);
-    const textY = isTop ? pad + Math.round(16*R) : SIZE - Math.round(16*R) - Math.round(hlSize * 1.0) - Math.round(9*R*1.65*2) - Math.round(40*R);
+    const labelFontH = Math.round(7*R);   // 레이블 폰트 높이
+    const labelGap  = Math.round(6*R);    // 레이블↔헤드라인 여백
+    const hlLineH   = Math.round(hlSize * 1.2);
+    const bodyLineH = Math.round(9*R * 1.9);
+    const bottomPad = Math.round(16*R);
+    // 아래 정렬: 바디2줄 + 헤드라인2줄 + 레이블 + 여백들을 합산해서 레이블 시작점 계산
+    const blockH = labelFontH + labelGap + hlLineH*2 + Math.round(6*R) + bodyLineH*2;
+    const textY = isTop ? pad + Math.round(16*R) : SIZE - bottomPad - blockH;
 
     if (slide.type === 'cover') {
-      setFont(Math.round(7*R), '400', sansFont); ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      setFont(labelFontH, '400', sansFont); ctx.fillStyle = 'rgba(255,255,255,0.5)';
       ctx.fillText('SAPMANRI', pad, pad + Math.round(10*R));
     } else {
-      setFont(Math.round(7*R), '400', sansFont); ctx.fillStyle = accent;
+      setFont(labelFontH, '400', sansFont); ctx.fillStyle = accent;
       ctx.fillText((slide.label||'').toUpperCase(), pad, textY);
     }
 
-    // 레이블 높이(7*R) + 여백(8*R) 확보 후 헤드라인 시작
-    const labelH = Math.round(7*R) + Math.round(8*R);
-    const hlY = slide.type === 'cover' ? SIZE - Math.round(hlSize*1.0) - Math.round(9*R*1.9*2) - Math.round(30*R) : textY + labelH;
+    const hlY = slide.type === 'cover'
+      ? SIZE - hlLineH*2 - bodyLineH*2 - Math.round(10*R) - bottomPad
+      : textY + labelFontH + labelGap;
     setFont(hlSize, isNike?'700':'300', isNike?sansFont:serifFont);
     ctx.fillStyle = '#fff';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
