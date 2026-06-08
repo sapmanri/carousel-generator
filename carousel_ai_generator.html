@@ -485,54 +485,17 @@ async function exportSlides() {
   const orig = btn.textContent;
   btn.disabled = true;
 
-  const existing = document.getElementById('exportModal');
-  if (existing) existing.remove();
-
-  const modal = document.createElement('div');
-  modal.id = 'exportModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;overflow-y:auto;padding:24px 16px';
-  document.body.appendChild(modal);
-
-  const inner = document.createElement('div');
-  inner.style.cssText = 'max-width:540px;margin:0 auto';
-  modal.appendChild(inner);
-
-  const hdr = document.createElement('div');
-  hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:16px';
-  const hint = document.createElement('p');
-  hint.style.cssText = 'font-family:sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4)';
-  hint.textContent = '우클릭 → 이미지로 저장';
-  const closeBtn = document.createElement('button');
-  closeBtn.textContent = '닫기';
-  closeBtn.style.cssText = 'background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:5px 14px;border-radius:2px;cursor:pointer;font-size:11px;font-family:sans-serif';
-  closeBtn.onclick = () => modal.remove();
-  hdr.appendChild(hint); hdr.appendChild(closeBtn);
-  inner.appendChild(hdr);
-
-  const grid = document.createElement('div');
-  grid.style.cssText = 'display:flex;flex-direction:column;gap:12px';
-  inner.appendChild(grid);
-
-  const SIZE = 1080;
-
   for (let i = 0; i < generatedSlides.length; i++) {
-    btn.textContent = '변환 중 ' + (i+1) + '/' + generatedSlides.length + '...';
-
+    btn.textContent = '저장 중 ' + (i+1) + '/' + generatedSlides.length + '...';
     const slide = generatedSlides[i];
     const imgData = (slide.image_index != null) ? images[slide.image_index]?.dataUrl : null;
-
     try {
-      const dataUrl = await renderSlideToCanvas(slide, i, imgData, SIZE);
-
-      const label = document.createElement('p');
-      label.style.cssText = 'font-family:sans-serif;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:5px;letter-spacing:0.08em';
-      label.textContent = 'SLIDE ' + String(i+1).padStart(2,'0');
-      const img = document.createElement('img');
-      img.src = dataUrl;
-      img.style.cssText = 'width:100%;display:block;border-radius:2px';
-      const wrap = document.createElement('div');
-      wrap.appendChild(label); wrap.appendChild(img);
-      grid.appendChild(wrap);
+      const dataUrl = await renderSlideToCanvas(slide, i, imgData, 1080);
+      const link = document.createElement('a');
+      link.download = 'sapmanri_slide_' + String(i+1).padStart(2,'0') + '.png';
+      link.href = dataUrl;
+      link.click();
+      await new Promise(r => setTimeout(r, 300));
     } catch(e) { console.error(e); }
   }
 
