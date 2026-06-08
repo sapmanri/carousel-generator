@@ -705,13 +705,13 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     ctx.fillText('SAPMANRI', pad, pad+Math.round(10*R));
     ctx.fillStyle = accent; ctx.fillRect(pad, pad+Math.round(20*R), Math.round(2*R), Math.round(28*R));
-    const hlSize = isNike ? Math.round(32*R) : Math.round(24*R);
+    const hlSize = isNike ? Math.round(26*R) : Math.round(20*R);
     setFont(hlSize, isNike ? '700' : '300', isNike ? sansFont : serifFont);
     ctx.fillStyle = '#fff';
     const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
     const lines = wrapText(hl, SIZE - pad*2 - 10);
     const hlY = pad + Math.round(65*R);
-    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.25)));
+    lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.25)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     const startY = hlY + lines.length * Math.round(hlSize*1.25) + Math.round(8*R);
@@ -740,16 +740,16 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     const textY = splitY + Math.round(10*R);
     setFont(Math.round(7*R), '400', sansFont); ctx.fillStyle = accent;
     ctx.fillText((slide.label||'').toUpperCase(), pad, textY + Math.round(8*R));
-    const hlSize = isNike ? Math.round(20*R) : Math.round(20*R);
+    const hlSize = isNike ? Math.round(18*R) : Math.round(17*R);
     setFont(hlSize, isNike?'700':'300', isNike?sansFont:serifFont);
     ctx.fillStyle = '#1a1a1a';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
     const lines = wrapText(hl, SIZE-pad*2);
     const hlY = textY + Math.round(7*R) + Math.round(8*R); // 레이블 높이 + 여백
-    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.3)));
+    lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.3)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont; ctx.fillStyle = '#888';
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    const by = hlY + lines.length*Math.round(hlSize*1.3) + Math.round(6*R);
+    const by = hlY + Math.min(lines.length,2)*Math.round(hlSize*1.3) + Math.round(6*R);
     blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
 
   } else {
@@ -757,7 +757,7 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     await drawBgImage(imgDataUrl, slide.layout);
 
     const isTop = slide.text_position === 'top_left';
-    const hlSize = isNike ? Math.round(30*R) : Math.round(28*R);
+    const hlSize = isNike ? Math.round(26*R) : Math.round(22*R);
     const textY = isTop ? pad + Math.round(16*R) : SIZE - Math.round(16*R) - Math.round(hlSize * 1.0) - Math.round(9*R*1.65*2) - Math.round(40*R);
 
     if (slide.type === 'cover') {
@@ -775,11 +775,11 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     ctx.fillStyle = '#fff';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
     const lines = wrapText(hl, SIZE-pad*2);
-    lines.forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.2)));
+    lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.2)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
     ctx.fillStyle = 'rgba(255,255,255,0.8)';
     const blines = wrapText(slide.body||'', SIZE-pad*2);
-    const by = hlY + lines.length*Math.round(hlSize*1.2) + Math.round(6*R);
+    const by = hlY + Math.min(lines.length,2)*Math.round(hlSize*1.2) + Math.round(6*R);
     blines.slice(0,3).forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
   }
 
