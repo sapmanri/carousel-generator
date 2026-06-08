@@ -81,7 +81,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 
 /* slide canvas base */
 .slide-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:var(--sans)}
-.slide-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slide-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
 .ov-bottom{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,6,0.78) 0%,transparent 55%)}
 .ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,8,6,0.72) 0%,transparent 50%)}
 .ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,8,6,0.75) 0%,transparent 60%)}
@@ -125,7 +125,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 /* ohouse */
 :root{--oh:#00C896;--oh-pale:#E6FAF4;--oh-cream:#FAFAF8;--oh-warm:#F5F3EF}
 .oh-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--oh-cream);font-family:var(--sans)}
-.oh-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.oh-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
 .oh-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.58) 0%,transparent 52%)}
 .oh-card{position:absolute;bottom:0;left:0;right:0;background:var(--oh-cream);border-radius:14px 14px 0 0;padding:10px 14px 14px}
 .oh-split{position:absolute;bottom:0;left:0;right:0;height:43%;background:var(--oh-cream);padding:8px 14px 12px;display:flex;flex-direction:column;justify-content:center}
@@ -529,6 +529,14 @@ async function exportSlides() {
       // 내부 slide-canvas도 540x540으로
       const cv = clone.querySelector('.slide-canvas, .oh-canvas');
       if (cv) { cv.style.width = '540px'; cv.style.height = '540px'; }
+      // 배경 이미지 cover 처리
+      clone.querySelectorAll('img.slide-bg-img, img.oh-bg').forEach(img => {
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center';
+      });
+      // split 레이아웃 이미지
+      clone.querySelectorAll('.feature-image-wrap img, [style*="flex:0 0"] img').forEach(img => {
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center';
+      });
       offscreen.innerHTML = '';
       offscreen.appendChild(clone);
 
