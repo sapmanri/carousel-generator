@@ -547,8 +547,9 @@ async function exportSlides() {
   for (let i = 0; i < generatedSlides.length; i++) {
     btn.textContent = '저장 중 ' + (i+1) + '/' + generatedSlides.length + '...';
     const slide = generatedSlides[i];
+    // objectUrl이 있으면 우선 사용 (Canvas Image 로딩 더 안정적)
     const imgDataUrl = (slide.image_index != null && images[slide.image_index])
-      ? images[slide.image_index].dataUrl : null;
+      ? (images[slide.image_index].objectUrl || images[slide.image_index].dataUrl) : null;
 
     try {
       const canvas = await renderSlideToCanvas(slide, i, imgDataUrl, SIZE);
