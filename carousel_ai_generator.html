@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>감성찾아삽만리 · AI 캐러셀 생성기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a1a1a;--canvas:#faf9f7;--paper:#f2f0ec;--paper-warm:#ede9e3;
+  --mid:#888580;--mute:#b5b2ad;--hairline:#d8d5d0;
+  --accent:#b87a6e;
+  --serif:"Cormorant Garamond","Noto Serif KR",Georgia,serif;
+  --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+}
+body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padding:24px 16px}
+.app{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+.header{display:flex;justify-content:space-between;align-items:baseline}
+.logo{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--canvas);letter-spacing:0.04em}
+.logo span{font-family:var(--sans);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--mute);display:block;margin-top:2px}
+
+/* upload */
+.upload-zone{border:1px dashed rgba(255,255,255,0.15);border-radius:4px;padding:28px 24px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.02);position:relative;transition:border-color 0.2s}
+.upload-zone:hover,.upload-zone.dragover{border-color:rgba(255,255,255,0.35)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-icon{font-size:24px;opacity:0.35;margin-bottom:8px}
+.upload-label{font-size:12px;color:var(--mute);letter-spacing:0.06em}
+.upload-sub{font-size:10px;color:rgba(255,255,255,0.2);margin-top:4px}
+
+/* image grid */
+.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.img-thumb{aspect-ratio:16/9;border-radius:2px;overflow:hidden;position:relative;background:#111}
+.img-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.img-thumb .remove-btn{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;font-size:11px;cursor:pointer;opacity:0;transition:opacity 0.15s;display:flex;align-items:center;justify-content:center}
+.img-thumb:hover .remove-btn{opacity:1}
+.img-thumb .img-num{position:absolute;bottom:5px;left:7px;font-size:8px;color:rgba(255,255,255,0.5);letter-spacing:0.08em}
+.img-thumb.analyzing .img-num{color:var(--accent)}
+.img-thumb.done .img-num{color:#7ec98a}
+
+/* form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mute)}
+.field input,.field select,.field textarea{
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  border-radius:2px;padding:8px 10px;color:#fff;font-family:var(--sans);
+  font-size:12px;outline:none;transition:border-color 0.15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(255,255,255,0.3)}
+.field textarea{resize:none;height:64px;line-height:1.6}
+.field select option{background:#1a1a1a}
+.field .hint{font-size:10px;color:rgba(255,255,255,0.2);margin-top:2px}
+
+/* generate btn */
+.generate-btn{width:100%;padding:13px;border:none;border-radius:2px;background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s}
+.generate-btn:hover{opacity:0.85}
+.generate-btn:disabled{opacity:0.3;cursor:not-allowed}
+
+/* progress */
+.progress-area{display:none;padding:14px;background:rgba(255,255,255,0.03);border-radius:2px;border:1px solid rgba(255,255,255,0.07)}
+.progress-area.visible{display:block}
+.progress-log{font-size:11px;color:var(--mute);line-height:2.2}
+.progress-log .step{display:flex;gap:8px;align-items:flex-start}
+.step-icon{color:var(--accent);min-width:14px}
+.step-icon.done{color:#7ec98a}
+@keyframes spin{to{transform:rotate(360deg)}}
+.step-icon.spin{animation:spin 1s linear infinite;display:inline-block}
+
+/* carousel */
+.carousel-section{display:none}
+.carousel-section.visible{display:flex;flex-direction:column;gap:12px}
+.section-label{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mute)}
+.slides-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+
+.slide-card{aspect-ratio:1/1;border-radius:2px;overflow:hidden;position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:border-color 0.2s}
+.slide-card:hover{border-color:rgba(255,255,255,0.25)}
+
+/* slide canvas base */
+.slide-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:var(--sans)}
+.slide-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ov-bottom{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,6,0.78) 0%,transparent 55%)}
+.ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,8,6,0.72) 0%,transparent 50%)}
+.ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,8,6,0.75) 0%,transparent 60%)}
+.ov-right{position:absolute;inset:0;background:linear-gradient(to left,rgba(10,8,6,0.75) 0%,transparent 60%)}
+.ov-full{position:absolute;inset:0;background:rgba(10,8,6,0.45)}
+
+/* text zones */
+.txt-bottom-left{position:absolute;bottom:0;left:0;right:0;padding:12px 14px 16px;z-index:2}
+.txt-top-left{position:absolute;top:0;left:0;right:0;padding:14px 14px 0;z-index:2}
+.txt-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:14px;z-index:2}
+.txt-left-half{position:absolute;top:0;left:0;bottom:0;width:55%;padding:14px 12px;display:flex;flex-direction:column;justify-content:flex-end;z-index:2}
+.txt-split{position:absolute;bottom:0;left:0;right:0;height:44%;background:var(--canvas);padding:10px 14px 12px;display:flex;flex-direction:column;justify-content:center;z-index:2}
+.txt-dark{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:16px;z-index:2;background:var(--ink)}
+.txt-pull{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:18px 20px;z-index:2;background:var(--paper)}
+
+/* text styles — mag B */
+.s-masthead{font-family:var(--sans);font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:8px;display:block}
+.s-masthead-dark{font-family:var(--sans);font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;display:block}
+.s-label{font-family:var(--sans);font-size:7px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;display:block}
+.s-label-ink{font-family:var(--sans);font-size:7px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;display:block}
+.s-headline-lg{font-family:var(--serif);font-size:28px;font-weight:300;line-height:0.95;letter-spacing:-0.01em;color:#fff;margin-bottom:6px}
+.s-headline-md{font-family:var(--serif);font-size:20px;font-weight:300;line-height:1.15;letter-spacing:-0.01em;color:var(--ink);margin-bottom:4px}
+.s-headline-pull{font-family:var(--serif);font-size:19px;font-weight:300;line-height:1.3;letter-spacing:-0.005em;color:var(--ink);margin-bottom:8px}
+.s-headline-dark{font-family:var(--serif);font-size:24px;font-weight:300;line-height:1.0;letter-spacing:-0.01em;color:#fff;margin-bottom:8px}
+.s-body{font-family:var(--serif);font-size:9px;font-style:italic;font-weight:300;line-height:1.65;color:rgba(255,255,255,0.75)}
+.s-body-ink{font-family:var(--serif);font-size:9px;font-style:italic;font-weight:300;line-height:1.65;color:var(--mid)}
+.s-body-dark{font-family:var(--serif);font-size:9px;font-style:italic;font-weight:300;line-height:1.65;color:rgba(255,255,255,0.5);margin-bottom:14px}
+.s-rule{width:2px;height:28px;background:var(--accent);margin-bottom:12px;flex-shrink:0}
+.s-closing-tag{font-family:var(--sans);font-size:7px;letter-spacing:0.18em;text-transform:uppercase}
+.s-folio{position:absolute;bottom:8px;right:10px;font-family:var(--sans);font-size:7px;letter-spacing:0.12em;color:rgba(255,255,255,0.3);z-index:3}
+.s-folio-dark{position:absolute;bottom:8px;right:10px;font-family:var(--sans);font-size:7px;letter-spacing:0.12em;color:rgba(255,255,255,0.18);z-index:3}
+.s-folio-ink{position:absolute;bottom:8px;right:10px;font-family:var(--sans);font-size:7px;letter-spacing:0.12em;color:var(--mute);z-index:3}
+
+/* nike overrides */
+.nike-headline{font-family:"Helvetica Neue",Arial,sans-serif;font-size:30px;font-weight:700;line-height:0.9;text-transform:uppercase;letter-spacing:-0.01em;color:#fff;margin-bottom:6px}
+.nike-headline-md{font-family:"Helvetica Neue",Arial,sans-serif;font-size:20px;font-weight:700;line-height:1.0;text-transform:uppercase;color:#fff;margin-bottom:4px}
+.nike-label{font-family:"Helvetica Neue",Arial,sans-serif;font-size:7px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:5px;display:block}
+.nike-closing{position:absolute;inset:0;background:#111;display:flex;flex-direction:column;justify-content:center;padding:16px}
+.nike-closing-hl{font-family:"Helvetica Neue",Arial,sans-serif;font-size:32px;font-weight:700;line-height:0.88;text-transform:uppercase;color:#fff;margin-bottom:10px}
+
+/* ohouse */
+:root{--oh:#00C896;--oh-pale:#E6FAF4;--oh-cream:#FAFAF8;--oh-warm:#F5F3EF}
+.oh-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--oh-cream);font-family:var(--sans)}
+.oh-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.oh-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.58) 0%,transparent 52%)}
+.oh-card{position:absolute;bottom:0;left:0;right:0;background:var(--oh-cream);border-radius:14px 14px 0 0;padding:10px 14px 14px}
+.oh-split{position:absolute;bottom:0;left:0;right:0;height:43%;background:var(--oh-cream);padding:8px 14px 12px;display:flex;flex-direction:column;justify-content:center}
+.oh-close{position:absolute;inset:0;background:var(--oh-pale);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px}
+.oh-full{position:absolute;inset:0;background:var(--oh-warm);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:16px}
+.oh-tag{display:inline-block;background:var(--oh);color:#fff;font-size:7px;font-weight:600;letter-spacing:0.04em;padding:3px 8px;border-radius:9999px;margin-bottom:6px}
+.oh-masthead{position:absolute;top:10px;left:12px;z-index:3;font-size:7px;font-weight:500;letter-spacing:0.12em;color:rgba(255,255,255,0.6)}
+.oh-masthead-brand{font-size:7px;font-weight:600;letter-spacing:0.12em;color:var(--oh);margin-bottom:10px}
+.oh-headline-cover{font-size:20px;font-weight:600;line-height:1.2;letter-spacing:-0.02em;color:#fff;margin-bottom:4px}
+.oh-headline{font-size:16px;font-weight:600;line-height:1.25;letter-spacing:-0.02em;color:var(--ink);margin-bottom:3px}
+.oh-headline-c{font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-0.02em;color:var(--ink);margin-bottom:8px;text-align:center}
+.oh-body{font-size:9px;font-weight:400;line-height:1.6;color:#888}
+.oh-body-c{font-size:9px;font-weight:400;line-height:1.6;color:#888;text-align:center;margin-bottom:10px}
+.oh-cta{display:inline-block;background:var(--oh);color:#fff;font-size:8px;font-weight:600;padding:6px 14px;border-radius:9999px;margin-top:4px}
+.oh-line{width:100%;height:2px;background:var(--oh);position:absolute;bottom:0;left:0}
+.oh-folio{position:absolute;bottom:8px;right:10px;font-size:7px;color:var(--mute);z-index:3}
+.oh-num{width:18px;height:18px;border-radius:50%;background:var(--oh);color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+
+/* export / caption */
+.action-row{display:flex;gap:8px}
+.action-btn{flex:1;padding:11px;border-radius:2px;font-family:var(--sans);font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;border:none}
+.action-btn:hover{opacity:0.8}
+.btn-primary{background:var(--canvas);color:var(--ink)}
+.btn-secondary{background:transparent;color:var(--mute);border:1px solid rgba(255,255,255,0.12)!important}
+.caption-box{display:none;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:2px}
+.caption-box.open{display:block}
+.caption-title{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
+.caption-text{font-family:var(--serif);font-size:13px;font-style:italic;line-height:1.85;color:rgba(255,255,255,0.7);white-space:pre-wrap}
+.caption-hint{font-size:9px;color:rgba(255,255,255,0.2);margin-top:8px;letter-spacing:0.06em;text-transform:uppercase}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+<div class="app">
+
+<div class="header">
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator</span></div>
+</div>
+
+<div class="upload-zone" id="uploadZone">
+  <input type="file" id="fileInput" accept="image/*" multiple />
+  <div class="upload-icon">⬆</div>
+  <div class="upload-label">이미지를 끌어다 놓거나 클릭해서 업로드</div>
+  <div class="upload-sub">JPG · PNG · 최대 6장</div>
+</div>
+
+<div class="image-grid" id="imageGrid"></div>
+
+<div class="form-grid">
+  <div class="field">
+    <label>영상 주제</label>
+    <input type="text" id="metaTopic" placeholder="예: 오디 수확과 장미 만개한 6월" />
+    <span class="hint">비워두면 AI가 이미지 보고 판단해요</span>
+  </div>
+  <div class="field">
+    <label>스타일</label>
+    <select id="metaStyle">
+      <option value="magazine-b">Magazine B (에디토리얼)</option>
+      <option value="nike">Nike (강렬 · 대문자)</option>
+      <option value="ohouse">오늘의집 (따뜻한 라이프스타일)</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>채널 태그</label>
+    <input type="text" id="metaTag" value="오늘도 느리게 · slow days" />
+  </div>
+  <div class="field">
+    <label>마무리 문구</label>
+    <input type="text" id="metaClosing" value="매주 토요일 정오, 유튜브에서 만나요" />
+  </div>
+  <div class="field" style="grid-column:1/-1">
+    <label>텍스트 슬라이드 문구 (선택)</label>
+    <textarea id="metaTextSlide" placeholder="직접 쓴 문장을 넣으면 캐러셀 중간에 텍스트 슬라이드로 들어가요. 비워두면 AI가 필요할 때 자동으로 만들어요."></textarea>
+  </div>
+</div>
+
+<button class="generate-btn" id="generateBtn" disabled>AI 분석 후 캐러셀 생성</button>
+
+<div class="progress-area" id="progressArea">
+  <div class="progress-log" id="progressLog"></div>
+</div>
+
+<div class="carousel-section" id="carouselSection">
+  <div class="section-label">생성된 캐러셀</div>
+  <div class="slides-row" id="slidesRow"></div>
+  <div class="action-row">
+    <button class="action-btn btn-primary" onclick="exportSlides()">PNG 저장 안내</button>
+    <button class="action-btn btn-secondary" onclick="toggleCaption()">인스타 캡션</button>
+  </div>
+  <div class="caption-box" id="captionBox">
+    <div class="caption-title">Instagram Caption</div>
+    <div class="caption-text" id="captionText"></div>
+    <div class="caption-hint">텍스트 선택 후 복사하세요</div>
+  </div>
+</div>
+
+</div>
+<script>
+let images = [];
+let generatedSlides = [];
+let generatedCaption = '';
+
+// ── upload ──
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  Array.from(files).slice(0, 6 - images.length).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => { images.push({ file, dataUrl: ev.target.result, analysis: null }); renderThumbs(); updateBtn(); };
+    reader.readAsDataURL(file);
+  });
+}
+function removeImg(i) { images.splice(i, 1); renderThumbs(); updateBtn(); }
+function renderThumbs() {
+  document.getElementById('imageGrid').innerHTML = images.map((img, i) => `
+    <div class="img-thumb" id="thumb-${i}">
+      <img src="${img.dataUrl}" />
+      <button class="remove-btn" onclick="removeImg(${i})">✕</button>
+      <div class="img-num">${i+1} / ${images.length}</div>
+    </div>`).join('');
+}
+function updateBtn() { document.getElementById('generateBtn').disabled = images.length === 0; }
+
+// ── progress ──
+function log(text, done=false) {
+  const id = 'step-' + Date.now() + Math.random();
+  document.getElementById('progressLog').innerHTML +=
+    `<div class="step" id="${id}"><span class="step-icon ${done?'done':'spin'}">${done?'✓':'◌'}</span><span>${text}</span></div>`;
+  return id;
+}
+function doneStep(id) {
+  const el = document.getElementById(id);
+  if (el) { const ic = el.querySelector('.step-icon'); ic.className='step-icon done'; ic.textContent='✓'; }
+}
+
+// ── generate ──
+document.getElementById('generateBtn').addEventListener('click', async () => {
+  if (!images.length) return;
+  document.getElementById('progressArea').classList.add('visible');
+  document.getElementById('carouselSection').classList.remove('visible');
+  document.getElementById('progressLog').innerHTML = '';
+  document.getElementById('generateBtn').disabled = true;
+
+  const style = document.getElementById('metaStyle').value;
+  const topic = document.getElementById('metaTopic').value || '';
+  const tag = document.getElementById('metaTag').value;
+  const closing = document.getElementById('metaClosing').value;
+  const manualText = document.getElementById('metaTextSlide').value.trim();
+
+  const s1 = log(`이미지 ${images.length}장 분석 중...`);
+  for (let i = 0; i < images.length; i++) {
+    const thumb = document.getElementById(`thumb-${i}`);
+    if (thumb) thumb.classList.add('analyzing');
+    try { images[i].analysis = await analyzeImage(images[i].dataUrl, topic, style); }
+    catch(e) { images[i].analysis = { subject_position:'center', best_text_position:'bottom_left', text_color:'white', suggested_copy:'감성의 순간', suggested_body:'오늘도 천천히.', overall_brightness:'mid', dominant_color:'#b87a6e', mood:'고요함' }; }
+    if (thumb) { thumb.classList.remove('analyzing'); thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }
+  }
+  doneStep(s1);
+
+  const s2 = log('슬라이드 계획 중...');
+  let plan;
+  try { plan = await generatePlan(images, topic, tag, closing, style, manualText); doneStep(s2); }
+  catch(e) { doneStep(s2); log('플랜 생성 실패: ' + e.message, true); document.getElementById('generateBtn').disabled=false; return; }
+
+  const s3 = log('렌더링 중...');
+  try {
+    if (!plan || !plan.slides || !Array.isArray(plan.slides)) {
+      throw new Error('슬라이드 데이터가 없어요. plan: ' + JSON.stringify(plan).slice(0,100));
+    }
+    generatedSlides = plan.slides;
+    generatedCaption = plan.caption || '';
+    renderCarousel(plan.slides);
+    doneStep(s3);
+    log('완성!', true);
+    document.getElementById('carouselSection').classList.add('visible');
+  } catch(e) {
+    doneStep(s3);
+    log('렌더링 실패: ' + e.message, true);
+  }
+  document.getElementById('generateBtn').disabled = false;
+});
+
+// ── Claude API: analyze image ──
+async function analyzeImage(dataUrl, topic, style) {
+  const base64 = dataUrl.split(',')[1];
+  const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514', max_tokens:600,
+      messages:[{ role:'user', content:[
+        { type:'image', source:{ type:'base64', media_type:mediaType, data:base64 }},
+        { type:'text', text:`이 이미지를 분석해서 Instagram 캐러셀 슬라이드 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
+{"subject_position":"left|center|right|top|bottom|full","bright_zone":"top|bottom|left|right|center","dark_zone":"top|bottom|left|right|none","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_copy":"2~4단어 한국어 헤드라인","suggested_body":"감성적 한국어 본문 1~2문장 (주제: ${topic})","best_text_position":"bottom_left|bottom_right|top_left|center_left|center|split_bottom","text_color":"white|dark"}`}
+      ]}]
+    })
+  });
+  const data = await res.json();
+  const text = data.content?.find(b=>b.type==='text')?.text || '{}';
+  const s=text.indexOf('{'), e=text.lastIndexOf('}');
+  return JSON.parse(text.slice(s,e+1));
+}
+
+// ── Claude API: generate plan ──
+async function generatePlan(images, topic, tag, closing, style, manualText) {
+  const total = images.length + 1;
+  const imageData = images.map((img,i) => ({ index:i, analysis:img.analysis||{} }));
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:2000,
+      messages:[{ role:'user', content:
+`이미지 분석 결과를 바탕으로 Instagram 캐러셀 계획을 순수 JSON으로만 반환해줘. 마크다운 없이 JSON만.
+
+스타일: ${style} / 주제: ${topic||'(이미지 분석 기반)'} / 채널태그: ${tag} / 마무리: ${closing}
+이미지수: ${images.length} / manualText: "${manualText}"
+
+분석결과: ${JSON.stringify(imageData, (k,v) => (v instanceof File ? undefined : v))}
+
+반환형식 (slides 총 ${total}개):
+{"slides":[{"type":"cover","image_index":0,"layout":"overlay_bottom","text_position":"bottom_left","label":"","headline":"헤드라인","body":"본문","folio":"01 — 0${total}","accent_color":"#b87a6e"},{"type":"feature","image_index":1,"layout":"split_bottom","text_position":"split_bottom","label":"garden · 정원","headline":"헤드라인","body":"본문","folio":"02 — 0${total}","accent_color":"#b87a6e"}],"caption":"캡션\n\n#해시태그"}
+
+규칙:
+- 첫 슬라이드: type cover
+- 마지막 슬라이드: type closing, image_index ${images.length-1}
+- layout: overlay_bottom/overlay_top/overlay_left/overlay_right/split_bottom/dark_full 중 하나
+- text_position: bottom_left/top_left/center/left_half/split_bottom/dark_center 중 하나
+- 슬라이드마다 다른 layout 사용, 이미지 분석 반영
+- 헤드라인 2~4단어 감성적 한국어
+- manualText가 있으면 중간에 pull_quote 타입으로 삽입 (image_index: null)
+- manualText 없어도 주제가 감성적이거나 이미지 흐름에 호흡 필요하면 AI가 pull_quote 1장 자동 삽입 판단
+- pull_quote는 image_index null, layout pull_quote, text_position pull_quote
+- caption에 해시태그 10개 포함`
+      }]
+    })
+  });
+  const data = await res.json();
+  // API 에러 체크
+  if (data.error) throw new Error('API 오류: ' + data.error.message);
+  const raw = data.content?.find(b=>b.type==='text')?.text || '';
+  if (!raw) throw new Error('응답이 비어있어요. 상태: ' + data.stop_reason);
+  const s=raw.indexOf('{'), e=raw.lastIndexOf('}');
+  if(s===-1||e===-1) throw new Error('JSON 없음: '+raw.slice(0,120));
+  return JSON.parse(raw.slice(s,e+1));
+}
+
+// ── render ──
+function renderCarousel(slides) {
+  document.getElementById('slidesRow').innerHTML = slides.map((s,i) => renderSlide(s,i)).join('');
+}
+
+function renderSlide(slide, i) {
+  const style = document.getElementById('metaStyle').value;
+  const img = slide.image_index!=null ? images[slide.image_index]?.dataUrl : null;
+  const folio = slide.folio || `0${i+1} — 0${generatedSlides.length}`;
+  const accent = slide.accent_color || '#b87a6e';
+  const tag = document.getElementById('metaTag').value;
+
+  if (slide.layout === 'pull_quote' || slide.type === 'pull_quote') return renderPullQuote(slide, i, style, accent, folio);
+  if (style === 'ohouse') return renderOhouse(slide, i, img, folio, tag);
+
+  // Magazine B / Nike
+  const isNike = style === 'nike';
+  const overlayMap = {overlay_bottom:'ov-bottom',overlay_top:'ov-top',overlay_left:'ov-left',overlay_right:'ov-right',split_bottom:'',dark_full:'ov-full'};
+  const isSplit = slide.layout === 'split_bottom';
+  const isDark = slide.type === 'closing';
+
+  let bgHtml = '';
+  if (img) {
+    const ov = overlayMap[slide.layout] || 'ov-bottom';
+    bgHtml = `<img class="slide-bg-img" src="${img}" />${ov ? `<div class="${ov}"></div>` : ''}`;
+  }
+
+  const txtClass = {bottom_left:'txt-bottom-left',top_left:'txt-top-left',center:'txt-center',left_half:'txt-left-half',split_bottom:'txt-split',dark_center:'txt-dark'}[slide.text_position] || 'txt-bottom-left';
+
+  const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
+  const headlineCls = isDark ? (isNike?'nike-closing-hl':'s-headline-dark') : isSplit ? (isNike?'nike-headline-md':'s-headline-md') : (isNike?'nike-headline':'s-headline-lg');
+  const bodyCls = isDark ? 's-body-dark' : isSplit ? 's-body-ink' : 's-body';
+  const labelCls = isNike ? 'nike-label' : (isSplit?'s-label-ink':'s-label');
+
+  let inner = '';
+  if (slide.type === 'cover') {
+    inner = `<span class="s-masthead">SAPMANRI</span><div style="flex:1"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
+  } else if (slide.type === 'closing') {
+    inner = `<span class="s-masthead-dark">SAPMANRI</span><div class="s-rule" style="background:${accent}"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div><span class="s-closing-tag" style="color:${accent}">${tag}</span>`;
+  } else {
+    inner = `<span class="${labelCls}" style="color:${accent}">${slide.label||''}</span><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
+  }
+
+  const bgColor = isDark ? '#1a1a1a' : isSplit ? 'transparent' : '#f2f0ec';
+  const folioClass = isDark ? 's-folio-dark' : isSplit ? 's-folio-ink' : 's-folio';
+
+  return `<div class="slide-card"><div class="slide-canvas" style="background:${bgColor}">${bgHtml}<div class="${txtClass}">${inner}</div><div class="${folioClass}">${folio}</div></div></div>`;
+}
+
+function renderPullQuote(slide, i, style, accent, folio) {
+  if (style === 'ohouse') {
+    return `<div class="slide-card"><div class="oh-canvas"><div class="oh-full"><div class="oh-num">${i+1}</div><div class="oh-headline-c" style="font-size:15px;line-height:1.5">${slide.headline||''}</div><div class="oh-body-c">${slide.body||''}</div><div class="oh-line"></div></div><div class="oh-folio">${folio}</div></div></div>`;
+  }
+  if (style === 'nike') {
+    return `<div class="slide-card"><div class="slide-canvas" style="background:#111"><div class="txt-dark"><span style="font-family:Helvetica Neue,Arial,sans-serif;font-size:7px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;display:block">SAPMANRI</span><div class="nike-headline" style="font-size:22px">${(slide.headline||'').toUpperCase()}</div><div class="s-body" style="color:rgba(255,255,255,0.5)">${slide.body||''}</div></div><div class="s-folio-dark">${folio}</div></div></div>`;
+  }
+  return `<div class="slide-card"><div class="slide-canvas" style="background:var(--paper)"><div class="txt-pull"><div class="s-rule" style="background:${accent}"></div><div class="s-headline-pull">${slide.headline||''}</div><div class="s-body-ink">${slide.body||''}</div></div><div class="s-folio-ink">${folio}</div></div></div>`;
+}
+
+function renderOhouse(slide, i, img, folio, tag) {
+  const accent = 'var(--oh)';
+  if (slide.type === 'cover') {
+    return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="oh-bg" src="${img}" /><div class="oh-ov"></div>`:''}<span class="oh-masthead">SAPMANRI</span><div class="oh-card"><div class="oh-tag">${slide.label||'공간'}</div><div class="oh-headline-cover">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
+  }
+  if (slide.type === 'closing') {
+    return `<div class="slide-card"><div class="oh-canvas"><div class="oh-close"><div class="oh-masthead-brand">SAPMANRI</div><div class="oh-headline-c">${slide.headline||''}</div><div class="oh-body-c">${slide.body||''}</div><div class="oh-cta">${tag}</div></div><div class="oh-folio" style="color:var(--mid)">${folio}</div></div></div>`;
+  }
+  const layout = slide.layout || 'split_bottom';
+  if (layout === 'split_bottom' || layout === 'overlay_bottom') {
+    return `<div class="slide-card"><div class="oh-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 57%;overflow:hidden;position:relative"><img class="oh-bg" src="${img}" style="position:absolute" /></div>`:'<div style="flex:0 0 57%;background:var(--oh-warm)"></div>'}<div style="flex:1;background:var(--oh-cream);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;position:relative"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div><div class="oh-line"></div></div><div class="oh-folio">${folio}</div></div></div>`;
+  }
+  return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="oh-bg" src="${img}" />`:''}${img?'<div class="oh-ov"></div>':''}<div class="oh-card"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
+}
+
+async function exportSlides() {
+  const cards = document.querySelectorAll('.slide-card');
+  if (!cards.length) return;
+  const btn = document.querySelector('.btn-primary');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '이미지 변환 중...';
+
+  const existing = document.getElementById('exportModal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'exportModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;overflow-y:auto;padding:24px 16px';
+  document.body.appendChild(modal);
+
+  const inner = document.createElement('div');
+  inner.style.cssText = 'max-width:560px;margin:0 auto';
+  modal.appendChild(inner);
+
+  const header = document.createElement('div');
+  header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:16px';
+  const hint = document.createElement('p');
+  hint.style.cssText = 'font-family:sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4)';
+  hint.textContent = '우클릭 또는 길게 눌러서 저장';
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '닫기';
+  closeBtn.style.cssText = 'background:transparent;border:1px solid rgba(255,255,255,0.2);color:#fff;padding:5px 14px;border-radius:2px;cursor:pointer;font-size:11px;font-family:sans-serif';
+  closeBtn.onclick = () => modal.remove();
+  header.appendChild(hint);
+  header.appendChild(closeBtn);
+  inner.appendChild(header);
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:flex;flex-direction:column;gap:12px';
+  inner.appendChild(grid);
+
+  for (let i = 0; i < cards.length; i++) {
+    btn.textContent = '변환 중 ' + (i+1) + '/' + cards.length + '...';
+    try {
+      const card = cards[i];
+      const rect = card.getBoundingClientRect();
+      const size = Math.round(Math.max(rect.width, rect.height));
+      const canvas = await html2canvas(card, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        width: size,
+        height: size,
+        windowWidth: size,
+        windowHeight: size,
+      });
+      // 1:1 정사각형으로 크롭
+      const out = document.createElement('canvas');
+      out.width = size * 2;
+      out.height = size * 2;
+      const ctx = out.getContext('2d');
+      ctx.drawImage(canvas, 0, 0, size*2, size*2, 0, 0, size*2, size*2);
+
+      const label = document.createElement('p');
+      label.style.cssText = 'font-family:sans-serif;font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:5px;letter-spacing:0.08em';
+      label.textContent = 'SLIDE ' + String(i+1).padStart(2,'0');
+      const img = document.createElement('img');
+      img.src = out.toDataURL('image/png');
+      img.style.cssText = 'width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:2px;display:block';
+      const wrap = document.createElement('div');
+      wrap.appendChild(label);
+      wrap.appendChild(img);
+      grid.appendChild(wrap);
+    } catch(e) { console.error(e); }
+  }
+
+  btn.textContent = orig;
+  btn.disabled = false;
+}
+
+function toggleCaption() {
+  const box = document.getElementById('captionBox');
+  box.classList.toggle('open');
+  document.getElementById('captionText').textContent = generatedCaption;
+}
+</script>
+</body>
+</html>
