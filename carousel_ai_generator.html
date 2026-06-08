@@ -768,17 +768,20 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     const blockH = labelFontH + labelGap + hlLineH*2 + Math.round(6*R) + bodyLineH*2;
     const textY = isTop ? pad + Math.round(16*R) : SIZE - bottomPad - blockH;
 
+    // fillText Y = 베이스라인 기준
+    // 레이블 베이스라인 = textY + labelFontH (top에서 폰트 높이만큼 내려야 베이스라인)
+    const labelBase = textY + labelFontH;
     if (slide.type === 'cover') {
       setFont(labelFontH, '400', sansFont); ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.fillText('SAPMANRI', pad, pad + Math.round(10*R));
+      ctx.fillText('SAPMANRI', pad, pad + labelFontH);
     } else {
       setFont(labelFontH, '400', sansFont); ctx.fillStyle = accent;
-      ctx.fillText((slide.label||'').toUpperCase(), pad, textY);
+      ctx.fillText((slide.label||'').toUpperCase(), pad, labelBase);
     }
 
     const hlY = slide.type === 'cover'
       ? SIZE - hlLineH*2 - bodyLineH*2 - Math.round(10*R) - bottomPad
-      : textY + labelFontH + labelGap;
+      : labelBase + labelGap + hlSize;  // 레이블 베이스라인 + 여백 + 헤드라인 cap-height
     setFont(hlSize, isNike?'700':'300', isNike?sansFont:serifFont);
     ctx.fillStyle = '#fff';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
