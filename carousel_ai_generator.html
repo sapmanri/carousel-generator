@@ -163,6 +163,12 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 
 <div class="header">
   <div class="logo">감성찾아삽만리<span>AI Carousel Generator</span></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." 
+      style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:200px"
+      oninput="saveApiKey(this.value)" />
+    <span id="apiKeyStatus" style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mute)">KEY</span>
+  </div>
 </div>
 
 <div class="upload-zone" id="uploadZone">
@@ -224,6 +230,26 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 
 </div>
 <script>
+// ── API Key ──
+function saveApiKey(val) {
+  try { localStorage.setItem('anthropic_key', val); } catch(e) {}
+  const status = document.getElementById('apiKeyStatus');
+  if (status) status.style.color = val.startsWith('sk-ant-') ? '#7ec98a' : 'var(--mute)';
+}
+function getApiKey() {
+  try { return localStorage.getItem('anthropic_key') || ''; } catch(e) { return ''; }
+}
+// 페이지 로드 시 저장된 키 복원
+window.addEventListener('load', () => {
+  const saved = getApiKey();
+  const input = document.getElementById('apiKeyInput');
+  if (saved && input) {
+    input.value = saved;
+    const status = document.getElementById('apiKeyStatus');
+    if (status) status.style.color = '#7ec98a';
+  }
+});
+
 let images = [];
 let generatedSlides = [];
 let generatedCaption = '';
@@ -318,7 +344,7 @@ async function analyzeImage(dataUrl, topic, style) {
   const base64 = dataUrl.split(',')[1];
   const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
   const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+    method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey()},
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514', max_tokens:600,
       messages:[{ role:'user', content:[
