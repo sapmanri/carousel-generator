@@ -479,57 +479,85 @@ function renderOhouse(slide, i, img, folio, tag) {
   return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="oh-bg" src="${img}" />`:''}${img?'<div class="oh-ov"></div>':''}<div class="oh-card"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
 }
 
+// 이미지 dataUrl을 S×S 정사각형 cover canvas dataUrl로 변환
+function imgToCoverCanvas(dataUrl, S) {
+  return new Promise((resolve) => {
+    if (!dataUrl) { resolve(null); return; }
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = S; c.height = S;
+      const ctx = c.getContext('2d');
+      const scale = Math.max(S / img.width, S / img.height);
+      const w = img.width * scale, h = img.height * scale;
+      ctx.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
+      resolve(c.toDataURL('image/jpeg', 0.92));
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
 async function exportSlides() {
   if (!generatedSlides.length) return;
   const btn = document.querySelector('.btn-primary');
   const orig = btn.textContent;
   btn.disabled = true;
+  btn.textContent = '이미지 준비 중...';
 
-  // 540px 히든 렌더 컨테이너 생성
-  const hiddenWrap = document.createElement('div');
-  hiddenWrap.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1;display:flex;flex-direction:column;gap:0';
-  document.body.appendChild(hiddenWrap);
-
-  // 각 슬라이드를 540x540으로 히든 렌더
   const RENDER_SIZE = 540;
-  const hiddenCards = [];
 
+  // 모든 이미지를 미리 cover canvas로 변환
+  const coverImgs = {};
   for (let i = 0; i < generatedSlides.length; i++) {
     const slide = generatedSlides[i];
-    const imgData = (slide.image_index != null) ? images[slide.image_index]?.dataUrl : null;
-    // renderSlide로 HTML 생성
-    const tmp = document.createElement('div');
-    tmp.style.cssText = `width:${RENDER_SIZE}px;height:${RENDER_SIZE}px;flex-shrink:0;overflow:hidden;position:relative`;
-    tmp.innerHTML = renderSlideInner(slide, i, imgData);
-    hiddenWrap.appendChild(tmp);
-    hiddenCards.push(tmp);
+    if (slide.image_index != null && images[slide.image_index]) {
+      coverImgs[slide.image_index] = await imgToCoverCanvas(images[slide.image_index].dataUrl, RENDER_SIZE);
+    }
   }
 
-  // 히든 컨테이너 내 모든 이미지를 절대위치 + cover로 강제 변환
-  hiddenWrap.querySelectorAll('img').forEach(img => {
-    const parent = img.parentElement;
-    const pw = parent.offsetWidth || RENDER_SIZE;
-    const ph = parent.offsetHeight || RENDER_SIZE;
-    img.style.position = 'absolute';
-    img.style.inset = '0';
-    img.style.objectFit = 'cover';
-    img.style.objectPosition = 'center';
-    img.style.width = pw + 'px';
-    img.style.height = ph + 'px';
-  });
+  // 히든 렌더 컨테이너
+  const hiddenWrap = document.createElement('div');
+  hiddenWrap.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-1';
+  document.body.appendChild(hiddenWrap);
 
-  await new Promise(r => setTimeout(r, 300)); // 폰트/이미지 로드 대기
+  for (let i = 0; i < generatedSlides.length; i++) {
+    btn.textContent = '저장 중 ' + (i+1) + '/' + generatedSlides.length + '...';
 
-  for (let i = 0; i < hiddenCards.length; i++) {
-    btn.textContent = '저장 중 ' + (i+1) + '/' + hiddenCards.length + '...';
+    const slide = generatedSlides[i];
+    const coverUrl = (slide.image_index != null) ? coverImgs[slide.image_index] : null;
+
+    // 슬라이드 HTML 생성 — 커버 이미지 URL 교체
+    const tmpSlide = JSON.parse(JSON.stringify(slide));
+    const tmpImages = images.map((img, idx) => ({
+      ...img,
+      dataUrl: coverImgs[idx] || img.dataUrl
+    }));
+
+    // 히든 div에 슬라이드 렌더
+    const container = document.createElement('div');
+    container.style.cssText = `width:${RENDER_SIZE}px;height:${RENDER_SIZE}px;position:relative;overflow:hidden;flex-shrink:0`;
+    hiddenWrap.innerHTML = '';
+    hiddenWrap.appendChild(container);
+
+    // renderSlide 결과에서 slide-canvas 내용 추출
+    const origImages = images;
+    // 임시로 images 교체
+    window._exportImages = images.map((img, idx) => ({ ...img, dataUrl: coverImgs[idx] || img.dataUrl }));
+    const slideHtml = renderSlideWithImages(slide, i, window._exportImages);
+    container.innerHTML = slideHtml;
+
+    await new Promise(r => setTimeout(r, 80));
+
     try {
-      const canvas = await html2canvas(hiddenCards[i], {
+      const canvas = await html2canvas(container, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
         width: RENDER_SIZE,
         height: RENDER_SIZE,
+        logging: false,
       });
       const link = document.createElement('a');
       link.download = 'sapmanri_slide_' + String(i+1).padStart(2,'0') + '.png';
@@ -544,18 +572,46 @@ async function exportSlides() {
   btn.disabled = false;
 }
 
-// 슬라이드 내부 HTML만 반환 (renderSlide 기반)
-function renderSlideInner(slide, i, imgData) {
+function renderSlideWithImages(slide, i, imgArr) {
   const style = document.getElementById('metaStyle').value;
+  const img = slide.image_index != null ? imgArr[slide.image_index]?.dataUrl : null;
   const folio = slide.folio || String(i+1).padStart(2,'0') + ' — ' + String(generatedSlides.length).padStart(2,'0');
   const accent = slide.accent_color || '#b87a6e';
   const tag = document.getElementById('metaTag').value;
 
-  // renderSlide 함수를 재활용해서 slide-card 내부 slide-canvas HTML만 추출
-  const tmpDiv = document.createElement('div');
-  tmpDiv.style.cssText = 'width:540px;height:540px;position:relative';
-  tmpDiv.innerHTML = renderSlide(slide, i).replace(/<div class="slide-card"[^>]*>/, '').replace(/<\/div>$/, '');
-  return tmpDiv.innerHTML;
+  if (slide.layout === 'pull_quote' || slide.type === 'pull_quote') return renderPullQuote(slide, i, style, accent, folio).replace(/<div class="slide-card"[^>]*>/, '').replace(/<\/div>\s*$/, '');
+  if (style === 'ohouse') return renderOhouse(slide, i, img, folio, tag).replace(/<div class="slide-card"[^>]*>/, '').replace(/<\/div>\s*$/, '');
+
+  const isNike = style === 'nike';
+  const overlayMap = {overlay_bottom:'ov-bottom',overlay_top:'ov-top',overlay_left:'ov-left',overlay_right:'ov-right',split_bottom:'',dark_full:'ov-full'};
+  const isSplit = slide.layout === 'split_bottom';
+  const isDark = slide.type === 'closing';
+
+  let bgHtml = '';
+  if (img) {
+    const ov = overlayMap[slide.layout] || 'ov-bottom';
+    bgHtml = `<img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}" />${ov ? `<div class="${ov}"></div>` : ''}`;
+  }
+
+  const txtClass = {bottom_left:'txt-bottom-left',top_left:'txt-top-left',center:'txt-center',left_half:'txt-left-half',split_bottom:'txt-split',dark_center:'txt-dark'}[slide.text_position] || 'txt-bottom-left';
+  const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
+  const headlineCls = isDark ? (isNike?'nike-closing-hl':'s-headline-dark') : isSplit ? (isNike?'nike-headline-md':'s-headline-md') : (isNike?'nike-headline':'s-headline-lg');
+  const bodyCls = isDark ? 's-body-dark' : isSplit ? 's-body-ink' : 's-body';
+  const labelCls = isNike ? 'nike-label' : (isSplit?'s-label-ink':'s-label');
+
+  let inner = '';
+  if (slide.type === 'cover') {
+    inner = `<span class="s-masthead">SAPMANRI</span><div style="flex:1"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
+  } else if (isDark) {
+    inner = `<span class="s-masthead-dark">SAPMANRI</span><div class="s-rule" style="background:${accent}"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div><span class="s-closing-tag" style="color:${accent}">${tag}</span>`;
+  } else {
+    inner = `<span class="${labelCls}" style="color:${accent}">${slide.label||''}</span><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
+  }
+
+  const bgColor = isDark ? '#1a1a1a' : isSplit ? 'transparent' : '#f2f0ec';
+  const folioClass = isDark ? 's-folio-dark' : isSplit ? 's-folio-ink' : 's-folio';
+
+  return `<div class="slide-canvas" style="width:100%;height:100%;background:${bgColor}">${bgHtml}<div class="${txtClass}">${inner}</div><div class="${folioClass}">${folio}</div></div>`;
 }
 
 async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
