@@ -429,7 +429,7 @@ function renderSlide(slide, i) {
   let bgHtml = '';
   if (img) {
     const ov = overlayMap[slide.layout] || 'ov-bottom';
-    bgHtml = `<img class="slide-bg-img" src="${img}" />${ov ? `<div class="${ov}"></div>` : ''}`;
+    bgHtml = `<div style="position:absolute;inset:0;background-image:url(${JSON.stringify(img)});background-size:cover;background-position:center;background-repeat:no-repeat;"></div>${ov ? `<div class="${ov}"></div>` : ''}`;
   }
 
   const txtClass = {bottom_left:'txt-bottom-left',top_left:'txt-top-left',center:'txt-center',left_half:'txt-left-half',split_bottom:'txt-split',dark_center:'txt-dark'}[slide.text_position] || 'txt-bottom-left';
@@ -467,14 +467,14 @@ function renderPullQuote(slide, i, style, accent, folio) {
 function renderOhouse(slide, i, img, folio, tag) {
   const accent = 'var(--oh)';
   if (slide.type === 'cover') {
-    return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="oh-bg" src="${img}" /><div class="oh-ov"></div>`:''}<span class="oh-masthead">SAPMANRI</span><div class="oh-card"><div class="oh-tag">${slide.label||'공간'}</div><div class="oh-headline-cover">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
+    return `<div class="slide-card"><div class="oh-canvas">${img?`<div style="position:absolute;inset:0;background-image:url('${img}');background-size:cover;background-position:center"></div><div class="oh-ov"></div>`:''}<span class="oh-masthead">SAPMANRI</span><div class="oh-card"><div class="oh-tag">${slide.label||'공간'}</div><div class="oh-headline-cover">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
   }
   if (slide.type === 'closing') {
     return `<div class="slide-card"><div class="oh-canvas"><div class="oh-close"><div class="oh-masthead-brand">SAPMANRI</div><div class="oh-headline-c">${slide.headline||''}</div><div class="oh-body-c">${slide.body||''}</div><div class="oh-cta">${tag}</div></div><div class="oh-folio" style="color:var(--mid)">${folio}</div></div></div>`;
   }
   const layout = slide.layout || 'split_bottom';
   if (layout === 'split_bottom' || layout === 'overlay_bottom') {
-    return `<div class="slide-card"><div class="oh-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 57%;overflow:hidden;position:relative"><img class="oh-bg" src="${img}" style="position:absolute" /></div>`:'<div style="flex:0 0 57%;background:var(--oh-warm)"></div>'}<div style="flex:1;background:var(--oh-cream);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;position:relative"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div><div class="oh-line"></div></div><div class="oh-folio">${folio}</div></div></div>`;
+    return `<div class="slide-card"><div class="oh-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 57%;overflow:hidden;position:relative"><div style="position:absolute;inset:0;background-image:url('${img}');background-size:cover;background-position:center"></div></div>`:'<div style="flex:0 0 57%;background:var(--oh-warm)"></div>'}<div style="flex:1;background:var(--oh-cream);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;position:relative"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div><div class="oh-line"></div></div><div class="oh-folio">${folio}</div></div></div>`;
   }
   return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="oh-bg" src="${img}" />`:''}${img?'<div class="oh-ov"></div>':''}<div class="oh-card"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
 }
