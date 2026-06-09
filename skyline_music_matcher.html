@@ -568,6 +568,7 @@ function renderCard(d){
   const ctx=canvas.getContext('2d');
   const img=new Image();
   img.onload=()=>{
+    canvas._srcImg=img; // store ref for designs that need to re-clip
     const sc=Math.max(CW/img.naturalWidth,CH/img.naturalHeight);
     const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
     // Apply cropOffsetX for horizontal positioning
@@ -1224,60 +1225,60 @@ function renderGirok(ctx,d,CW,CH,isV){
 
 function renderPolaroid(ctx,d,CW,CH,isV){
   // ── 폴라로이드 ──
-  // 이미지 전체, 하단 흰 테두리에 곡명만
   const borderSide = CW*0.055;
   const borderTop  = CW*0.055;
   const borderBot  = isV ? CW*0.22 : CW*0.18;
+  const innerX=borderSide, innerY=borderTop;
+  const innerW=CW-borderSide*2, innerH=CH-borderTop-borderBot;
 
-  // White frame
+  // 1) 흰 프레임 전체 먼저
   ctx.fillStyle='#F8F6F2';
   ctx.fillRect(0,0,CW,CH);
 
-  // Photo area (image already drawn full — clip to inner)
-  // Re-draw image clipped to inner rect
-  const innerX=borderSide, innerY=borderTop;
-  const innerW=CW-borderSide*2, innerH=CH-borderTop-borderBot;
-  ctx.save();
-  ctx.beginPath(); ctx.rect(innerX,innerY,innerW,innerH); ctx.clip();
-  // image already on canvas, just add overlays inside clip
-  // slight vignette inside photo
-  let g=ctx.createRadialGradient(CW/2,innerY+innerH/2,innerH*0.3,CW/2,innerY+innerH/2,innerH*0.85);
-  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.28)');
-  ctx.fillStyle=g; ctx.fillRect(innerX,innerY,innerW,innerH);
-  // Waveform inside photo — bottom third
-  const wY=innerY+innerH*0.78, wH=innerH*0.26;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.55)','rgba(255,255,255,0.18)',d._ampRatio||1);
-  ctx.restore();
+  // 2) 이미지를 inner rect에 맞게 재드로우
+  const img=ctx.canvas._srcImg;
+  if(img){
+    ctx.save();
+    ctx.beginPath(); ctx.rect(innerX,innerY,innerW,innerH); ctx.clip();
+    const sc=Math.max(innerW/img.naturalWidth, innerH/img.naturalHeight);
+    const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
+    const ox=innerX+(innerW-sw)/2, oy=innerY+(innerH-sh)/2;
+    ctx.drawImage(img,ox,oy,sw,sh);
 
-  // Shadow under photo
-  ctx.shadowColor='rgba(0,0,0,0.13)'; ctx.shadowBlur=18; ctx.shadowOffsetY=4;
+    // vignette inside photo
+    let g=ctx.createRadialGradient(CW/2,innerY+innerH/2,innerH*0.25,CW/2,innerY+innerH/2,innerH*0.82);
+    g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.32)');
+    ctx.fillStyle=g; ctx.fillRect(innerX,innerY,innerW,innerH);
+
+    // Waveform
+    const wY=innerY+innerH*0.78, wH=innerH*0.26;
+    drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.55)','rgba(255,255,255,0.18)',d._ampRatio||1);
+    ctx.restore();
+  }
+
+  // 3) 흰 테두리 위에 살짝 그림자
+  ctx.shadowColor='rgba(0,0,0,0.10)'; ctx.shadowBlur=24; ctx.shadowOffsetY=6;
   ctx.fillStyle='rgba(0,0,0,0)'; ctx.fillRect(innerX,innerY,innerW,innerH);
   ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
 
-  // Bottom text area
-  const textY = CH - borderBot + borderBot*0.28;
-  const pad = borderSide*1.2;
-
-  // Song title — handwriting-ish, centered
+  // 4) 하단 텍스트
+  const textY = CH - borderBot + borderBot*0.26;
   const titleSz = CW*0.048;
   setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
   ctx.fillStyle='#2a2a2a'; ctx.textAlign='center';
   ctx.fillText(d.song_title, CW/2, textY + titleSz);
 
-  // Artist — small, muted
   setF(ctx,CW*0.022,'400','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='#999'; ctx.textAlign='center';
+  ctx.fillStyle='#aaa'; ctx.textAlign='center';
   ctx.fillText(d.artist, CW/2, textY + titleSz*2.1);
 
-  // Caption line — italic, small
   setF(ctx,CW*0.02,'300 italic','"Cormorant Garamond",Georgia,serif');
   ctx.fillStyle='#bbb'; ctx.textAlign='center';
   ctx.fillText(d.caption_line2||'', CW/2, textY + titleSz*3.3);
 
-  // SAPMANRI stamp — bottom right, faint
   setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.textAlign='right';
-  ctx.fillText('SAPMANRI', CW-pad*0.6, CH-CW*0.022);
+  ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.textAlign='right';
+  ctx.fillText('SAPMANRI', CW-borderSide*1.1, CH-CW*0.022);
   ctx.textAlign='left';
 }
 
