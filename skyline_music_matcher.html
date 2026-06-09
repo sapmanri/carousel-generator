@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.6';
+const VERSION = 'v1.0.7';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -674,7 +674,7 @@ function renderCard(d){
     const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
     canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
     const prev=document.getElementById('cardPreview');
     prev.innerHTML=''; prev.appendChild(canvas);
