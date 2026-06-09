@@ -578,7 +578,7 @@ function brand(ctx,CW,CH,pad,color){
 function renderSapmanri(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
   g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
-  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.14:CH*0.16;
+  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(190,170,255,0.82)','rgba(140,100,255,0.35)');
   const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
   const titleSize=CW*0.052;
@@ -596,10 +596,10 @@ function renderSapmanri(ctx,d,CW,CH,isV){
 }
 
 function renderMagazine(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*0.75 : CH*0.58; // 9:16에서 텍스트 패널 높이 고정
+  const splitY = isV ? CW*1.4 : CH*0.58; // 9:16에서 텍스트 패널 높이 고정
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
-  const wY=splitY*0.68, wH=splitY*0.19;
+  const wY=splitY*0.68, wH=splitY*0.38;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(184,122,110,0.88)','rgba(184,122,110,0.28)');
   const pad=CW*0.07, ty=splitY+CW*0.048;
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
@@ -616,7 +616,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
 
 function renderTheEdit(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
-  const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.13:CH*0.14;
+  const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)');
   const bx=CW*0.07, bw=CW*0.86;
   const by=isV?CW*0.88:CH*0.64;
@@ -636,10 +636,10 @@ function renderTheEdit(ctx,d,CW,CH,isV){
 }
 
 function renderStayfolio(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*0.75 : CH*0.6;
+  const splitY = isV ? CW*1.4 : CH*0.6;
   let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
-  const wY=splitY*0.66, wH=splitY*0.2;
+  const wY=splitY*0.66, wH=splitY*0.4;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,115,85,0.92)','rgba(140,115,85,0.28)');
   const pad=CW*0.075, ty=splitY+CW*0.04;
   ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(CW-pad,ty); ctx.strokeStyle='#d4cfc8'; ctx.lineWidth=1; ctx.stroke();
@@ -656,7 +656,7 @@ function renderStayfolio(ctx,d,CW,CH,isV){
 
 function renderNike(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
-  const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.13:CH*0.15;
+  const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.26:CH*0.30;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)');
   const pad=CW*0.08;
   const base = isV ? CW*0.88 : CH*0.67;
@@ -673,10 +673,10 @@ function renderNike(ctx,d,CW,CH,isV){
 }
 
 function renderOhouse(ctx,d,CW,CH,isV){
-  const cardY = isV ? CW*0.75 : CH*0.6;
+  const cardY = isV ? CW*1.4 : CH*0.6;
   const radius=CW*0.04;
   let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
-  const wY=cardY*0.65, wH=cardY*0.22;
+  const wY=cardY*0.65, wH=cardY*0.44;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(0,200,150,0.92)','rgba(0,200,150,0.28)');
   ctx.fillStyle='#FAFAF8'; ctx.beginPath();
   ctx.moveTo(0,cardY+radius); ctx.arcTo(0,cardY,radius,cardY,radius); ctx.lineTo(CW-radius,cardY); ctx.arcTo(CW,cardY,CW,cardY+radius,radius); ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath(); ctx.fill();
@@ -695,7 +695,7 @@ function renderOhouse(ctx,d,CW,CH,isV){
 }
 
 function renderApple(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*0.75 : CH*0.55;
+  const splitY = isV ? CW*1.4 : CH*0.55;
 
   // Very subtle dark vignette on photo
   const vg = ctx.createRadialGradient(CW/2,splitY/2,CW*0.1,CW/2,splitY/2,CW*0.75);
@@ -703,7 +703,7 @@ function renderApple(ctx,d,CW,CH,isV){
   ctx.fillStyle=vg; ctx.fillRect(0,0,CW,splitY);
 
   // Waveform on photo — ice white, ultra thin
-  const wY = splitY*0.6, wH = splitY*0.22;
+  const wY = splitY*0.6, wH = splitY*0.44;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.75)','rgba(255,255,255,0.15)');
 
   // Black bottom panel — perfectly flat
