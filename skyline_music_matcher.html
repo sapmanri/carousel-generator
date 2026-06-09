@@ -166,6 +166,16 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
               oninput="document.getElementById('ampVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>낮게</span><span>높게</span></div>
           </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:10px;color:#555;">글씨 크기</span>
+              <span style="font-size:10px;color:#666;" id="textScaleVal">1.0×</span>
+            </div>
+            <input type="range" id="textScaleSlider" min="50" max="150" value="100"
+              style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;"
+              oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
+          </div>
         </div>
       </div>
 
@@ -213,6 +223,20 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           oninput="cropOffsetX=this.value/100; if(cachedResult)renderCard(cachedResult);" />
         <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;">
           <span>왼쪽</span><span>오른쪽</span>
+        </div>
+      </div>
+
+      <!-- Panel position slider — always visible after analysis -->
+      <div id="panelSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">텍스트 패널 위치</span>
+          <span style="font-size:10px;color:#666;" id="panelPosVal">50%</span>
+        </div>
+        <input type="range" id="panelSlider" min="20" max="80" value="50"
+          style="width:100%;accent-color:#b87a6e;height:3px;cursor:pointer;"
+          oninput="panelPos=this.value/100; document.getElementById('panelPosVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;">
+          <span>위로</span><span>아래로</span>
         </div>
       </div>
       <div id="playerSection" style="display:none;">
@@ -306,7 +330,9 @@ function pickDesign(btn){
 }
 let cropOffsetX=0.5;
 let captionLang='ko';
-let usedSongs=[]; // 같은 이미지에서 나온 곡 히스토리
+let usedSongs=[];
+let panelPos=0.5;
+let textScale=1.0; // 0.2=높이, 0.8=낮게 (splitY 비율) // 같은 이미지에서 나온 곡 히스토리
 
 function pickLang(btn){
   document.querySelectorAll('.lang-btn').forEach(b=>{
@@ -347,6 +373,10 @@ async function analyze(){
   const btn=document.getElementById('analyzeBtn');
   btn.disabled=true; btn.textContent='분석 중...';
   document.getElementById('downloadBtn').style.display='none';
+  document.getElementById('panelSliderWrap').style.display='none';
+  panelPos=0.5; textScale=1.0;
+  document.getElementById('textScaleSlider').value=100;
+  document.getElementById('textScaleVal').textContent='1.0×';
   document.getElementById('playerSection').style.display='none';
   document.getElementById('ytPlayerWrap').style.display='none';
   document.getElementById('ytFrame').src='';
@@ -405,6 +435,10 @@ Respond ONLY as valid JSON — no markdown, no extra text:
     usedSongs.push(`${cachedResult.song_title} by ${cachedResult.artist}`);
     renderCard(cachedResult);
     document.getElementById('downloadBtn').style.display='block';
+    document.getElementById('panelSliderWrap').style.display='block';
+    document.getElementById('panelSlider').value=50;
+    document.getElementById('panelPosVal').textContent='50%';
+    panelPos=0.5;
     // Show player section
     document.getElementById('playerSongTitle').textContent=cachedResult.song_title;
     document.getElementById('playerArtist').textContent=cachedResult.artist;
@@ -633,7 +667,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
 }
 
 // ── TEXT HELPERS ──────────────────────────────────────────
-function setF(ctx,sz,wt,fam){ctx.font=`${wt} ${sz}px ${fam}`}
+function setF(ctx,sz,wt,fam){ctx.font=`${wt} ${sz*textScale}px ${fam}`}
 function fillWrap(ctx,text,x,y,maxW,lh,color){
   ctx.fillStyle=color;
   const words=text.split(' '); let line='',cy=y;
@@ -672,7 +706,7 @@ function renderSapmanri(ctx,d,CW,CH,isV){
 }
 
 function renderMagazine(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.4 : CH*0.58; // 9:16에서 텍스트 패널 높이 고정
+  const splitY = isV ? CW*1.4 : CH*(0.38 + panelPos*0.4);
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.68, wH=splitY*0.38;
@@ -695,7 +729,7 @@ function renderTheEdit(ctx,d,CW,CH,isV){
   const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)',d._ampRatio||1);
   const bx=CW*0.07, bw=CW*0.86;
-  const by=isV?CW*0.88:CH*0.64;
+  const by=isV?CW*0.88:CH*(0.44+panelPos*0.3);
   // Draw box first with estimated height, then we'll just draw content and let it flow
   const contentH = CW*0.52; // enough for all content
   ctx.fillStyle='rgba(255,255,255,0.97)';
@@ -712,7 +746,7 @@ function renderTheEdit(ctx,d,CW,CH,isV){
 }
 
 function renderStayfolio(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.4 : CH*0.6;
+  const splitY = isV ? CW*1.4 : CH*(0.4 + panelPos*0.4);
   let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.66, wH=splitY*0.4;
@@ -749,7 +783,7 @@ function renderNike(ctx,d,CW,CH,isV){
 }
 
 function renderOhouse(ctx,d,CW,CH,isV){
-  const cardY = isV ? CW*1.4 : CH*0.6;
+  const cardY = isV ? CW*1.4 : CH*(0.4 + panelPos*0.4);
   const radius=CW*0.04;
   let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
   const wY=cardY*0.65, wH=cardY*0.44;
@@ -771,7 +805,7 @@ function renderOhouse(ctx,d,CW,CH,isV){
 }
 
 function renderApple(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.4 : CH*0.55;
+  const splitY = isV ? CW*1.4 : CH*(0.35 + panelPos*0.4);
 
   // Very subtle dark vignette on photo
   const vg = ctx.createRadialGradient(CW/2,splitY/2,CW*0.1,CW/2,splitY/2,CW*0.75);
@@ -987,7 +1021,7 @@ async function loadPlayer(){
 function renderGirok(ctx,d,CW,CH,isV){
   // ── 기록 앱 스타일 ──
   // 흰 배경 + 연한 블루그레이 패널 + 파스텔 포인트 + 원형 이미지 클립
-  const splitY = isV ? CW*1.55 : CH*0.48;
+  const splitY = isV ? CW*1.55 : CH*(0.28 + panelPos*0.4);
 
   // Photo area — full bleed top
   // Light vignette
