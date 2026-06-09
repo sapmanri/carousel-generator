@@ -141,12 +141,43 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
         </div>
       </div>
       <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+
+      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <label style="margin-bottom:0;">캡션 직접 입력 <span style="font-size:9px;color:#333;font-weight:normal;text-transform:none;letter-spacing:0">— 비우면 AI 자동</span></label>
+          <div style="display:flex;gap:4px;">
+            <button class="lang-btn active-lang" data-lang="ko" onclick="pickLang(this)" style="background:#1a1830;border:0.5px solid #7c6fd4;border-radius:4px;padding:4px 10px;font-size:10px;color:#a99ef0;cursor:pointer;font-family:var(--sans);">한국어</button>
+            <button class="lang-btn" data-lang="en" onclick="pickLang(this)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">English</button>
+          </div>
+        </div>
+        <textarea id="manualCaption" placeholder="줄바꿈으로 구분, 최대 3줄&#10;예)&#10;바람이 멈춘 오후,&#10;Here Comes the Sun 이 흐른다&#10;— 그냥, 아무것도 안 해도 괜찮은 날" rows="4"
+          style="width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:5px;padding:8px 11px;font-size:12px;color:#ccc;outline:none;font-family:var(--sans);resize:none;line-height:1.8;transition:border-color 0.15s;"
+          onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
+          oninput="if(cachedResult)renderCard(cachedResult)"></textarea>
+      </div>
+
       <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
       <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:16px;">
       <div class="card-preview" id="cardPreview">
         <div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>
+      </div>
+      <div id="cropSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">프레임 위치</span>
+          <div style="display:flex;gap:6px;">
+            <button onclick="setCrop(0)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">◀ 좌</button>
+            <button onclick="setCrop(0.5)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">● 중앙</button>
+            <button onclick="setCrop(1)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">우 ▶</button>
+          </div>
+        </div>
+        <input type="range" id="cropSlider" min="0" max="100" value="50"
+          style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;"
+          oninput="cropOffsetX=this.value/100; if(cachedResult)renderCard(cachedResult);" />
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;">
+          <span>왼쪽</span><span>오른쪽</span>
+        </div>
       </div>
       <div id="playerSection" style="display:none;">
         <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
@@ -160,6 +191,18 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           <div id="ytPlayerWrap" style="display:none;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
             <iframe id="ytFrame" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>
           </div>
+        </div>
+      </div>
+
+      <!-- Instagram caption -->
+      <div id="instaCapSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">Instagram Caption</span>
+            <button onclick="generateInstaCaption()" id="instaCapBtn" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:5px;padding:6px 12px;font-size:11px;color:#888;cursor:pointer;font-family:var(--sans);">✦ 캡션 생성</button>
+          </div>
+          <div id="instaCapText" style="display:none;padding:16px 18px;font-size:13px;color:#aaa;line-height:1.9;white-space:pre-wrap;font-family:var(--sans);"></div>
+          <div id="instaCapHint" style="display:none;padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사하세요</div>
         </div>
       </div>
     </div>
@@ -215,9 +258,30 @@ function pickDesign(btn){
   btn.classList.add('active-design'); cardDesign=btn.dataset.design;
   if(cachedResult) renderCard(cachedResult);
 }
+let cropOffsetX=0.5;
+let captionLang='ko';
+
+function pickLang(btn){
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.remove('active-lang');
+    b.style.background='#141414'; b.style.borderColor='#2a2a2a'; b.style.color='#666';
+  });
+  btn.classList.add('active-lang');
+  btn.style.background='#1a1830'; btn.style.borderColor='#7c6fd4'; btn.style.color='#a99ef0';
+  captionLang=btn.dataset.lang;
+}
+
+function setCrop(v){
+  cropOffsetX=v;
+  document.getElementById('cropSlider').value=v*100;
+  if(cachedResult)renderCard(cachedResult);
+}
 function pickFmt(btn){
   document.querySelectorAll('[data-fmt]').forEach(b=>b.classList.remove('active-fmt'));
   btn.classList.add('active-fmt'); cardFmt=btn.dataset.fmt;
+  cropOffsetX=0.5;
+  document.getElementById('cropSlider').value=50;
+  document.getElementById('cropSliderWrap').style.display='none';
   if(cachedResult) renderCard(cachedResult);
 }
 
@@ -239,6 +303,8 @@ async function analyze(){
   document.getElementById('playerSection').style.display='none';
   document.getElementById('ytPlayerWrap').style.display='none';
   document.getElementById('ytFrame').src='';
+  document.getElementById('instaCapSection').style.display='none';
+  document.getElementById('instaCapText').style.display='none';
   document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
 
   const prompt=`You are a visual analyst and music curator for 감성찾아삽만리 (SAPMANRI), a Korean slow-life YouTube channel.
@@ -260,6 +326,7 @@ Based only on the composite waveform's shape, rhythm, and emotional arc, match O
 
 STEP 4 — POETIC CAPTION:
 3 short lines in the quiet, lyrical voice of a slow-life vlogger. Evocative, not descriptive. Line 2 must naturally weave in the song title.
+Write the caption in ${captionLang === 'ko' ? 'Korean (한국어)' : 'English'}.
 
 Respond ONLY as valid JSON — no markdown, no extra text:
 {
@@ -291,6 +358,10 @@ Respond ONLY as valid JSON — no markdown, no extra text:
     document.getElementById('playerSection').style.display='block';
     document.getElementById('ytPlayerWrap').style.display='none';
     document.getElementById('ytFrame').src='';
+    document.getElementById('instaCapSection').style.display='block';
+    document.getElementById('instaCapText').style.display='none';
+    document.getElementById('instaCapHint').style.display='none';
+    document.getElementById('instaCapBtn').textContent='✦ 캡션 생성';
   }catch(err){
     document.getElementById('cardPreview').innerHTML=`<div class="placeholder"><p style="color:#c06060">오류: ${err.message}</p></div>`;
   }
@@ -300,18 +371,35 @@ Respond ONLY as valid JSON — no markdown, no extra text:
 // ── RENDER CARD ───────────────────────────────────────────
 function renderCard(d){
   const isV=cardFmt==='vertical', CW=1080, CH=isV?1920:1080;
+
+  // Manual caption override — use if filled, else AI result
+  const manualCapLines=document.getElementById('manualCaption').value.trim().split('\n').filter(l=>l.trim());
+
+  const rd={
+    ...d,
+    caption_line1: manualCapLines[0] || d.caption_line1,
+    caption_line2: manualCapLines[1] || d.caption_line2,
+    caption_line3: manualCapLines[2] || d.caption_line3,
+  };
   const canvas=document.createElement('canvas');
   canvas.width=CW; canvas.height=CH;
   const ctx=canvas.getContext('2d');
   const img=new Image();
   img.onload=()=>{
     const sc=Math.max(CW/img.naturalWidth,CH/img.naturalHeight);
-    ctx.drawImage(img,(CW-img.naturalWidth*sc)/2,(CH-img.naturalHeight*sc)/2,img.naturalWidth*sc,img.naturalHeight*sc);
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple})[cardDesign](ctx,d,CW,CH,isV);
+    const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
+    // Apply cropOffsetX for horizontal positioning
+    const maxOffsetX = Math.max(0, sw - CW);
+    const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
+    const oy = (CH-sh)/2;
+    ctx.drawImage(img, ox, oy, sw, sh);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple})[cardDesign](ctx,rd,CW,CH,isV);
     canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
     const prev=document.getElementById('cardPreview');
     prev.innerHTML=''; prev.appendChild(canvas);
     window._cardCanvas=canvas;
+    // Show crop slider if vertical
+    document.getElementById('cropSliderWrap').style.display = isV ? 'block' : 'none';
   };
   img.src=imgSrc;
 }
@@ -508,7 +596,7 @@ function renderSapmanri(ctx,d,CW,CH,isV){
 }
 
 function renderMagazine(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.05 : CH*0.58; // 9:16에서 텍스트 패널 높이 고정
+  const splitY = isV ? CW*0.75 : CH*0.58; // 9:16에서 텍스트 패널 높이 고정
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.68, wH=splitY*0.19;
@@ -548,7 +636,7 @@ function renderTheEdit(ctx,d,CW,CH,isV){
 }
 
 function renderStayfolio(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.05 : CH*0.6;
+  const splitY = isV ? CW*0.75 : CH*0.6;
   let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.66, wH=splitY*0.2;
@@ -585,7 +673,7 @@ function renderNike(ctx,d,CW,CH,isV){
 }
 
 function renderOhouse(ctx,d,CW,CH,isV){
-  const cardY = isV ? CW*1.05 : CH*0.6;
+  const cardY = isV ? CW*0.75 : CH*0.6;
   const radius=CW*0.04;
   let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
   const wY=cardY*0.65, wH=cardY*0.22;
@@ -607,7 +695,7 @@ function renderOhouse(ctx,d,CW,CH,isV){
 }
 
 function renderApple(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.05 : CH*0.55;
+  const splitY = isV ? CW*0.75 : CH*0.55;
 
   // Very subtle dark vignette on photo
   const vg = ctx.createRadialGradient(CW/2,splitY/2,CW*0.1,CW/2,splitY/2,CW*0.75);
@@ -665,6 +753,55 @@ function renderApple(ctx,d,CW,CH,isV){
   ctx.textAlign='right';
   ctx.fillText('SAPMANRI', CW-pad*0.7, CH-CW*0.022);
   ctx.textAlign='left';
+}
+
+async function generateInstaCaption(){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('API 키를 입력해주세요.');return}
+  if(!cachedResult)return;
+
+  const btn=document.getElementById('instaCapBtn');
+  btn.textContent='생성 중...'; btn.disabled=true;
+
+  const isEn = captionLang==='en';
+  const lang = isEn ? 'English' : '한국어';
+  const d=cachedResult;
+
+  const prompt=`You are an Instagram SEO expert for a Korean slow-life YouTube channel called 감성찾아삽만리 (SAPMANRI).
+
+Context:
+- Photo location/scene: ${d.line_description}
+- Matched song: "${d.song_title}" by ${d.artist}
+- Mood traits: ${(d.line_traits||[]).join(', ')}
+- Card caption: ${d.caption_line1} / ${d.caption_line2} / ${d.caption_line3}
+
+Write an Instagram post caption in ${lang} that:
+1. Opens with 2-3 evocative lines in the quiet slow-life vlogger voice (reference the song naturally)
+2. A short paragraph about the scene/feeling (3-4 sentences)
+3. A line break then 15-20 relevant hashtags — mix of: channel brand (#감성찾아삽만리 #sapmanri), slow life (#슬로우라이프 #slowliving), location mood, music reference, nature/season tags
+4. End with the channel tag: @sapmanri
+
+Write ONLY the caption text, no explanations. Use ${lang} for all text except hashtags which can mix Korean and English.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=data.content[0].text.trim();
+    document.getElementById('instaCapText').textContent=text;
+    document.getElementById('instaCapText').style.display='block';
+    document.getElementById('instaCapHint').style.display='block';
+    btn.textContent='↺ 다시 생성';
+  }catch(err){
+    document.getElementById('instaCapText').textContent='오류: '+err.message;
+    document.getElementById('instaCapText').style.display='block';
+    btn.textContent='✦ 캡션 생성';
+  }
+  btn.disabled=false;
 }
 
 async function loadPlayer(){
