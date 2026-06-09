@@ -203,6 +203,33 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .sf-txt-split{position:absolute;bottom:0;left:0;right:0;height:42%;background:var(--sf-cream);padding:12px 16px;display:flex;flex-direction:column;justify-content:center;z-index:2}
 .sf-txt-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:20px;z-index:2;background:var(--sf-cream)}
 .sf-closing{position:absolute;inset:0;background:var(--sf-dark);display:flex;flex-direction:column;justify-content:center;padding:20px}
+
+/* ── 감성찾아삽만리 스타일 ── */
+:root{--sm-purple:rgba(190,170,255,0.9);--sm-purpleglow:rgba(140,100,255,0.35)}
+.sm-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:#0e0e0e;font-family:"Helvetica Neue",Arial,var(--sans)}
+.sm-overlay-top{position:absolute;top:0;left:0;right:0;height:38%;background:linear-gradient(to bottom,rgba(0,0,0,0.3),transparent);z-index:1}
+.sm-overlay-bottom{position:absolute;bottom:0;left:0;right:0;height:58%;background:linear-gradient(to top,rgba(0,0,0,0.97) 0%,rgba(0,0,0,0.78) 48%,transparent 100%);z-index:1}
+.sm-txt{position:absolute;bottom:0;left:0;right:0;padding:14px 14px 20px;z-index:2}
+.sm-title{font-size:22px;font-weight:700;line-height:1.05;color:rgba(255,255,255,0.97);letter-spacing:-0.01em;margin-bottom:4px}
+.sm-sub{font-size:9px;font-weight:400;color:rgba(255,255,255,0.45);margin-bottom:8px;letter-spacing:0.06em}
+.sm-rule{width:18%;height:1px;background:rgba(255,255,255,0.12);margin-bottom:8px}
+.sm-body{font-size:8px;font-weight:300;color:rgba(255,255,255,0.5);line-height:1.7;letter-spacing:0.03em}
+.sm-body2{font-size:9px;font-weight:500;color:rgba(255,255,255,0.9);line-height:1.6}
+.sm-folio{position:absolute;bottom:8px;right:10px;font-size:7px;letter-spacing:0.1em;color:rgba(255,255,255,0.15);z-index:3}
+.sm-closing{position:absolute;inset:0;background:#0e0e0e;display:flex;flex-direction:column;justify-content:center;padding:18px;z-index:2}
+
+/* ── Apple MD 스타일 ── */
+.amd-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:#000;font-family:"Helvetica Neue","Noto Sans KR",Arial,sans-serif}
+.amd-vignette{position:absolute;top:0;left:0;right:0;height:55%;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.22) 100%);z-index:1}
+.amd-panel{position:absolute;bottom:0;left:0;right:0;height:45%;background:#000;border-top:0.5px solid rgba(255,255,255,0.08);z-index:2;padding:12px 14px 16px;display:flex;flex-direction:column;justify-content:center}
+.amd-label{font-size:7px;font-weight:400;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.32);margin-bottom:8px}
+.amd-title{font-size:26px;font-weight:200;line-height:1.05;color:#fff;letter-spacing:-0.02em;margin-bottom:5px}
+.amd-sub{font-size:9px;font-weight:300;color:rgba(255,255,255,0.35);margin-bottom:10px}
+.amd-rule{width:100%;height:0.5px;background:rgba(255,255,255,0.1);margin-bottom:10px}
+.amd-body{font-size:8px;font-weight:300;color:rgba(255,255,255,0.42);text-align:center;line-height:1.7;letter-spacing:0.02em}
+.amd-body2{font-size:7px;font-weight:300;color:rgba(255,255,255,0.2);text-align:center;letter-spacing:0.02em;margin-top:4px}
+.amd-folio{position:absolute;bottom:8px;right:10px;font-size:7px;font-weight:300;letter-spacing:0.1em;color:rgba(255,255,255,0.12);z-index:3}
+.amd-closing{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;justify-content:center;padding:18px;z-index:2}
 </style>
 
 </head>
@@ -253,6 +280,8 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
       <option value="stayfolio">스테이폴리오 (파인스테이)</option>
       <option value="nike">Nike (강렬 · 대문자)</option>
       <option value="ohouse">오늘의집 (따뜻한 라이프스타일)</option>
+      <option value="sapmanri">감성찾아삽만리 (다크 · 감성)</option>
+      <option value="applemd">Apple (미니멀 · 여백)</option>
     </select>
   </div>
   <div class="field">
@@ -682,6 +711,8 @@ function renderSlide(slide, i) {
   if (slide.type === 'infographic') return renderInfographic(slide, i, img, folio, accent);
   if (style === 'ohouse') return renderOhouse(slide, i, img, folio, tag);
   if (style === 'theedit') return renderTheEdit(slide, i, img, folio, accent, tag);
+  if (style === 'sapmanri') return renderSapmanriStyle(slide, i, img, folio, accent, tag);
+  if (style === 'applemd') return renderAppleMD(slide, i, img, folio, accent, tag);
   if (style === 'stayfolio') return renderStayfolio(slide, i, img, folio, accent, tag);
 
   // Magazine B / Nike
@@ -730,6 +761,12 @@ function renderPullQuote(slide, i, style, accent, folio) {
   }
   if (style === 'stayfolio') {
     return `<div class="slide-card"><div class="sf-canvas"><div class="sf-txt-center"><div class="sf-rule"></div><div class="sf-headline-sm">${slide.headline||''}</div><div class="sf-body">${slide.body||''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
+  }
+  if (style === 'sapmanri') {
+    return `<div class="slide-card"><div class="sm-canvas"><div class="sm-closing"><div style="width:16px;height:2px;background:${accent};margin-bottom:12px"></div><div class="sm-title" style="font-size:18px">${slide.headline||''}</div><div class="sm-body" style="margin-top:8px">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
+  }
+  if (style === 'applemd') {
+    return `<div class="slide-card"><div class="amd-canvas"><div class="amd-closing"><div class="amd-rule"></div><div class="amd-title" style="font-size:20px;text-align:center">${slide.headline||''}</div><div class="amd-body" style="margin-top:10px">${slide.body||''}</div></div><div class="amd-folio">${folio}</div></div></div>`;
   }
   return `<div class="slide-card"><div class="slide-canvas" style="background:var(--paper)"><div class="txt-pull"><div class="s-rule" style="background:${accent}"></div><div class="s-headline-pull">${slide.headline||''}</div><div class="s-body-ink">${slide.body||''}</div></div><div class="s-folio-ink">${folio}</div></div></div>`;
 }
@@ -826,6 +863,45 @@ function renderInfographic(slide, i, img, folio, accent) {
   const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#222"></div>`;
   return `<div class="slide-card"><div class="slide-canvas" style="background:#1a1a1a">${bgHtml}<div style="position:absolute;inset:0;background:rgba(0,0,0,0.15)"></div>${labelsHtml}<div class="s-folio" style="z-index:5">${folio}</div></div></div>`;
 }
+
+function renderSapmanriStyle(slide, i, img, folio, accent, tag) {
+  const isDark = slide.type === 'closing';
+  const isSplit = slide.layout === 'split_bottom';
+  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : '<div style="position:absolute;inset:0;background:#1a1a1a"></div>';
+
+  if (isDark) {
+    const bg = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:rgba(14,14,14,0.82)"></div>` : '';
+    return `<div class="slide-card"><div class="sm-canvas">${bg}<div class="sm-closing"><span style="font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.22);display:block;margin-bottom:14px">SAPMANRI</span><div style="width:18px;height:2px;background:${accent};margin-bottom:14px"></div><div class="sm-title" style="font-size:20px">${slide.headline||''}</div><div class="sm-body" style="margin-top:8px">${slide.body||''}</div><span style="font-size:7px;letter-spacing:0.18em;text-transform:uppercase;color:${accent};margin-top:18px;display:block">${tag}</span></div><div class="sm-folio">${folio}</div></div></div>`;
+  }
+  if (isSplit) {
+    return `<div class="slide-card"><div class="sm-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 57%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(14,14,14,0.6))"></div></div>`:'<div style="flex:0 0 57%;background:#1a1a1a"></div>'}<div style="flex:1;background:#0e0e0e;padding:10px 14px;display:flex;flex-direction:column;justify-content:center"><span style="font-size:6px;letter-spacing:0.18em;text-transform:uppercase;color:${accent};display:block;margin-bottom:5px">${slide.label||''}</span><div class="sm-title" style="font-size:16px">${slide.headline||''}</div><div class="sm-body" style="margin-top:5px">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
+  }
+  // cover / feature
+  const isText = !img;
+  if (isText) {
+    return `<div class="slide-card"><div class="sm-canvas"><div class="sm-closing"><span style="font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.22);display:block;margin-bottom:10px">SAPMANRI</span><div class="sm-title">${slide.headline||''}</div><div class="sm-body" style="margin-top:8px">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
+  }
+  const isCover = slide.type === 'cover';
+  return `<div class="slide-card"><div class="sm-canvas">${bgHtml}<div class="sm-overlay-top"></div><div class="sm-overlay-bottom"></div><div class="sm-txt">${isCover?`<span style="font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.3);display:block;margin-bottom:10px">SAPMANRI</span>`:`<span style="font-size:6px;letter-spacing:0.18em;text-transform:uppercase;color:${accent};display:block;margin-bottom:6px">${slide.label||''}</span>`}<div class="sm-title">${slide.headline||''}</div><div class="sm-rule"></div><div class="sm-body">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
+}
+
+function renderAppleMD(slide, i, img, folio, accent, tag) {
+  const isDark = slide.type === 'closing';
+  const isSplit = slide.layout === 'split_bottom';
+
+  if (isDark) {
+    const bg = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:rgba(0,0,0,0.85)"></div>` : '';
+    return `<div class="slide-card"><div class="amd-canvas">${bg}<div class="amd-closing"><div class="amd-label">SAPMANRI</div><div class="amd-title" style="font-size:20px">${slide.headline||''}</div><div class="amd-rule" style="margin-top:12px"></div><div class="amd-body">${slide.body||''}</div><div class="amd-body2">${tag}</div></div><div class="amd-folio">${folio}</div></div></div>`;
+  }
+  if (isSplit || !img) {
+    // Apple은 상단 이미지 + 하단 블랙 패널 구조
+    return `<div class="slide-card"><div class="amd-canvas">${img?`<div style="position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden"><img style="width:100%;height:100%;object-fit:cover" src="${img}"/><div class="amd-vignette"></div></div>`:'<div style="position:absolute;top:0;left:0;right:0;height:55%;background:#111"></div>'}<div class="amd-panel"><div class="amd-label">${slide.label||'SAPMANRI'}</div><div class="amd-title" style="font-size:18px">${slide.headline||''}</div><div class="amd-sub">${slide.body||''}</div></div><div class="amd-folio">${folio}</div></div></div>`;
+  }
+  // cover / feature — 상단 이미지 + 하단 패널
+  const isCover = slide.type === 'cover';
+  return `<div class="slide-card"><div class="amd-canvas"><div style="position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden"><img style="width:100%;height:100%;object-fit:cover" src="${img}"/><div class="amd-vignette"></div></div><div class="amd-panel"><div class="amd-label">${isCover?'SAPMANRI':(slide.label||'')}</div><div class="amd-title">${slide.headline||''}</div><div class="amd-sub">${slide.body?.slice(0,40)||''}</div><div class="amd-rule"></div><div class="amd-body">${!isCover?(slide.body||''):''}</div></div><div class="amd-folio">${folio}</div></div></div>`;
+}
+
 
 // 이미지 dataUrl을 S×S 정사각형 cover canvas dataUrl로 변환
 function imgToCoverCanvas(dataUrl, S) {
@@ -1032,15 +1108,17 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     : '"Noto Sans KR", "Helvetica Neue", Arial, sans-serif';
 
   // 스타일별 헤드라인 폰트 — 디에디트는 산세리프 굵게, 스테이폴리오는 세리프 가늘게
-  const headFont = style === 'theedit'
+  const headFont = (style === 'theedit' || style === 'nike' || style === 'sapmanri')
     ? '"Helvetica Neue", Arial, sans-serif'
     : style === 'stayfolio'
     ? '"Cormorant Garamond", "Noto Serif KR", serif'
-    : style === 'nike'
-    ? '"Helvetica Neue", Arial, sans-serif'
+    : style === 'applemd'
+    ? '"Helvetica Neue", "Noto Sans KR", Arial, sans-serif'
     : serifFont;
 
-  const headWeight = (style === 'theedit' || style === 'nike') ? '700' : '300';
+  const headWeight = (style === 'theedit' || style === 'nike' || style === 'sapmanri') ? '700'
+    : style === 'applemd' ? '200'
+    : '300';
 
   function setFont(size, weight, family) {
     ctx.font = weight + ' ' + size + 'px ' + family;
