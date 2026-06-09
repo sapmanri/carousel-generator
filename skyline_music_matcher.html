@@ -1527,9 +1527,7 @@ function downloadCard(){
   const a=document.createElement('a'); a.download=`sapmanri_${Date.now()}.jpg`;
   a.href=window._cardCanvas.toDataURL('image/jpeg',0.95); a.click();
 }
-</script>
-</body>
-</html>
+
 // ── WAVEFORM ENGINE ───────────────────────────────────────
 function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
   const aH = maxH * (ampRatio||1);
@@ -1696,3 +1694,6 @@ function fillWrap(ctx,text,x,y,maxW,lh,color){
     if(i===words.length-1)ctx.fillText(line,x,cy);
   });return cy;
 }
+</script>
+</body>
+</html>
