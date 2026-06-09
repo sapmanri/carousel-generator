@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.1.0';
+const VERSION = 'v1.1.1';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1325,67 +1325,60 @@ function renderGirok(ctx,d,CW,CH,isV){
 }
 
 function renderPolaroid(ctx,d,CW,CH,isV){
-  // ── 폴라로이드 ──
-  const bs = CW*0.055;          // border side
-  const bt = CW*0.055;          // border top
-  const bb = isV ? CW*0.28 : CW*0.24;  // border bottom — generous for branding
+  // ── 폴라로이드 ── 이미지는 이미 canvas에 그려져 있음 — 테두리만 덮어씌우기
+  const bs = CW*0.055;
+  const bt = CW*0.055;
+  const bb = isV ? CW*0.28 : CW*0.24;
   const innerX=bs, innerY=bt;
   const innerW=CW-bs*2, innerH=CH-bt-bb;
 
-  // 1) 크림 화이트 배경
+  // 이미지 위에 크림 배경 테두리 그리기 (4방향)
   ctx.fillStyle='#F7F5F0';
-  ctx.fillRect(0,0,CW,CH);
+  ctx.fillRect(0,0,CW,bt);                        // top
+  ctx.fillRect(0,0,bs,CH);                         // left
+  ctx.fillRect(CW-bs,0,bs,CH);                     // right
+  ctx.fillRect(0,CH-bb,CW,bb);                     // bottom
 
-  // 2) 이미지 재드로우 (클립)
-  const img=_lastImg;
-  if(img){
-    ctx.save();
-    ctx.beginPath(); ctx.rect(innerX,innerY,innerW,innerH); ctx.clip();
-    const sc=Math.max(innerW/img.naturalWidth, innerH/img.naturalHeight);
-    const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
-    ctx.drawImage(img, innerX+(innerW-sw)/2, innerY+(innerH-sh)/2, sw, sh);
-    // bottom fade into white
-    let fade=ctx.createLinearGradient(0,innerY+innerH*0.7,0,innerY+innerH);
-    fade.addColorStop(0,'rgba(247,245,240,0)');
-    fade.addColorStop(1,'rgba(247,245,240,0.55)');
-    ctx.fillStyle=fade; ctx.fillRect(innerX,innerY,innerW,innerH);
-    // waveform — subtle, near bottom of photo
-    const wY=innerY+innerH*0.80, wH=innerH*0.22;
-    const _sc8=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc8.main,_sc8.glow,d._ampRatio||1);
-    ctx.restore();
-  }
+  // 이미지 영역 하단 페이드 (흰쪽으로)
+  let fade=ctx.createLinearGradient(0,innerY+innerH*0.7,0,innerY+innerH);
+  fade.addColorStop(0,'rgba(247,245,240,0)');
+  fade.addColorStop(1,'rgba(247,245,240,0.5)');
+  ctx.fillStyle=fade; ctx.fillRect(innerX,innerY+innerH*0.7,innerW,innerH*0.3);
 
-  // 3) 텍스트 영역 — 하단 여백
-  const areaY = innerY + innerH;          // top of white area
-  const cx    = CW / 2;
-  const pad   = bs * 1.4;
+  // 파형 — 이미지 하단
+  const wY=innerY+innerH*0.80, wH=innerH*0.22;
+  const _sc=getWaveColors(ctx,CW,wY,wH);
+  drawWave(ctx,d.line_points,CW,wY,wH,_sc.main,_sc.glow,d._ampRatio||1);
 
-  // 곡 제목 — 크고 세리프, 센터
-  const titleSz = CW * (isV ? 0.052 : 0.056);
-  setF(ctx, titleSz, '300', '"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  // 하단 텍스트 영역
+  const areaY=innerY+innerH;
+  const cx=CW/2;
+
+  // 곡 제목
+  const titleSz=CW*(isV?0.052:0.056);
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
   ctx.fillStyle='#1a1a1a'; ctx.textAlign='center';
-  ctx.fillText(d.song_title, cx, areaY + bb*0.28);
+  ctx.fillText(d.song_title,cx,areaY+bb*0.28);
 
-  // 아티스트 — 작고 레터스페이싱
-  setF(ctx, CW*0.02, '400', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='#999'; ctx.textAlign='center';
-  ctx.fillText(d.artist.toUpperCase(), cx, areaY + bb*0.46);
+  // 아티스트
+  setF(ctx,CW*0.02,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#aaa'; ctx.textAlign='center';
+  ctx.fillText(d.artist.toUpperCase(),cx,areaY+bb*0.46);
 
-  // 얇은 구분선
-  const lineY = areaY + bb*0.58;
-  ctx.beginPath();
-  ctx.moveTo(cx - CW*0.12, lineY); ctx.lineTo(cx + CW*0.12, lineY);
+  // 구분선
+  const lineY=areaY+bb*0.58;
+  ctx.beginPath(); ctx.moveTo(cx-CW*0.12,lineY); ctx.lineTo(cx+CW*0.12,lineY);
   ctx.strokeStyle='rgba(0,0,0,0.10)'; ctx.lineWidth=1; ctx.stroke();
 
-  // Skyline Music Matcher™ — 브랜드명, 살짝 크게
-  setF(ctx, CW*0.019, '400', '"Helvetica Neue",Arial,sans-serif');
+  // Skyline Music Matcher™
+  setF(ctx,CW*0.019,'400','"Helvetica Neue",Arial,sans-serif');
   ctx.fillStyle='#888'; ctx.textAlign='center';
-  ctx.fillText('Skyline Music Matcher™', cx, areaY + bb*0.73);
+  ctx.fillText('Skyline Music Matcher™',cx,areaY+bb*0.73);
 
-  // by @sapmanri — 더 작게, 뮤트
-  setF(ctx, CW*0.016, '300', '"Helvetica Neue",Arial,sans-serif');
+  // by @sapmanri
+  setF(ctx,CW*0.016,'300','"Helvetica Neue",Arial,sans-serif');
   ctx.fillStyle='#bbb'; ctx.textAlign='center';
-  ctx.fillText('by @sapmanri', cx, areaY + bb*0.88);
+  ctx.fillText('by @sapmanri',cx,areaY+bb*0.88);
 
   ctx.textAlign='left';
 }
