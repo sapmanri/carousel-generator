@@ -93,6 +93,27 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
   .design-scroll{display:grid;grid-template-columns:repeat(4,minmax(80px,1fr));gap:5px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
   .design-scroll::-webkit-scrollbar{display:none}
 }
+
+/* ── SLIDERS ── */
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:3px;border-radius:2px;
+  background:#2a2a2a;outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:#e8e8e8;cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,0.4);
+}
+input[type=range]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;border:none;
+  background:#e8e8e8;cursor:pointer;
+}
+input[type=range][accent-color="#7c6fd4"]::-webkit-slider-runnable-track,
+input[type=range][accent-color="#b87a6e"]::-webkit-slider-runnable-track{
+  height:3px;border-radius:2px;
+}
 </style>
 </head>
 <body>
@@ -165,17 +186,17 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           <div style="display:flex;flex-direction:column;gap:12px;margin-top:2px;">
             <div>
               <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">밀도</span><span style="font-size:10px;color:#666;" id="densityVal">80</span></div>
-              <input type="range" id="densitySlider" min="10" max="80" value="80" style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;" oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
+              <input type="range" id="densitySlider" min="10" max="80" value="80" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
               <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>잔잔</span><span>촘촘</span></div>
             </div>
             <div>
               <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">진폭</span><span style="font-size:10px;color:#666;" id="ampVal">100%</span></div>
-              <input type="range" id="ampSlider" min="20" max="200" value="100" style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;" oninput="document.getElementById('ampVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+              <input type="range" id="ampSlider" min="20" max="200" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('ampVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
               <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>낮게</span><span>높게</span></div>
             </div>
             <div>
               <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">글씨 크기</span><span style="font-size:10px;color:#666;" id="textScaleVal">1.0×</span></div>
-              <input type="range" id="textScaleSlider" min="50" max="150" value="100" style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;" oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
+              <input type="range" id="textScaleSlider" min="50" max="150" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
               <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
             </div>
           </div>
@@ -225,7 +246,7 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
               <button onclick="setCrop(1)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">우 ▶</button>
             </div>
           </div>
-          <input type="range" id="cropSlider" min="0" max="100" value="50" style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;" oninput="cropOffsetX=this.value/100; if(cachedResult)renderCard(cachedResult);" />
+          <input type="range" id="cropSlider" min="0" max="100" value="50" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="cropOffsetX=this.value/100; if(cachedResult)renderCard(cachedResult);" />
           <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>왼쪽</span><span>오른쪽</span></div>
         </div>
         <div id="panelSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
@@ -233,7 +254,7 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
             <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">텍스트 패널 위치</span>
             <span style="font-size:10px;color:#666;" id="panelPosVal">50%</span>
           </div>
-          <input type="range" id="panelSlider" min="20" max="80" value="50" style="width:100%;accent-color:#b87a6e;height:3px;cursor:pointer;" oninput="panelPos=this.value/100; document.getElementById('panelPosVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+          <input type="range" id="panelSlider" min="20" max="80" value="50" style="width:100%;accent-color:#b87a6e;cursor:pointer;" oninput="panelPos=this.value/100; document.getElementById('panelPosVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
           <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>위로</span><span>아래로</span></div>
         </div>
       </div><!-- /card-col -->
