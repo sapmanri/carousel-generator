@@ -299,14 +299,21 @@ function applyMobileLayout(){
   const cardCol = workspace.querySelector('.panel + div');
   if(!cardCol) return;
 
-  // Insert card column after analyze button, before after-card elements
+  // Insert card column (card + sliders) after analyze button
   const analyzeBtn = document.getElementById('analyzeBtn');
-  // Insert cardCol right after analyzeBtn in the panel
   analyzeBtn.insertAdjacentElement('afterend', cardCol);
 
-  // Move after-card elements after cardCol
+  // Move after-card elements (파형조절, 캡션, 토글, 버튼) after cardCol
   const afterCards = panel.querySelectorAll('.after-card');
   afterCards.forEach(el => panel.appendChild(el));
+
+  // Move player, insta caption, video rec sections to very end of panel
+  // They're in cardCol — move them after after-card elements
+  const toMove = ['playerSection','instaCapSection','videoRecSection'];
+  toMove.forEach(id => {
+    const el = document.getElementById(id);
+    if(el) panel.appendChild(el);
+  });
 }
 window.addEventListener('load', applyMobileLayout);
 const keyInput=document.getElementById('apiKey');
