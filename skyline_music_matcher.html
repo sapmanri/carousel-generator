@@ -855,7 +855,7 @@ function getWaveColors(ctx, CW, zoneY, zoneH){
 function renderSapmanri(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
   g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
-  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
+  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.56:CH*0.64;
   const _sc0=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc0.main,_sc0.glow,d._ampRatio||1);
   const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
   const titleSize=CW*0.052;
