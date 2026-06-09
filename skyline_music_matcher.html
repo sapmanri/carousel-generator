@@ -63,24 +63,32 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
 /* ── MOBILE ── */
 @media(max-width:680px){
   header{padding:14px 16px}
-  .key-wrap input{width:150px;font-size:11px}
+  .key-wrap input{width:140px;font-size:11px}
   main{padding:20px 16px 60px}
 
-  /* Stack: card first, panel below on mobile */
+  /* Single column, card column first */
   .workspace{grid-template-columns:1fr;grid-template-rows:auto auto}
-  .card-preview{order:-1;min-height:280px;border-radius:8px}
-  .card-preview canvas{max-height:75vw}
-  .panel{gap:14px}
 
-  /* Horizontal scroll for design buttons on mobile */
-  .btn-grid-3{grid-template-columns:repeat(3,1fr)}
-  .design-scroll{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:5px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
-  .design-scroll::-webkit-scrollbar{display:none}
+  /* Panel becomes flex column so we can use order */
+  .panel{display:flex;flex-direction:column;gap:14px;order:2}
+
+  /* Card column comes first */
+  .workspace > div:last-child{order:1}
+
+  /* Card preview sizing */
+  .card-preview{min-height:260px;border-radius:8px}
+  .card-preview canvas{max-height:72vw}
+
+  /* after-card items: pushed below card via panel order trick */
+  /* We use a different approach — wrap panel into two sections */
 
   .opt-btn{padding:10px 4px;font-size:10px}
   .opt-btn .name{font-size:10px}
   .btn-analyze{padding:15px;font-size:14px}
   .btn-secondary{padding:12px}
+
+  .design-scroll{display:grid;grid-template-columns:repeat(4,minmax(80px,1fr));gap:5px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  .design-scroll::-webkit-scrollbar{display:none}
 }
 </style>
 </head>
@@ -143,7 +151,7 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
       </div>
       <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
 
-      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+      <div class="panel-section after-card" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
         <label>파형 조절</label>
         <div style="display:flex;flex-direction:column;gap:12px;margin-top:2px;">
           <div>
@@ -179,7 +187,7 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
         </div>
       </div>
 
-      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+      <div class="panel-section after-card" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <label style="margin-bottom:0;">캡션 직접 입력 <span style="font-size:9px;color:#333;font-weight:normal;text-transform:none;letter-spacing:0">— 비우면 AI 자동</span></label>
           <div style="display:flex;gap:4px;">
@@ -193,7 +201,7 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           oninput="if(cachedResult)renderCard(cachedResult)"></textarea>
       </div>
 
-      <div style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+      <div class="after-card" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;">
           <input type="checkbox" id="videoRecToggle" checked
             style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;"
@@ -202,8 +210,8 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
         </label>
       </div>
 
-      <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
-      <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
+      <button class="btn-secondary btn-dl after-card" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
+      <button class="btn-secondary btn-reset after-card" onclick="resetAll()">다른 사진 선택</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:16px;">
       <div class="card-preview" id="cardPreview">
@@ -283,7 +291,22 @@ let imgSrc=null,b64=null,mtype='image/jpeg';
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
 let cachedResult=null;
 
-// API key persistence
+// Mobile layout reorder
+function applyMobileLayout(){
+  if(window.innerWidth > 680) return;
+  const workspace = document.getElementById('workspaceSection');
+  const panel = workspace.querySelector('.panel');
+  const cardCol = workspace.querySelector('.panel + div');
+  if(!cardCol) return;
+
+  // Move card column before panel
+  workspace.insertBefore(cardCol, panel);
+
+  // Move after-card elements into card column
+  const afterCards = panel.querySelectorAll('.after-card');
+  afterCards.forEach(el => cardCol.appendChild(el));
+}
+window.addEventListener('load', applyMobileLayout);
 const keyInput=document.getElementById('apiKey');
 const savedKey=localStorage.getItem('smm_apikey');
 if(savedKey)keyInput.value=savedKey;
@@ -706,7 +729,7 @@ function renderSapmanri(ctx,d,CW,CH,isV){
 }
 
 function renderMagazine(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.4 : CH*(0.38 + panelPos*0.4);
+  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.38 + panelPos*0.4);
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.68, wH=splitY*0.38;
@@ -729,7 +752,7 @@ function renderTheEdit(ctx,d,CW,CH,isV){
   const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)',d._ampRatio||1);
   const bx=CW*0.07, bw=CW*0.86;
-  const by=isV?CW*0.88:CH*(0.44+panelPos*0.3);
+  const by=isV?CW*(0.6+panelPos*0.6):CH*(0.44+panelPos*0.3);
   // Draw box first with estimated height, then we'll just draw content and let it flow
   const contentH = CW*0.52; // enough for all content
   ctx.fillStyle='rgba(255,255,255,0.97)';
@@ -746,7 +769,7 @@ function renderTheEdit(ctx,d,CW,CH,isV){
 }
 
 function renderStayfolio(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.4 : CH*(0.4 + panelPos*0.4);
+  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.4 + panelPos*0.4);
   let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.66, wH=splitY*0.4;
@@ -769,7 +792,7 @@ function renderNike(ctx,d,CW,CH,isV){
   const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.26:CH*0.30;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)',d._ampRatio||1);
   const pad=CW*0.08;
-  const base = isV ? CW*0.88 : CH*0.67;
+  const base = isV ? CW*(0.6+panelPos*0.5) : CH*0.67;
   setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
   const titleSz=CW*0.062;
   setF(ctx,titleSz,'700','"Helvetica Neue",Arial,sans-serif');
@@ -783,7 +806,7 @@ function renderNike(ctx,d,CW,CH,isV){
 }
 
 function renderOhouse(ctx,d,CW,CH,isV){
-  const cardY = isV ? CW*1.4 : CH*(0.4 + panelPos*0.4);
+  const cardY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.4 + panelPos*0.4);
   const radius=CW*0.04;
   let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
   const wY=cardY*0.65, wH=cardY*0.44;
@@ -805,7 +828,7 @@ function renderOhouse(ctx,d,CW,CH,isV){
 }
 
 function renderApple(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*1.4 : CH*(0.35 + panelPos*0.4);
+  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.35 + panelPos*0.4);
 
   // Very subtle dark vignette on photo
   const vg = ctx.createRadialGradient(CW/2,splitY/2,CW*0.1,CW/2,splitY/2,CW*0.75);
@@ -1021,7 +1044,7 @@ async function loadPlayer(){
 function renderGirok(ctx,d,CW,CH,isV){
   // ── 기록 앱 스타일 ──
   // 흰 배경 + 연한 블루그레이 패널 + 파스텔 포인트 + 원형 이미지 클립
-  const splitY = isV ? CW*1.55 : CH*(0.28 + panelPos*0.4);
+  const splitY = isV ? CW*(1.2 + panelPos*0.6) : CH*(0.28 + panelPos*0.4);
 
   // Photo area — full bleed top
   // Light vignette
