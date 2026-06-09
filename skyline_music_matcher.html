@@ -376,10 +376,12 @@ ${usedSongs.length > 0 ? `IMPORTANT: Do NOT suggest any of these songs that were
 
 STEP 4 — POETIC CAPTION:
 3 short lines in the quiet, lyrical voice of a slow-life vlogger. Evocative, not descriptive. Line 2 must naturally weave in the song title.
+Use the specific image details (subject, season, mood) to make the caption feel grounded and particular — not generic.
 Write the caption in ${captionLang === 'ko' ? 'Korean (한국어)' : 'English'}.
 
 Respond ONLY as valid JSON — no markdown, no extra text:
 {
+  "image_description": "사진에 담긴 피사체/장소/계절/분위기를 구체적으로 묘사 — 꽃이면 품종·색·상태, 풍경이면 지형·식생·날씨, 건물이면 양식·재질·시간대까지 (한국어, 2-3문장)",
   "line_description": "복합 컨투어 한 문장 (한국어)",
   "line_traits": ["특성1","특성2","특성3"],
   "song_title": "곡 제목",
@@ -868,7 +870,8 @@ async function findRelatedVideo(){
     const prompt=`You are helping match YouTube videos from the channel 감성찾아삽만리 (SAPMANRI) to a photo.
 
 Photo analysis:
-- Scene/line description: ${d.line_description}
+- Subject/scene: ${d.image_description||d.line_description}
+- Line description: ${d.line_description}
 - Mood traits: ${(d.line_traits||[]).join(', ')}
 - Matched song: "${d.song_title}" by ${d.artist}
 - Caption: ${d.caption_line1} / ${d.caption_line2}
@@ -922,7 +925,8 @@ async function generateInstaCaption(){
   const prompt=`You are an Instagram SEO expert for a Korean slow-life YouTube channel called 감성찾아삽만리 (SAPMANRI).
 
 Context:
-- Photo location/scene: ${d.line_description}
+- Photo subject/scene: ${d.image_description||d.line_description}
+- Line description: ${d.line_description}
 - Matched song: "${d.song_title}" by ${d.artist}
 - Mood traits: ${(d.line_traits||[]).join(', ')}
 - Card caption: ${d.caption_line1} / ${d.caption_line2} / ${d.caption_line3}
