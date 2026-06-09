@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Skyline Music Matcher — 감성찾아삽만리</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--serif:"Cormorant Garamond","Noto Serif KR",Georgia,serif;--sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif}
+body{background:#0e0e0e;color:#e8e8e8;font-family:var(--sans);min-height:100vh}
+header{padding:18px 24px;border-bottom:0.5px solid #222;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:14px;font-weight:600;letter-spacing:0.04em;font-family:var(--serif)}
+.brand p{font-size:9px;letter-spacing:0.14em;color:#444;margin-top:2px;text-transform:uppercase}
+.key-wrap{display:flex;align-items:center;gap:8px}
+.key-wrap input{background:#1a1a1a;border:0.5px solid #333;border-radius:4px;padding:7px 12px;font-size:12px;color:#aaa;width:200px;letter-spacing:0.05em;outline:none;transition:border-color 0.15s}
+.key-wrap input:focus{border-color:#555}
+.key-label{font-size:9px;letter-spacing:0.12em;color:#444;text-transform:uppercase}
+main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
+
+/* Upload */
+.upload-zone{border:1px dashed #2a2a2a;border-radius:8px;padding:48px 24px;text-align:center;cursor:pointer;background:#111;transition:all 0.2s;position:relative}
+.upload-zone:hover,.upload-zone.dragover{border-color:#444;background:#151515}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone p{font-size:14px;color:#555;margin-top:14px}
+.upload-zone span{font-size:11px;color:#333;margin-top:6px;display:block}
+
+/* Workspace: desktop = side panel | card preview */
+.workspace{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+.panel{display:flex;flex-direction:column;gap:18px}
+.panel-section label{font-size:9px;letter-spacing:0.13em;color:#444;text-transform:uppercase;display:block;margin-bottom:9px}
+.btn-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.btn-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.opt-btn{background:#141414;border:0.5px solid #2a2a2a;border-radius:6px;padding:11px 6px;cursor:pointer;color:#666;font-size:11px;text-align:center;transition:all 0.15s;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+.opt-btn:hover{border-color:#3a3a3a;color:#999}
+.opt-btn:active{transform:scale(0.97)}
+.opt-btn.active-wave{border-color:#7c6fd4;background:#1a1830;color:#a99ef0}
+.opt-btn.active-design{border-color:#b87a6e;background:#1f1510;color:#d4987c}
+.opt-btn.active-fmt{border-color:#7c6fd4;background:#1a1830;color:#a99ef0}
+.opt-btn .name{font-weight:500;font-size:11px;display:block}
+.opt-btn .desc{font-size:9px;margin-top:2px;display:block;opacity:0.5}
+.btn-analyze{width:100%;background:#e8e8e8;color:#0e0e0e;border:none;border-radius:6px;padding:14px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+.btn-analyze:hover:not(:disabled){background:#fff}
+.btn-analyze:active:not(:disabled){transform:scale(0.98)}
+.btn-analyze:disabled{opacity:0.35;cursor:not-allowed}
+.btn-secondary{width:100%;background:transparent;border:0.5px solid #2a2a2a;border-radius:6px;padding:11px;font-size:12px;cursor:pointer;transition:all 0.15s;font-family:var(--sans);-webkit-tap-highlight-color:transparent}
+.btn-secondary:active{transform:scale(0.98)}
+.btn-dl{color:#a99ef0;border-color:#2d2850;background:#1a1830;display:none}
+.btn-dl:hover{background:#211e40}
+.btn-reset{color:#444}
+.btn-reset:hover{border-color:#3a3a3a;color:#666}
+
+/* Card preview */
+.card-preview{background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:400px}
+.card-preview canvas{max-width:100%;max-height:580px;display:block;border-radius:4px}
+.placeholder{text-align:center;padding:48px 24px;color:#2a2a2a}
+.placeholder p{font-size:12px;margin-top:12px;line-height:1.7}
+.spinner{width:24px;height:24px;border:2px solid #2a2a2a;border-top-color:#777;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MOBILE ── */
+@media(max-width:680px){
+  header{padding:14px 16px}
+  .key-wrap input{width:150px;font-size:11px}
+  main{padding:20px 16px 60px}
+
+  /* Stack: card first, panel below on mobile */
+  .workspace{grid-template-columns:1fr;grid-template-rows:auto auto}
+  .card-preview{order:-1;min-height:280px;border-radius:8px}
+  .card-preview canvas{max-height:75vw}
+  .panel{gap:14px}
+
+  /* Horizontal scroll for design buttons on mobile */
+  .btn-grid-3{grid-template-columns:repeat(3,1fr)}
+  .design-scroll{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:5px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+  .design-scroll::-webkit-scrollbar{display:none}
+
+  .opt-btn{padding:10px 4px;font-size:10px}
+  .opt-btn .name{font-size:10px}
+  .btn-analyze{padding:15px;font-size:14px}
+  .btn-secondary{padding:12px}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>감성찾아삽만리</h1><p>Skyline Music Matcher</p></div>
+  <div class="key-wrap">
+    <input type="password" id="apiKey" placeholder="••••••••••••••••••••" autocomplete="off"/>
+    <span class="key-label">KEY</span>
+  </div>
+</header>
+<main>
+  <div id="uploadSection">
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*"/>
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" style="margin:0 auto">
+        <path d="M12 16V4m0 0L8 8m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke-linecap="round"/>
+      </svg>
+      <p>이미지를 끌어다 놓거나 클릭해서 업로드</p>
+      <span>JPG · PNG · 스카이라인, 능선, 건물, 지평선</span>
+    </div>
+  </div>
+
+  <div class="workspace" id="workspaceSection" style="display:none">
+    <div class="panel">
+      <div class="panel-section">
+        <label>파형 스타일</label>
+        <div class="btn-grid-3">
+          <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)">
+            <span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span>
+          </button>
+          <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)">
+            <span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span>
+          </button>
+          <button class="opt-btn" data-wave="dots" onclick="pickWave(this)">
+            <span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span>
+          </button>
+        </div>
+      </div>
+      <div class="panel-section">
+        <label>카드 디자인</label>
+        <div class="design-scroll">
+          <button class="opt-btn active-design" data-design="sapmanri" onclick="pickDesign(this)"><span class="name">감성찾아삽만리</span><span class="desc">다크 · 감성</span></button>
+          <button class="opt-btn" data-design="magazine" onclick="pickDesign(this)"><span class="name">Magazine B</span><span class="desc">에디토리얼</span></button>
+          <button class="opt-btn" data-design="theedit" onclick="pickDesign(this)"><span class="name">디에디트</span><span class="desc">큐레이션</span></button>
+          <button class="opt-btn" data-design="stayfolio" onclick="pickDesign(this)"><span class="name">스테이폴리오</span><span class="desc">파인스테이</span></button>
+          <button class="opt-btn" data-design="nike" onclick="pickDesign(this)"><span class="name">Nike</span><span class="desc">강렬 · 대문자</span></button>
+          <button class="opt-btn" data-design="ohouse" onclick="pickDesign(this)"><span class="name">오늘의집</span><span class="desc">라이프스타일</span></button>
+        </div>
+      </div>
+      <div class="panel-section">
+        <label>카드 포맷</label>
+        <div class="btn-grid-2">
+          <button class="opt-btn active-fmt" data-fmt="square" onclick="pickFmt(this)"><span class="name">1 : 1</span><span class="desc">인스타그램</span></button>
+          <button class="opt-btn" data-fmt="vertical" onclick="pickFmt(this)"><span class="name">9 : 16</span><span class="desc">쇼츠 · 릴스</span></button>
+        </div>
+      </div>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+      <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
+      <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
+    </div>
+    <div class="card-preview" id="cardPreview">
+      <div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>
+    </div>
+  </div>
+</main>
+
+<script>
+let imgSrc=null,b64=null,mtype='image/jpeg';
+let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
+let cachedResult=null; // ← 캐시: 재분석 없이 리렌더
+
+// File handling
+document.getElementById('fileInput').addEventListener('change',e=>loadFile(e.target.files[0]));
+const zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover')});
+zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('dragover');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
+
+function loadFile(f){
+  if(!f)return; mtype=f.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgSrc=ev.target.result; b64=ev.target.result.split(',')[1];
+    cachedResult=null;
+    document.getElementById('uploadSection').style.display='none';
+    document.getElementById('workspaceSection').style.display='grid';
+    document.getElementById('downloadBtn').style.display='none';
+    setPlaceholder();
+  };r.readAsDataURL(f);
+}
+
+function setPlaceholder(){document.getElementById('cardPreview').innerHTML='<div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>'}
+
+// Option pickers — rerender without re-analyzing if cached
+function pickWave(btn){
+  document.querySelectorAll('[data-wave]').forEach(b=>b.classList.remove('active-wave'));
+  btn.classList.add('active-wave'); waveStyle=btn.dataset.wave;
+  if(cachedResult) renderCard(cachedResult);
+}
+function pickDesign(btn){
+  document.querySelectorAll('[data-design]').forEach(b=>b.classList.remove('active-design'));
+  btn.classList.add('active-design'); cardDesign=btn.dataset.design;
+  if(cachedResult) renderCard(cachedResult);
+}
+function pickFmt(btn){
+  document.querySelectorAll('[data-fmt]').forEach(b=>b.classList.remove('active-fmt'));
+  btn.classList.add('active-fmt'); cardFmt=btn.dataset.fmt;
+  if(cachedResult) renderCard(cachedResult);
+}
+
+function resetAll(){
+  imgSrc=null;b64=null;cachedResult=null;
+  document.getElementById('uploadSection').style.display='block';
+  document.getElementById('workspaceSection').style.display='none';
+  document.getElementById('fileInput').value='';
+}
+
+// ── ANALYZE ───────────────────────────────────────────────
+async function analyze(){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('API 키를 입력해주세요.');return}
+  if(!b64)return;
+  const btn=document.getElementById('analyzeBtn');
+  btn.disabled=true; btn.textContent='분석 중...';
+  document.getElementById('downloadBtn').style.display='none';
+  document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
+
+  const prompt=`You are a visual analyst and music curator for 감성찾아삽만리 (SAPMANRI), a Korean slow-life YouTube channel.
+
+Analyze this image carefully:
+
+STEP 1 — MULTI-LAYER CONTOUR:
+Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon). Note the height of each layer at multiple horizontal positions across the image.
+
+STEP 2 — COMPOSITE WAVEFORM (40 points):
+Produce a composite height array of exactly 40 integers (0–100), left to right. Rules:
+- Take the HIGHEST prominent contour at each position
+- Reflect REAL geometry: buildings/peaks = high (60–100), flat fields/sky = low (5–30)
+- Must have HIGH VARIANCE — span the full 0–100 range with clear peaks and valleys
+- Neighbouring points can change rapidly (±20–40) to capture jagged rooflines or tree canopies
+
+STEP 3 — SONG MATCH:
+Based only on the composite waveform's shape, rhythm, and emotional arc, match ONE globally famous song (something most people worldwide instantly recognise).
+
+STEP 4 — POETIC CAPTION:
+3 short lines in the quiet, lyrical voice of a slow-life vlogger. Evocative, not descriptive. Line 2 must naturally weave in the song title.
+
+Respond ONLY as valid JSON — no markdown, no extra text:
+{
+  "line_description": "복합 컨투어 한 문장 (한국어)",
+  "line_traits": ["특성1","특성2","특성3"],
+  "song_title": "곡 제목",
+  "artist": "아티스트명",
+  "match_reason_ko": "파형이 이 곡과 닮은 이유 2문장 (한국어)",
+  "caption_line1": "첫 번째 줄",
+  "caption_line2": "두 번째 줄 — 곡 제목 포함",
+  "caption_line3": "— 세 번째 줄",
+  "line_points": [40개 정수, 0-100]
+}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:prompt}]}]})
+    });
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    cachedResult=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
+    renderCard(cachedResult);
+    document.getElementById('downloadBtn').style.display='block';
+  }catch(err){
+    document.getElementById('cardPreview').innerHTML=`<div class="placeholder"><p style="color:#c06060">오류: ${err.message}</p></div>`;
+  }
+  btn.disabled=false; btn.textContent='다시 분석하기';
+}
+
+// ── RENDER CARD ───────────────────────────────────────────
+function renderCard(d){
+  const isV=cardFmt==='vertical', CW=1080, CH=isV?1920:1080;
+  const canvas=document.createElement('canvas');
+  canvas.width=CW; canvas.height=CH;
+  const ctx=canvas.getContext('2d');
+  const img=new Image();
+  img.onload=()=>{
+    const sc=Math.max(CW/img.naturalWidth,CH/img.naturalHeight);
+    ctx.drawImage(img,(CW-img.naturalWidth*sc)/2,(CH-img.naturalHeight*sc)/2,img.naturalWidth*sc,img.naturalHeight*sc);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse})[cardDesign](ctx,d,CW,CH,isV);
+    canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
+    const prev=document.getElementById('cardPreview');
+    prev.innerHTML=''; prev.appendChild(canvas);
+    window._cardCanvas=canvas;
+  };
+  img.src=imgSrc;
+}
+
+// ── WAVEFORM ENGINE ───────────────────────────────────────
+function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
+  const n = pts.length;
+
+  if(waveStyle === 'mirror'){
+    // ── Sharp angular building silhouette + water reflection ──
+    // Convert smooth pts into stepped building outlines
+    const segW = CW / n;
+
+    const buildPath = (mirror, scaleH) => {
+      ctx.beginPath();
+      ctx.moveTo(0, baseY);
+      for(let i=0; i<n; i++){
+        const x0 = i * segW;
+        const x1 = (i+1) * segW;
+        const h = (pts[i]/100) * maxH * scaleH;
+        const y = mirror ? baseY + h : baseY - h;
+        // vertical rise at start of segment
+        if(i===0) ctx.lineTo(x0, y);
+        else {
+          // sharp vertical step from previous height
+          const ph = (pts[i-1]/100) * maxH * scaleH;
+          const py = mirror ? baseY + ph : baseY - ph;
+          ctx.lineTo(x0, py);
+          ctx.lineTo(x0, y);
+        }
+        // horizontal top of building
+        ctx.lineTo(x1, y);
+      }
+      ctx.lineTo(CW, baseY);
+      ctx.closePath();
+    };
+
+    // Glow layer
+    ctx.save();
+    ctx.filter = `blur(${CW*0.008}px)`;
+    ctx.globalAlpha = 0.35;
+    buildPath(false, 1);
+    ctx.fillStyle = glowColor; ctx.fill();
+    ctx.restore();
+
+    // Main silhouette fill
+    buildPath(false, 1);
+    const gUp = ctx.createLinearGradient(0, baseY-maxH, 0, baseY);
+    gUp.addColorStop(0, color); gUp.addColorStop(0.6, color); gUp.addColorStop(1, glowColor);
+    ctx.fillStyle = gUp; ctx.fill();
+
+    // Top edge highlight
+    ctx.save();
+    buildPath(false, 1);
+    ctx.clip();
+    ctx.beginPath();
+    for(let i=0; i<n; i++){
+      const x0=i*segW, x1=(i+1)*segW;
+      const y=baseY-(pts[i]/100)*maxH;
+      ctx.moveTo(x0,y); ctx.lineTo(x1,y);
+    }
+    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=CW/550; ctx.stroke();
+    ctx.restore();
+
+    // Reflection — mirrored, fading
+    buildPath(true, 0.55);
+    const gDown = ctx.createLinearGradient(0, baseY, 0, baseY+maxH*0.55);
+    gDown.addColorStop(0, glowColor); gDown.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gDown; ctx.fill();
+
+    // Center divider line
+    ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
+    ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=CW/800; ctx.stroke();
+
+  } else if(waveStyle === 'multiline'){
+    // ── Image 3 style: multiple thin overlapping lines ───
+    const layers = 8;
+    ctx.lineJoin='round'; ctx.lineCap='round';
+
+    for(let l=0; l<layers; l++){
+      const t = l/(layers-1); // 0=outermost, 1=innermost
+      const scale = 0.3 + t*0.7; // inner layers are taller
+      const alpha = 0.08 + t*0.55;
+      const jitter = (layers-l)*CW*0.0018;
+
+      // top line
+      ctx.beginPath();
+      pts.forEach((p,i)=>{
+        const x=(i/(n-1))*CW;
+        const j=(Math.random()-0.5)*jitter;
+        const y=baseY-(p/100)*maxH*scale+j;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle=color.replace('1)',`${alpha})`).replace(/rgba\((.+),[\d.]+\)/,`rgba($1,${alpha})`);
+      ctx.lineWidth=Math.max(CW/(600+l*80), 0.6);
+      ctx.stroke();
+
+      // mirror bottom line
+      ctx.beginPath();
+      pts.forEach((p,i)=>{
+        const x=(i/(n-1))*CW;
+        const j=(Math.random()-0.5)*jitter;
+        const y=baseY+(p/100)*maxH*scale*0.6+j;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle=glowColor.replace(/[\d.]+\)$/,`${alpha*0.6})`);
+      ctx.lineWidth=Math.max(CW/(700+l*80), 0.5);
+      ctx.stroke();
+    }
+
+    // Bright center line
+    ctx.beginPath();
+    pts.forEach((p,i)=>{
+      const x=(i/(n-1))*CW, y=baseY-(p/100)*maxH;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=CW/700; ctx.stroke();
+
+    ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
+    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+
+  } else if(waveStyle === 'dots'){
+    // ── Image 2 style: dotted gradient bars ──────────────
+    const barW = Math.max((CW/n)*0.38, 3);
+    const dotH = Math.max(barW*0.9, 3);
+    const dotGap = dotH*1.35;
+
+    pts.forEach((p,i)=>{
+      const x=(i/(n-1))*CW;
+      const h=(p/100)*maxH;
+      const numDots = Math.ceil(h/dotGap);
+
+      for(let d=0; d<numDots; d++){
+        const progress = d/Math.max(numDots-1,1); // 0=center, 1=tip
+        // Gradient color: warm pink→orange like image 2
+        const alpha = 0.9 - progress*0.5;
+        // Interpolate between two hues based on horizontal position
+        const hueShift = (i/n); // 0=left, 1=right
+        // color from glowColor/color with alpha
+        const col = color.replace(/[\d.]+\)$/, `${alpha})`);
+
+        const dotSize = barW*(0.5+progress*0.5);
+        // top
+        ctx.beginPath();
+        ctx.arc(x, baseY - d*dotGap - dotH, dotSize/2, 0, Math.PI*2);
+        ctx.fillStyle=col; ctx.fill();
+        // bottom mirror
+        if(d < numDots*0.7){
+          const mirrorAlpha = alpha*0.45;
+          ctx.beginPath();
+          ctx.arc(x, baseY + d*dotGap + dotH, dotSize*0.45/2, 0, Math.PI*2);
+          ctx.fillStyle=glowColor.replace(/[\d.]+\)$/, `${mirrorAlpha})`);
+          ctx.fill();
+        }
+      }
+    });
+  }
+}
+
+// ── TEXT HELPERS ──────────────────────────────────────────
+function setF(ctx,sz,wt,fam){ctx.font=`${wt} ${sz}px ${fam}`}
+function fillWrap(ctx,text,x,y,maxW,lh,color){
+  ctx.fillStyle=color;
+  const words=text.split(' '); let line='',cy=y;
+  words.forEach((w,i)=>{
+    const t=line+(line?' ':'')+w;
+    if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,cy);line=w;cy+=lh;}else line=t;
+    if(i===words.length-1)ctx.fillText(line,x,cy);
+  });return cy;
+}
+function brand(ctx,CW,CH,pad,color){
+  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle=color; ctx.textAlign='right';
+  ctx.fillText('© SAPMANRI',CW-pad*0.7,CH-CW*0.022); ctx.textAlign='left';
+}
+
+// ── DESIGN RENDERERS ─────────────────────────────────────
+
+function renderSapmanri(ctx,d,CW,CH,isV){
+  let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
+  g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
+  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.14:CH*0.16;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(190,170,255,0.82)','rgba(140,100,255,0.35)');
+  const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
+  setF(ctx,CW*0.052,'700','"Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,base,CW-pad*2,CW*0.064,'rgba(255,255,255,0.97)')+CW*0.014;
+  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fillText(d.artist,pad,afterT);
+  const sepY=afterT+CW*0.05;
+  ctx.beginPath(); ctx.moveTo(pad,sepY); ctx.lineTo(pad+CW*0.065,sepY); ctx.strokeStyle='rgba(255,255,255,0.16)'; ctx.lineWidth=1; ctx.stroke();
+  const cs=CW*0.024, cy=sepY+cs*2;
+  setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.fillText(d.caption_line1||'',pad,cy);
+  setF(ctx,cs,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.fillText(d.caption_line2||'',pad,cy+cs*1.7);
+  setF(ctx,cs*0.86,'300','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.34)'; ctx.fillText(d.caption_line3||'',pad,cy+cs*3.3);
+  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.18)');
+}
+
+function renderMagazine(ctx,d,CW,CH,isV){
+  const splitY=CH*0.58;
+  let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
+  ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
+  const wY=splitY*0.68, wH=splitY*0.19;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(184,122,110,0.88)','rgba(184,122,110,0.28)');
+  const pad=CW*0.07, ty=splitY+CW*0.048;
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
+  ctx.fillStyle='#b87a6e'; ctx.fillRect(pad,ty+CW*0.02,CW*0.0018,CW*0.046);
+  setF(ctx,CW*0.042,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  fillWrap(ctx,d.song_title,pad+CW*0.011,ty+CW*0.088,CW-pad*2,CW*0.052,'#1a1a1a');
+  setF(ctx,CW*0.022,'300','"Noto Serif KR",Georgia,serif'); ctx.fillStyle='#888580'; ctx.fillText(d.artist,pad+CW*0.011,ty+CW*0.156);
+  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif'); ctx.fillStyle='#888580';
+  ctx.fillText(d.caption_line2||'',pad+CW*0.011,ty+CW*0.206);
+  ctx.fillText(d.caption_line3||'',pad+CW*0.011,ty+CW*0.244);
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#b5b2ad'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.8,CH-CW*0.02); ctx.textAlign='left';
+}
+
+function renderTheEdit(ctx,d,CW,CH,isV){
+  let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+  const wY=isV?CH*0.5:CH*0.47, wH=CH*0.14;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)');
+  const bx=CW*0.07, by=isV?CH*0.65:CH*0.64, bw=CW*0.86, bh=isV?CH*0.25:CH*0.29;
+  ctx.fillStyle='rgba(255,255,255,0.97)'; ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,CW*0.012); else ctx.rect(bx,by,bw,bh); ctx.fill();
+  const px=bx+CW*0.05, py=by+CW*0.038;
+  ctx.fillStyle='#ff3c00'; ctx.fillRect(px,py,CW*0.036,CW*0.005);
+  setF(ctx,CW*0.017,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ff3c00'; ctx.fillText('SAPMANRI × SKYLINE',px,py+CW*0.034);
+  setF(ctx,CW*0.044,'700','"Helvetica Neue",Arial,sans-serif');
+  fillWrap(ctx,d.song_title.toUpperCase(),px,py+CW*0.086,bw-CW*0.1,CW*0.054,'#111111');
+  setF(ctx,CW*0.022,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#555'; ctx.fillText(d.artist,px,py+CW*0.155);
+  setF(ctx,CW*0.02,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#999'; ctx.fillText(d.caption_line2||'',px,py+CW*0.196);
+  setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#bbb'; ctx.textAlign='right'; ctx.fillText('© SAPMANRI',CW-CW*0.07,CH-CW*0.024); ctx.textAlign='left';
+}
+
+function renderStayfolio(ctx,d,CW,CH,isV){
+  const splitY=CH*0.6;
+  let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
+  ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
+  const wY=splitY*0.66, wH=splitY*0.2;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,115,85,0.92)','rgba(140,115,85,0.28)');
+  const pad=CW*0.075, ty=splitY+CW*0.04;
+  ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(CW-pad,ty); ctx.strokeStyle='#d4cfc8'; ctx.lineWidth=1; ctx.stroke();
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#8c7355'; ctx.fillText('STAYFOLIO × SAPMANRI',pad,ty+CW*0.027);
+  setF(ctx,CW*0.038,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  fillWrap(ctx,d.song_title,pad,ty+CW*0.074,CW-pad*2,CW*0.048,'#1c1917');
+  setF(ctx,CW*0.02,'300','"Noto Serif KR",Georgia,serif'); ctx.fillStyle='#7a7570'; ctx.fillText(d.artist,pad,ty+CW*0.138);
+  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif'); ctx.fillStyle='#7a7570';
+  ctx.fillText(d.caption_line2||'',pad,ty+CW*0.178); ctx.fillText(d.caption_line3||'',pad,ty+CW*0.214);
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#b5b2ad'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.9,CH-CW*0.019); ctx.textAlign='left';
+}
+
+function renderNike(ctx,d,CW,CH,isV){
+  ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
+  const wY=isV?CH*0.48:CH*0.46, wH=CH*0.15;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)');
+  const pad=CW*0.08, base=isV?CH*0.68:CH*0.67;
+  setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
+  setF(ctx,CW*0.062,'700','"Helvetica Neue",Arial,sans-serif');
+  fillWrap(ctx,d.song_title.toUpperCase(),pad,base,CW-pad*2,CW*0.076,'#ffffff');
+  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.fillText(d.artist,pad,base+CW*0.088);
+  ctx.fillStyle='#fff'; ctx.fillRect(pad,base+CW*0.112,CW*0.088,CW*0.004);
+  setF(ctx,CW*0.024,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.62)';
+  ctx.fillText(d.caption_line2||'',pad,base+CW*0.152); ctx.fillText(d.caption_line3||'',pad,base+CW*0.186);
+  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.2)');
+}
+
+function renderOhouse(ctx,d,CW,CH,isV){
+  const cardY=CH*0.6, radius=CW*0.04;
+  let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
+  const wY=cardY*0.65, wH=cardY*0.22;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(0,200,150,0.92)','rgba(0,200,150,0.28)');
+  ctx.fillStyle='#FAFAF8'; ctx.beginPath();
+  ctx.moveTo(0,cardY+radius); ctx.arcTo(0,cardY,radius,cardY,radius); ctx.lineTo(CW-radius,cardY); ctx.arcTo(CW,cardY,CW,cardY+radius,radius); ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath(); ctx.fill();
+  const pad=CW*0.07, ty=cardY+CW*0.048;
+  ctx.fillStyle='#00C896';
+  const tw=CW*0.23,th=CW*0.044;
+  ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(pad,ty,tw,th,th/2); else ctx.rect(pad,ty,tw,th); ctx.fill();
+  setF(ctx,CW*0.019,'600','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText('SKYLINE MUSIC',pad+tw/2,ty+th*0.68); ctx.textAlign='left';
+  setF(ctx,CW*0.044,'600','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  fillWrap(ctx,d.song_title,pad,ty+CW*0.092,CW-pad*2,CW*0.056,'#1a1a1a');
+  setF(ctx,CW*0.024,'400','"Noto Sans KR",Arial,sans-serif'); ctx.fillStyle='#888'; ctx.fillText(d.artist,pad,ty+CW*0.162);
+  setF(ctx,CW*0.022,'400','"Noto Sans KR",Arial,sans-serif'); ctx.fillStyle='#aaa'; ctx.fillText(d.caption_line2||'',pad,ty+CW*0.204);
+  ctx.fillStyle='#00C896'; ctx.fillRect(0,CH-CW*0.009,CW,CW*0.009);
+  setF(ctx,CW*0.014,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ccc'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.8,CH-CW*0.024); ctx.textAlign='left';
+}
+
+function downloadCard(){
+  if(!window._cardCanvas)return;
+  const a=document.createElement('a'); a.download=`sapmanri_${Date.now()}.jpg`;
+  a.href=window._cardCanvas.toDataURL('image/jpeg',0.95); a.click();
+}
+</script>
+</body>
+</html>
