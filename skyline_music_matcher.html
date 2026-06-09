@@ -374,7 +374,8 @@ function pickDesign(btn){
 }
 let cropOffsetX=0.5;
 let captionLang='ko';
-let usedSongs=[];
+// usedSongs: persist across sessions in localStorage (last 10)
+let usedSongs = JSON.parse(localStorage.getItem('smm_usedSongs')||'[]');
 let panelPos=0.5;
 let textScale=1.0; // 0.2=높이, 0.8=낮게 (splitY 비율) // 같은 이미지에서 나온 곡 히스토리
 
@@ -403,7 +404,7 @@ function pickFmt(btn){
 }
 
 function resetAll(){
-  imgSrc=null;b64=null;cachedResult=null;usedSongs=[];
+  imgSrc=null;b64=null;cachedResult=null; // usedSongs preserved across images
   document.getElementById('uploadSection').style.display='block';
   document.getElementById('workspaceSection').classList.remove('visible');
   document.getElementById('fileInput').value='';
@@ -436,7 +437,7 @@ async function analyze(){
 Analyze this image carefully:
 
 STEP 1 — MULTI-LAYER CONTOUR:
-Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon). Note the height of each layer at multiple horizontal positions across the image.
+Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon). Note the height of each layer at multiple horizontal positions.
 
 STEP 2 — COMPOSITE WAVEFORM (80 points):
 Produce a composite height array of exactly 80 integers (0–100), left to right. Rules:
@@ -445,23 +446,45 @@ Produce a composite height array of exactly 80 integers (0–100), left to right
 - Must have HIGH VARIANCE — span the full 0–100 range with clear peaks and valleys
 - Neighbouring points can change rapidly (±20–40) to capture jagged rooflines or tree canopies
 
-STEP 3 — SONG MATCH:
-Based only on the composite waveform's shape, rhythm, and emotional arc, match ONE globally famous song (something most people worldwide instantly recognise).
-${usedSongs.length > 0 ? `IMPORTANT: Do NOT suggest any of these songs that were already used for this image: ${usedSongs.join(', ')}. Pick a completely different song.` : ''}
+STEP 3 — WAVEFORM CHARACTERISTICS:
+Analyze the composite waveform and assign these values:
+- tempo_feel: "slow" | "medium" | "driving"  (how fast the line moves horizontally — many changes = driving, few = slow)
+- dynamic_range: integer 0–100  (difference between highest and lowest points — flat horizon = low, mountain peaks = high)
+- density: "sparse" | "moderate" | "dense"  (number of distinct peaks)
+- contour_shape: "ascending" | "descending" | "arch" | "valley" | "plateau" | "jagged"  (overall shape)
+- mood: "melancholic" | "peaceful" | "hopeful" | "tense" | "joyful" | "nostalgic"
 
-STEP 4 — POETIC CAPTION:
+STEP 4 — GENRE POOL:
+Based ONLY on the waveform characteristics above, select 3–5 genres from this list that genuinely fit the waveform's mood and energy. Do NOT force variety — only include genres that honestly match.
+Available genres: post-classical | jazz | pop-soul | indie-alternative | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost
+
+STEP 5 — SONG MATCH:
+From the genre pool selected in Step 4, choose the genre NOT in this recent history: ${usedSongs.length > 0 ? `recent songs used: ${usedSongs.join(', ')}` : 'no history yet'}.
+If all pool genres appear in history, pick the least recently used.
+Then match ONE globally famous, instantly recognisable song from that chosen genre — something most people worldwide know.
+
+STEP 6 — POETIC CAPTION:
 3 short lines in the quiet, lyrical voice of a slow-life vlogger. Evocative, not descriptive. Line 2 must naturally weave in the song title.
-Use the specific image details (subject, season, mood) to make the caption feel grounded and particular — not generic.
-Write the caption in ${captionLang === 'ko' ? 'Korean (한국어)' : 'English'}.
+Use specific image details (subject, season, mood) to make the caption feel grounded.
+Write in ${captionLang === 'ko' ? 'Korean (한국어)' : 'English'}.
 
 Respond ONLY as valid JSON — no markdown, no extra text:
 {
-  "image_description": "사진에 담긴 피사체/장소/계절/분위기를 구체적으로 묘사 — 꽃이면 품종·색·상태, 풍경이면 지형·식생·날씨, 건물이면 양식·재질·시간대까지 (한국어, 2-3문장)",
+  "image_description": "사진에 담긴 피사체/장소/계절/분위기를 구체적으로 묘사 (한국어, 2-3문장)",
   "line_description": "복합 컨투어 한 문장 (한국어)",
   "line_traits": ["특성1","특성2","특성3"],
+  "waveform": {
+    "tempo_feel": "slow|medium|driving",
+    "dynamic_range": 0,
+    "density": "sparse|moderate|dense",
+    "contour_shape": "ascending|descending|arch|valley|plateau|jagged",
+    "mood": "melancholic|peaceful|hopeful|tense|joyful|nostalgic"
+  },
+  "genre_pool": ["genre1","genre2"],
+  "chosen_genre": "the genre selected for this match",
   "song_title": "곡 제목",
   "artist": "아티스트명",
-  "match_reason_ko": "파형이 이 곡과 닮은 이유 2문장 (한국어)",
+  "match_reason_ko": "파형 특성이 이 곡과 닮은 이유 2문장 (한국어)",
   "caption_line1": "첫 번째 줄",
   "caption_line2": "두 번째 줄 — 곡 제목 포함",
   "caption_line3": "— 세 번째 줄",
@@ -477,7 +500,11 @@ Respond ONLY as valid JSON — no markdown, no extra text:
     const data=await res.json();
     if(data.error)throw new Error(data.error.message);
     cachedResult=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
-    usedSongs.push(`${cachedResult.song_title} by ${cachedResult.artist}`);
+    // Record song + genre, keep last 10
+    const songEntry = `${cachedResult.song_title} by ${cachedResult.artist} [${cachedResult.chosen_genre||''}]`;
+    usedSongs.push(songEntry);
+    if(usedSongs.length > 10) usedSongs = usedSongs.slice(-10);
+    localStorage.setItem('smm_usedSongs', JSON.stringify(usedSongs));
     renderCard(cachedResult);
     document.getElementById('downloadBtn').style.display='block';
     document.getElementById('panelSliderWrap').style.display='block';
