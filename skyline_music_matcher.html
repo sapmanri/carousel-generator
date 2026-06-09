@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.9';
+const VERSION = 'v1.1.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -838,12 +838,13 @@ All prose in ${lang}. No labels. No markdown.`
 
     // 6. Hashtags — 3 fixed + 2 from AI (SEO flexible)
     const fixedTags = ['#SkylineScore','#sapmanri','#slowliving'];
-    // Extract hashtags AI included in raw response
+    // Extract 2 best SEO tags from AI response
     const aiTags = (raw.match(/#[\w가-힣]+/g)||[])
       .filter(t=>!fixedTags.map(f=>f.toLowerCase()).includes(t.toLowerCase()))
       .filter(t=>t!=='#감성찾아삽만리')
       .slice(0,2);
-    const hashtags = '#감성찾아삽만리 ' + [...fixedTags, ...aiTags].join(' ');
+    // Total: 3 fixed + 2 AI = exactly 5
+    const hashtags = [...fixedTags, ...aiTags].join(' ');
 
     // 7. Assemble final caption
     const caption = finalBody + '\n\n' + hashtags + '\n\nSkyline Music Matcher™ by @sapmanri';
