@@ -153,7 +153,13 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
 <script>
 let imgSrc=null,b64=null,mtype='image/jpeg';
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
-let cachedResult=null; // ← 캐시: 재분석 없이 리렌더
+let cachedResult=null;
+
+// API key persistence
+const keyInput=document.getElementById('apiKey');
+const savedKey=localStorage.getItem('smm_apikey');
+if(savedKey)keyInput.value=savedKey;
+keyInput.addEventListener('input',()=>localStorage.setItem('smm_apikey',keyInput.value));
 
 // File handling
 document.getElementById('fileInput').addEventListener('change',e=>loadFile(e.target.files[0]));
