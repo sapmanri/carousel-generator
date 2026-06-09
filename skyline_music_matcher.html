@@ -759,13 +759,46 @@ function brand(ctx,CW,CH,pad,color){
   ctx.fillText('© SAPMANRI',CW-pad*0.7,CH-CW*0.022); ctx.textAlign='left';
 }
 
+
+// ── ADAPTIVE WAVE COLOR ──────────────────────────────────
+function getWaveColors(ctx, CW, zoneY, zoneH){
+  // Sample a strip of pixels in the waveform zone
+  try {
+    const sampleY = Math.max(0, Math.floor(zoneY - zoneH * 0.5));
+    const sampleH = Math.min(Math.floor(zoneH * 1.2), ctx.canvas.height - sampleY);
+    if(sampleH <= 0) return {main:'rgba(255,255,255,0.82)', glow:'rgba(255,255,255,0.28)'};
+    const data = ctx.getImageData(0, sampleY, CW, sampleH).data;
+    let total = 0, count = 0;
+    // Sample every 8th pixel for speed
+    for(let i = 0; i < data.length; i += 32){
+      const r=data[i], g=data[i+1], b=data[i+2];
+      total += 0.299*r + 0.587*g + 0.114*b; // perceived brightness
+      count++;
+    }
+    const brightness = count > 0 ? total / count : 128;
+
+    if(brightness > 160){
+      // bright zone — dark wave
+      return {main:'rgba(30,20,10,0.72)', glow:'rgba(30,20,10,0.25)'};
+    } else if(brightness > 90){
+      // mid zone — white wave with good opacity
+      return {main:'rgba(255,255,255,0.90)', glow:'rgba(255,255,255,0.30)'};
+    } else {
+      // dark zone — bright white wave
+      return {main:'rgba(255,255,255,0.95)', glow:'rgba(200,180,255,0.35)'};
+    }
+  } catch(e){
+    return {main:'rgba(255,255,255,0.82)', glow:'rgba(255,255,255,0.28)'};
+  }
+}
+
 // ── DESIGN RENDERERS ─────────────────────────────────────
 
 function renderSapmanri(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
   g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
   const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(190,170,255,0.82)','rgba(140,100,255,0.35)',d._ampRatio||1);
+  const _sc0=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc0.main,_sc0.glow,d._ampRatio||1);
   const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
   const titleSize=CW*0.052;
   setF(ctx,titleSize,'700','"Helvetica Neue",Arial,sans-serif');
@@ -786,7 +819,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.68, wH=splitY*0.38;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(184,122,110,0.88)','rgba(184,122,110,0.28)',d._ampRatio||1);
+  const _sc1=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc1.main,_sc1.glow,d._ampRatio||1);
   const pad=CW*0.07, ty=splitY+CW*0.048;
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
   ctx.fillStyle='#b87a6e'; ctx.fillRect(pad,ty+CW*0.02,CW*0.0018,CW*0.046);
@@ -1139,7 +1172,7 @@ function renderGirok(ctx,d,CW,CH,isV){
 
   // Waveform — soft pastel blue-purple
   const wY=splitY*0.62, wH=splitY*0.44;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,120,240,0.75)','rgba(180,160,255,0.25)',d._ampRatio||1);
+  const _sc7=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc7.main,_sc7.glow,d._ampRatio||1);
 
   // White bottom panel with rounded top corners
   const panelY=splitY;
@@ -1250,7 +1283,7 @@ function renderPolaroid(ctx,d,CW,CH,isV){
     ctx.fillStyle=fade; ctx.fillRect(innerX,innerY,innerW,innerH);
     // waveform — subtle, near bottom of photo
     const wY=innerY+innerH*0.80, wH=innerH*0.22;
-    drawWave(ctx,d.line_points,CW,wY,wH,'rgba(80,60,40,0.35)','rgba(80,60,40,0.12)',d._ampRatio||1);
+    const _sc8=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc8.main,_sc8.glow,d._ampRatio||1);
     ctx.restore();
   }
 
@@ -1322,7 +1355,7 @@ function renderGrain(ctx,d,CW,CH,isV){
 
   // Waveform — white, near bottom
   const wY=isV?CH*0.62:CH*0.60, wH=isV?CH*0.22:CH*0.28;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.72)','rgba(255,220,140,0.35)',d._ampRatio||1);
+  const _sc9=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc9.main,'rgba(255,220,140,0.35)',d._ampRatio||1);
 
   // Text — bottom, all white
   const pad=CW*0.08;
@@ -1361,7 +1394,7 @@ function renderCinema(ctx,d,CW,CH,isV){
 
   // Subtle waveform inside image area — near bottom of photo
   const wY=CH-botBarH-CW*0.04, wH=isV?CH*0.18:CH*0.22;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.38)','rgba(255,255,255,0.12)',d._ampRatio||1);
+  const _sc10=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc10.main,_sc10.glow,d._ampRatio||1);
 
   // Top bar: tiny channel name left + aspect ratio right
   const topPad=CW*0.06;
