@@ -314,8 +314,8 @@ Analyze this image carefully:
 STEP 1 — MULTI-LAYER CONTOUR:
 Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon). Note the height of each layer at multiple horizontal positions across the image.
 
-STEP 2 — COMPOSITE WAVEFORM (40 points):
-Produce a composite height array of exactly 40 integers (0–100), left to right. Rules:
+STEP 2 — COMPOSITE WAVEFORM (80 points):
+Produce a composite height array of exactly 80 integers (0–100), left to right. Rules:
 - Take the HIGHEST prominent contour at each position
 - Reflect REAL geometry: buildings/peaks = high (60–100), flat fields/sky = low (5–30)
 - Must have HIGH VARIANCE — span the full 0–100 range with clear peaks and valleys
@@ -338,7 +338,7 @@ Respond ONLY as valid JSON — no markdown, no extra text:
   "caption_line1": "첫 번째 줄",
   "caption_line2": "두 번째 줄 — 곡 제목 포함",
   "caption_line3": "— 세 번째 줄",
-  "line_points": [40개 정수, 0-100]
+  "line_points": [80개 정수, 0-100]
 }`;
 
   try{
