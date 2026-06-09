@@ -476,55 +476,35 @@ async function analyze(){
   document.getElementById('ytPlayerWrap').style.display='none';
   document.getElementById('ytFrame').src='';
   document.getElementById('instaCapSection').style.display='none';
-  document.getElementById('pinCommentSection').style.display='none';
   document.getElementById('instaCapText').style.display='none';
+  document.getElementById('pinCommentSection').style.display='none';
   document.getElementById('videoRecSection').style.display='none';
   document.getElementById('videoRecList').innerHTML='';
   document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
 
-  const prompt=`You are a visual analyst and music curator for 감성찾아삽만리 (SAPMANRI), a Korean slow-life YouTube channel.
-
-Analyze this image carefully:
+  // ── STEP 1: 이미지 분석 — 파형 수치만 추출 ──
+  const promptStep1=`You are a visual analyst. Analyze this image and extract ONLY the waveform data. No music, no captions.
 
 STEP 1 — MULTI-LAYER CONTOUR:
-Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon). Note the height of each layer at multiple horizontal positions.
+Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon).
 
 STEP 2 — COMPOSITE WAVEFORM (80 points):
-Produce a composite height array of exactly 80 integers (0–100), left to right. Rules:
+Produce a composite height array of exactly 80 integers (0–100), left to right.
 - Take the HIGHEST prominent contour at each position
 - Reflect REAL geometry: buildings/peaks = high (60–100), flat fields/sky = low (5–30)
-- Must have HIGH VARIANCE — span the full 0–100 range with clear peaks and valleys
-- Neighbouring points can change rapidly (±20–40) to capture jagged rooflines or tree canopies
+- Must have HIGH VARIANCE — span the full 0–100 range
+- Neighbouring points can change rapidly (±20–40)
 
 STEP 3 — WAVEFORM CHARACTERISTICS:
-Analyze the composite waveform and assign these values:
-- tempo_feel: "slow" | "medium" | "driving"  (how fast the line moves horizontally — many changes = driving, few = slow)
-- dynamic_range: integer 0–100  (difference between highest and lowest points — flat horizon = low, mountain peaks = high)
-- density: "sparse" | "moderate" | "dense"  (number of distinct peaks)
-- contour_shape: "ascending" | "descending" | "arch" | "valley" | "plateau" | "jagged"  (overall shape)
+- tempo_feel: "slow" | "medium" | "driving"
+- dynamic_range: integer 0–100
+- density: "sparse" | "moderate" | "dense"
+- contour_shape: "ascending" | "descending" | "arch" | "valley" | "plateau" | "jagged"
 - mood: "melancholic" | "peaceful" | "hopeful" | "tense" | "joyful" | "nostalgic"
 
-STEP 4 — GENRE POOL:
-Based ONLY on the waveform characteristics above, select 3–5 genres from this list that genuinely fit the waveform's mood and energy. Do NOT force variety — only include genres that honestly match.
-Available genres: post-classical | jazz | pop-soul | indie-alternative | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost
-
-STEP 5 — SONG MATCH:
-BANNED — do NOT suggest any of these songs or artists again: ${usedSongs.length > 0 ? usedSongs.join(', ') : 'none yet'}. This is a hard rule. If you were going to suggest any of these, pick something completely different instead.
-
-Rules:
-1. From your genre pool, pick the genre that appears LEAST RECENTLY in the history above.
-2. If your genre pool contains only genres already in the recent history, you MUST expand the pool by adding 1-2 more genres that could plausibly fit the waveform mood — even if they are a less obvious choice. Variety is required.
-3. Match ONE globally famous, instantly recognisable song from the chosen genre — something most people worldwide know.
-4. NEVER pick the same song title that appears in the history.
-
-STEP 6 — POETIC CAPTION:
-3 short lines in the quiet, lyrical voice of a slow-life vlogger. Evocative, not descriptive. Line 2 must naturally weave in the song title.
-Use specific image details (subject, season, mood) to make the caption feel grounded.
-Write in ${captionLang === 'ko' ? 'Korean (한국어)' : 'English'}.
-
-Respond ONLY as valid JSON — no markdown, no extra text:
+Respond ONLY as valid JSON:
 {
-  "image_description": "사진에 담긴 피사체/장소/계절/분위기를 구체적으로 묘사 (한국어, 2-3문장)",
+  "image_description": "사진에 담긴 피사체/장소/계절/분위기 (한국어, 2-3문장)",
   "line_description": "복합 컨투어 한 문장 (한국어)",
   "line_traits": ["특성1","특성2","특성3"],
   "waveform": {
@@ -534,38 +514,86 @@ Respond ONLY as valid JSON — no markdown, no extra text:
     "contour_shape": "ascending|descending|arch|valley|plateau|jagged",
     "mood": "melancholic|peaceful|hopeful|tense|joyful|nostalgic"
   },
-  "genre_pool": ["genre1","genre2"],
-  "chosen_genre": "the genre selected for this match",
-  "song_title": "곡 제목",
-  "artist": "아티스트명",
-  "match_reason_ko": "파형 특성이 이 곡과 닮은 이유 2문장 (한국어)",
-  "caption_line1": "첫 번째 줄",
-  "caption_line2": "두 번째 줄 — 곡 제목 포함",
-  "caption_line3": "— 세 번째 줄",
   "line_points": [80개 정수, 0-100]
 }`;
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
+    const res1=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:prompt}]}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}]}]})
     });
-    const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    cachedResult=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
-    // Record song + genre, keep last 10
-    const songEntry = `${cachedResult.song_title} by ${cachedResult.artist} [${cachedResult.chosen_genre||''}]`;
+    const data1=await res1.json();
+    if(data1.error)throw new Error(data1.error.message);
+    const step1=JSON.parse(data1.content[0].text.replace(/```json|```/g,'').trim());
+
+    // ── STEP 2: 곡 선택 — 이미지 없이 파형 수치 기반 ──
+    document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">음악을 찾는 중...</p></div>';
+
+    const bannedList = usedSongs.length > 0 ? usedSongs.join(', ') : 'none';
+    const promptStep2=`You are a music curator matching waveform data to globally famous songs.
+
+Waveform characteristics:
+- tempo_feel: ${step1.waveform.tempo_feel}
+- dynamic_range: ${step1.waveform.dynamic_range}/100
+- density: ${step1.waveform.density}
+- contour_shape: ${step1.waveform.contour_shape}
+- mood: ${step1.waveform.mood}
+- scene: ${step1.image_description}
+
+BANNED (do NOT suggest these under any circumstances): ${bannedList}
+
+STEP 1 — GENRE POOL:
+Select 3–5 genres from this list that genuinely fit the waveform. Be open to unexpected but fitting combinations.
+Available: post-classical | jazz | pop-soul | indie-alternative | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost
+
+STEP 2 — GENRE SELECTION:
+From the pool, pick the genre LEAST represented in the banned list.
+If all pool genres are banned, expand the pool with 2 more genres before selecting.
+
+STEP 3 — SONG:
+Match ONE globally famous, instantly recognisable song from the chosen genre.
+It must NOT appear in the banned list. If your first choice is banned, pick another.
+
+STEP 4 — CAPTION (${captionLang === 'ko' ? 'Korean' : 'English'}):
+3 short lines in a quiet slow-life vlogger voice. Line 2 weaves in the song title naturally.
+
+Respond ONLY as valid JSON:
+{
+  "genre_pool": ["genre1","genre2"],
+  "chosen_genre": "selected genre",
+  "song_title": "곡 제목",
+  "artist": "아티스트명",
+  "match_reason_ko": "파형이 이 곡과 닮은 이유 2문장 (한국어)",
+  "caption_line1": "첫 번째 줄",
+  "caption_line2": "두 번째 줄 — 곡 제목 포함",
+  "caption_line3": "— 세 번째 줄"
+}`;
+
+    const res2=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:promptStep2}]})
+    });
+    const data2=await res2.json();
+    if(data2.error)throw new Error(data2.error.message);
+    const step2=JSON.parse(data2.content[0].text.replace(/```json|```/g,'').trim());
+
+    // 두 결과 합치기
+    cachedResult={...step1, ...step2};
+
+    const songEntry=`${cachedResult.song_title} by ${cachedResult.artist} [${cachedResult.chosen_genre||''}]`;
     usedSongs.push(songEntry);
-    if(usedSongs.length > 10) usedSongs = usedSongs.slice(-10);
-    localStorage.setItem('smm_usedSongs', JSON.stringify(usedSongs));
+    if(usedSongs.length>10) usedSongs=usedSongs.slice(-10);
+    localStorage.setItem('smm_usedSongs',JSON.stringify(usedSongs));
+
     renderCard(cachedResult);
     document.getElementById('downloadBtn').style.display='block';
     document.getElementById('panelSliderWrap').style.display='block';
     document.getElementById('panelSlider').value=50;
     document.getElementById('panelPosVal').textContent='50%';
     panelPos=0.5;
-    // Show player section
     document.getElementById('playerSongTitle').textContent=cachedResult.song_title;
     document.getElementById('playerArtist').textContent=cachedResult.artist;
     document.getElementById('playerSection').style.display='block';
@@ -575,7 +603,6 @@ Respond ONLY as valid JSON — no markdown, no extra text:
     document.getElementById('instaCapText').style.display='none';
     document.getElementById('instaCapHint').style.display='none';
     document.getElementById('instaCapBtn').textContent='✦ 캡션 생성';
-    // Channel video recommendation
     document.getElementById('videoRecSection').style.display='none';
     document.getElementById('videoRecList').innerHTML='';
     if(document.getElementById('videoRecToggle').checked) findRelatedVideo();
@@ -584,459 +611,6 @@ Respond ONLY as valid JSON — no markdown, no extra text:
   }
   btn.disabled=false; btn.textContent='다시 분석하기';
 }
-
-// ── RENDER CARD ───────────────────────────────────────────
-function renderCard(d){
-  const isV=cardFmt==='vertical', CW=1080, CH=isV?1920:1080;
-
-  // Manual caption override — use if filled, else AI result
-  const manualCapLines=document.getElementById('manualCaption').value.trim().split('\n').filter(l=>l.trim());
-
-  // Waveform controls
-  const density = parseInt(document.getElementById('densitySlider').value)||80;
-  const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
-
-  // Downsample/resample line_points to desired density
-  const rawPts = d.line_points || [];
-  const resampledPts = [];
-  for(let i=0; i<density; i++){
-    const t = i/(density-1);
-    const idx = t*(rawPts.length-1);
-    const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
-    resampledPts.push(rawPts[i0]*(1-(idx-i0)) + rawPts[i1]*(idx-i0));
-  }
-
-  const rd={
-    ...d,
-    line_points: resampledPts,
-    _ampRatio: ampRatio,
-    caption_line1: manualCapLines[0] || d.caption_line1,
-    caption_line2: manualCapLines[1] || d.caption_line2,
-    caption_line3: manualCapLines[2] || d.caption_line3,
-  };
-  const canvas=document.createElement('canvas');
-  canvas.width=CW; canvas.height=CH;
-  const ctx=canvas.getContext('2d');
-  const img=new Image();
-  img.onload=()=>{
-    canvas._srcImg=img; // store ref for designs that need to re-clip
-    const sc=Math.max(CW/img.naturalWidth,CH/img.naturalHeight);
-    const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
-    // Apply cropOffsetX for horizontal positioning
-    const maxOffsetX = Math.max(0, sw - CW);
-    const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
-    const oy = (CH-sh)/2;
-    ctx.drawImage(img, ox, oy, sw, sh);
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
-    canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
-    const prev=document.getElementById('cardPreview');
-    prev.innerHTML=''; prev.appendChild(canvas);
-    window._cardCanvas=canvas;
-    // Show crop slider if vertical
-    document.getElementById('cropSliderWrap').style.display = isV ? 'block' : 'none';
-  };
-  img.src=imgSrc;
-}
-
-// ── WAVEFORM ENGINE ───────────────────────────────────────
-function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
-  const aH = maxH * (ampRatio||1);
-  const n = pts.length;
-
-  if(waveStyle === 'mirror'){
-    // ── Dotted pixel skyline — buildings made of scattered dots ──
-    const dotSize = Math.max(CW / 160, 5);
-    const dotGap = dotSize * 1.55;
-    const cols = Math.floor(CW / dotGap);
-    const colW = CW / cols;
-
-    // Map pts to columns
-    const getH = (col) => {
-      const t = col / (cols - 1);
-      const idx = t * (n - 1);
-      const i0 = Math.floor(idx), i1 = Math.min(i0 + 1, n - 1);
-      const frac = idx - i0;
-      return (pts[i0] * (1 - frac) + pts[i1] * frac) / 100 * aH;
-    };
-
-    for(let col = 0; col < cols; col++){
-      const cx = col * colW + colW * 0.5;
-      const h = getH(col);
-      const rows = Math.floor(h / dotGap);
-
-      for(let row = 0; row < rows; row++){
-        const progress = row / Math.max(rows - 1, 1); // 0=bottom, 1=top
-        const cy = baseY - row * dotGap - dotGap * 0.5;
-
-        // Density: both bottom AND top rows sparse, dense in middle
-        const topFade = 1 - progress * 0.75;
-        const bottomFade = Math.min(1, row / 3); // bottom 3 rows fade in
-        const density = topFade * bottomFade;
-        if(Math.random() > density) continue;
-
-        // Size: top dots smaller
-        const ds = dotSize * (0.5 + (1 - progress) * 0.5);
-
-        // Alpha: bottom bright, top fades out
-        const alpha = (0.85 - progress * 0.6) * (0.6 + Math.random() * 0.4);
-
-        // Color: interpolate between glowColor (top) and color (bottom)
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = progress > 0.6 ? glowColor : color;
-
-        ctx.beginPath();
-        ctx.rect(cx - ds/2, cy - ds/2, ds, ds);
-        ctx.fill();
-
-        // Mirror reflection dot — below baseY, more visible
-        if(row < rows * 0.7){
-          const mirrorProgress = row / (rows * 0.7);
-          const mirrorAlpha = alpha * 0.5 * (1 - mirrorProgress);
-          ctx.globalAlpha = mirrorAlpha;
-          ctx.fillStyle = progress > 0.4 ? glowColor : color;
-          const ds2 = ds * (0.7 - mirrorProgress * 0.3);
-          const mcy = baseY + row * dotGap + dotGap * 0.5;
-          ctx.beginPath();
-          ctx.rect(cx - ds2/2, mcy - ds2/2, ds2, ds2);
-          ctx.fill();
-        }
-      }
-    }
-    ctx.globalAlpha = 1;
-
-    // Subtle center line
-    ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
-    ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
-
-  } else if(waveStyle === 'multiline'){
-    // ── Image 3 style: multiple thin overlapping lines ───
-    const layers = 8;
-    ctx.lineJoin='round'; ctx.lineCap='round';
-
-    for(let l=0; l<layers; l++){
-      const t = l/(layers-1); // 0=outermost, 1=innermost
-      const scale = 0.3 + t*0.7; // inner layers are taller
-      const alpha = 0.08 + t*0.55;
-      const jitter = (layers-l)*CW*0.0018;
-
-      // top line
-      ctx.beginPath();
-      pts.forEach((p,i)=>{
-        const x=(i/(n-1))*CW;
-        const j=(Math.random()-0.5)*jitter;
-        const y=baseY-(p/100)*aH*scale+j;
-        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-      });
-      ctx.strokeStyle=color.replace('1)',`${alpha})`).replace(/rgba\((.+),[\d.]+\)/,`rgba($1,${alpha})`);
-      ctx.lineWidth=Math.max(CW/(600+l*80), 0.6);
-      ctx.stroke();
-
-      // mirror bottom line
-      ctx.beginPath();
-      pts.forEach((p,i)=>{
-        const x=(i/(n-1))*CW;
-        const j=(Math.random()-0.5)*jitter;
-        const y=baseY+(p/100)*aH*scale*0.6+j;
-        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-      });
-      ctx.strokeStyle=glowColor.replace(/[\d.]+\)$/,`${alpha*0.6})`);
-      ctx.lineWidth=Math.max(CW/(700+l*80), 0.5);
-      ctx.stroke();
-    }
-
-    // Bright center line
-    ctx.beginPath();
-    pts.forEach((p,i)=>{
-      const x=(i/(n-1))*CW, y=baseY-(p/100)*aH;
-      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    });
-    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=CW/700; ctx.stroke();
-
-    ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
-    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
-
-  } else if(waveStyle === 'dots'){
-    // ── Image 2 style: dotted gradient bars ──────────────
-    const barW = Math.max((CW/n)*0.38, 3);
-    const dotH = Math.max(barW*0.9, 3);
-    const dotGap = dotH*1.35;
-
-    pts.forEach((p,i)=>{
-      const x=(i/(n-1))*CW;
-      const h=(p/100)*aH;
-      const numDots = Math.ceil(h/dotGap);
-
-      for(let d=0; d<numDots; d++){
-        const progress = d/Math.max(numDots-1,1); // 0=center, 1=tip
-        // Gradient color: warm pink→orange like image 2
-        const alpha = 0.9 - progress*0.5;
-        // Interpolate between two hues based on horizontal position
-        const hueShift = (i/n); // 0=left, 1=right
-        // color from glowColor/color with alpha
-        const col = color.replace(/[\d.]+\)$/, `${alpha})`);
-
-        const dotSize = barW*(0.5+progress*0.5);
-        // top
-        ctx.beginPath();
-        ctx.arc(x, baseY - d*dotGap - dotH, dotSize/2, 0, Math.PI*2);
-        ctx.fillStyle=col; ctx.fill();
-        // bottom mirror
-        if(d < numDots*0.7){
-          const mirrorAlpha = alpha*0.45;
-          ctx.beginPath();
-          ctx.arc(x, baseY + d*dotGap + dotH, dotSize*0.45/2, 0, Math.PI*2);
-          ctx.fillStyle=glowColor.replace(/[\d.]+\)$/, `${mirrorAlpha})`);
-          ctx.fill();
-        }
-      }
-    });
-  }
-}
-
-// ── TEXT HELPERS ──────────────────────────────────────────
-function setF(ctx,sz,wt,fam){ctx.font=`${wt} ${sz*textScale}px ${fam}`}
-function fillWrap(ctx,text,x,y,maxW,lh,color){
-  ctx.fillStyle=color;
-  const words=text.split(' '); let line='',cy=y;
-  words.forEach((w,i)=>{
-    const t=line+(line?' ':'')+w;
-    if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,cy);line=w;cy+=lh;}else line=t;
-    if(i===words.length-1)ctx.fillText(line,x,cy);
-  });return cy;
-}
-function brand(ctx,CW,CH,pad,color){
-  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle=color; ctx.textAlign='right';
-  ctx.fillText('© SAPMANRI',CW-pad*0.7,CH-CW*0.022); ctx.textAlign='left';
-}
-
-
-// ── ADAPTIVE WAVE COLOR ──────────────────────────────────
-function getWaveColors(ctx, CW, zoneY, zoneH){
-  // Manual color override
-  if(waveColor && waveColor !== 'auto'){
-    const h=waveColor;
-    // parse hex to rgba with good opacity
-    const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
-    return {
-      main: `rgba(${r},${g},${b},0.88)`,
-      glow: `rgba(${r},${g},${b},0.28)`
-    };
-  }
-  // Auto brightness detection
-  // Sample a strip of pixels in the waveform zone
-  try {
-    const sampleY = Math.max(0, Math.floor(zoneY - zoneH * 0.5));
-    const sampleH = Math.min(Math.floor(zoneH * 1.2), ctx.canvas.height - sampleY);
-    if(sampleH <= 0) return {main:'rgba(255,255,255,0.82)', glow:'rgba(255,255,255,0.28)'};
-    const data = ctx.getImageData(0, sampleY, CW, sampleH).data;
-    let total = 0, count = 0;
-    // Sample every 8th pixel for speed
-    for(let i = 0; i < data.length; i += 32){
-      const r=data[i], g=data[i+1], b=data[i+2];
-      total += 0.299*r + 0.587*g + 0.114*b; // perceived brightness
-      count++;
-    }
-    const brightness = count > 0 ? total / count : 128;
-
-    if(brightness > 160){
-      // bright zone — dark wave
-      return {main:'rgba(30,20,10,0.72)', glow:'rgba(30,20,10,0.25)'};
-    } else if(brightness > 90){
-      // mid zone — white wave with good opacity
-      return {main:'rgba(255,255,255,0.90)', glow:'rgba(255,255,255,0.30)'};
-    } else {
-      // dark zone — bright white wave
-      return {main:'rgba(255,255,255,0.95)', glow:'rgba(200,180,255,0.35)'};
-    }
-  } catch(e){
-    return {main:'rgba(255,255,255,0.82)', glow:'rgba(255,255,255,0.28)'};
-  }
-}
-
-// ── DESIGN RENDERERS ─────────────────────────────────────
-
-function renderSapmanri(ctx,d,CW,CH,isV){
-  let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
-  g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
-  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.56:CH*0.64;
-  const _sc0=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc0.main,_sc0.glow,d._ampRatio||1);
-  const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
-  const titleSize=CW*0.052;
-  setF(ctx,titleSize,'700','"Helvetica Neue",Arial,sans-serif');
-  const afterT=fillWrap(ctx,d.song_title,pad,base,CW-pad*2,titleSize*1.25,'rgba(255,255,255,0.97)');
-  const artistY=afterT+titleSize*0.7;
-  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fillText(d.artist,pad,artistY);
-  const sepY=artistY+CW*0.052;
-  ctx.beginPath(); ctx.moveTo(pad,sepY); ctx.lineTo(pad+CW*0.065,sepY); ctx.strokeStyle='rgba(255,255,255,0.16)'; ctx.lineWidth=1; ctx.stroke();
-  const cs=CW*0.024, cy=sepY+cs*2;
-  setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.fillText(d.caption_line1||'',pad,cy);
-  setF(ctx,cs,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.fillText(d.caption_line2||'',pad,cy+cs*1.7);
-  setF(ctx,cs*0.86,'300','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.34)'; ctx.fillText(d.caption_line3||'',pad,cy+cs*3.3);
-  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.18)');
-}
-
-function renderMagazine(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.38 + panelPos*0.4);
-  let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
-  ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
-  const wY=splitY*0.68, wH=splitY*0.38;
-  const _sc1=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc1.main,_sc1.glow,d._ampRatio||1);
-  const pad=CW*0.07, ty=splitY+CW*0.048;
-  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
-  ctx.fillStyle='#b87a6e'; ctx.fillRect(pad,ty+CW*0.02,CW*0.0018,CW*0.046);
-  const titleSz=CW*0.042;
-  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
-  const afterT=fillWrap(ctx,d.song_title,pad+CW*0.011,ty+CW*0.088,CW-pad*2,titleSz*1.25,'#1a1a1a');
-  setF(ctx,CW*0.022,'300','"Noto Serif KR",Georgia,serif'); ctx.fillStyle='#888580'; ctx.fillText(d.artist,pad+CW*0.011,afterT+CW*0.03);
-  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif'); ctx.fillStyle='#888580';
-  ctx.fillText(d.caption_line2||'',pad+CW*0.011,afterT+CW*0.075);
-  ctx.fillText(d.caption_line3||'',pad+CW*0.011,afterT+CW*0.112);
-  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#b5b2ad'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.8,CH-CW*0.02); ctx.textAlign='left';
-}
-
-function renderTheEdit(ctx,d,CW,CH,isV){
-  let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
-  const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)',d._ampRatio||1);
-  const bx=CW*0.07, bw=CW*0.86;
-  const by=isV?CW*(0.6+panelPos*0.6):CH*(0.44+panelPos*0.3);
-  // Draw box first with estimated height, then we'll just draw content and let it flow
-  const contentH = CW*0.52; // enough for all content
-  ctx.fillStyle='rgba(255,255,255,0.97)';
-  ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(bx,by,bw,contentH,CW*0.012); else ctx.rect(bx,by,bw,contentH); ctx.fill();
-  const px=bx+CW*0.05, py=by+CW*0.038;
-  ctx.fillStyle='#ff3c00'; ctx.fillRect(px,py,CW*0.036,CW*0.005);
-  setF(ctx,CW*0.017,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ff3c00'; ctx.fillText('SAPMANRI × SKYLINE',px,py+CW*0.034);
-  const titleSz=CW*0.044;
-  setF(ctx,titleSz,'700','"Helvetica Neue",Arial,sans-serif');
-  const afterT=fillWrap(ctx,d.song_title.toUpperCase(),px,py+CW*0.086,bw-CW*0.1,titleSz*1.2,'#111111');
-  setF(ctx,CW*0.022,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#555'; ctx.fillText(d.artist,px,afterT+CW*0.032);
-  setF(ctx,CW*0.02,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#999'; ctx.fillText(d.caption_line2||'',px,afterT+CW*0.075);
-  setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#bbb'; ctx.textAlign='right'; ctx.fillText('© SAPMANRI',CW-CW*0.07,CH-CW*0.024); ctx.textAlign='left';
-}
-
-function renderStayfolio(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.4 + panelPos*0.4);
-  let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
-  ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
-  const wY=splitY*0.66, wH=splitY*0.4;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,115,85,0.92)','rgba(140,115,85,0.28)',d._ampRatio||1);
-  const pad=CW*0.075, ty=splitY+CW*0.04;
-  ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(CW-pad,ty); ctx.strokeStyle='#d4cfc8'; ctx.lineWidth=1; ctx.stroke();
-  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#8c7355'; ctx.fillText('STAYFOLIO × SAPMANRI',pad,ty+CW*0.027);
-  const titleSz=CW*0.038;
-  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
-  const afterT=fillWrap(ctx,d.song_title,pad,ty+CW*0.074,CW-pad*2,titleSz*1.25,'#1c1917');
-  setF(ctx,CW*0.02,'300','"Noto Serif KR",Georgia,serif'); ctx.fillStyle='#7a7570'; ctx.fillText(d.artist,pad,afterT+CW*0.032);
-  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif'); ctx.fillStyle='#7a7570';
-  ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.075);
-  ctx.fillText(d.caption_line3||'',pad,afterT+CW*0.112);
-  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#b5b2ad'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.9,CH-CW*0.019); ctx.textAlign='left';
-}
-
-function renderNike(ctx,d,CW,CH,isV){
-  ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
-  const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.26:CH*0.30;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)',d._ampRatio||1);
-  const pad=CW*0.08;
-  const base = isV ? CW*(0.6+panelPos*0.5) : CH*0.67;
-  setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
-  const titleSz=CW*0.062;
-  setF(ctx,titleSz,'700','"Helvetica Neue",Arial,sans-serif');
-  const afterT=fillWrap(ctx,d.song_title.toUpperCase(),pad,base,CW-pad*2,titleSz*1.2,'#ffffff');
-  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.fillText(d.artist,pad,afterT+CW*0.038);
-  ctx.fillStyle='#fff'; ctx.fillRect(pad,afterT+CW*0.062,CW*0.088,CW*0.004);
-  setF(ctx,CW*0.024,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.62)';
-  ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.102);
-  ctx.fillText(d.caption_line3||'',pad,afterT+CW*0.136);
-  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.2)');
-}
-
-function renderOhouse(ctx,d,CW,CH,isV){
-  const cardY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.4 + panelPos*0.4);
-  const radius=CW*0.04;
-  let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
-  const wY=cardY*0.65, wH=cardY*0.44;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(0,200,150,0.92)','rgba(0,200,150,0.28)',d._ampRatio||1);
-  ctx.fillStyle='#FAFAF8'; ctx.beginPath();
-  ctx.moveTo(0,cardY+radius); ctx.arcTo(0,cardY,radius,cardY,radius); ctx.lineTo(CW-radius,cardY); ctx.arcTo(CW,cardY,CW,cardY+radius,radius); ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath(); ctx.fill();
-  const pad=CW*0.07, ty=cardY+CW*0.048;
-  ctx.fillStyle='#00C896';
-  const tw=CW*0.23,th=CW*0.044;
-  ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(pad,ty,tw,th,th/2); else ctx.rect(pad,ty,tw,th); ctx.fill();
-  setF(ctx,CW*0.019,'600','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText('SKYLINE MUSIC',pad+tw/2,ty+th*0.68); ctx.textAlign='left';
-  const titleSz=CW*0.044;
-  setF(ctx,titleSz,'600','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
-  const afterT=fillWrap(ctx,d.song_title,pad,ty+CW*0.092,CW-pad*2,titleSz*1.25,'#1a1a1a');
-  setF(ctx,CW*0.024,'400','"Noto Sans KR",Arial,sans-serif'); ctx.fillStyle='#888'; ctx.fillText(d.artist,pad,afterT+CW*0.032);
-  setF(ctx,CW*0.022,'400','"Noto Sans KR",Arial,sans-serif'); ctx.fillStyle='#aaa'; ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.072);
-  ctx.fillStyle='#00C896'; ctx.fillRect(0,CH-CW*0.009,CW,CW*0.009);
-  setF(ctx,CW*0.014,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ccc'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.8,CH-CW*0.024); ctx.textAlign='left';
-}
-
-function renderApple(ctx,d,CW,CH,isV){
-  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.35 + panelPos*0.4);
-
-  // Very subtle dark vignette on photo
-  const vg = ctx.createRadialGradient(CW/2,splitY/2,CW*0.1,CW/2,splitY/2,CW*0.75);
-  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.22)');
-  ctx.fillStyle=vg; ctx.fillRect(0,0,CW,splitY);
-
-  // Waveform on photo — ice white, ultra thin
-  const wY = splitY*0.6, wH = splitY*0.44;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.75)','rgba(255,255,255,0.15)',d._ampRatio||1);
-
-  // Black bottom panel — perfectly flat
-  ctx.fillStyle='#000000'; ctx.fillRect(0,splitY,CW,CH-splitY);
-
-  // Thin 1px separator line between photo and panel
-  ctx.beginPath(); ctx.moveTo(0,splitY); ctx.lineTo(CW,splitY);
-  ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.stroke();
-
-  const pad = CW*0.08;
-
-  // Category label — tiny, gray, letter-spaced
-  const labelY = splitY + CW*0.058;
-  setF(ctx,CW*0.018,'400','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.35)';
-  ctx.fillText('SKYLINE MUSIC', pad, labelY);
-
-  // Song title — large, ultra-light weight, pure white
-  const titleSize = CW*0.068;
-  setF(ctx,titleSize,'200','"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-  const afterT = fillWrap(ctx,d.song_title,pad,labelY+titleSize*1.1,CW-pad*2,titleSize*1.15,'#ffffff');
-
-  // Artist — small, mid-gray
-  setF(ctx,CW*0.024,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.38)';
-  ctx.fillText(d.artist, pad, afterT+CW*0.034);
-
-  // Hairline divider
-  const divY = afterT+CW*0.082;
-  ctx.beginPath(); ctx.moveTo(pad,divY); ctx.lineTo(CW-pad,divY);
-  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
-
-  // Caption — centered, light gray, italic-ish
-  const capSize = CW*0.022;
-  setF(ctx,capSize,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.45)';
-  ctx.textAlign='center';
-  ctx.fillText(d.caption_line2||'', CW/2, divY+capSize*2.2);
-  setF(ctx,capSize*0.9,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.22)';
-  ctx.fillText(d.caption_line3||'', CW/2, divY+capSize*3.8);
-  ctx.textAlign='left';
-
-  // Branding — bottom right, barely visible
-  setF(ctx,CW*0.015,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.15)';
-  ctx.textAlign='right';
-  ctx.fillText('SAPMANRI', CW-pad*0.7, CH-CW*0.022);
-  ctx.textAlign='left';
-}
-
-const CHANNEL_ID = 'UCHhBukRCWSaBTcKolh2wN6Q';
 
 async function findRelatedVideo(){
   const gkey=document.getElementById('googleKey').value.trim();
