@@ -509,7 +509,7 @@ Based ONLY on the waveform characteristics above, select 3–5 genres from this 
 Available genres: post-classical | jazz | pop-soul | indie-alternative | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost
 
 STEP 5 — SONG MATCH:
-Recent history (avoid repeating these genres): ${usedSongs.length > 0 ? usedSongs.join(', ') : 'none yet'}.
+BANNED — do NOT suggest any of these songs or artists again: ${usedSongs.length > 0 ? usedSongs.join(', ') : 'none yet'}. This is a hard rule. If you were going to suggest any of these, pick something completely different instead.
 
 Rules:
 1. From your genre pool, pick the genre that appears LEAST RECENTLY in the history above.
