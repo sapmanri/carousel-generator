@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.2';
+const VERSION = 'v1.0.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -394,7 +394,7 @@ function loadFile(f){
   r.onload=ev=>{
     imgSrc=ev.target.result; b64=ev.target.result.split(',')[1];
     cachedResult=null;
-    usedSongs=[];
+    // usedSongs persists across images intentionally
     document.getElementById('uploadSection').style.display='none';
     document.getElementById('workspaceSection').classList.add('visible');
     document.getElementById('downloadBtn').style.display='none';
