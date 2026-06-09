@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.4';
+const VERSION = 'v1.0.5';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -811,18 +811,54 @@ All prose in ${lang}. No labels. No markdown.`
     const raw=data.content[0].text.trim();
     // Split caption and pin comment — separated by ===COMMENT===
     const parts=raw.split('===COMMENT===');
-    const caption=parts[0].trim();
+    let body=parts[0].trim();
     const pinComment=parts[1]?parts[1].trim():'';
+
+    // ── POST-PROCESS: enforce structure regardless of AI output ──
+    // 1. Strip any hashtags from body (we'll add our own)
+    body = body.replace(/#[\w가-힣]+/g,'').trim();
+    // 2. Strip any @mentions from body
+    body = body.replace(/@\w+/g,'').trim();
+    // 3. Strip "Skyline Music Matcher" lines if AI added them
+    body = body.split('\n').filter(l=>!l.includes('Skyline Music Matcher')).join('\n').trim();
+
+    // 4. Build declaration line
+    const subject = (d.line_description||'').includes('능선')?'이 능선은':
+                    (d.line_description||'').includes('지평선')?'이 지평선은':
+                    (d.line_description||'').includes('스카이라인')?'이 스카이라인은':
+                    (d.line_description||'').includes('실루엣')?'이 실루엣은':
+                    (d.line_description||'').includes('산')?'이 산선은':'이 선은';
+    const declaration = subject + ' ' + (d.song_title||'') + '의 악보다.';
+
+    // 5. Check if body already starts with declaration-like sentence
+    const firstLine = body.split('\n')[0];
+    const hasDeclaration = firstLine.includes(d.song_title) && (firstLine.includes('악보') || firstLine.includes('흐른') || firstLine.includes('음악'));
+    const finalBody = hasDeclaration ? body : declaration + '\n\n' + body;
+
+    // 6. Fixed hashtags — always exactly 5
+    const hashtags = '#감성찾아삽만리 #SkylineScore #sapmanri #슬로우라이프 #slowliving';
+
+    // 7. Assemble final caption
+    const caption = finalBody + '\n\n' + hashtags + '\n\nSkyline Music Matcher™ by @sapmanri';
 
     document.getElementById('instaCapText').textContent=caption;
     document.getElementById('instaCapText').style.display='block';
     document.getElementById('instaCapHint').style.display='block';
     btn.textContent='↺ 다시 생성';
 
-    if(pinComment){
-      document.getElementById('pinCommentText').textContent=pinComment;
-      document.getElementById('pinCommentSection').style.display='block';
+    // ── 고정 댓글 — AI 응답 or 코드 생성 fallback ──
+    let finalPinComment = pinComment;
+    if(!finalPinComment){
+      // Generate from template when AI doesn't provide it
+      const templates = [
+        `${d.song_title}이 흐르던 이 장면처럼, 지금 여러분 주변엔 어떤 선이 펼쳐져 있나요? 그 풍경에선 무슨 음악이 흐르고 있을 것 같아요? 🎵 #SkylineScore`,
+        `저는 이 풍경에서 ${d.song_title}을 들었어요. 지금 여러분이 보고 있는 하늘이나 능선에서는 어떤 노래가 떠오르나요? ☁️ #SkylineScore`,
+        `이 선이 ${d.song_title}의 악보였다면, 지금 여러분 창밖의 선은 어떤 노래일까요? 🎼 #SkylineScore`,
+      ];
+      finalPinComment = templates[Math.floor(Math.random()*templates.length)];
     }
+    document.getElementById('pinCommentText').textContent=finalPinComment;
+    document.getElementById('pinCommentSection').style.display='block';
   }catch(err){
     document.getElementById('instaCapText').textContent='오류: '+err.message;
     document.getElementById('instaCapText').style.display='block';
