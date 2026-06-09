@@ -287,6 +287,27 @@ input[type=range]::-moz-range-thumb{
           <div id="instaCapHint" style="display:none;padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사하세요</div>
         </div>
       </div>
+      <!-- 고정 댓글 -->
+      <div id="pinCommentSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">📌 고정 댓글</span>
+            <span style="font-size:9px;color:#333;letter-spacing:0.06em;">복사 후 게시물에 고정</span>
+          </div>
+          <div id="pinCommentText" style="padding:16px 18px;font-size:13px;color:#aaa;line-height:1.7;white-space:pre-wrap;font-family:var(--sans);"></div>
+        </div>
+      </div>
+      <!-- 고정 댓글 -->
+      <div id="pinCommentSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">📌 고정 댓글</span>
+            <span style="font-size:9px;color:#333;letter-spacing:0.06em;">캡션 생성 시 자동 생성</span>
+          </div>
+          <div id="pinCommentText" style="padding:16px 18px;font-size:13px;color:#aaa;line-height:1.9;white-space:pre-wrap;font-family:var(--sans);"></div>
+          <div style="padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사 → 게시 후 댓글에 고정</div>
+        </div>
+      </div>
       <div id="videoRecSection" style="display:none;">
         <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
           <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;">
@@ -404,6 +425,7 @@ async function analyze(){
   document.getElementById('ytPlayerWrap').style.display='none';
   document.getElementById('ytFrame').src='';
   document.getElementById('instaCapSection').style.display='none';
+  document.getElementById('pinCommentSection').style.display='none';
   document.getElementById('instaCapText').style.display='none';
   document.getElementById('videoRecSection').style.display='none';
   document.getElementById('videoRecList').innerHTML='';
@@ -1010,7 +1032,13 @@ Always include #감성찾아삽만리 and #SkylineScore. Pick the 3 best remaini
 PART 4 — CLOSING (last line, always exactly):
 Skyline Music Matcher™ by @sapmanri
 
-Write ONLY the caption. No labels, no markdown, no explanations. All prose in ${lang}.`
+Then output exactly this separator on its own line:
+===COMMENT===
+
+PART 5 — PINNED COMMENT (for the first pinned comment on the post):
+A single engaging question that invites followers to think about their own place. Core idea: "여기선 이런 음악이 흘렀어. 네가 있는 곳엔?" — but vary the phrasing naturally each time, matching the mood and scene of this specific post. Reference the matched song or the landscape briefly. SEO-friendly: include 1-2 relevant keywords naturally in the sentence. Warm, not promotional. Written in ${lang}.
+
+Write ONLY the caption and comment, separated by ===COMMENT===. No labels, no markdown, no extra explanations.`
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
@@ -1020,11 +1048,21 @@ Write ONLY the caption. No labels, no markdown, no explanations. All prose in ${
     });
     const data=await res.json();
     if(data.error)throw new Error(data.error.message);
-    const text=data.content[0].text.trim();
-    document.getElementById('instaCapText').textContent=text;
+    const raw=data.content[0].text.trim();
+    // Split caption and pin comment — separated by ===COMMENT===
+    const parts=raw.split('===COMMENT===');
+    const caption=parts[0].trim();
+    const pinComment=parts[1]?parts[1].trim():'';
+
+    document.getElementById('instaCapText').textContent=caption;
     document.getElementById('instaCapText').style.display='block';
     document.getElementById('instaCapHint').style.display='block';
     btn.textContent='↺ 다시 생성';
+
+    if(pinComment){
+      document.getElementById('pinCommentText').textContent=pinComment;
+      document.getElementById('pinCommentSection').style.display='block';
+    }
   }catch(err){
     document.getElementById('instaCapText').textContent='오류: '+err.message;
     document.getElementById('instaCapText').style.display='block';
