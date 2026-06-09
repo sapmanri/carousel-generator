@@ -269,6 +269,14 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   </div>
 </div>
 
+<div style="display:flex;align-items:center;gap:10px;padding:4px 0 8px">
+  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+    <input type="checkbox" id="infographicMode"
+      style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer">
+    <span style="font-size:10px;letter-spacing:0.08em;color:var(--mute)">인포그래픽 모드 <span style="color:rgba(255,255,255,0.2)">— 적합한 이미지에 레이블·화살표 자동 생성</span></span>
+  </label>
+</div>
+
 <button class="generate-btn" id="generateBtn" disabled>AI 분석 후 캐러셀 생성</button>
 
 <div class="progress-area" id="progressArea">
@@ -416,6 +424,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   const tag = document.getElementById('metaTag').value;
   const closing = document.getElementById('metaClosing').value;
   const manualText = document.getElementById('metaTextSlide').value.trim();
+  const infographicMode = document.getElementById('infographicMode').checked;
 
   const needsAnalysis = images.some(img => !img.analysis);
   if (needsAnalysis) {
@@ -435,7 +444,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 
   const s2 = log('슬라이드 계획 중...');
   let plan;
-  try { plan = await generatePlan(images, topic, tag, closing, style, manualText); doneStep(s2); }
+  try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode); doneStep(s2); }
   catch(e) { doneStep(s2); log('플랜 생성 실패: ' + e.message, true); document.getElementById('generateBtn').disabled=false; return; }
 
   const s3 = log('렌더링 중...');
@@ -600,7 +609,7 @@ async function analyzeImage(dataUrl, topic, style) {
 }
 
 // ── Claude API: generate plan ──
-async function generatePlan(images, topic, tag, closing, style, manualText) {
+async function generatePlan(images, topic, tag, closing, style, manualText, infographicMode=false) {
   const total = images.length + 1;
   const imageData = images.map((img,i) => ({ index:i, analysis:img.analysis||{} }));
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -631,7 +640,15 @@ async function generatePlan(images, topic, tag, closing, style, manualText) {
 - manualText가 있으면 중간에 pull_quote 타입으로 삽입 (image_index: null)
 - manualText 없어도 주제가 감성적이거나 이미지 흐름에 호흡 필요하면 AI가 pull_quote 1장 자동 삽입 판단
 - pull_quote는 image_index null, layout pull_quote, text_position pull_quote
-- caption에 해시태그 10개 포함`
+- caption에 해시태그 10개 포함
+${infographicMode ? `
+인포그래픽 모드 추가 규칙:
+- 이미지들 중 사물·공간·제품이 여러 개 있는 이미지 1~2개를 골라 type을 "infographic"으로 설정
+- infographic 슬라이드에는 labels 배열 추가: 이미지 내 주요 사물/포인트 3~5개
+- labels 형식: [{"text":"레이블명","x":0.3,"y":0.4,"direction":"right"}]
+- x,y는 0~1 사이 비율 좌표 (이미지 내 해당 사물 위치)
+- direction: "right"|"left"|"up"|"down" (화살표 방향)
+- 인포그래픽이 아닌 슬라이드는 labels 없이 그대로` : ''}`
       }]
     })
   });
@@ -659,6 +676,7 @@ function renderSlide(slide, i) {
   const tag = document.getElementById('metaTag').value;
 
   if (slide.layout === 'pull_quote' || slide.type === 'pull_quote') return renderPullQuote(slide, i, style, accent, folio);
+  if (slide.type === 'infographic') return renderInfographic(slide, i, img, folio, accent);
   if (style === 'ohouse') return renderOhouse(slide, i, img, folio, tag);
   if (style === 'theedit') return renderTheEdit(slide, i, img, folio, accent, tag);
   if (style === 'stayfolio') return renderStayfolio(slide, i, img, folio, accent, tag);
@@ -771,6 +789,38 @@ function renderStayfolio(slide, i, img, folio, accent, tag) {
   }
   const bgHtml = `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(28,25,23,0.75) 0%,transparent 52%)"></div>`;
   return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-txt-bottom"><span class="sf-label">${slide.label||''}</span><div class="sf-headline-lg">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div></div><div class="sf-folio-dark">${folio}</div></div></div>`;
+}
+
+function renderInfographic(slide, i, img, folio, accent) {
+  const labels = slide.labels || [];
+  const labelsHtml = labels.map(lb => {
+    const xPct = (lb.x * 100).toFixed(1) + '%';
+    const yPct = (lb.y * 100).toFixed(1) + '%';
+    const dir = lb.direction || 'right';
+    const lineLen = 28;
+    const lineStyle = {
+      right:  `left:100%;top:50%;width:${lineLen}px;height:1px`,
+      left:   `right:100%;top:50%;width:${lineLen}px;height:1px`,
+      up:     `left:50%;bottom:100%;width:1px;height:${lineLen}px`,
+      down:   `left:50%;top:100%;width:1px;height:${lineLen}px`,
+    }[dir] || `left:100%;top:50%;width:${lineLen}px;height:1px`;
+    const textPos = {
+      right: 'left:calc(100% + ' + lineLen + 'px);top:50%;transform:translateY(-50%)',
+      left:  'right:calc(100% + ' + lineLen + 'px);top:50%;transform:translateY(-50%);text-align:right',
+      up:    'left:50%;bottom:calc(100% + ' + lineLen + 'px);transform:translateX(-50%);text-align:center',
+      down:  'left:50%;top:calc(100% + ' + lineLen + 'px);transform:translateX(-50%);text-align:center',
+    }[dir] || 'left:calc(100% + ' + lineLen + 'px);top:50%;transform:translateY(-50%)';
+
+    return `<div style="position:absolute;left:${xPct};top:${yPct};transform:translate(-50%,-50%);z-index:4">
+      <div style="width:6px;height:6px;border-radius:50%;background:${accent};border:1.5px solid #fff;position:relative">
+        <div style="position:absolute;background:${accent};${lineStyle}"></div>
+        <div style="position:absolute;${textPos};font-family:var(--sans);font-size:7px;font-weight:500;letter-spacing:0.06em;color:#fff;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.8)">${lb.text||''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#222"></div>`;
+  return `<div class="slide-card"><div class="slide-canvas" style="background:#1a1a1a">${bgHtml}<div style="position:absolute;inset:0;background:rgba(0,0,0,0.15)"></div>${labelsHtml}<div class="s-folio" style="z-index:5">${folio}</div></div></div>`;
 }
 
 // 이미지 dataUrl을 S×S 정사각형 cover canvas dataUrl로 변환
@@ -988,6 +1038,72 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     }
     if (cur) lines.push(cur);
     return lines;
+  }
+
+  // ── 인포그래픽 슬라이드 ──
+  if (slide.type === 'infographic') {
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
+    if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
+    // 살짝 어두운 오버레이
+    ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(0,0,SIZE,SIZE);
+
+    const labels = slide.labels || [];
+    const accentRgb = accent || '#b87a6e';
+    for (const lb of labels) {
+      const cx = Math.round(lb.x * SIZE);
+      const cy = Math.round(lb.y * SIZE);
+      const dir = lb.direction || 'right';
+      const lineLen = Math.round(SIZE * 0.09);
+      const dotR = Math.round(SIZE * 0.007);
+
+      // 점
+      ctx.beginPath();
+      ctx.arc(cx, cy, dotR, 0, Math.PI*2);
+      ctx.fillStyle = accentRgb;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy, dotR+2, 0, Math.PI*2);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = Math.round(SIZE*0.002);
+      ctx.stroke();
+
+      // 선
+      let lx2 = cx, ly2 = cy;
+      if (dir === 'right') lx2 = cx + lineLen;
+      else if (dir === 'left') lx2 = cx - lineLen;
+      else if (dir === 'down') ly2 = cy + lineLen;
+      else if (dir === 'up') ly2 = cy - lineLen;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(lx2, ly2);
+      ctx.strokeStyle = accentRgb;
+      ctx.lineWidth = Math.round(SIZE*0.0015);
+      ctx.stroke();
+
+      // 레이블 텍스트
+      const fontSize = Math.round(SIZE * 0.022);
+      setFont(fontSize, '500', sansFont);
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = 'rgba(0,0,0,0.85)';
+      ctx.shadowBlur = 6;
+      const textGap = Math.round(SIZE*0.012);
+      let tx = lx2, ty = ly2;
+      if (dir === 'right') { ctx.textAlign = 'left'; tx = lx2 + textGap; ty = ly2 + fontSize/3; }
+      else if (dir === 'left') { ctx.textAlign = 'right'; tx = lx2 - textGap; ty = ly2 + fontSize/3; }
+      else if (dir === 'down') { ctx.textAlign = 'center'; ty = ly2 + textGap + fontSize; }
+      else if (dir === 'up') { ctx.textAlign = 'center'; ty = ly2 - textGap; }
+      ctx.fillText(lb.text || '', tx, ty);
+      ctx.shadowBlur = 0;
+      ctx.textAlign = 'left';
+    }
+
+    // 폴리오
+    setFont(Math.round(SIZE*0.022), '400', sansFont);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.textAlign = 'right';
+    ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), SIZE - Math.round(SIZE*0.03), SIZE - Math.round(SIZE*0.025));
+    ctx.textAlign = 'left';
+    return canvas;
   }
 
   const isDark = slide.type === 'closing';
