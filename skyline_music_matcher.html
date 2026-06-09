@@ -28,11 +28,14 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px;width:100%;box-sizing
 .upload-zone span{font-size:11px;color:#333;margin-top:6px;display:block}
 
 /* Workspace: desktop = side panel | card preview */
-.workspace{display:none;grid-template-columns:300px 1fr;gap:24px;align-items:start}
-.workspace.visible{display:grid}
-.left-col{display:flex;flex-direction:column;gap:18px}
-.right-col{display:flex;flex-direction:column;gap:16px}
-.controls-top{display:flex;flex-direction:column;gap:18px}
+.workspace{display:none}
+.workspace.visible{display:grid;grid-template-columns:300px 1fr;grid-template-rows:auto auto auto;gap:24px;align-items:start}
+/* desktop: left col = controls / analyze / after-card, right col = card-col / post-card */
+.controls-top{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:18px}
+.analyze-wrap{grid-column:1;grid-row:2}
+.after-card-group{grid-column:1;grid-row:3;display:flex;flex-direction:column;gap:18px}
+.card-col{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:16px}
+.post-card-group{grid-column:2;grid-row:3;display:flex;flex-direction:column;gap:16px}
 .panel{display:flex;flex-direction:column;gap:18px}
 .panel-section label{font-size:9px;letter-spacing:0.13em;color:#444;text-transform:uppercase;display:block;margin-bottom:9px}
 .btn-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
@@ -70,16 +73,11 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px;width:100%;box-sizing
   .key-wrap input{width:140px;font-size:11px}
   main{padding:20px 16px 60px;width:100%;box-sizing:border-box}
 
-  /* Flatten into single column */
+  /* Single column — HTML order is already mobile order */
   .workspace.visible{display:flex;flex-direction:column;gap:14px;width:100%;box-sizing:border-box}
-  .left-col,.right-col{display:contents}
-
-  /* Re-order the 5 groups */
-  .controls-top{order:1}
-  .card-col{order:2}
-  .after-card-group{order:3}
-  .post-card-group{order:4}
-  .analyze-wrap{order:5}
+  .controls-top,.analyze-wrap,.after-card-group,.card-col,.post-card-group{
+    grid-column:unset;grid-row:unset;width:100%;box-sizing:border-box
+  }
 
   /* Card preview sizing */
   .card-preview{min-height:180px;border-radius:8px}
@@ -154,163 +152,151 @@ input[type=range]::-moz-range-thumb{
 
   <div class="workspace" id="workspaceSection">
 
-    <!-- ═══ LEFT COL ═══ -->
-    <div class="left-col">
-
-      <!-- 파형·디자인·포맷 -->
-      <div class="controls-top">
-        <div class="panel-section">
-          <label>파형 스타일</label>
-          <div class="btn-grid-3">
-            <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
-            <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
-            <button class="opt-btn" data-wave="dots" onclick="pickWave(this)"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
-          </div>
+    <!-- 1 파형·디자인·포맷 (desktop: left col) -->
+    <div class="controls-top">
+      <div class="panel-section">
+        <label>파형 스타일</label>
+        <div class="btn-grid-3">
+          <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
+          <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
+          <button class="opt-btn" data-wave="dots" onclick="pickWave(this)"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
         </div>
-        <div class="panel-section">
-          <label>카드 디자인</label>
-          <div class="design-scroll">
-            <button class="opt-btn active-design" data-design="sapmanri" onclick="pickDesign(this)"><span class="name">감성찾아삽만리</span><span class="desc">다크 · 감성</span></button>
-            <button class="opt-btn" data-design="magazine" onclick="pickDesign(this)"><span class="name">Magazine B</span><span class="desc">에디토리얼</span></button>
-            <button class="opt-btn" data-design="theedit" onclick="pickDesign(this)"><span class="name">디에디트</span><span class="desc">큐레이션</span></button>
-            <button class="opt-btn" data-design="stayfolio" onclick="pickDesign(this)"><span class="name">스테이폴리오</span><span class="desc">파인스테이</span></button>
-            <button class="opt-btn" data-design="nike" onclick="pickDesign(this)"><span class="name">Nike</span><span class="desc">강렬 · 대문자</span></button>
-            <button class="opt-btn" data-design="ohouse" onclick="pickDesign(this)"><span class="name">오늘의집</span><span class="desc">라이프스타일</span></button>
-            <button class="opt-btn" data-design="apple" onclick="pickDesign(this)"><span class="name">Apple</span><span class="desc">미니멀 · 여백</span></button>
-            <button class="opt-btn" data-design="girok" onclick="pickDesign(this)"><span class="name">기록</span><span class="desc">라이프로그</span></button>
-          </div>
-        </div>
-        <div class="panel-section">
-          <label>카드 포맷</label>
-          <div class="btn-grid-2">
-            <button class="opt-btn active-fmt" data-fmt="square" onclick="pickFmt(this)"><span class="name">1 : 1</span><span class="desc">인스타그램</span></button>
-            <button class="opt-btn" data-fmt="vertical" onclick="pickFmt(this)"><span class="name">9 : 16</span><span class="desc">쇼츠 · 릴스</span></button>
-          </div>
-        </div>
-      </div><!-- /controls-top -->
-
-      <!-- 분석 버튼 -->
-      <div class="analyze-wrap">
-        <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
       </div>
+      <div class="panel-section">
+        <label>카드 디자인</label>
+        <div class="design-scroll">
+          <button class="opt-btn active-design" data-design="sapmanri" onclick="pickDesign(this)"><span class="name">감성찾아삽만리</span><span class="desc">다크 · 감성</span></button>
+          <button class="opt-btn" data-design="magazine" onclick="pickDesign(this)"><span class="name">Magazine B</span><span class="desc">에디토리얼</span></button>
+          <button class="opt-btn" data-design="theedit" onclick="pickDesign(this)"><span class="name">디에디트</span><span class="desc">큐레이션</span></button>
+          <button class="opt-btn" data-design="stayfolio" onclick="pickDesign(this)"><span class="name">스테이폴리오</span><span class="desc">파인스테이</span></button>
+          <button class="opt-btn" data-design="nike" onclick="pickDesign(this)"><span class="name">Nike</span><span class="desc">강렬 · 대문자</span></button>
+          <button class="opt-btn" data-design="ohouse" onclick="pickDesign(this)"><span class="name">오늘의집</span><span class="desc">라이프스타일</span></button>
+          <button class="opt-btn" data-design="apple" onclick="pickDesign(this)"><span class="name">Apple</span><span class="desc">미니멀 · 여백</span></button>
+          <button class="opt-btn" data-design="girok" onclick="pickDesign(this)"><span class="name">기록</span><span class="desc">라이프로그</span></button>
+        </div>
+      </div>
+      <div class="panel-section">
+        <label>카드 포맷</label>
+        <div class="btn-grid-2">
+          <button class="opt-btn active-fmt" data-fmt="square" onclick="pickFmt(this)"><span class="name">1 : 1</span><span class="desc">인스타그램</span></button>
+          <button class="opt-btn" data-fmt="vertical" onclick="pickFmt(this)"><span class="name">9 : 16</span><span class="desc">쇼츠 · 릴스</span></button>
+        </div>
+      </div>
+    </div><!-- /controls-top -->
 
-      <!-- 파형 조절·캡션·다운로드 -->
-      <div class="after-card-group" style="display:flex;flex-direction:column;gap:18px;">
-        <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
-          <label>파형 조절</label>
-          <div style="display:flex;flex-direction:column;gap:12px;margin-top:2px;">
+    <!-- 2 카드 프리뷰 + 슬라이더 (desktop: right col, row 1) -->
+    <div class="card-col">
+      <div class="card-preview" id="cardPreview">
+        <div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>
+      </div>
+      <div id="cropSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">프레임 위치</span>
+          <div style="display:flex;gap:6px;">
+            <button onclick="setCrop(0)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">◀ 좌</button>
+            <button onclick="setCrop(0.5)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">● 중앙</button>
+            <button onclick="setCrop(1)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">우 ▶</button>
+          </div>
+        </div>
+        <input type="range" id="cropSlider" min="0" max="100" value="50" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="cropOffsetX=this.value/100; if(cachedResult)renderCard(cachedResult);" />
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>왼쪽</span><span>오른쪽</span></div>
+      </div>
+      <div id="panelSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">텍스트 패널 위치</span>
+          <span style="font-size:10px;color:#666;" id="panelPosVal">50%</span>
+        </div>
+        <input type="range" id="panelSlider" min="20" max="80" value="50" style="width:100%;accent-color:#b87a6e;cursor:pointer;" oninput="panelPos=this.value/100; document.getElementById('panelPosVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>위로</span><span>아래로</span></div>
+      </div>
+    </div><!-- /card-col -->
+
+    <!-- 3 분석 버튼 (desktop: left col) -->
+    <div class="analyze-wrap">
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+    </div>
+
+    <!-- 4 파형조절·캡션·다운로드 (desktop: left col) -->
+    <div class="after-card-group">
+      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <label>파형 조절</label>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:2px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">밀도</span><span style="font-size:10px;color:#666;" id="densityVal">80</span></div>
+            <input type="range" id="densitySlider" min="10" max="80" value="80" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>잔잔</span><span>촘촘</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">진폭</span><span style="font-size:10px;color:#666;" id="ampVal">100%</span></div>
+            <input type="range" id="ampSlider" min="20" max="200" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('ampVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>낮게</span><span>높게</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">글씨 크기</span><span style="font-size:10px;color:#666;" id="textScaleVal">1.0×</span></div>
+            <input type="range" id="textScaleSlider" min="50" max="150" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <label style="margin-bottom:0;">캡션 직접 입력 <span style="font-size:9px;color:#333;font-weight:normal;text-transform:none;letter-spacing:0">— 비우면 AI 자동</span></label>
+          <div style="display:flex;gap:4px;">
+            <button class="lang-btn active-lang" data-lang="ko" onclick="pickLang(this)" style="background:#1a1830;border:0.5px solid #7c6fd4;border-radius:4px;padding:4px 10px;font-size:10px;color:#a99ef0;cursor:pointer;font-family:var(--sans);">한국어</button>
+            <button class="lang-btn" data-lang="en" onclick="pickLang(this)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">English</button>
+          </div>
+        </div>
+        <textarea id="manualCaption" placeholder="줄바꿈으로 구분, 최대 3줄&#10;예)&#10;바람이 멈춘 오후,&#10;Here Comes the Sun 이 흐른다&#10;— 그냥, 아무것도 안 해도 괜찮은 날" rows="4"
+          style="width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:5px;padding:8px 11px;font-size:12px;color:#ccc;outline:none;font-family:var(--sans);resize:none;line-height:1.8;transition:border-color 0.15s;box-sizing:border-box;"
+          onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
+          oninput="if(cachedResult)renderCard(cachedResult)"></textarea>
+      </div>
+      <div style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="videoRecToggle" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" onchange="if(cachedResult&&this.checked)findRelatedVideo();" />
+          <span style="font-size:10px;letter-spacing:0.12em;color:#555;text-transform:uppercase;">채널 영상 추천</span>
+        </label>
+      </div>
+      <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
+      <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
+    </div><!-- /after-card-group -->
+
+    <!-- 5 재생·인스타캡션·채널영상 (desktop: right col, row 2) -->
+    <div class="post-card-group">
+      <div id="playerSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;gap:12px;">
             <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">밀도</span><span style="font-size:10px;color:#666;" id="densityVal">80</span></div>
-              <input type="range" id="densitySlider" min="10" max="80" value="80" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
-              <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>잔잔</span><span>촘촘</span></div>
+              <div id="playerSongTitle" style="font-size:13px;font-weight:500;color:#e8e8e8;"></div>
+              <div id="playerArtist" style="font-size:11px;color:#555;margin-top:2px;"></div>
             </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">진폭</span><span style="font-size:10px;color:#666;" id="ampVal">100%</span></div>
-              <input type="range" id="ampSlider" min="20" max="200" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('ampVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
-              <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>낮게</span><span>높게</span></div>
-            </div>
-            <div>
-              <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">글씨 크기</span><span style="font-size:10px;color:#666;" id="textScaleVal">1.0×</span></div>
-              <input type="range" id="textScaleSlider" min="50" max="150" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
-              <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
-            </div>
+            <button onclick="loadPlayer()" style="background:#1a1830;border:0.5px solid #2d2850;border-radius:6px;padding:8px 14px;font-size:11px;color:#a99ef0;cursor:pointer;white-space:nowrap;font-family:var(--sans);">▶ 재생</button>
+          </div>
+          <div id="ytPlayerWrap" style="display:none;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+            <iframe id="ytFrame" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>
           </div>
         </div>
-
-        <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <label style="margin-bottom:0;">캡션 직접 입력 <span style="font-size:9px;color:#333;font-weight:normal;text-transform:none;letter-spacing:0">— 비우면 AI 자동</span></label>
-            <div style="display:flex;gap:4px;">
-              <button class="lang-btn active-lang" data-lang="ko" onclick="pickLang(this)" style="background:#1a1830;border:0.5px solid #7c6fd4;border-radius:4px;padding:4px 10px;font-size:10px;color:#a99ef0;cursor:pointer;font-family:var(--sans);">한국어</button>
-              <button class="lang-btn" data-lang="en" onclick="pickLang(this)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">English</button>
-            </div>
+      </div>
+      <div id="instaCapSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">Instagram Caption</span>
+            <button onclick="generateInstaCaption()" id="instaCapBtn" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:5px;padding:6px 12px;font-size:11px;color:#888;cursor:pointer;font-family:var(--sans);">✦ 캡션 생성</button>
           </div>
-          <textarea id="manualCaption" placeholder="줄바꿈으로 구분, 최대 3줄&#10;예)&#10;바람이 멈춘 오후,&#10;Here Comes the Sun 이 흐른다&#10;— 그냥, 아무것도 안 해도 괜찮은 날" rows="4"
-            style="width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:5px;padding:8px 11px;font-size:12px;color:#ccc;outline:none;font-family:var(--sans);resize:none;line-height:1.8;transition:border-color 0.15s;"
-            onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
-            oninput="if(cachedResult)renderCard(cachedResult)"></textarea>
+          <div id="instaCapText" style="display:none;padding:16px 18px;font-size:13px;color:#aaa;line-height:1.9;white-space:pre-wrap;font-family:var(--sans);"></div>
+          <div id="instaCapHint" style="display:none;padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사하세요</div>
         </div>
-
-        <div style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;">
-            <input type="checkbox" id="videoRecToggle" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" onchange="if(cachedResult&&this.checked)findRelatedVideo();" />
-            <span style="font-size:10px;letter-spacing:0.12em;color:#555;text-transform:uppercase;">채널 영상 추천</span>
-          </label>
-        </div>
-
-        <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
-        <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
-      </div><!-- /after-card-group -->
-
-    </div><!-- /left-col -->
-
-    <!-- ═══ RIGHT COL ═══ -->
-    <div class="right-col">
-
-      <!-- 카드 프리뷰 + 슬라이더 -->
-      <div class="card-col" style="display:flex;flex-direction:column;gap:16px;">
-        <div class="card-preview" id="cardPreview">
-          <div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>
-        </div>
-        <div id="cropSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">프레임 위치</span>
-            <div style="display:flex;gap:6px;">
-              <button onclick="setCrop(0)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">◀ 좌</button>
-              <button onclick="setCrop(0.5)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">● 중앙</button>
-              <button onclick="setCrop(1)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">우 ▶</button>
-            </div>
+      </div>
+      <div id="videoRecSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">감성찾아삽만리 추천 영상</span>
           </div>
-          <input type="range" id="cropSlider" min="0" max="100" value="50" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="cropOffsetX=this.value/100; if(cachedResult)renderCard(cachedResult);" />
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>왼쪽</span><span>오른쪽</span></div>
+          <div id="videoRecList" style="padding:14px 18px;display:flex;flex-direction:column;gap:10px;"></div>
         </div>
-        <div id="panelSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">텍스트 패널 위치</span>
-            <span style="font-size:10px;color:#666;" id="panelPosVal">50%</span>
-          </div>
-          <input type="range" id="panelSlider" min="20" max="80" value="50" style="width:100%;accent-color:#b87a6e;cursor:pointer;" oninput="panelPos=this.value/100; document.getElementById('panelPosVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
-          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>위로</span><span>아래로</span></div>
-        </div>
-      </div><!-- /card-col -->
+      </div>
+    </div><!-- /post-card-group -->
 
-      <!-- 재생·인스타캡션·채널영상 -->
-      <div class="post-card-group" style="display:flex;flex-direction:column;gap:16px;">
-        <div id="playerSection" style="display:none;">
-          <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
-            <div style="padding:14px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-              <div>
-                <div id="playerSongTitle" style="font-size:13px;font-weight:500;color:#e8e8e8;"></div>
-                <div id="playerArtist" style="font-size:11px;color:#555;margin-top:2px;"></div>
-              </div>
-              <button onclick="loadPlayer()" style="background:#1a1830;border:0.5px solid #2d2850;border-radius:6px;padding:8px 14px;font-size:11px;color:#a99ef0;cursor:pointer;white-space:nowrap;font-family:var(--sans);">▶ 재생</button>
-            </div>
-            <div id="ytPlayerWrap" style="display:none;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
-              <iframe id="ytFrame" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>
-            </div>
-          </div>
-        </div>
-        <div id="instaCapSection" style="display:none;">
-          <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
-            <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
-              <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">Instagram Caption</span>
-              <button onclick="generateInstaCaption()" id="instaCapBtn" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:5px;padding:6px 12px;font-size:11px;color:#888;cursor:pointer;font-family:var(--sans);">✦ 캡션 생성</button>
-            </div>
-            <div id="instaCapText" style="display:none;padding:16px 18px;font-size:13px;color:#aaa;line-height:1.9;white-space:pre-wrap;font-family:var(--sans);"></div>
-            <div id="instaCapHint" style="display:none;padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사하세요</div>
-          </div>
-        </div>
-        <div id="videoRecSection" style="display:none;">
-          <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
-            <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;">
-              <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">감성찾아삽만리 추천 영상</span>
-            </div>
-            <div id="videoRecList" style="padding:14px 18px;display:flex;flex-direction:column;gap:10px;"></div>
-          </div>
-        </div>
-      </div><!-- /post-card-group -->
-
-    </div><!-- /right-col -->
   </div><!-- /workspace -->
 </main>
 
