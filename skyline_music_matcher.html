@@ -1225,60 +1225,67 @@ function renderGirok(ctx,d,CW,CH,isV){
 
 function renderPolaroid(ctx,d,CW,CH,isV){
   // ── 폴라로이드 ──
-  const borderSide = CW*0.055;
-  const borderTop  = CW*0.055;
-  const borderBot  = isV ? CW*0.22 : CW*0.18;
-  const innerX=borderSide, innerY=borderTop;
-  const innerW=CW-borderSide*2, innerH=CH-borderTop-borderBot;
+  const bs = CW*0.055;          // border side
+  const bt = CW*0.055;          // border top
+  const bb = isV ? CW*0.28 : CW*0.24;  // border bottom — generous for branding
+  const innerX=bs, innerY=bt;
+  const innerW=CW-bs*2, innerH=CH-bt-bb;
 
-  // 1) 흰 프레임 전체 먼저
-  ctx.fillStyle='#F8F6F2';
+  // 1) 크림 화이트 배경
+  ctx.fillStyle='#F7F5F0';
   ctx.fillRect(0,0,CW,CH);
 
-  // 2) 이미지를 inner rect에 맞게 재드로우
+  // 2) 이미지 재드로우 (클립)
   const img=ctx.canvas._srcImg;
   if(img){
     ctx.save();
     ctx.beginPath(); ctx.rect(innerX,innerY,innerW,innerH); ctx.clip();
     const sc=Math.max(innerW/img.naturalWidth, innerH/img.naturalHeight);
     const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
-    const ox=innerX+(innerW-sw)/2, oy=innerY+(innerH-sh)/2;
-    ctx.drawImage(img,ox,oy,sw,sh);
-
-    // vignette inside photo
-    let g=ctx.createRadialGradient(CW/2,innerY+innerH/2,innerH*0.25,CW/2,innerY+innerH/2,innerH*0.82);
-    g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.32)');
-    ctx.fillStyle=g; ctx.fillRect(innerX,innerY,innerW,innerH);
-
-    // Waveform
-    const wY=innerY+innerH*0.78, wH=innerH*0.26;
-    drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.55)','rgba(255,255,255,0.18)',d._ampRatio||1);
+    ctx.drawImage(img, innerX+(innerW-sw)/2, innerY+(innerH-sh)/2, sw, sh);
+    // bottom fade into white
+    let fade=ctx.createLinearGradient(0,innerY+innerH*0.7,0,innerY+innerH);
+    fade.addColorStop(0,'rgba(247,245,240,0)');
+    fade.addColorStop(1,'rgba(247,245,240,0.55)');
+    ctx.fillStyle=fade; ctx.fillRect(innerX,innerY,innerW,innerH);
+    // waveform — subtle, near bottom of photo
+    const wY=innerY+innerH*0.80, wH=innerH*0.22;
+    drawWave(ctx,d.line_points,CW,wY,wH,'rgba(80,60,40,0.35)','rgba(80,60,40,0.12)',d._ampRatio||1);
     ctx.restore();
   }
 
-  // 3) 흰 테두리 위에 살짝 그림자
-  ctx.shadowColor='rgba(0,0,0,0.10)'; ctx.shadowBlur=24; ctx.shadowOffsetY=6;
-  ctx.fillStyle='rgba(0,0,0,0)'; ctx.fillRect(innerX,innerY,innerW,innerH);
-  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+  // 3) 텍스트 영역 — 하단 여백
+  const areaY = innerY + innerH;          // top of white area
+  const cx    = CW / 2;
+  const pad   = bs * 1.4;
 
-  // 4) 하단 텍스트
-  const textY = CH - borderBot + borderBot*0.26;
-  const titleSz = CW*0.048;
-  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
-  ctx.fillStyle='#2a2a2a'; ctx.textAlign='center';
-  ctx.fillText(d.song_title, CW/2, textY + titleSz);
+  // 곡 제목 — 크고 세리프, 센터
+  const titleSz = CW * (isV ? 0.052 : 0.056);
+  setF(ctx, titleSz, '300', '"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  ctx.fillStyle='#1a1a1a'; ctx.textAlign='center';
+  ctx.fillText(d.song_title, cx, areaY + bb*0.28);
 
-  setF(ctx,CW*0.022,'400','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='#aaa'; ctx.textAlign='center';
-  ctx.fillText(d.artist, CW/2, textY + titleSz*2.1);
+  // 아티스트 — 작고 레터스페이싱
+  setF(ctx, CW*0.02, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#999'; ctx.textAlign='center';
+  ctx.fillText(d.artist.toUpperCase(), cx, areaY + bb*0.46);
 
-  setF(ctx,CW*0.02,'300 italic','"Cormorant Garamond",Georgia,serif');
+  // 얇은 구분선
+  const lineY = areaY + bb*0.58;
+  ctx.beginPath();
+  ctx.moveTo(cx - CW*0.12, lineY); ctx.lineTo(cx + CW*0.12, lineY);
+  ctx.strokeStyle='rgba(0,0,0,0.10)'; ctx.lineWidth=1; ctx.stroke();
+
+  // Skyline Music Matcher™ — 브랜드명, 살짝 크게
+  setF(ctx, CW*0.019, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#888'; ctx.textAlign='center';
+  ctx.fillText('Skyline Music Matcher™', cx, areaY + bb*0.73);
+
+  // by @sapmanri — 더 작게, 뮤트
+  setF(ctx, CW*0.016, '300', '"Helvetica Neue",Arial,sans-serif');
   ctx.fillStyle='#bbb'; ctx.textAlign='center';
-  ctx.fillText(d.caption_line2||'', CW/2, textY + titleSz*3.3);
+  ctx.fillText('by @sapmanri', cx, areaY + bb*0.88);
 
-  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.textAlign='right';
-  ctx.fillText('SAPMANRI', CW-borderSide*1.1, CH-CW*0.022);
   ctx.textAlign='left';
 }
 
