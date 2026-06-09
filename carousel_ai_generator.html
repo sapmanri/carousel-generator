@@ -435,54 +435,80 @@ async function fetchAndFillFromYoutube() {
   status.style.color = 'var(--mute)';
 
   try {
-    // Claude API — web_search 툴 멀티턴 방식
-    const headers = {
-      'Content-Type': 'application/json',
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'x-api-key': getApiKey(),
-      'anthropic-version': '2023-06-01'
-    };
-    const tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-    const systemPrompt = '유튜브 영상을 검색해서 제목과 내용을 파악한 뒤, 최종 답변은 반드시 JSON만 반환해. 마크다운이나 다른 텍스트 없이 순수 JSON만.';
-    const userMsg = `유튜브 영상: https://www.youtube.com/watch?v=${videoId}
+    // 1단계: oEmbed로 영상 제목 취득
+    status.textContent = '영상 정보 가져오는 중...';
+    let videoTitle = '';
+    try {
+      const oembedRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      if (oembedRes.ok) { const d = await oembedRes.json(); videoTitle = d.title || ''; }
+    } catch(e) {}
+    if (!videoTitle) throw new Error('영상 정보를 가져오지 못했어요. URL을 확인해주세요.');
+    status.textContent = `"${videoTitle}" — 자막 가져오는 중...`;
 
-이 영상을 web_search로 찾아서 제목과 내용을 파악하고 아래 형식으로만 답해:
-{"topic":"영상 주제 15자 이내 한국어","text_slide":"인스타 텍스트 슬라이드용 감성적 한 문장 20-30자 한국어","mood":"분위기 한 단어"}`;
-
-    let messages = [{ role: 'user', content: userMsg }];
-    let raw = '';
-
-    // 최대 4턴 — tool_use 끝날 때까지
-    for (let turn = 0; turn < 4; turn++) {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: systemPrompt, tools, messages })
-      });
-      const data = await res.json();
-      if (data.error) throw new Error(data.error.message);
-
-      // assistant 메시지 추가
-      messages.push({ role: 'assistant', content: data.content });
-
-      // tool_use 블록 처리
-      const toolUseBlocks = data.content.filter(b => b.type === 'tool_use');
-      if (toolUseBlocks.length > 0) {
-        // tool_result를 user로 보내기
-        const toolResults = toolUseBlocks.map(b => ({
-          type: 'tool_result',
-          tool_use_id: b.id,
-          content: '검색 완료. 영상 제목과 내용을 바탕으로 JSON만 반환해줘.'
-        }));
-        messages.push({ role: 'user', content: toolResults });
-        continue;
+    // 2단계: YouTube 자막 가져오기 (CORS 프록시 경유)
+    let transcript = '';
+    try {
+      const proxyBase = 'https://corsproxy.io/?url=';
+      const ytPageRes = await fetch(proxyBase + encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`));
+      if (ytPageRes.ok) {
+        const html = await ytPageRes.text();
+        // 한국어 자막 우선, 없으면 첫 번째 자막 URL 추출
+        let captionUrl = '';
+        const koMatch = html.match(/"baseUrl":"(https:[^"]+timedtext[^"]+)"[^}]{0,200}"languageCode":"ko"/);
+        if (koMatch) {
+          captionUrl = koMatch[1].replace(/\u0026/g, '&');
+        } else {
+          const anyMatch = html.match(/"captionTracks":\[{"baseUrl":"([^"]+)"/);
+          if (anyMatch) captionUrl = anyMatch[1].replace(/\u0026/g, '&');
+        }
+        if (captionUrl) {
+          const captionRes = await fetch(proxyBase + encodeURIComponent(captionUrl + '&fmt=json3'));
+          if (captionRes.ok) {
+            const captionData = await captionRes.json();
+            transcript = (captionData.events || [])
+              .slice(0, 180)
+              .map(e => (e.segs || []).map(s => s.utf8 || '').join(''))
+              .filter(t => t.trim() && t !== '\n')
+              .join(' ')
+              .slice(0, 1200);
+          }
+        }
       }
+    } catch(e) { console.warn('자막 오류:', e.message); }
 
-      // text 블록 찾기
-      const textBlock = data.content.filter(b => b.type === 'text').pop();
-      if (textBlock?.text) { raw = textBlock.text; break; }
-    }
+    status.textContent = transcript
+      ? `자막 ${transcript.length}자 — 분석 중...`
+      : `자막 없음 — 제목으로 분석 중...`;
 
+    // 3단계: 제목 + 자막으로 Haiku 분석
+    const contextText = transcript
+      ? `영상 제목: "${videoTitle}"
+자막 내용(일부): ${transcript}`
+      : `영상 제목: "${videoTitle}"`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 250,
+        messages: [{
+          role: 'user',
+          content: `${contextText}
+
+이 영상 내용을 바탕으로 아래 JSON만 반환해. 다른 텍스트 없이.
+{"topic":"핵심 주제 15자 이내 한국어","text_slide":"인스타 감성 한 문장 20-30자 한국어","mood":"분위기 한 단어"}`
+        }]
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content?.find(b => b.type === 'text')?.text || '';
     const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
     if (s === -1) throw new Error('응답에서 JSON을 찾지 못했어요');
     const result = JSON.parse(raw.slice(s, e + 1));
