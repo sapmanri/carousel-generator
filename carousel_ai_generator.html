@@ -633,6 +633,8 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 규칙:
 - 첫 슬라이드: type cover
 - 마지막 슬라이드: type closing, image_index ${images.length-1}
+- image_index는 반드시 0~${images.length-1} 범위 안에서만 사용 (범위 초과 금지)
+- 이미지가 없는 슬라이드(pull_quote 제외)에도 반드시 유효한 image_index 할당
 - layout: overlay_bottom/overlay_top/overlay_left/overlay_right/split_bottom/dark_full 중 하나
 - text_position: bottom_left/top_left/center/left_half/split_bottom/dark_center 중 하나
 - 슬라이드마다 다른 layout 사용, 이미지 분석 반영
@@ -669,7 +671,8 @@ function renderCarousel(slides) {
 
 function renderSlide(slide, i) {
   const style = document.getElementById('metaStyle').value;
-  const imgObj = slide.image_index!=null ? images[slide.image_index] : null;
+  // image_index 범위 초과 방어
+  const imgObj = (slide.image_index != null && slide.image_index < images.length) ? images[slide.image_index] : null;
   const img = imgObj ? imgObj.dataUrl : null;
   const folio = slide.folio || `0${i+1} — 0${generatedSlides.length}`;
   const accent = slide.accent_color || '#b87a6e';
@@ -785,7 +788,8 @@ function renderStayfolio(slide, i, img, folio, accent, tag) {
   // feature
   const isText = !img;
   if (isText) {
-    return `<div class="slide-card"><div class="sf-canvas"><div class="sf-txt-center"><span class="sf-masthead">SAPMANRI</span><div class="sf-rule"></div><div class="sf-headline">${slide.headline||''}</div><div class="sf-body">${slide.body||''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
+    const hl = slide.headline || slide.body || '·';
+    return `<div class="slide-card"><div class="sf-canvas"><div class="sf-txt-center"><span class="sf-masthead">SAPMANRI</span><div class="sf-rule"></div><div class="sf-headline">${hl}</div><div class="sf-body">${slide.headline ? (slide.body||'') : ''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
   }
   const bgHtml = `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(28,25,23,0.75) 0%,transparent 52%)"></div>`;
   return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-txt-bottom"><span class="sf-label">${slide.label||''}</span><div class="sf-headline-lg">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div></div><div class="sf-folio-dark">${folio}</div></div></div>`;
