@@ -612,6 +612,57 @@ Respond ONLY as valid JSON:
   btn.disabled=false; btn.textContent='다시 분석하기';
 }
 
+function renderCard(d){
+  const isV=cardFmt==='vertical', CW=1080, CH=isV?1920:1080;
+
+  // Manual caption override — use if filled, else AI result
+  const manualCapLines=document.getElementById('manualCaption').value.trim().split('\n').filter(l=>l.trim());
+
+  // Waveform controls
+  const density = parseInt(document.getElementById('densitySlider').value)||80;
+  const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
+
+  // Downsample/resample line_points to desired density
+  const rawPts = d.line_points || [];
+  const resampledPts = [];
+  for(let i=0; i<density; i++){
+    const t = i/(density-1);
+    const idx = t*(rawPts.length-1);
+    const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
+    resampledPts.push(rawPts[i0]*(1-(idx-i0)) + rawPts[i1]*(idx-i0));
+  }
+
+  const rd={
+    ...d,
+    line_points: resampledPts,
+    _ampRatio: ampRatio,
+    caption_line1: manualCapLines[0] || d.caption_line1,
+    caption_line2: manualCapLines[1] || d.caption_line2,
+    caption_line3: manualCapLines[2] || d.caption_line3,
+  };
+  const canvas=document.createElement('canvas');
+  canvas.width=CW; canvas.height=CH;
+  const ctx=canvas.getContext('2d');
+  const img=new Image();
+  img.onload=()=>{
+    const sc=Math.max(CW/img.naturalWidth,CH/img.naturalHeight);
+    const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
+    // Apply cropOffsetX for horizontal positioning
+    const maxOffsetX = Math.max(0, sw - CW);
+    const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
+    const oy = (CH-sh)/2;
+    ctx.drawImage(img, ox, oy, sw, sh);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok})[cardDesign](ctx,rd,CW,CH,isV);
+    canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
+    const prev=document.getElementById('cardPreview');
+    prev.innerHTML=''; prev.appendChild(canvas);
+    window._cardCanvas=canvas;
+    // Show crop slider if vertical
+    document.getElementById('cropSliderWrap').style.display = isV ? 'block' : 'none';
+  };
+  img.src=imgSrc;
+}
+
 async function findRelatedVideo(){
   const gkey=document.getElementById('googleKey').value.trim();
   const akey=document.getElementById('apiKey').value.trim();
