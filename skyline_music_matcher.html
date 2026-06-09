@@ -29,13 +29,13 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px;width:100%;box-sizing
 
 /* Workspace: desktop = side panel | card preview */
 .workspace{display:none}
-.workspace.visible{display:grid;grid-template-columns:300px 1fr;grid-template-rows:auto auto auto;gap:24px;align-items:start}
+.workspace.visible{display:grid;grid-template-columns:260px 1fr 260px;gap:24px;align-items:start}
 /* desktop: left col = controls / analyze / after-card, right col = card-col / post-card */
-.controls-top{grid-column:1;grid-row:1;display:flex;flex-direction:column;gap:18px}
-.analyze-wrap{grid-column:1;grid-row:2}
-.after-card-group{grid-column:1;grid-row:3;display:flex;flex-direction:column;gap:18px}
-.card-col{grid-column:2;grid-row:1/3;display:flex;flex-direction:column;gap:16px}
-.post-card-group{grid-column:2;grid-row:3;display:flex;flex-direction:column;gap:16px}
+.controls-top{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:18px}
+.analyze-wrap{grid-column:1;grid-row:3}
+.card-col{grid-column:2;grid-row:1/4;display:flex;flex-direction:column;gap:16px}
+.after-card-group{grid-column:3;grid-row:1;display:flex;flex-direction:column;gap:18px}
+.post-card-group{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:16px}
 .panel{display:flex;flex-direction:column;gap:18px}
 .panel-section label{font-size:9px;letter-spacing:0.13em;color:#444;text-transform:uppercase;display:block;margin-bottom:9px}
 .btn-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
