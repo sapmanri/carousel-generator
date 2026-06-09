@@ -453,14 +453,16 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
         ctx.rect(cx - ds/2, cy - ds/2, ds, ds);
         ctx.fill();
 
-        // Mirror reflection dot — below baseY, very faint
-        if(row < rows * 0.4){
-          const mirrorAlpha = alpha * 0.25 * (1 - row / (rows * 0.4));
+        // Mirror reflection dot — below baseY, more visible
+        if(row < rows * 0.7){
+          const mirrorProgress = row / (rows * 0.7);
+          const mirrorAlpha = alpha * 0.5 * (1 - mirrorProgress);
           ctx.globalAlpha = mirrorAlpha;
-          ctx.fillStyle = glowColor;
+          ctx.fillStyle = progress > 0.4 ? glowColor : color;
+          const ds2 = ds * (0.7 - mirrorProgress * 0.3);
           const mcy = baseY + row * dotGap + dotGap * 0.5;
           ctx.beginPath();
-          ctx.rect(cx - ds*0.4/2, mcy - ds*0.4/2, ds*0.4, ds*0.4);
+          ctx.rect(cx - ds2/2, mcy - ds2/2, ds2, ds2);
           ctx.fill();
         }
       }
