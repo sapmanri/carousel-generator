@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.3';
+const VERSION = 'v1.0.4';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -774,53 +774,37 @@ async function generateInstaCaption(){
   const lang = isEn ? 'English' : '한국어';
   const d=cachedResult;
 
-  const prompt=`You are writing an Instagram post caption for 감성찾아삽만리 (SAPMANRI), a Korean slow-life channel that matches landscape contour lines to music.
+  const prompt=`You are writing an Instagram caption for 감성찾아삽만리 (SAPMANRI).
 
-## WRITING STYLE — follow exactly
-The voice is quiet, lyrical, restrained, warm, modest, and contemplative.
-Begin from an ordinary scene in the photo — light, shadow, water, trees, a road, a season, a silhouette — and slowly draw out one small reflection on life, time, memory, or continuing.
-Use short Korean sentences with generous line breaks. Let the rhythm breathe.
-Do not explain emotions directly. Let emotions appear through objects, gestures, silence, and small scenes.
-Preferred feeling: a quiet photo-essay titled "잠깐 멈춰." Something the reader opens when their heart feels a little hungry.
-Ending style: soft, lingering, understated. Not a lesson. Not comfort. Just a quiet aftertaste.
-Do not imitate famous poets. Do not make it dramatic. Do not make it too smooth. Keep it close to an ordinary Korean person's quiet inner monologue.
-Avoid: motivational tone, self-help language, over-explained metaphors, forced comfort, obvious conclusions, AI-polished structure, trendy poetic clichés, sounding like marketing copy.
+WRITING STYLE: Quiet, lyrical, restrained Korean prose. Like a photo-essay titled "잠깐 멈춰." Emotions appear through objects and scenes, not explanations. Short sentences, generous line breaks. No motivational tone, no AI-polished language, no forced comfort.
 
-## Context
+Context:
 - Scene: ${d.image_description||d.line_description}
-- Skyline/contour: ${d.line_description}
-- Matched song: "${d.song_title}" by ${d.artist}
+- Song: "${d.song_title}" by ${d.artist}
 - Why this line matches: ${d.match_reason_ko||''}
-- Mood: ${(d.line_traits||[]).join(', ')}
 
-## Structure
+OUTPUT EXACTLY IN THIS ORDER — NO EXCEPTIONS:
 
-LINE 1 — DECLARATION (one sentence, always first):
-A quiet declarative statement that the contour/silhouette of this specific scene IS the score of "${d.song_title}". Like: "이 능선은 [곡 제목]의 악보다." Adapt naturally to the scene. Spare. No explanation. Written in the same quiet voice.
+1. ONE declarative sentence: "[이 장면/능선/스카이라인]은 ${d.song_title}의 악보다." Adapt the subject naturally to the scene.
 
-PART 2 — BODY (4-6 lines, in the style above):
-Follow naturally from the declaration. Use line breaks generously. Stay close to the specific visual details of this scene. Do not rush to a conclusion. Let the connection between landscape and song emerge quietly.
+2. 4-6 short lyrical lines. Stay close to the visual. Let the landscape-song connection emerge quietly. No conclusion.
 
-PART 3 — HASHTAGS (exactly 5 tags, space-separated):
-Always #감성찾아삽만리 and #SkylineScore. Pick the 3 best SEO tags from: #sapmanri #슬로우라이프 #slowliving scene/nature/music tags.
+3. EXACTLY 5 hashtags on one line: #감성찾아삽만리 #SkylineScore + 3 best SEO tags for this post from #sapmanri #슬로우라이프 #slowliving + scene/music tags. MAXIMUM 5. NO MORE.
 
-PART 4 — CLOSING (last line, always exactly):
-Skyline Music Matcher™ by @sapmanri
+4. This exact line: Skyline Music Matcher™ by @sapmanri
 
-Then output exactly this separator on its own line:
-===COMMENT===
+5. This separator on its own line: ===COMMENT===
 
-PART 5 — PINNED COMMENT:
-A single warm question inviting followers to think about their own place. Core idea: "여기선 이런 음악이 흘렀어. 네가 있는 곳엔?" Vary phrasing naturally each time. Reference the song or landscape briefly. Warm, not promotional. Written in ${lang}.
+6. ONE warm question for pinned comment. Idea: "여기선 이런 음악이 흘렀어. 네가 있는 곳엔?" Vary naturally. Reference the song or scene briefly.
 
-Write ONLY the caption and comment separated by ===COMMENT===. No labels, no markdown, no explanations. All prose in ${lang}.`
+All prose in ${lang}. No labels. No markdown.`
 
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})
     });
     const data=await res.json();
     if(data.error)throw new Error(data.error.message);
