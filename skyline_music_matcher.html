@@ -291,70 +291,104 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
   const n = pts.length;
 
   if(waveStyle === 'mirror'){
-    // ── Sharp angular building silhouette + water reflection ──
-    // Convert smooth pts into stepped building outlines
-    const segW = CW / n;
+    // ── Layered depth skyline — 3 layers with parallax ──
+    // Each layer: slightly different scale + x-offset + opacity
+    // Creates foggy city depth like the reference image
 
-    const buildPath = (mirror, scaleH) => {
+    const drawLayer = (xShift, scaleH, scaleW, alpha, blur) => {
+      ctx.save();
+      if(blur > 0) ctx.filter = `blur(${blur}px)`;
+      ctx.globalAlpha = alpha;
+
+      const segW = (CW * scaleW) / n;
+      const startX = xShift;
+
+      // Build stepped silhouette path
       ctx.beginPath();
-      ctx.moveTo(0, baseY);
+      ctx.moveTo(startX, baseY);
+
       for(let i=0; i<n; i++){
-        const x0 = i * segW;
-        const x1 = (i+1) * segW;
+        const x0 = startX + i * segW;
+        const x1 = startX + (i+1) * segW;
         const h = (pts[i]/100) * maxH * scaleH;
-        const y = mirror ? baseY + h : baseY - h;
-        // vertical rise at start of segment
-        if(i===0) ctx.lineTo(x0, y);
-        else {
-          // sharp vertical step from previous height
+        const y = baseY - h;
+
+        if(i === 0){
+          ctx.lineTo(x0, y);
+        } else {
           const ph = (pts[i-1]/100) * maxH * scaleH;
-          const py = mirror ? baseY + ph : baseY - ph;
-          ctx.lineTo(x0, py);
+          ctx.lineTo(x0, baseY - ph);
           ctx.lineTo(x0, y);
         }
-        // horizontal top of building
-        ctx.lineTo(x1, y);
+        ctx.lineTo(Math.min(x1, startX + CW * scaleW), y);
       }
-      ctx.lineTo(CW, baseY);
+      ctx.lineTo(startX + CW * scaleW, baseY);
       ctx.closePath();
+
+      // Fill with gradient — darker at base, lighter at top edge for depth
+      const g = ctx.createLinearGradient(0, baseY - maxH * scaleH, 0, baseY);
+      g.addColorStop(0, color);
+      g.addColorStop(0.5, color);
+      g.addColorStop(1, glowColor);
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // Top edge highlight — brighter for front layer
+      ctx.beginPath();
+      for(let i=0; i<n; i++){
+        const x0 = startX + i * segW;
+        const x1 = startX + (i+1) * segW;
+        const h = (pts[i]/100) * maxH * scaleH;
+        const y = baseY - h;
+        if(i === 0) ctx.moveTo(x0, y);
+        else {
+          const ph = (pts[i-1]/100) * maxH * scaleH;
+          ctx.lineTo(x0, baseY - ph);
+          ctx.lineTo(x0, y);
+        }
+        ctx.lineTo(Math.min(x1, startX + CW * scaleW), y);
+      }
+      ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.6})`;
+      ctx.lineWidth = Math.max(CW/700, 0.8);
+      ctx.lineJoin = 'miter';
+      ctx.stroke();
+
+      ctx.restore();
     };
 
-    // Glow layer
-    ctx.save();
-    ctx.filter = `blur(${CW*0.008}px)`;
-    ctx.globalAlpha = 0.35;
-    buildPath(false, 1);
-    ctx.fillStyle = glowColor; ctx.fill();
-    ctx.restore();
+    // Layer 1 — back, wide, pale, blurred (most fog)
+    drawLayer(-CW*0.08, 0.55, 1.16, 0.25, CW*0.006);
+    // Layer 2 — mid, slight shift, medium opacity
+    drawLayer(CW*0.04, 0.78, 0.96, 0.45, CW*0.003);
+    // Layer 3 — front, full opacity, sharpest
+    drawLayer(0, 1.0, 1.0, 0.88, 0);
 
-    // Main silhouette fill
-    buildPath(false, 1);
-    const gUp = ctx.createLinearGradient(0, baseY-maxH, 0, baseY);
-    gUp.addColorStop(0, color); gUp.addColorStop(0.6, color); gUp.addColorStop(1, glowColor);
-    ctx.fillStyle = gUp; ctx.fill();
-
-    // Top edge highlight
+    // Reflection — front layer only, flipped, heavily faded
     ctx.save();
-    buildPath(false, 1);
-    ctx.clip();
+    ctx.globalAlpha = 0.22;
+    const segWR = CW / n;
     ctx.beginPath();
+    ctx.moveTo(0, baseY);
     for(let i=0; i<n; i++){
-      const x0=i*segW, x1=(i+1)*segW;
-      const y=baseY-(pts[i]/100)*maxH;
-      ctx.moveTo(x0,y); ctx.lineTo(x1,y);
+      const x0 = i * segWR, x1 = (i+1) * segWR;
+      const h = (pts[i]/100) * maxH * 0.5;
+      const y = baseY + h;
+      if(i===0){ ctx.lineTo(x0,y); }
+      else {
+        const ph = (pts[i-1]/100)*maxH*0.5;
+        ctx.lineTo(x0, baseY+ph); ctx.lineTo(x0,y);
+      }
+      ctx.lineTo(x1, y);
     }
-    ctx.strokeStyle='rgba(255,255,255,0.5)'; ctx.lineWidth=CW/550; ctx.stroke();
+    ctx.lineTo(CW, baseY); ctx.closePath();
+    const gr = ctx.createLinearGradient(0, baseY, 0, baseY + maxH*0.5);
+    gr.addColorStop(0, glowColor); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gr; ctx.fill();
     ctx.restore();
 
-    // Reflection — mirrored, fading
-    buildPath(true, 0.55);
-    const gDown = ctx.createLinearGradient(0, baseY, 0, baseY+maxH*0.55);
-    gDown.addColorStop(0, glowColor); gDown.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = gDown; ctx.fill();
-
-    // Center divider line
+    // Center divider — thin, subtle
     ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
-    ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=CW/800; ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.stroke();
 
   } else if(waveStyle === 'multiline'){
     // ── Image 3 style: multiple thin overlapping lines ───
@@ -501,12 +535,14 @@ function renderMagazine(ctx,d,CW,CH,isV){
 
 function renderTheEdit(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
-  const wY=isV?CH*0.38:CH*0.47, wH=CH*(isV?0.1:0.14);
+  const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.13:CH*0.14;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)');
   const bx=CW*0.07, bw=CW*0.86;
-  const by=isV?CW*1.1:CH*0.64;
-  const bh=isV?CW*0.72:CH*0.29;
-  ctx.fillStyle='rgba(255,255,255,0.97)'; ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(bx,by,bw,bh,CW*0.012); else ctx.rect(bx,by,bw,bh); ctx.fill();
+  const by=isV?CW*0.88:CH*0.64;
+  // Draw box first with estimated height, then we'll just draw content and let it flow
+  const contentH = CW*0.52; // enough for all content
+  ctx.fillStyle='rgba(255,255,255,0.97)';
+  ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(bx,by,bw,contentH,CW*0.012); else ctx.rect(bx,by,bw,contentH); ctx.fill();
   const px=bx+CW*0.05, py=by+CW*0.038;
   ctx.fillStyle='#ff3c00'; ctx.fillRect(px,py,CW*0.036,CW*0.005);
   setF(ctx,CW*0.017,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ff3c00'; ctx.fillText('SAPMANRI × SKYLINE',px,py+CW*0.034);
@@ -539,10 +575,10 @@ function renderStayfolio(ctx,d,CW,CH,isV){
 
 function renderNike(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
-  const wY=isV?CH*0.36:CH*0.46, wH=CH*(isV?0.1:0.15);
+  const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.13:CH*0.15;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)');
   const pad=CW*0.08;
-  const base = isV ? CW*1.18 : CH*0.67;
+  const base = isV ? CW*0.88 : CH*0.67;
   setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
   const titleSz=CW*0.062;
   setF(ctx,titleSz,'700','"Helvetica Neue",Arial,sans-serif');
