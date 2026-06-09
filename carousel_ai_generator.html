@@ -298,6 +298,14 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   </div>
 </div>
 
+<div style="display:flex;align-items:center;gap:10px;padding:4px 0 6px">
+  <span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mute)">텍스트 언어</span>
+  <div style="display:flex;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">
+    <button id="langKo" onclick="setLang('ko')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:rgba(255,255,255,0.15);color:#fff">한국어</button>
+    <button id="langEn" onclick="setLang('en')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:transparent;color:rgba(255,255,255,0.35)">English</button>
+  </div>
+</div>
+
 <div style="display:flex;align-items:center;gap:10px;padding:4px 0 8px">
   <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
     <input type="checkbox" id="infographicMode"
@@ -394,6 +402,17 @@ let images = [];
 let generatedSlides = [];
 let generatedCaption = '';
 let textScale = 1.0;
+let textLang = 'ko';
+function setLang(lang) {
+  textLang = lang;
+  const ko = document.getElementById('langKo');
+  const en = document.getElementById('langEn');
+  if (!ko || !en) return;
+  ko.style.background = lang === 'ko' ? 'rgba(255,255,255,0.15)' : 'transparent';
+  ko.style.color       = lang === 'ko' ? '#fff' : 'rgba(255,255,255,0.35)';
+  en.style.background  = lang === 'en' ? 'rgba(255,255,255,0.15)' : 'transparent';
+  en.style.color       = lang === 'en' ? '#fff' : 'rgba(255,255,255,0.35)';
+}
 
 // ── upload ──
 const uploadZone = document.getElementById('uploadZone');
@@ -473,7 +492,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 
   const s2 = log('슬라이드 계획 중...');
   let plan;
-  try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode); doneStep(s2); }
+  try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode, textLang); doneStep(s2); }
   catch(e) { doneStep(s2); log('플랜 생성 실패: ' + e.message, true); document.getElementById('generateBtn').disabled=false; return; }
 
   const s3 = log('렌더링 중...');
@@ -638,7 +657,7 @@ async function analyzeImage(dataUrl, topic, style) {
 }
 
 // ── Claude API: generate plan ──
-async function generatePlan(images, topic, tag, closing, style, manualText, infographicMode=false) {
+async function generatePlan(images, topic, tag, closing, style, manualText, infographicMode=false, textLang='ko') {
   const total = images.length + 1;
   const imageData = images.map((img,i) => ({ index:i, analysis:img.analysis||{} }));
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -671,6 +690,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - manualText가 있으면 중간에 pull_quote 타입으로 삽입 (image_index: null)
 - manualText 없어도 주제가 감성적이거나 이미지 흐름에 호흡 필요하면 AI가 pull_quote 1장 자동 삽입 판단
 - pull_quote는 image_index null, layout pull_quote, text_position pull_quote
+- 모든 텍스트(headline, body, label, caption, hashtag)는 ${textLang === 'en' ? '영어로만 작성 (한국어 금지)' : '한국어로만 작성 (label은 영어 단어 허용)'}
 - caption에 해시태그 10개 포함
 ${infographicMode ? `
 인포그래픽 모드 추가 규칙:
