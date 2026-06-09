@@ -1123,33 +1123,35 @@ async function generateInstaCaption(){
   const lang = isEn ? 'English' : '한국어';
   const d=cachedResult;
 
-  const prompt=`You are writing an Instagram post for 감성찾아삽만리 (SAPMANRI), a Korean slow-life channel that matches landscape contour lines to music.
+  const prompt=`You are writing an Instagram post caption for 감성찾아삽만리 (SAPMANRI), a Korean slow-life channel that matches landscape contour lines to music.
 
-The writer has a distinct prose style — follow it strictly:
-- Convey emotion through sensation and scene, never through direct explanation
-- Mix short and long sentences rhythmically — flow long, land short
-- First-person without ever saying "나는" — inward, like an interior monologue
-- Weave in the song title, a visual detail, weather or time-of-day naturally — never forced
-- Do not conclude — leave a gap for the reader to arrive at the feeling themselves
-- White space and ellipsis carry weight; spare, not sparse
+## WRITING STYLE — follow exactly
+The voice is quiet, lyrical, restrained, warm, modest, and contemplative.
+Begin from an ordinary scene in the photo — light, shadow, water, trees, a road, a season, a silhouette — and slowly draw out one small reflection on life, time, memory, or continuing.
+Use short Korean sentences with generous line breaks. Let the rhythm breathe.
+Do not explain emotions directly. Let emotions appear through objects, gestures, silence, and small scenes.
+Preferred feeling: a quiet photo-essay titled "잠깐 멈춰." Something the reader opens when their heart feels a little hungry.
+Ending style: soft, lingering, understated. Not a lesson. Not comfort. Just a quiet aftertaste.
+Do not imitate famous poets. Do not make it dramatic. Do not make it too smooth. Keep it close to an ordinary Korean person's quiet inner monologue.
+Avoid: motivational tone, self-help language, over-explained metaphors, forced comfort, obvious conclusions, AI-polished structure, trendy poetic clichés, sounding like marketing copy.
 
-Context:
+## Context
 - Scene: ${d.image_description||d.line_description}
 - Skyline/contour: ${d.line_description}
 - Matched song: "${d.song_title}" by ${d.artist}
 - Why this line matches: ${d.match_reason_ko||''}
 - Mood: ${(d.line_traits||[]).join(', ')}
 
-Write an Instagram caption in ${lang} with this exact structure:
+## Structure
 
 LINE 1 — DECLARATION (one sentence, always first):
-A quiet, declarative statement that the contour/silhouette of this specific scene IS the score of "${d.song_title}". Like: "이 능선은 [곡 제목]의 악보다." — adapt naturally to the scene (ridge, skyline, rooftop, horizon, treeline — whatever fits). Spare. No explanation. Just the statement.
+A quiet declarative statement that the contour/silhouette of this specific scene IS the score of "${d.song_title}". Like: "이 능선은 [곡 제목]의 악보다." Adapt naturally to the scene. Spare. No explanation. Written in the same quiet voice.
 
-PART 2 — BODY (3-5 sentences, in the writer's voice):
-Follow naturally from the declaration. The feeling of standing in that scene while that song plays. Specific visual details. Do not conclude — leave it open.
+PART 2 — BODY (4-6 lines, in the style above):
+Follow naturally from the declaration. Use line breaks generously. Stay close to the specific visual details of this scene. Do not rush to a conclusion. Let the connection between landscape and song emerge quietly.
 
-PART 3 — HASHTAGS (exactly 5 tags, space-separated on one line):
-Always include #감성찾아삽만리 and #SkylineScore. Pick the 3 best remaining SEO tags for this specific post from: #sapmanri #슬로우라이프 #slowliving scene/nature/music tags.
+PART 3 — HASHTAGS (exactly 5 tags, space-separated):
+Always #감성찾아삽만리 and #SkylineScore. Pick the 3 best SEO tags from: #sapmanri #슬로우라이프 #slowliving scene/nature/music tags.
 
 PART 4 — CLOSING (last line, always exactly):
 Skyline Music Matcher™ by @sapmanri
@@ -1157,10 +1159,11 @@ Skyline Music Matcher™ by @sapmanri
 Then output exactly this separator on its own line:
 ===COMMENT===
 
-PART 5 — PINNED COMMENT (for the first pinned comment on the post):
-A single engaging question that invites followers to think about their own place. Core idea: "여기선 이런 음악이 흘렀어. 네가 있는 곳엔?" — but vary the phrasing naturally each time, matching the mood and scene of this specific post. Reference the matched song or the landscape briefly. SEO-friendly: include 1-2 relevant keywords naturally in the sentence. Warm, not promotional. Written in ${lang}.
+PART 5 — PINNED COMMENT:
+A single warm question inviting followers to think about their own place. Core idea: "여기선 이런 음악이 흘렀어. 네가 있는 곳엔?" Vary phrasing naturally each time. Reference the song or landscape briefly. Warm, not promotional. Written in ${lang}.
 
-Write ONLY the caption and comment, separated by ===COMMENT===. No labels, no markdown, no extra explanations.`
+Write ONLY the caption and comment separated by ===COMMENT===. No labels, no markdown, no explanations. All prose in ${lang}.`
+
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
