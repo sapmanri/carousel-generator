@@ -131,11 +131,12 @@ input[type=range]::-moz-range-thumb{
 </head>
 <body>
 <header>
-  <div class="brand"><h1>감성찾아삽만리</h1><p>Skyline Music Matcher</p></div>
-  <div class="key-wrap">
+  <div class="brand"><h1>감성찾아삽만리</h1><p>Skyline Music Matcher <span id="versionTag" style="opacity:0.35;font-size:8px;letter-spacing:0.08em;">v1.0.0</span></p></div>
+  <div class="key-wrap" id="keyWrap">
     <input type="password" id="apiKey" placeholder="Anthropic KEY" autocomplete="off"/>
     <input type="password" id="googleKey" placeholder="Google KEY" autocomplete="off" style="width:160px"/>
   </div>
+  <div id="keyStatus" style="display:none;cursor:pointer;font-size:10px;letter-spacing:0.1em;color:#444;text-transform:uppercase;padding:6px 10px;border:0.5px solid #222;border-radius:4px;" onclick="document.getElementById('keyWrap').style.display='flex';document.getElementById('keyStatus').style.display='none';">🔑 KEY 설정됨</div>
 </header>
 <main>
   <div id="uploadSection">
@@ -343,6 +344,20 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
+const VERSION = 'v1.0.1';
+document.addEventListener('DOMContentLoaded',()=>{
+  const el=document.getElementById('versionTag');
+  if(el) el.textContent=VERSION;
+});
+
+function updateKeyVisibility(){
+  const apiKey=localStorage.getItem('smm_apikey')||'';
+  const wrap=document.getElementById('keyWrap');
+  const status=document.getElementById('keyStatus');
+  if(apiKey){wrap.style.display='none';status.style.display='block';}
+  else{wrap.style.display='flex';status.style.display='none';}
+}
+
 let imgSrc=null,b64=null,mtype='image/jpeg';
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
 let cachedResult=null;
@@ -351,12 +366,19 @@ window.addEventListener('load', ()=>{
   const keyInput=document.getElementById('apiKey');
   const savedKey=localStorage.getItem('smm_apikey');
   if(savedKey)keyInput.value=savedKey;
-  keyInput.addEventListener('input',()=>localStorage.setItem('smm_apikey',keyInput.value));
+  keyInput.addEventListener('input',()=>{
+    localStorage.setItem('smm_apikey',keyInput.value);
+    updateKeyVisibility();
+  });
 
   const gKeyInput=document.getElementById('googleKey');
   const savedGKey=localStorage.getItem('smm_gkey');
   if(savedGKey)gKeyInput.value=savedGKey;
-  gKeyInput.addEventListener('input',()=>localStorage.setItem('smm_gkey',gKeyInput.value));
+  gKeyInput.addEventListener('input',()=>{
+    localStorage.setItem('smm_gkey',gKeyInput.value);
+    updateKeyVisibility();
+  });
+  updateKeyVisibility();
 
   // File handling
   document.getElementById('fileInput').addEventListener('change',e=>loadFile(e.target.files[0]));
