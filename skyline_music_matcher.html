@@ -509,9 +509,13 @@ Based ONLY on the waveform characteristics above, select 3–5 genres from this 
 Available genres: post-classical | jazz | pop-soul | indie-alternative | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost
 
 STEP 5 — SONG MATCH:
-From the genre pool selected in Step 4, choose the genre NOT in this recent history: ${usedSongs.length > 0 ? `recent songs used: ${usedSongs.join(', ')}` : 'no history yet'}.
-If all pool genres appear in history, pick the least recently used.
-Then match ONE globally famous, instantly recognisable song from that chosen genre — something most people worldwide know.
+Recent history (avoid repeating these genres): ${usedSongs.length > 0 ? usedSongs.join(', ') : 'none yet'}.
+
+Rules:
+1. From your genre pool, pick the genre that appears LEAST RECENTLY in the history above.
+2. If your genre pool contains only genres already in the recent history, you MUST expand the pool by adding 1-2 more genres that could plausibly fit the waveform mood — even if they are a less obvious choice. Variety is required.
+3. Match ONE globally famous, instantly recognisable song from the chosen genre — something most people worldwide know.
+4. NEVER pick the same song title that appears in the history.
 
 STEP 6 — POETIC CAPTION:
 3 short lines in the quiet, lyrical voice of a slow-life vlogger. Evocative, not descriptive. Line 2 must naturally weave in the song title.
