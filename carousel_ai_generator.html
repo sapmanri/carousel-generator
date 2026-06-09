@@ -166,6 +166,43 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   .action-btn{width:100%}
   .header{flex-direction:column;gap:4px}
 }
+
+/* ── 디에디트 스타일 ── */
+:root{--te-black:#111;--te-white:#fff;--te-gray:#f5f5f5;--te-mid:#888;--te-accent:#ff3c00}
+.te-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:"Helvetica Neue",Arial,var(--sans);background:var(--te-white)}
+.te-masthead{font-size:7px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--te-black);display:block;margin-bottom:10px}
+.te-label{font-size:7px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--te-accent);display:block;margin-bottom:6px}
+.te-headline{font-size:26px;font-weight:700;line-height:1.0;letter-spacing:-0.02em;color:var(--te-black);margin-bottom:6px}
+.te-headline-sm{font-size:18px;font-weight:700;line-height:1.1;letter-spacing:-0.02em;color:var(--te-black);margin-bottom:5px}
+.te-body{font-size:9px;font-weight:400;line-height:1.65;color:#555}
+.te-body-white{font-size:9px;font-weight:400;line-height:1.65;color:rgba(255,255,255,0.8)}
+.te-rule{width:24px;height:3px;background:var(--te-accent);margin-bottom:10px}
+.te-folio{position:absolute;bottom:8px;right:10px;font-size:7px;font-weight:500;letter-spacing:0.1em;color:#bbb;z-index:3}
+.te-folio-dark{position:absolute;bottom:8px;right:10px;font-size:7px;font-weight:500;letter-spacing:0.1em;color:rgba(255,255,255,0.3);z-index:3}
+.te-txt-bottom{position:absolute;bottom:0;left:0;right:0;padding:14px 14px 18px;z-index:2}
+.te-txt-white{position:absolute;bottom:0;left:0;right:0;padding:14px 14px 18px;z-index:2;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 100%)}
+.te-txt-box{position:absolute;bottom:16px;left:14px;right:14px;background:var(--te-white);padding:12px 14px;z-index:2}
+.te-txt-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:18px;z-index:2;background:var(--te-gray)}
+.te-closing{position:absolute;inset:0;background:var(--te-black);display:flex;flex-direction:column;justify-content:center;padding:18px}
+
+/* ── 스테이폴리오 스타일 ── */
+:root{--sf-cream:#f7f4ef;--sf-dark:#1c1917;--sf-mid:#7a7570;--sf-accent:#8c7355;--sf-line:#d4cfc8}
+.sf-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:var(--serif);background:var(--sf-cream)}
+.sf-masthead{font-family:var(--sans);font-size:6px;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--sf-mid);display:block;margin-bottom:12px}
+.sf-label{font-family:var(--sans);font-size:6px;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--sf-accent);display:block;margin-bottom:8px}
+.sf-headline{font-size:24px;font-weight:300;line-height:1.15;letter-spacing:-0.005em;color:var(--sf-dark);margin-bottom:8px}
+.sf-headline-lg{font-size:28px;font-weight:300;line-height:1.1;letter-spacing:-0.01em;color:#fff;margin-bottom:8px}
+.sf-headline-sm{font-size:18px;font-weight:300;line-height:1.2;color:var(--sf-dark);margin-bottom:6px}
+.sf-body{font-size:8px;font-style:italic;font-weight:300;line-height:1.75;color:var(--sf-mid)}
+.sf-body-white{font-size:8px;font-style:italic;font-weight:300;line-height:1.75;color:rgba(255,255,255,0.7)}
+.sf-rule{width:100%;height:1px;background:var(--sf-line);margin-bottom:12px}
+.sf-folio{position:absolute;bottom:10px;right:12px;font-family:var(--sans);font-size:6px;letter-spacing:0.14em;color:var(--sf-line);z-index:3}
+.sf-folio-dark{position:absolute;bottom:10px;right:12px;font-family:var(--sans);font-size:6px;letter-spacing:0.14em;color:rgba(255,255,255,0.2);z-index:3}
+.sf-folio-ink{position:absolute;bottom:10px;right:12px;font-family:var(--sans);font-size:6px;letter-spacing:0.14em;color:var(--sf-mid);z-index:3}
+.sf-txt-bottom{position:absolute;bottom:0;left:0;right:0;padding:16px 16px 20px;z-index:2}
+.sf-txt-split{position:absolute;bottom:0;left:0;right:0;height:42%;background:var(--sf-cream);padding:12px 16px;display:flex;flex-direction:column;justify-content:center;z-index:2}
+.sf-txt-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:20px;z-index:2;background:var(--sf-cream)}
+.sf-closing{position:absolute;inset:0;background:var(--sf-dark);display:flex;flex-direction:column;justify-content:center;padding:20px}
 </style>
 
 </head>
@@ -212,6 +249,8 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
     <label>스타일</label>
     <select id="metaStyle">
       <option value="magazine-b">Magazine B (에디토리얼)</option>
+      <option value="theedit">디에디트 (큐레이션 매거진)</option>
+      <option value="stayfolio">스테이폴리오 (파인스테이)</option>
       <option value="nike">Nike (강렬 · 대문자)</option>
       <option value="ohouse">오늘의집 (따뜻한 라이프스타일)</option>
     </select>
@@ -574,6 +613,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText) {
 `이미지 분석 결과를 바탕으로 Instagram 캐러셀 계획을 순수 JSON으로만 반환해줘. 마크다운 없이 JSON만.
 
 스타일: ${style} / 주제: ${topic||'(이미지 분석 기반)'} / 채널태그: ${tag} / 마무리: ${closing}
+스타일 특성: ${{'magazine-b':'에디토리얼 감성, 세리프 중심, 여백','theedit':'큐레이션 매거진, 산세리프 굵게, 흰배경, 텍스트박스 오버레이','stayfolio':'파인스테이, 세리프 우아함, 크림배경, 여백 넉넉','nike':'강렬 대문자 스포츠','ohouse':'따뜻한 라이프스타일'}[style]||''}
 이미지수: ${images.length} / manualText: "${manualText}"
 
 분석결과: ${JSON.stringify(imageData, (k,v) => (v instanceof File ? undefined : v))}
@@ -620,6 +660,8 @@ function renderSlide(slide, i) {
 
   if (slide.layout === 'pull_quote' || slide.type === 'pull_quote') return renderPullQuote(slide, i, style, accent, folio);
   if (style === 'ohouse') return renderOhouse(slide, i, img, folio, tag);
+  if (style === 'theedit') return renderTheEdit(slide, i, img, folio, accent, tag);
+  if (style === 'stayfolio') return renderStayfolio(slide, i, img, folio, accent, tag);
 
   // Magazine B / Nike
   const isNike = style === 'nike';
@@ -662,6 +704,12 @@ function renderPullQuote(slide, i, style, accent, folio) {
   if (style === 'nike') {
     return `<div class="slide-card"><div class="slide-canvas" style="background:#111"><div class="txt-dark"><span style="font-family:Helvetica Neue,Arial,sans-serif;font-size:7px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;display:block">SAPMANRI</span><div class="nike-headline" style="font-size:22px">${(slide.headline||'').toUpperCase()}</div><div class="s-body" style="color:rgba(255,255,255,0.5)">${slide.body||''}</div></div><div class="s-folio-dark">${folio}</div></div></div>`;
   }
+  if (style === 'theedit') {
+    return `<div class="slide-card"><div class="te-canvas"><div class="te-txt-center"><div class="te-rule"></div><div class="te-headline-sm">${slide.headline||''}</div><div class="te-body">${slide.body||''}</div></div><div class="te-folio">${folio}</div></div></div>`;
+  }
+  if (style === 'stayfolio') {
+    return `<div class="slide-card"><div class="sf-canvas"><div class="sf-txt-center"><div class="sf-rule"></div><div class="sf-headline-sm">${slide.headline||''}</div><div class="sf-body">${slide.body||''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
+  }
   return `<div class="slide-card"><div class="slide-canvas" style="background:var(--paper)"><div class="txt-pull"><div class="s-rule" style="background:${accent}"></div><div class="s-headline-pull">${slide.headline||''}</div><div class="s-body-ink">${slide.body||''}</div></div><div class="s-folio-ink">${folio}</div></div></div>`;
 }
 
@@ -678,6 +726,51 @@ function renderOhouse(slide, i, img, folio, tag) {
     return `<div class="slide-card"><div class="oh-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 57%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}" /></div>`:'<div style="flex:0 0 57%;background:var(--oh-warm)"></div>'}<div style="flex:1;background:var(--oh-cream);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;position:relative"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div><div class="oh-line"></div></div><div class="oh-folio">${folio}</div></div></div>`;
   }
   return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="oh-bg" src="${img}" />`:''}${img?'<div class="oh-ov"></div>':''}<div class="oh-card"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
+}
+
+function renderTheEdit(slide, i, img, folio, accent, tag) {
+  const isDark = slide.type === 'closing';
+  const isSplit = slide.layout === 'split_bottom';
+
+  if (isDark) {
+    const bgHtml = img ? `<img class="slide-bg-img" src="${img}" /><div style="position:absolute;inset:0;background:rgba(0,0,0,0.72)"></div>` : '';
+    return `<div class="slide-card"><div class="te-canvas">${bgHtml}<div class="te-closing" style="${img?'background:transparent':''}"><span class="te-masthead" style="color:rgba(255,255,255,0.4)">THE EDIT × SAPMANRI</span><div style="width:20px;height:3px;background:var(--te-accent);margin-bottom:12px"></div><div class="te-headline" style="color:#fff;font-size:22px">${slide.headline||''}</div><div class="te-body-white">${slide.body||''}</div><span style="font-size:7px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--te-accent);margin-top:14px;display:block">${tag}</span></div><div class="te-folio-dark">${folio}</div></div></div>`;
+  }
+  if (isSplit) {
+    return `<div class="slide-card"><div class="te-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 55%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}"/></div>`:'<div style="flex:0 0 55%;background:#eee"></div>'}<div style="flex:1;background:#fff;padding:10px 14px;display:flex;flex-direction:column;justify-content:center"><span class="te-label">${slide.label||''}</span><div class="te-headline-sm">${slide.headline||''}</div><div class="te-body">${slide.body||''}</div></div><div class="te-folio">${folio}</div></div></div>`;
+  }
+  if (slide.type === 'cover') {
+    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.65) 0%,transparent 50%)"></div>` : '';
+    return `<div class="slide-card"><div class="te-canvas">${bgHtml}<div class="te-txt-white"><span style="font-size:7px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.6);display:block;margin-bottom:8px">THE EDIT × SAPMANRI</span><div class="te-headline" style="color:#fff">${slide.headline||''}</div><div class="te-body-white">${slide.body||''}</div></div><div class="te-folio-dark">${folio}</div></div></div>`;
+  }
+  // feature — 흰 박스 오버레이
+  const overlayMap = {overlay_bottom:'',overlay_top:'',overlay_left:'',overlay_right:'',split_bottom:'',dark_full:''};
+  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:var(--te-gray)"></div>`;
+  return `<div class="slide-card"><div class="te-canvas">${bgHtml}<div class="te-txt-box"><span class="te-label">${slide.label||''}</span><div class="te-headline-sm">${slide.headline||''}</div><div class="te-body">${slide.body||''}</div></div><div class="te-folio">${folio}</div></div></div>`;
+}
+
+function renderStayfolio(slide, i, img, folio, accent, tag) {
+  const isDark = slide.type === 'closing';
+  const isSplit = slide.layout === 'split_bottom';
+
+  if (isDark) {
+    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:rgba(28,25,23,0.78)"></div>` : '';
+    return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-closing" style="${img?'background:transparent':''}"><span class="sf-masthead" style="color:rgba(255,255,255,0.3)">STAYFOLIO × SAPMANRI</span><div style="width:100%;height:1px;background:rgba(255,255,255,0.15);margin-bottom:16px"></div><div class="sf-headline" style="color:#fff;font-size:22px">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div><span style="font-family:var(--sans);font-size:6px;letter-spacing:0.22em;text-transform:uppercase;color:var(--sf-accent);margin-top:18px;display:block">${tag}</span></div><div class="sf-folio-dark">${folio}</div></div></div>`;
+  }
+  if (isSplit) {
+    return `<div class="slide-card"><div class="sf-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 58%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}"/></div>`:'<div style="flex:0 0 58%;background:var(--sf-line)"></div>'}<div style="flex:1;background:var(--sf-cream);padding:10px 16px;display:flex;flex-direction:column;justify-content:center"><span class="sf-label">${slide.label||''}</span><div class="sf-headline-sm">${slide.headline||''}</div><div class="sf-body">${slide.body||''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
+  }
+  if (slide.type === 'cover') {
+    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(28,25,23,0.72) 0%,rgba(0,0,0,0.1) 55%,transparent 100%)"></div>` : '';
+    return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-txt-bottom"><span style="font-family:var(--sans);font-size:6px;letter-spacing:0.26em;text-transform:uppercase;color:rgba(255,255,255,0.45);display:block;margin-bottom:10px">STAYFOLIO × SAPMANRI</span><div class="sf-headline-lg">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div></div><div class="sf-folio-dark">${folio}</div></div></div>`;
+  }
+  // feature
+  const isText = !img;
+  if (isText) {
+    return `<div class="slide-card"><div class="sf-canvas"><div class="sf-txt-center"><span class="sf-masthead">SAPMANRI</span><div class="sf-rule"></div><div class="sf-headline">${slide.headline||''}</div><div class="sf-body">${slide.body||''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
+  }
+  const bgHtml = `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(28,25,23,0.75) 0%,transparent 52%)"></div>`;
+  return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-txt-bottom"><span class="sf-label">${slide.label||''}</span><div class="sf-headline-lg">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div></div><div class="sf-folio-dark">${folio}</div></div></div>`;
 }
 
 // 이미지 dataUrl을 S×S 정사각형 cover canvas dataUrl로 변환
