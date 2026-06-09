@@ -291,104 +291,65 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
   const n = pts.length;
 
   if(waveStyle === 'mirror'){
-    // ── Layered depth skyline — 3 layers with parallax ──
-    // Each layer: slightly different scale + x-offset + opacity
-    // Creates foggy city depth like the reference image
+    // ── Dotted pixel skyline — buildings made of scattered dots ──
+    const dotSize = Math.max(CW / 160, 5);
+    const dotGap = dotSize * 1.55;
+    const cols = Math.floor(CW / dotGap);
+    const colW = CW / cols;
 
-    const drawLayer = (xShift, scaleH, scaleW, alpha, blur) => {
-      ctx.save();
-      if(blur > 0) ctx.filter = `blur(${blur}px)`;
-      ctx.globalAlpha = alpha;
-
-      const segW = (CW * scaleW) / n;
-      const startX = xShift;
-
-      // Build stepped silhouette path
-      ctx.beginPath();
-      ctx.moveTo(startX, baseY);
-
-      for(let i=0; i<n; i++){
-        const x0 = startX + i * segW;
-        const x1 = startX + (i+1) * segW;
-        const h = (pts[i]/100) * maxH * scaleH;
-        const y = baseY - h;
-
-        if(i === 0){
-          ctx.lineTo(x0, y);
-        } else {
-          const ph = (pts[i-1]/100) * maxH * scaleH;
-          ctx.lineTo(x0, baseY - ph);
-          ctx.lineTo(x0, y);
-        }
-        ctx.lineTo(Math.min(x1, startX + CW * scaleW), y);
-      }
-      ctx.lineTo(startX + CW * scaleW, baseY);
-      ctx.closePath();
-
-      // Fill with gradient — darker at base, lighter at top edge for depth
-      const g = ctx.createLinearGradient(0, baseY - maxH * scaleH, 0, baseY);
-      g.addColorStop(0, color);
-      g.addColorStop(0.5, color);
-      g.addColorStop(1, glowColor);
-      ctx.fillStyle = g;
-      ctx.fill();
-
-      // Top edge highlight — brighter for front layer
-      ctx.beginPath();
-      for(let i=0; i<n; i++){
-        const x0 = startX + i * segW;
-        const x1 = startX + (i+1) * segW;
-        const h = (pts[i]/100) * maxH * scaleH;
-        const y = baseY - h;
-        if(i === 0) ctx.moveTo(x0, y);
-        else {
-          const ph = (pts[i-1]/100) * maxH * scaleH;
-          ctx.lineTo(x0, baseY - ph);
-          ctx.lineTo(x0, y);
-        }
-        ctx.lineTo(Math.min(x1, startX + CW * scaleW), y);
-      }
-      ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.6})`;
-      ctx.lineWidth = Math.max(CW/700, 0.8);
-      ctx.lineJoin = 'miter';
-      ctx.stroke();
-
-      ctx.restore();
+    // Map pts to columns
+    const getH = (col) => {
+      const t = col / (cols - 1);
+      const idx = t * (n - 1);
+      const i0 = Math.floor(idx), i1 = Math.min(i0 + 1, n - 1);
+      const frac = idx - i0;
+      return (pts[i0] * (1 - frac) + pts[i1] * frac) / 100 * maxH;
     };
 
-    // Layer 1 — back, wide, pale, blurred (most fog)
-    drawLayer(-CW*0.08, 0.55, 1.16, 0.25, CW*0.006);
-    // Layer 2 — mid, slight shift, medium opacity
-    drawLayer(CW*0.04, 0.78, 0.96, 0.45, CW*0.003);
-    // Layer 3 — front, full opacity, sharpest
-    drawLayer(0, 1.0, 1.0, 0.88, 0);
+    for(let col = 0; col < cols; col++){
+      const cx = col * colW + colW * 0.5;
+      const h = getH(col);
+      const rows = Math.floor(h / dotGap);
 
-    // Reflection — front layer only, flipped, heavily faded
-    ctx.save();
-    ctx.globalAlpha = 0.22;
-    const segWR = CW / n;
-    ctx.beginPath();
-    ctx.moveTo(0, baseY);
-    for(let i=0; i<n; i++){
-      const x0 = i * segWR, x1 = (i+1) * segWR;
-      const h = (pts[i]/100) * maxH * 0.5;
-      const y = baseY + h;
-      if(i===0){ ctx.lineTo(x0,y); }
-      else {
-        const ph = (pts[i-1]/100)*maxH*0.5;
-        ctx.lineTo(x0, baseY+ph); ctx.lineTo(x0,y);
+      for(let row = 0; row < rows; row++){
+        const progress = row / Math.max(rows - 1, 1); // 0=bottom, 1=top
+        const cy = baseY - row * dotGap - dotGap * 0.5;
+
+        // Density: bottom rows dense, top rows sparse/random
+        const density = 1 - progress * 0.75;
+        if(Math.random() > density) continue;
+
+        // Size: top dots smaller
+        const ds = dotSize * (0.5 + (1 - progress) * 0.5);
+
+        // Alpha: bottom bright, top fades out
+        const alpha = (0.85 - progress * 0.6) * (0.6 + Math.random() * 0.4);
+
+        // Color: interpolate between glowColor (top) and color (bottom)
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = progress > 0.6 ? glowColor : color;
+
+        ctx.beginPath();
+        ctx.rect(cx - ds/2, cy - ds/2, ds, ds);
+        ctx.fill();
+
+        // Mirror reflection dot — below baseY, very faint
+        if(row < rows * 0.4){
+          const mirrorAlpha = alpha * 0.25 * (1 - row / (rows * 0.4));
+          ctx.globalAlpha = mirrorAlpha;
+          ctx.fillStyle = glowColor;
+          const mcy = baseY + row * dotGap + dotGap * 0.5;
+          ctx.beginPath();
+          ctx.rect(cx - ds*0.4/2, mcy - ds*0.4/2, ds*0.4, ds*0.4);
+          ctx.fill();
+        }
       }
-      ctx.lineTo(x1, y);
     }
-    ctx.lineTo(CW, baseY); ctx.closePath();
-    const gr = ctx.createLinearGradient(0, baseY, 0, baseY + maxH*0.5);
-    gr.addColorStop(0, glowColor); gr.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = gr; ctx.fill();
-    ctx.restore();
+    ctx.globalAlpha = 1;
 
-    // Center divider — thin, subtle
+    // Subtle center line
     ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
-    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
 
   } else if(waveStyle === 'multiline'){
     // ── Image 3 style: multiple thin overlapping lines ───
