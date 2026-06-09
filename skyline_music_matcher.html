@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.7';
+const VERSION = 'v1.0.8';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -359,6 +359,7 @@ function updateKeyVisibility(){
 }
 
 let imgSrc=null,b64=null,mtype='image/jpeg';
+let _lastImg=null; // global image ref for renderers
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
 let cachedResult=null;
 
@@ -1329,7 +1330,7 @@ function renderPolaroid(ctx,d,CW,CH,isV){
   ctx.fillRect(0,0,CW,CH);
 
   // 2) 이미지 재드로우 (클립)
-  const img=ctx.canvas._srcImg;
+  const img=_lastImg;
   if(img){
     ctx.save();
     ctx.beginPath(); ctx.rect(innerX,innerY,innerW,innerH); ctx.clip();
