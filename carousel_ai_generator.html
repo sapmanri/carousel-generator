@@ -186,7 +186,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   <input type="file" id="fileInput" accept="image/*" multiple />
   <div class="upload-icon">⬆</div>
   <div class="upload-label">이미지를 끌어다 놓거나 클릭해서 업로드</div>
-  <div class="upload-sub">JPG · PNG · 최대 6장</div>
+  <div class="upload-sub">JPG · PNG · 최대 10장</div>
 </div>
 
 <div class="image-grid" id="imageGrid"></div>
@@ -328,7 +328,7 @@ uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classL
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
 function handleFiles(files) {
-  Array.from(files).slice(0, 6 - images.length).forEach(file => {
+  Array.from(files).slice(0, 10 - images.length).forEach(file => {
     const objectUrl = URL.createObjectURL(file);
     const reader = new FileReader();
     reader.onload = ev => {
@@ -378,15 +378,21 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   const closing = document.getElementById('metaClosing').value;
   const manualText = document.getElementById('metaTextSlide').value.trim();
 
-  const s1 = log(`이미지 ${images.length}장 분석 중...`);
-  for (let i = 0; i < images.length; i++) {
-    const thumb = document.getElementById(`thumb-${i}`);
-    if (thumb) thumb.classList.add('analyzing');
-    try { images[i].analysis = await analyzeImage(images[i].dataUrl, topic, style); }
-    catch(e) { images[i].analysis = { subject_position:'center', best_text_position:'bottom_left', text_color:'white', suggested_copy:'감성의 순간', suggested_body:'오늘도 천천히.', overall_brightness:'mid', dominant_color:'#b87a6e', mood:'고요함' }; }
-    if (thumb) { thumb.classList.remove('analyzing'); thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }
+  const needsAnalysis = images.some(img => !img.analysis);
+  if (needsAnalysis) {
+    const s1 = log(`이미지 ${images.length}장 분석 중...`);
+    for (let i = 0; i < images.length; i++) {
+      if (images[i].analysis) continue; // 이미 분석된 이미지는 스킵
+      const thumb = document.getElementById(`thumb-${i}`);
+      if (thumb) thumb.classList.add('analyzing');
+      try { images[i].analysis = await analyzeImage(images[i].dataUrl, topic, style); }
+      catch(e) { images[i].analysis = { subject_position:'center', best_text_position:'bottom_left', text_color:'white', suggested_copy:'감성의 순간', suggested_body:'오늘도 천천히.', overall_brightness:'mid', dominant_color:'#b87a6e', mood:'고요함' }; }
+      if (thumb) { thumb.classList.remove('analyzing'); thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }
+    }
+    doneStep(s1);
+  } else {
+    log('이미지 분석 완료 (캐시)', true);
   }
-  doneStep(s1);
 
   const s2 = log('슬라이드 계획 중...');
   let plan;
