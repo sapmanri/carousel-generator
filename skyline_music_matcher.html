@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.5';
+const VERSION = 'v1.0.6';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1194,55 +1194,6 @@ Respond ONLY as JSON, no markdown:
   }
 }
 
-async function generateInstaCaption(){
-  const key=document.getElementById('apiKey').value.trim();
-  if(!key){alert('API 키를 입력해주세요.');return}
-  if(!cachedResult)return;
-
-  const btn=document.getElementById('instaCapBtn');
-  btn.textContent='생성 중...'; btn.disabled=true;
-
-  const isEn = captionLang==='en';
-  const lang = isEn ? 'English' : '한국어';
-  const d=cachedResult;
-
-  const prompt=`You are an Instagram SEO expert for a Korean slow-life YouTube channel called 감성찾아삽만리 (SAPMANRI).
-
-Context:
-- Photo subject/scene: ${d.image_description||d.line_description}
-- Line description: ${d.line_description}
-- Matched song: "${d.song_title}" by ${d.artist}
-- Mood traits: ${(d.line_traits||[]).join(', ')}
-- Card caption: ${d.caption_line1} / ${d.caption_line2} / ${d.caption_line3}
-
-Write an Instagram post caption in ${lang} that:
-1. Opens with 2-3 evocative lines in the quiet slow-life vlogger voice (reference the song naturally)
-2. A short paragraph about the scene/feeling (3-4 sentences)
-3. A line break then 15-20 relevant hashtags — mix of: channel brand (#감성찾아삽만리 #sapmanri), slow life (#슬로우라이프 #slowliving), location mood, music reference, nature/season tags
-4. End with the channel tag: @sapmanri
-
-Write ONLY the caption text, no explanations. Use ${lang} for all text except hashtags which can mix Korean and English.`;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    const text=data.content[0].text.trim();
-    document.getElementById('instaCapText').textContent=text;
-    document.getElementById('instaCapText').style.display='block';
-    document.getElementById('instaCapHint').style.display='block';
-    btn.textContent='↺ 다시 생성';
-  }catch(err){
-    document.getElementById('instaCapText').textContent='오류: '+err.message;
-    document.getElementById('instaCapText').style.display='block';
-    btn.textContent='✦ 캡션 생성';
-  }
-  btn.disabled=false;
-}
 
 async function loadPlayer(){
   if(!cachedResult)return;
