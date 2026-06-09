@@ -173,6 +173,9 @@ input[type=range]::-moz-range-thumb{
           <button class="opt-btn" data-design="ohouse" onclick="pickDesign(this)"><span class="name">오늘의집</span><span class="desc">라이프스타일</span></button>
           <button class="opt-btn" data-design="apple" onclick="pickDesign(this)"><span class="name">Apple</span><span class="desc">미니멀 · 여백</span></button>
           <button class="opt-btn" data-design="girok" onclick="pickDesign(this)"><span class="name">기록</span><span class="desc">라이프로그</span></button>
+          <button class="opt-btn" data-design="polaroid" onclick="pickDesign(this)"><span class="name">폴라로이드</span><span class="desc">필름 · 따뜻함</span></button>
+          <button class="opt-btn" data-design="grain" onclick="pickDesign(this)"><span class="name">필름그레인</span><span class="desc">노출 오버레이</span></button>
+          <button class="opt-btn" data-design="cinema" onclick="pickDesign(this)"><span class="name">시네마</span><span class="desc">레터박스</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -572,7 +575,7 @@ function renderCard(d){
     const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
     canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
     const prev=document.getElementById('cardPreview');
     prev.innerHTML=''; prev.appendChild(canvas);
@@ -1217,6 +1220,176 @@ function renderGirok(ctx,d,CW,CH,isV){
   setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
   ctx.fillStyle='#CCCCCC'; ctx.textAlign='right';
   ctx.fillText('SAPMANRI',CW-pad*0.7,CH-CW*0.022); ctx.textAlign='left';
+}
+
+function renderPolaroid(ctx,d,CW,CH,isV){
+  // ── 폴라로이드 ──
+  // 이미지 전체, 하단 흰 테두리에 곡명만
+  const borderSide = CW*0.055;
+  const borderTop  = CW*0.055;
+  const borderBot  = isV ? CW*0.22 : CW*0.18;
+
+  // White frame
+  ctx.fillStyle='#F8F6F2';
+  ctx.fillRect(0,0,CW,CH);
+
+  // Photo area (image already drawn full — clip to inner)
+  // Re-draw image clipped to inner rect
+  const innerX=borderSide, innerY=borderTop;
+  const innerW=CW-borderSide*2, innerH=CH-borderTop-borderBot;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(innerX,innerY,innerW,innerH); ctx.clip();
+  // image already on canvas, just add overlays inside clip
+  // slight vignette inside photo
+  let g=ctx.createRadialGradient(CW/2,innerY+innerH/2,innerH*0.3,CW/2,innerY+innerH/2,innerH*0.85);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.28)');
+  ctx.fillStyle=g; ctx.fillRect(innerX,innerY,innerW,innerH);
+  // Waveform inside photo — bottom third
+  const wY=innerY+innerH*0.78, wH=innerH*0.26;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.55)','rgba(255,255,255,0.18)',d._ampRatio||1);
+  ctx.restore();
+
+  // Shadow under photo
+  ctx.shadowColor='rgba(0,0,0,0.13)'; ctx.shadowBlur=18; ctx.shadowOffsetY=4;
+  ctx.fillStyle='rgba(0,0,0,0)'; ctx.fillRect(innerX,innerY,innerW,innerH);
+  ctx.shadowColor='transparent'; ctx.shadowBlur=0; ctx.shadowOffsetY=0;
+
+  // Bottom text area
+  const textY = CH - borderBot + borderBot*0.28;
+  const pad = borderSide*1.2;
+
+  // Song title — handwriting-ish, centered
+  const titleSz = CW*0.048;
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  ctx.fillStyle='#2a2a2a'; ctx.textAlign='center';
+  ctx.fillText(d.song_title, CW/2, textY + titleSz);
+
+  // Artist — small, muted
+  setF(ctx,CW*0.022,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#999'; ctx.textAlign='center';
+  ctx.fillText(d.artist, CW/2, textY + titleSz*2.1);
+
+  // Caption line — italic, small
+  setF(ctx,CW*0.02,'300 italic','"Cormorant Garamond",Georgia,serif');
+  ctx.fillStyle='#bbb'; ctx.textAlign='center';
+  ctx.fillText(d.caption_line2||'', CW/2, textY + titleSz*3.3);
+
+  // SAPMANRI stamp — bottom right, faint
+  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.textAlign='right';
+  ctx.fillText('SAPMANRI', CW-pad*0.6, CH-CW*0.022);
+  ctx.textAlign='left';
+}
+
+function renderGrain(ctx,d,CW,CH,isV){
+  // ── 노출 오버레이 / 필름 그레인 ──
+  // 이미지 전체 + 강한 그레인 + 빈티지 컬러 번 + 파형
+  // Color burn overlay — warm amber vignette
+  let g=ctx.createRadialGradient(CW*0.5,CH*0.5,CH*0.15,CW*0.5,CH*0.5,CH*0.75);
+  g.addColorStop(0,'rgba(0,0,0,0)');
+  g.addColorStop(0.6,'rgba(30,18,8,0.22)');
+  g.addColorStop(1,'rgba(20,10,0,0.72)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+
+  // Horizontal light leak — top left
+  let leak=ctx.createLinearGradient(0,0,CW*0.5,CH*0.25);
+  leak.addColorStop(0,'rgba(255,180,60,0.22)');
+  leak.addColorStop(0.4,'rgba(255,120,30,0.08)');
+  leak.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=leak; ctx.fillRect(0,0,CW,CH);
+
+  // Film grain — canvas pixel noise
+  const gCanvas=document.createElement('canvas');
+  gCanvas.width=CW; gCanvas.height=CH;
+  const gCtx=gCanvas.getContext('2d');
+  const idata=gCtx.createImageData(CW,CH);
+  for(let i=0;i<idata.data.length;i+=4){
+    const v=Math.random()*60-30;
+    idata.data[i]=128+v; idata.data[i+1]=128+v; idata.data[i+2]=128+v; idata.data[i+3]=28;
+  }
+  gCtx.putImageData(idata,0,0);
+  ctx.globalCompositeOperation='overlay';
+  ctx.drawImage(gCanvas,0,0);
+  ctx.globalCompositeOperation='source-over';
+
+  // Waveform — white, near bottom
+  const wY=isV?CH*0.62:CH*0.60, wH=isV?CH*0.22:CH*0.28;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.72)','rgba(255,220,140,0.35)',d._ampRatio||1);
+
+  // Text — bottom, all white
+  const pad=CW*0.08;
+  const base=isV?CH*0.80:CH*0.80;
+  const titleSz=CW*0.05;
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,base,CW-pad*2,titleSz*1.3,'rgba(255,255,255,0.95)');
+  setF(ctx,CW*0.024,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.42)';
+  ctx.fillText(d.artist,pad,afterT+CW*0.034);
+  const cs=CW*0.022;
+  setF(ctx,cs,'300 italic','"Cormorant Garamond",Georgia,serif');
+  ctx.fillStyle='rgba(255,255,255,0.58)';
+  ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.075);
+  ctx.fillText(d.caption_line3||'',pad,afterT+CW*0.108);
+
+  // Film frame number — top right, mono
+  setF(ctx,CW*0.018,'400','"Courier New",monospace');
+  ctx.fillStyle='rgba(255,200,80,0.55)'; ctx.textAlign='right';
+  ctx.fillText('SAPMANRI  ♦  01A', CW-pad*0.7, CW*0.06);
+  ctx.textAlign='left';
+}
+
+function renderCinema(ctx,d,CW,CH,isV){
+  // ── 시네마스코프 ──
+  // 상하 letterbox + 하단 바에 곡명
+  const barH = isV ? CH*0.09 : CH*0.11;
+
+  // Top letterbox
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,CW,barH);
+  // Bottom letterbox — slightly taller for text
+  const botBarH = isV ? CH*0.14 : CH*0.17;
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,CH-botBarH,CW,botBarH);
+
+  // Subtle waveform inside image area — near bottom of photo
+  const wY=CH-botBarH-CW*0.04, wH=isV?CH*0.18:CH*0.22;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.38)','rgba(255,255,255,0.12)',d._ampRatio||1);
+
+  // Top bar: tiny channel name left + aspect ratio right
+  const topPad=CW*0.06;
+  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.textAlign='left';
+  ctx.fillText('SAPMANRI', topPad, barH*0.66);
+  ctx.textAlign='right';
+  ctx.fillText('2.39:1', CW-topPad, barH*0.66);
+  ctx.textAlign='left';
+
+  // Thin separator line
+  ctx.beginPath(); ctx.moveTo(0,barH); ctx.lineTo(CW,barH);
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,CH-botBarH); ctx.lineTo(CW,CH-botBarH);
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+
+  // Bottom bar content
+  const pad=CW*0.06;
+  const midBot=CH-botBarH/2;
+
+  // Song title — left, large
+  const titleSz=CW*(isV?0.038:0.042);
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.textAlign='left';
+  ctx.fillText(d.song_title, pad, midBot+titleSz*0.38);
+
+  // Artist — right, small
+  setF(ctx,CW*0.02,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.38)'; ctx.textAlign='right';
+  ctx.fillText(d.artist.toUpperCase(), CW-pad, midBot-titleSz*0.1);
+
+  // Caption line — right, italic, smaller
+  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif');
+  ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.textAlign='right';
+  ctx.fillText(d.caption_line2||'', CW-pad, midBot+titleSz*0.55);
+  ctx.textAlign='left';
 }
 
 function downloadCard(){
