@@ -131,6 +131,7 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           <button class="opt-btn" data-design="nike" onclick="pickDesign(this)"><span class="name">Nike</span><span class="desc">강렬 · 대문자</span></button>
           <button class="opt-btn" data-design="ohouse" onclick="pickDesign(this)"><span class="name">오늘의집</span><span class="desc">라이프스타일</span></button>
           <button class="opt-btn" data-design="apple" onclick="pickDesign(this)"><span class="name">Apple</span><span class="desc">미니멀 · 여백</span></button>
+          <button class="opt-btn" data-design="girok" onclick="pickDesign(this)"><span class="name">기록</span><span class="desc">라이프로그</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -141,6 +142,32 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
         </div>
       </div>
       <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+
+      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <label>파형 조절</label>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:2px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:10px;color:#555;">밀도</span>
+              <span style="font-size:10px;color:#666;" id="densityVal">80</span>
+            </div>
+            <input type="range" id="densitySlider" min="10" max="80" value="80"
+              style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;"
+              oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>잔잔</span><span>촘촘</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:10px;color:#555;">진폭</span>
+              <span style="font-size:10px;color:#666;" id="ampVal">100%</span>
+            </div>
+            <input type="range" id="ampSlider" min="20" max="200" value="100"
+              style="width:100%;accent-color:#7c6fd4;height:3px;cursor:pointer;"
+              oninput="document.getElementById('ampVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>낮게</span><span>높게</span></div>
+          </div>
+        </div>
+      </div>
 
       <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -403,8 +430,24 @@ function renderCard(d){
   // Manual caption override — use if filled, else AI result
   const manualCapLines=document.getElementById('manualCaption').value.trim().split('\n').filter(l=>l.trim());
 
+  // Waveform controls
+  const density = parseInt(document.getElementById('densitySlider').value)||80;
+  const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
+
+  // Downsample/resample line_points to desired density
+  const rawPts = d.line_points || [];
+  const resampledPts = [];
+  for(let i=0; i<density; i++){
+    const t = i/(density-1);
+    const idx = t*(rawPts.length-1);
+    const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
+    resampledPts.push(rawPts[i0]*(1-(idx-i0)) + rawPts[i1]*(idx-i0));
+  }
+
   const rd={
     ...d,
+    line_points: resampledPts,
+    _ampRatio: ampRatio,
     caption_line1: manualCapLines[0] || d.caption_line1,
     caption_line2: manualCapLines[1] || d.caption_line2,
     caption_line3: manualCapLines[2] || d.caption_line3,
@@ -421,7 +464,7 @@ function renderCard(d){
     const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok})[cardDesign](ctx,rd,CW,CH,isV);
     canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
     const prev=document.getElementById('cardPreview');
     prev.innerHTML=''; prev.appendChild(canvas);
@@ -433,7 +476,8 @@ function renderCard(d){
 }
 
 // ── WAVEFORM ENGINE ───────────────────────────────────────
-function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
+function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
+  const aH = maxH * (ampRatio||1);
   const n = pts.length;
 
   if(waveStyle === 'mirror'){
@@ -449,7 +493,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
       const idx = t * (n - 1);
       const i0 = Math.floor(idx), i1 = Math.min(i0 + 1, n - 1);
       const frac = idx - i0;
-      return (pts[i0] * (1 - frac) + pts[i1] * frac) / 100 * maxH;
+      return (pts[i0] * (1 - frac) + pts[i1] * frac) / 100 * aH;
     };
 
     for(let col = 0; col < cols; col++){
@@ -517,7 +561,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
       pts.forEach((p,i)=>{
         const x=(i/(n-1))*CW;
         const j=(Math.random()-0.5)*jitter;
-        const y=baseY-(p/100)*maxH*scale+j;
+        const y=baseY-(p/100)*aH*scale+j;
         i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
       });
       ctx.strokeStyle=color.replace('1)',`${alpha})`).replace(/rgba\((.+),[\d.]+\)/,`rgba($1,${alpha})`);
@@ -529,7 +573,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
       pts.forEach((p,i)=>{
         const x=(i/(n-1))*CW;
         const j=(Math.random()-0.5)*jitter;
-        const y=baseY+(p/100)*maxH*scale*0.6+j;
+        const y=baseY+(p/100)*aH*scale*0.6+j;
         i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
       });
       ctx.strokeStyle=glowColor.replace(/[\d.]+\)$/,`${alpha*0.6})`);
@@ -540,7 +584,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
     // Bright center line
     ctx.beginPath();
     pts.forEach((p,i)=>{
-      const x=(i/(n-1))*CW, y=baseY-(p/100)*maxH;
+      const x=(i/(n-1))*CW, y=baseY-(p/100)*aH;
       i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
     });
     ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=CW/700; ctx.stroke();
@@ -556,7 +600,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor){
 
     pts.forEach((p,i)=>{
       const x=(i/(n-1))*CW;
-      const h=(p/100)*maxH;
+      const h=(p/100)*aH;
       const numDots = Math.ceil(h/dotGap);
 
       for(let d=0; d<numDots; d++){
@@ -609,7 +653,7 @@ function renderSapmanri(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
   g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
   const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(190,170,255,0.82)','rgba(140,100,255,0.35)');
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(190,170,255,0.82)','rgba(140,100,255,0.35)',d._ampRatio||1);
   const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
   const titleSize=CW*0.052;
   setF(ctx,titleSize,'700','"Helvetica Neue",Arial,sans-serif');
@@ -630,7 +674,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.68, wH=splitY*0.38;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(184,122,110,0.88)','rgba(184,122,110,0.28)');
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(184,122,110,0.88)','rgba(184,122,110,0.28)',d._ampRatio||1);
   const pad=CW*0.07, ty=splitY+CW*0.048;
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
   ctx.fillStyle='#b87a6e'; ctx.fillRect(pad,ty+CW*0.02,CW*0.0018,CW*0.046);
@@ -647,7 +691,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
 function renderTheEdit(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
   const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)');
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)',d._ampRatio||1);
   const bx=CW*0.07, bw=CW*0.86;
   const by=isV?CW*0.88:CH*0.64;
   // Draw box first with estimated height, then we'll just draw content and let it flow
@@ -670,7 +714,7 @@ function renderStayfolio(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.66, wH=splitY*0.4;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,115,85,0.92)','rgba(140,115,85,0.28)');
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,115,85,0.92)','rgba(140,115,85,0.28)',d._ampRatio||1);
   const pad=CW*0.075, ty=splitY+CW*0.04;
   ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(CW-pad,ty); ctx.strokeStyle='#d4cfc8'; ctx.lineWidth=1; ctx.stroke();
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#8c7355'; ctx.fillText('STAYFOLIO × SAPMANRI',pad,ty+CW*0.027);
@@ -687,7 +731,7 @@ function renderStayfolio(ctx,d,CW,CH,isV){
 function renderNike(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
   const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.26:CH*0.30;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)');
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)',d._ampRatio||1);
   const pad=CW*0.08;
   const base = isV ? CW*0.88 : CH*0.67;
   setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
@@ -707,7 +751,7 @@ function renderOhouse(ctx,d,CW,CH,isV){
   const radius=CW*0.04;
   let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
   const wY=cardY*0.65, wH=cardY*0.44;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(0,200,150,0.92)','rgba(0,200,150,0.28)');
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(0,200,150,0.92)','rgba(0,200,150,0.28)',d._ampRatio||1);
   ctx.fillStyle='#FAFAF8'; ctx.beginPath();
   ctx.moveTo(0,cardY+radius); ctx.arcTo(0,cardY,radius,cardY,radius); ctx.lineTo(CW-radius,cardY); ctx.arcTo(CW,cardY,CW,cardY+radius,radius); ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath(); ctx.fill();
   const pad=CW*0.07, ty=cardY+CW*0.048;
@@ -734,7 +778,7 @@ function renderApple(ctx,d,CW,CH,isV){
 
   // Waveform on photo — ice white, ultra thin
   const wY = splitY*0.6, wH = splitY*0.44;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.75)','rgba(255,255,255,0.15)');
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.75)','rgba(255,255,255,0.15)',d._ampRatio||1);
 
   // Black bottom panel — perfectly flat
   ctx.fillStyle='#000000'; ctx.fillRect(0,splitY,CW,CH-splitY);
@@ -934,6 +978,103 @@ async function loadPlayer(){
     alert('재생 오류: '+err.message);
     btn.textContent='▶ 재생'; btn.disabled=false;
   }
+}
+
+function renderGirok(ctx,d,CW,CH,isV){
+  // ── 기록 앱 스타일 ──
+  // 흰 배경 + 연한 블루그레이 패널 + 파스텔 포인트 + 원형 이미지 클립
+  const splitY = isV ? CW*1.4 : CH*0.56;
+
+  // Photo area — full bleed top
+  // Light vignette
+  let g=ctx.createLinearGradient(0,0,0,splitY);
+  g.addColorStop(0,'rgba(255,255,255,0.05)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
+
+  // Waveform — soft pastel blue-purple
+  const wY=splitY*0.62, wH=splitY*0.44;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,120,240,0.75)','rgba(180,160,255,0.25)',d._ampRatio||1);
+
+  // White bottom panel with rounded top corners
+  const panelY=splitY;
+  const r=CW*0.06;
+  ctx.fillStyle='#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(0,panelY+r);
+  ctx.arcTo(0,panelY,r,panelY,r);
+  ctx.lineTo(CW-r,panelY);
+  ctx.arcTo(CW,panelY,CW,panelY+r,r);
+  ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath();
+  ctx.fill();
+
+  // Subtle top border line
+  ctx.beginPath(); ctx.moveTo(r,panelY); ctx.lineTo(CW-r,panelY);
+  ctx.strokeStyle='rgba(0,0,0,0.06)'; ctx.lineWidth=1; ctx.stroke();
+
+  const pad=CW*0.08;
+  const ty=panelY+CW*0.06;
+
+  // Pastel pill tag — mood trait
+  const tag=(d.line_traits||[])[0]||'';
+  const tagW=ctx.measureText(tag).width+CW*0.06;
+  const tagH=CW*0.048; const tagX=pad; const tagY=ty;
+  ctx.fillStyle='#EEF0FF';
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(tagX,tagY,tagW,tagH,tagH/2);
+  else ctx.rect(tagX,tagY,tagW,tagH);
+  ctx.fill();
+  setF(ctx,CW*0.022,'500','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#7C6FD4'; ctx.textAlign='center';
+  ctx.fillText(tag,tagX+tagW/2,tagY+tagH*0.68); ctx.textAlign='left';
+
+  // Song title — large bold Korean style
+  const titleSz=CW*0.058;
+  setF(ctx,titleSz,'700','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,ty+tagH+titleSz*1.1,CW-pad*2,titleSz*1.3,'#1A1A1A');
+
+  // Artist — small gray
+  setF(ctx,CW*0.026,'400','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#AAAAAA';
+  ctx.fillText(d.artist,pad,afterT+CW*0.038);
+
+  // Divider line — light
+  const divY=afterT+CW*0.082;
+  ctx.beginPath(); ctx.moveTo(pad,divY); ctx.lineTo(CW-pad,divY);
+  ctx.strokeStyle='#F0F0F5'; ctx.lineWidth=1; ctx.stroke();
+
+  // Caption lines
+  const capSz=CW*0.026;
+  setF(ctx,capSz,'300','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#888888';
+  ctx.fillText(d.caption_line1||'',pad,divY+capSz*2);
+  setF(ctx,capSz,'500','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#444444';
+  ctx.fillText(d.caption_line2||'',pad,divY+capSz*3.7);
+  setF(ctx,capSz*0.9,'300','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#BBBBBB';
+  ctx.fillText(d.caption_line3||'',pad,divY+capSz*5.3);
+
+  // Two extra pastel trait pills bottom right
+  const traits=(d.line_traits||[]).slice(1,3);
+  let px=CW-pad;
+  traits.reverse().forEach(t=>{
+    setF(ctx,CW*0.019,'400','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+    const tw=ctx.measureText(t).width+CW*0.05;
+    const th=CW*0.04; const tx=px-tw; const tyy=divY+capSz*6.2;
+    ctx.fillStyle='#F5F5FF';
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(tx,tyy,tw,th,th/2);
+    else ctx.rect(tx,tyy,tw,th);
+    ctx.fill();
+    ctx.fillStyle='#9B91E0'; ctx.textAlign='center';
+    ctx.fillText(t,tx+tw/2,tyy+th*0.68); ctx.textAlign='left';
+    px=tx-CW*0.018;
+  });
+
+  // Branding — bottom, dark small
+  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#CCCCCC'; ctx.textAlign='right';
+  ctx.fillText('SAPMANRI',CW-pad*0.7,CH-CW*0.022); ctx.textAlign='left';
 }
 
 function downloadCard(){
