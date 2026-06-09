@@ -435,36 +435,54 @@ async function fetchAndFillFromYoutube() {
   status.style.color = 'var(--mute)';
 
   try {
-    // Claude API에 web_search 툴로 유튜브 영상 정보 + 자막 가져오기
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'x-api-key': getApiKey(),
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1000,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{
-          role: 'user',
-          content: `유튜브 영상 URL: https://www.youtube.com/watch?v=${videoId}
+    // Claude API — web_search 툴 멀티턴 방식
+    const headers = {
+      'Content-Type': 'application/json',
+      'anthropic-dangerous-direct-browser-access': 'true',
+      'x-api-key': getApiKey(),
+      'anthropic-version': '2023-06-01'
+    };
+    const tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+    const systemPrompt = '유튜브 영상을 검색해서 제목과 내용을 파악한 뒤, 최종 답변은 반드시 JSON만 반환해. 마크다운이나 다른 텍스트 없이 순수 JSON만.';
+    const userMsg = `유튜브 영상: https://www.youtube.com/watch?v=${videoId}
 
-이 영상을 검색해서 제목, 내용, 주제를 파악하고 아래 JSON만 반환해줘. 다른 텍스트 없이 JSON만.
+이 영상을 web_search로 찾아서 제목과 내용을 파악하고 아래 형식으로만 답해:
+{"topic":"영상 주제 15자 이내 한국어","text_slide":"인스타 텍스트 슬라이드용 감성적 한 문장 20-30자 한국어","mood":"분위기 한 단어"}`;
 
-{"topic":"영상 주제 (15자 이내 한국어)","text_slide":"감성적인 한 문장 (인스타 텍스트 슬라이드용, 20-30자 한국어)","mood":"영상 분위기 한 단어"}`
-        }]
-      })
-    });
+    let messages = [{ role: 'user', content: userMsg }];
+    let raw = '';
 
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    // 최대 4턴 — tool_use 끝날 때까지
+    for (let turn = 0; turn < 4; turn++) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 1000, system: systemPrompt, tools, messages })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
 
-    // 최종 text 블록에서 JSON 추출
-    const textBlock = data.content?.filter(b => b.type === 'text').pop();
-    const raw = textBlock?.text || '';
+      // assistant 메시지 추가
+      messages.push({ role: 'assistant', content: data.content });
+
+      // tool_use 블록 처리
+      const toolUseBlocks = data.content.filter(b => b.type === 'tool_use');
+      if (toolUseBlocks.length > 0) {
+        // tool_result를 user로 보내기
+        const toolResults = toolUseBlocks.map(b => ({
+          type: 'tool_result',
+          tool_use_id: b.id,
+          content: '검색 완료. 영상 제목과 내용을 바탕으로 JSON만 반환해줘.'
+        }));
+        messages.push({ role: 'user', content: toolResults });
+        continue;
+      }
+
+      // text 블록 찾기
+      const textBlock = data.content.filter(b => b.type === 'text').pop();
+      if (textBlock?.text) { raw = textBlock.text; break; }
+    }
+
     const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
     if (s === -1) throw new Error('응답에서 JSON을 찾지 못했어요');
     const result = JSON.parse(raw.slice(s, e + 1));
