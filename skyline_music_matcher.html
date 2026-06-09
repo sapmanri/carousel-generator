@@ -236,6 +236,9 @@ async function analyze(){
   const btn=document.getElementById('analyzeBtn');
   btn.disabled=true; btn.textContent='분석 중...';
   document.getElementById('downloadBtn').style.display='none';
+  document.getElementById('playerSection').style.display='none';
+  document.getElementById('ytPlayerWrap').style.display='none';
+  document.getElementById('ytFrame').src='';
   document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
 
   const prompt=`You are a visual analyst and music curator for 감성찾아삽만리 (SAPMANRI), a Korean slow-life YouTube channel.
@@ -681,7 +684,7 @@ async function loadPlayer(){
     if(!vid)throw new Error('검색 결과가 없어요');
     document.getElementById('ytFrame').src=`https://www.youtube.com/embed/${vid}?autoplay=1`;
     document.getElementById('ytPlayerWrap').style.display='block';
-    btn.textContent='▶ 재생 중';
+    btn.textContent='▶ 다시 재생'; btn.disabled=false;
   }catch(err){
     alert('재생 오류: '+err.message);
     btn.textContent='▶ 재생'; btn.disabled=false;
