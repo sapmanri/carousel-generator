@@ -156,6 +156,15 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           oninput="if(cachedResult)renderCard(cachedResult)"></textarea>
       </div>
 
+      <div style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="videoRecToggle" checked
+            style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;"
+            onchange="if(cachedResult&&this.checked)findRelatedVideo();" />
+          <span style="font-size:10px;letter-spacing:0.12em;color:#555;text-transform:uppercase;">채널 영상 추천</span>
+        </label>
+      </div>
+
       <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
       <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
     </div>
@@ -205,6 +214,15 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           <div id="instaCapHint" style="display:none;padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사하세요</div>
         </div>
       </div>
+      <!-- Channel video recommendation -->
+      <div id="videoRecSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">감성찾아삽만리 추천 영상</span>
+          </div>
+          <div id="videoRecList" style="padding:14px 18px;display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -238,6 +256,7 @@ function loadFile(f){
   r.onload=ev=>{
     imgSrc=ev.target.result; b64=ev.target.result.split(',')[1];
     cachedResult=null;
+    usedSongs=[];
     document.getElementById('uploadSection').style.display='none';
     document.getElementById('workspaceSection').style.display='grid';
     document.getElementById('downloadBtn').style.display='none';
@@ -260,6 +279,7 @@ function pickDesign(btn){
 }
 let cropOffsetX=0.5;
 let captionLang='ko';
+let usedSongs=[]; // 같은 이미지에서 나온 곡 히스토리
 
 function pickLang(btn){
   document.querySelectorAll('.lang-btn').forEach(b=>{
@@ -286,7 +306,7 @@ function pickFmt(btn){
 }
 
 function resetAll(){
-  imgSrc=null;b64=null;cachedResult=null;
+  imgSrc=null;b64=null;cachedResult=null;usedSongs=[];
   document.getElementById('uploadSection').style.display='block';
   document.getElementById('workspaceSection').style.display='none';
   document.getElementById('fileInput').value='';
@@ -305,6 +325,8 @@ async function analyze(){
   document.getElementById('ytFrame').src='';
   document.getElementById('instaCapSection').style.display='none';
   document.getElementById('instaCapText').style.display='none';
+  document.getElementById('videoRecSection').style.display='none';
+  document.getElementById('videoRecList').innerHTML='';
   document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
 
   const prompt=`You are a visual analyst and music curator for 감성찾아삽만리 (SAPMANRI), a Korean slow-life YouTube channel.
@@ -323,6 +345,7 @@ Produce a composite height array of exactly 80 integers (0–100), left to right
 
 STEP 3 — SONG MATCH:
 Based only on the composite waveform's shape, rhythm, and emotional arc, match ONE globally famous song (something most people worldwide instantly recognise).
+${usedSongs.length > 0 ? `IMPORTANT: Do NOT suggest any of these songs that were already used for this image: ${usedSongs.join(', ')}. Pick a completely different song.` : ''}
 
 STEP 4 — POETIC CAPTION:
 3 short lines in the quiet, lyrical voice of a slow-life vlogger. Evocative, not descriptive. Line 2 must naturally weave in the song title.
@@ -350,6 +373,7 @@ Respond ONLY as valid JSON — no markdown, no extra text:
     const data=await res.json();
     if(data.error)throw new Error(data.error.message);
     cachedResult=JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
+    usedSongs.push(`${cachedResult.song_title} by ${cachedResult.artist}`);
     renderCard(cachedResult);
     document.getElementById('downloadBtn').style.display='block';
     // Show player section
@@ -362,6 +386,10 @@ Respond ONLY as valid JSON — no markdown, no extra text:
     document.getElementById('instaCapText').style.display='none';
     document.getElementById('instaCapHint').style.display='none';
     document.getElementById('instaCapBtn').textContent='✦ 캡션 생성';
+    // Channel video recommendation
+    document.getElementById('videoRecSection').style.display='none';
+    document.getElementById('videoRecList').innerHTML='';
+    if(document.getElementById('videoRecToggle').checked) findRelatedVideo();
   }catch(err){
     document.getElementById('cardPreview').innerHTML=`<div class="placeholder"><p style="color:#c06060">오류: ${err.message}</p></div>`;
   }
@@ -755,6 +783,84 @@ function renderApple(ctx,d,CW,CH,isV){
   ctx.textAlign='right';
   ctx.fillText('SAPMANRI', CW-pad*0.7, CH-CW*0.022);
   ctx.textAlign='left';
+}
+
+const CHANNEL_ID = 'UCHhBukRCWSaBTcKolh2wN6Q';
+
+async function findRelatedVideo(){
+  const gkey=document.getElementById('googleKey').value.trim();
+  const akey=document.getElementById('apiKey').value.trim();
+  if(!gkey||!akey||!cachedResult)return;
+
+  const recList=document.getElementById('videoRecList');
+  const recSection=document.getElementById('videoRecSection');
+  recSection.style.display='block';
+  recList.innerHTML='<div style="font-size:12px;color:#444;padding:4px 0;">채널 영상 불러오는 중...</div>';
+
+  try{
+    // 1. Fetch all video titles (up to 200, 50 per page)
+    let videos=[], pageToken='';
+    for(let page=0; page<4; page++){
+      const url=`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&type=video&maxResults=50&order=date${pageToken?'&pageToken='+pageToken:''}&key=${gkey}`;
+      const res=await fetch(url);
+      const data=await res.json();
+      if(data.error)throw new Error(data.error.message);
+      videos.push(...(data.items||[]).map(v=>({
+        id:v.id.videoId,
+        title:v.snippet.title,
+        thumb:v.snippet.thumbnails?.medium?.url||''
+      })));
+      if(!data.nextPageToken)break;
+      pageToken=data.nextPageToken;
+    }
+
+    if(!videos.length)throw new Error('영상을 찾을 수 없어요');
+    recList.innerHTML='<div style="font-size:12px;color:#444;padding:4px 0;">AI가 어울리는 영상 고르는 중...</div>';
+
+    // 2. Ask Claude to pick 3 matching videos
+    const d=cachedResult;
+    const videoList=videos.map((v,i)=>`${i+1}. [${v.id}] ${v.title}`).join('\n');
+
+    const prompt=`You are helping match YouTube videos from the channel 감성찾아삽만리 (SAPMANRI) to a photo.
+
+Photo analysis:
+- Scene/line description: ${d.line_description}
+- Mood traits: ${(d.line_traits||[]).join(', ')}
+- Matched song: "${d.song_title}" by ${d.artist}
+- Caption: ${d.caption_line1} / ${d.caption_line2}
+
+Channel videos (format: index. [videoId] title):
+${videoList}
+
+Pick the 3 most thematically and emotionally fitting videos. Consider: season, location type (countryside/water/urban/cafe), mood, time of day implied by the photo.
+
+Respond ONLY as JSON, no markdown:
+{"picks":[{"id":"videoId","title":"title","reason":"한국어로 1문장 추천 이유"}]}`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':akey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const aiData=await res.json();
+    if(aiData.error)throw new Error(aiData.error.message);
+    const picks=JSON.parse(aiData.content[0].text.replace(/```json|```/g,'').trim()).picks;
+
+    recList.innerHTML=picks.map(p=>`
+      <a href="https://www.youtube.com/watch?v=${p.id}" target="_blank"
+        style="display:flex;gap:12px;align-items:flex-start;text-decoration:none;padding:10px;background:#0a0a0a;border-radius:7px;border:0.5px solid #1e1e1e;transition:border-color 0.15s;"
+        onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#1e1e1e'">
+        <img src="https://img.youtube.com/vi/${p.id}/mqdefault.jpg"
+          style="width:96px;height:54px;object-fit:cover;border-radius:4px;flex-shrink:0;" />
+        <div style="min-width:0;">
+          <div style="font-size:12px;font-weight:500;color:#ccc;line-height:1.4;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${p.title}</div>
+          <div style="font-size:11px;color:#555;line-height:1.5;">${p.reason}</div>
+        </div>
+      </a>`).join('');
+
+  }catch(err){
+    recList.innerHTML=`<div style="font-size:12px;color:#555;padding:4px 0;">오류: ${err.message}</div>`;
+  }
 }
 
 async function generateInstaCaption(){
