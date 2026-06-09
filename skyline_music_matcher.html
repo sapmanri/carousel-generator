@@ -346,7 +346,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.2.0';
+const VERSION = 'v1.2.1';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1502,13 +1502,13 @@ function downloadWaveGif(){
   const btn = document.getElementById('downloadGifBtn');
   btn.textContent='GIF 생성 중...'; btn.disabled=true;
 
-  const SIZE = 600;
-  const FRAMES = 30;  // 30 frames
-  const FPS = 12;
+  const SIZE = 400;
+  const FRAMES = 16;  // 16 frames
+  const FPS = 10;
 
   const gif = new GIF({
     workers: 2,
-    quality: 8,
+    quality: 10,
     width: SIZE,
     height: SIZE,
     transparent: 0x000000,  // black = transparent
