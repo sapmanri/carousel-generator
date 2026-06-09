@@ -130,6 +130,7 @@ main{max-width:1020px;margin:0 auto;padding:28px 24px 80px}
           <button class="opt-btn" data-design="stayfolio" onclick="pickDesign(this)"><span class="name">스테이폴리오</span><span class="desc">파인스테이</span></button>
           <button class="opt-btn" data-design="nike" onclick="pickDesign(this)"><span class="name">Nike</span><span class="desc">강렬 · 대문자</span></button>
           <button class="opt-btn" data-design="ohouse" onclick="pickDesign(this)"><span class="name">오늘의집</span><span class="desc">라이프스타일</span></button>
+          <button class="opt-btn" data-design="apple" onclick="pickDesign(this)"><span class="name">Apple</span><span class="desc">미니멀 · 여백</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -270,7 +271,7 @@ function renderCard(d){
   img.onload=()=>{
     const sc=Math.max(CW/img.naturalWidth,CH/img.naturalHeight);
     ctx.drawImage(img,(CW-img.naturalWidth*sc)/2,(CH-img.naturalHeight*sc)/2,img.naturalWidth*sc,img.naturalHeight*sc);
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse})[cardDesign](ctx,d,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple})[cardDesign](ctx,d,CW,CH,isV);
     canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
     const prev=document.getElementById('cardPreview');
     prev.innerHTML=''; prev.appendChild(canvas);
@@ -459,10 +460,12 @@ function renderSapmanri(ctx,d,CW,CH,isV){
   const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.14:CH*0.16;
   drawWave(ctx,d.line_points,CW,wY,wH,'rgba(190,170,255,0.82)','rgba(140,100,255,0.35)');
   const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
-  setF(ctx,CW*0.052,'700','"Helvetica Neue",Arial,sans-serif');
-  const afterT=fillWrap(ctx,d.song_title,pad,base,CW-pad*2,CW*0.064,'rgba(255,255,255,0.97)')+CW*0.014;
-  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fillText(d.artist,pad,afterT);
-  const sepY=afterT+CW*0.05;
+  const titleSize=CW*0.052;
+  setF(ctx,titleSize,'700','"Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,base,CW-pad*2,titleSize*1.25,'rgba(255,255,255,0.97)');
+  const artistY=afterT+titleSize*0.7;
+  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fillText(d.artist,pad,artistY);
+  const sepY=artistY+CW*0.052;
   ctx.beginPath(); ctx.moveTo(pad,sepY); ctx.lineTo(pad+CW*0.065,sepY); ctx.strokeStyle='rgba(255,255,255,0.16)'; ctx.lineWidth=1; ctx.stroke();
   const cs=CW*0.024, cy=sepY+cs*2;
   setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.fillText(d.caption_line1||'',pad,cy);
@@ -555,6 +558,68 @@ function renderOhouse(ctx,d,CW,CH,isV){
   setF(ctx,CW*0.022,'400','"Noto Sans KR",Arial,sans-serif'); ctx.fillStyle='#aaa'; ctx.fillText(d.caption_line2||'',pad,ty+CW*0.204);
   ctx.fillStyle='#00C896'; ctx.fillRect(0,CH-CW*0.009,CW,CW*0.009);
   setF(ctx,CW*0.014,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ccc'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.8,CH-CW*0.024); ctx.textAlign='left';
+}
+
+function renderApple(ctx,d,CW,CH,isV){
+  // ── Apple style: photo top 55%, pure black bottom panel ──
+  const splitY = CH * 0.55;
+
+  // Very subtle dark vignette on photo
+  const vg = ctx.createRadialGradient(CW/2,splitY/2,CW*0.1,CW/2,splitY/2,CW*0.75);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.22)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,CW,splitY);
+
+  // Waveform on photo — ice white, ultra thin
+  const wY = splitY*0.62, wH = splitY*0.24;
+  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.75)','rgba(255,255,255,0.15)');
+
+  // Black bottom panel — perfectly flat
+  ctx.fillStyle='#000000'; ctx.fillRect(0,splitY,CW,CH-splitY);
+
+  // Thin 1px separator line between photo and panel
+  ctx.beginPath(); ctx.moveTo(0,splitY); ctx.lineTo(CW,splitY);
+  ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.stroke();
+
+  const pad = CW*0.08;
+
+  // Category label — tiny, gray, letter-spaced
+  const labelY = splitY + CW*0.058;
+  setF(ctx,CW*0.018,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.fillText('SKYLINE MUSIC', pad, labelY);
+
+  // Song title — large, ultra-light weight, pure white
+  const titleSize = CW*0.068;
+  setF(ctx,titleSize,'200','"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  const afterT = fillWrap(ctx,d.song_title,pad,labelY+titleSize*1.1,CW-pad*2,titleSize*1.15,'#ffffff');
+
+  // Artist — small, mid-gray
+  setF(ctx,CW*0.024,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.38)';
+  ctx.fillText(d.artist, pad, afterT+CW*0.034);
+
+  // Hairline divider
+  const divY = afterT+CW*0.082;
+  ctx.beginPath(); ctx.moveTo(pad,divY); ctx.lineTo(CW-pad,divY);
+  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
+
+  // Caption — centered, light gray, italic-ish
+  const capSize = CW*0.022;
+  setF(ctx,capSize,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.45)';
+  ctx.textAlign='center';
+  ctx.fillText(d.caption_line2||'', CW/2, divY+capSize*2.2);
+  setF(ctx,capSize*0.9,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.fillText(d.caption_line3||'', CW/2, divY+capSize*3.8);
+  ctx.textAlign='left';
+
+  // Branding — bottom right, barely visible
+  setF(ctx,CW*0.015,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.15)';
+  ctx.textAlign='right';
+  ctx.fillText('SAPMANRI', CW-pad*0.7, CH-CW*0.022);
+  ctx.textAlign='left';
 }
 
 function downloadCard(){
