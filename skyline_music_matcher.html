@@ -299,12 +299,14 @@ function applyMobileLayout(){
   const cardCol = workspace.querySelector('.panel + div');
   if(!cardCol) return;
 
-  // Move card column before panel
-  workspace.insertBefore(cardCol, panel);
+  // Insert card column after analyze button, before after-card elements
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  // Insert cardCol right after analyzeBtn in the panel
+  analyzeBtn.insertAdjacentElement('afterend', cardCol);
 
-  // Move after-card elements into card column
+  // Move after-card elements after cardCol
   const afterCards = panel.querySelectorAll('.after-card');
-  afterCards.forEach(el => cardCol.appendChild(el));
+  afterCards.forEach(el => panel.appendChild(el));
 }
 window.addEventListener('load', applyMobileLayout);
 const keyInput=document.getElementById('apiKey');
