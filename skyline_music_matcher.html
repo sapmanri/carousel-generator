@@ -344,7 +344,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.0.8';
+const VERSION = 'v1.0.9';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -790,7 +790,7 @@ OUTPUT EXACTLY IN THIS ORDER — NO EXCEPTIONS:
 
 2. 4-6 short lyrical lines. Stay close to the visual. Let the landscape-song connection emerge quietly. No conclusion.
 
-3. EXACTLY 5 hashtags on one line: #감성찾아삽만리 #SkylineScore + 3 best SEO tags for this post from #sapmanri #슬로우라이프 #slowliving + scene/music tags. MAXIMUM 5. NO MORE.
+3. Include 2 relevant SEO hashtags for this specific post (song title, artist, mood, or scene — whichever has the most search value). No fixed tags needed here.
 
 4. This exact line: Skyline Music Matcher™ by @sapmanri
 
@@ -836,8 +836,14 @@ All prose in ${lang}. No labels. No markdown.`
     const hasDeclaration = firstLine.includes(d.song_title) && (firstLine.includes('악보') || firstLine.includes('흐른') || firstLine.includes('음악'));
     const finalBody = hasDeclaration ? body : declaration + '\n\n' + body;
 
-    // 6. Fixed hashtags — always exactly 5
-    const hashtags = '#감성찾아삽만리 #SkylineScore #sapmanri #슬로우라이프 #slowliving';
+    // 6. Hashtags — 3 fixed + 2 from AI (SEO flexible)
+    const fixedTags = ['#SkylineScore','#sapmanri','#slowliving'];
+    // Extract hashtags AI included in raw response
+    const aiTags = (raw.match(/#[\w가-힣]+/g)||[])
+      .filter(t=>!fixedTags.map(f=>f.toLowerCase()).includes(t.toLowerCase()))
+      .filter(t=>t!=='#감성찾아삽만리')
+      .slice(0,2);
+    const hashtags = '#감성찾아삽만리 ' + [...fixedTags, ...aiTags].join(' ');
 
     // 7. Assemble final caption
     const caption = finalBody + '\n\n' + hashtags + '\n\nSkyline Music Matcher™ by @sapmanri';
