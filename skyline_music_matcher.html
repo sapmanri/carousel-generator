@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Skyline Music Matcher — 감성찾아삽만리</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
@@ -280,6 +281,7 @@ input[type=range]::-moz-range-thumb{
         </label>
       </div>
       <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
+      <button class="btn-secondary btn-dl" id="downloadGifBtn" onclick="downloadWaveGif()" style="display:none;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 GIF 저장</button>
       <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
     </div><!-- /after-card-group -->
 
@@ -344,7 +346,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.1.1';
+const VERSION = 'v1.2.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -613,6 +615,7 @@ Respond ONLY as valid JSON:
 
     renderCard(cachedResult);
     document.getElementById('downloadBtn').style.display='block';
+    document.getElementById('downloadGifBtn').style.display='block';
     document.getElementById('panelSliderWrap').style.display='block';
     document.getElementById('panelSlider').value=50;
     document.getElementById('panelPosVal').textContent='50%';
@@ -1492,6 +1495,137 @@ function renderCinema(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.textAlign='right';
   ctx.fillText(d.caption_line2||'', CW-pad, midBot+titleSz*0.55);
   ctx.textAlign='left';
+}
+
+function downloadWaveGif(){
+  if(!cachedResult) return;
+  const btn = document.getElementById('downloadGifBtn');
+  btn.textContent='GIF 생성 중...'; btn.disabled=true;
+
+  const SIZE = 600;
+  const FRAMES = 30;  // 30 frames
+  const FPS = 12;
+
+  const gif = new GIF({
+    workers: 2,
+    quality: 8,
+    width: SIZE,
+    height: SIZE,
+    transparent: 0x000000,  // black = transparent
+    background: '#000000'
+  });
+
+  const d = cachedResult;
+  const density = parseInt(document.getElementById('densitySlider').value)||80;
+  const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
+
+  // Resample line_points
+  const rawPts = d.line_points || [];
+  const pts = [];
+  for(let i=0; i<density; i++){
+    const t = i/(density-1);
+    const idx = t*(rawPts.length-1);
+    const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
+    pts.push(rawPts[i0]*(1-(idx-i0)) + rawPts[i1]*(idx-i0));
+  }
+
+  for(let f=0; f<FRAMES; f++){
+    const canvas = document.createElement('canvas');
+    canvas.width = SIZE; canvas.height = SIZE;
+    const ctx = canvas.getContext('2d');
+
+    // Black background (will be transparent)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    // Animate: phase shift per frame
+    const phase = (f / FRAMES) * Math.PI * 2;
+    const animPts = pts.map((v, i) => {
+      const wave = Math.sin(phase + i * 0.3) * 8;
+      return Math.max(0, Math.min(100, v + wave));
+    });
+
+    const baseY = SIZE * 0.62;
+    const maxH = SIZE * 0.52;
+
+    // Draw wave — white for GIF
+    const wStyle = waveStyle;
+    const aH = maxH * ampRatio;
+    const n = animPts.length;
+
+    if(wStyle === 'mirror'){
+      const dotSize = Math.max(SIZE/160, 3);
+      const dotGap = dotSize * 1.55;
+      const cols = Math.floor(SIZE/dotGap);
+      const colW = SIZE/cols;
+      for(let col=0; col<cols; col++){
+        const cx2 = col*colW + colW*0.5;
+        const t2 = col/(cols-1);
+        const idx2 = t2*(n-1);
+        const i0=Math.floor(idx2), i1=Math.min(i0+1,n-1);
+        const h = (animPts[i0]*(1-(idx2-i0))+animPts[i1]*(idx2-i0))/100*aH;
+        const rows = Math.floor(h/dotGap);
+        for(let row=0; row<rows; row++){
+          const progress = row/Math.max(rows-1,1);
+          const cy2 = baseY - row*dotGap - dotGap*0.5;
+          const alpha = (0.85 - progress*0.6);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = '#ffffff';
+          const ds = dotSize*(0.5+(1-progress)*0.5);
+          ctx.beginPath(); ctx.rect(cx2-ds/2, cy2-ds/2, ds, ds); ctx.fill();
+          // mirror
+          if(row < rows*0.7){
+            ctx.globalAlpha = alpha*0.4*(1-row/(rows*0.7));
+            ctx.beginPath(); ctx.rect(cx2-ds/2, baseY+row*dotGap, ds, ds); ctx.fill();
+          }
+        }
+      }
+    } else if(wStyle === 'multiline'){
+      const layers = 6;
+      ctx.lineJoin='round'; ctx.lineCap='round';
+      for(let l=0; l<layers; l++){
+        const alpha2 = 0.12 + (l/layers)*0.55;
+        const scale2 = 0.5 + (l/layers)*0.8;
+        ctx.globalAlpha = alpha2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.max(SIZE/(700+l*80), 0.5);
+        ctx.beginPath();
+        for(let i=0; i<n; i++){
+          const x = (i/(n-1))*SIZE;
+          const y = baseY - (animPts[i]/100)*aH*scale2;
+          i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+    } else {
+      // dots
+      const barW = Math.max(SIZE/0.38/n, 2);
+      ctx.globalAlpha = 0.85;
+      animPts.forEach((p,i)=>{
+        const x = (i/(n-1))*SIZE;
+        const h2 = (p/100)*aH;
+        const numDots = Math.ceil(h2/(barW*1.35));
+        for(let d2=0; d2<numDots; d2++){
+          const t3 = d2/Math.max(numDots-1,1);
+          ctx.fillStyle = t3>0.6 ? 'rgba(255,255,255,0.4)' : '#ffffff';
+          ctx.fillRect(x-barW/2, baseY-d2*barW*1.35, barW, barW);
+        }
+      });
+    }
+
+    ctx.globalAlpha = 1;
+    gif.addFrame(canvas, {delay: Math.floor(1000/FPS), copy: true});
+  }
+
+  gif.on('finished', blob=>{
+    const a = document.createElement('a');
+    a.download = `sapmanri_wave_${Date.now()}.gif`;
+    a.href = URL.createObjectURL(blob);
+    a.click();
+    btn.textContent='↓ 파형 GIF 저장'; btn.disabled=false;
+  });
+
+  gif.render();
 }
 
 function downloadCard(){
