@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.6';
+const VERSION = 'v1.8.7';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1785,8 +1785,19 @@ function downloadWaveVideo(fmt){
     btn.disabled = false;
   };
 
-  const bgImg = new Image();
-  bgImg.onload = () => {
+  // 카드 canvas를 배경으로 사용 (텍스트/디자인 포함)
+  const cardCanvas = window._cardCanvas;
+  if(!cardCanvas){
+    alert('먼저 카드를 생성해주세요.');
+    btn.textContent=isV?'↓ 파형 영상 9:16':'↓ 파형 영상 1:1'; btn.disabled=false; return;
+  }
+  // 카드를 영상 해상도로 리사이즈한 배경 canvas
+  const bgCanvas = document.createElement('canvas');
+  bgCanvas.width = CW; bgCanvas.height = CH;
+  const bgCtx = bgCanvas.getContext('2d');
+  bgCtx.drawImage(cardCanvas, 0, 0, CW, CH);
+
+  (() => {
     recorder.start();
     let frame = 0;
 
@@ -1899,13 +1910,9 @@ function downloadWaveVideo(fmt){
       if(frame >= TOTAL_FRAMES){ recorder.stop(); return; }
       const phase = (frame/FPS)*Math.PI*1.2;
 
-      // 배경
+      // 카드 배경 복사 (텍스트/디자인 포함)
       ctx.globalAlpha=1;
-      const sc=Math.max(CW/bgImg.naturalWidth,CH/bgImg.naturalHeight);
-      const sw=bgImg.naturalWidth*sc, sh=bgImg.naturalHeight*sc;
-      ctx.drawImage(bgImg,(CW-sw)/2,(CH-sh)/2,sw,sh);
-      ctx.globalAlpha=0.35; ctx.fillStyle='#000'; ctx.fillRect(0,0,CW,CH);
-      ctx.globalAlpha=1;
+      ctx.drawImage(bgCanvas, 0, 0, CW, CH);
 
       // visibleWaves 전부 그리기
       waveSnapshot.forEach(ws => {
@@ -1916,22 +1923,13 @@ function downloadWaveVideo(fmt){
         drawOneWave(ws.style, animPts, ws.color, ws.offset, ws.amp);
       });
 
-      // 하단 텍스트
       ctx.globalAlpha=1;
-      ctx.font=`300 ${CW*0.028}px 'Cormorant Garamond', serif`;
-      ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.textAlign='left';
-      ctx.fillText(d.song_title||'', CW*0.06, CH*0.93);
-      ctx.font=`300 ${CW*0.018}px 'Noto Sans KR', sans-serif`;
-      ctx.fillStyle='rgba(255,255,255,0.5)';
-      ctx.fillText(d.artist||'', CW*0.06, CH*0.96);
 
       frame++;
       setTimeout(drawFrame, 1000/FPS);
     }
     drawFrame();
-  };
-  bgImg.crossOrigin='anonymous';
-  bgImg.src = imgSrc;
+  })();
 }
 
 
