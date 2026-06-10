@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.3';
+const VERSION = 'v1.8.4';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1826,6 +1826,10 @@ function downloadWaveVideo(fmt){
         // dots
         ctx.globalAlpha=0.65; ctx.fillStyle=tc;
         for(let i=0;i<n;i+=6){const x=(i/(n-1))*CW,y=getY(smooth[i]);const r=Math.max(CW/300,2);ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+        // 반사 (뒤집힌 선)
+        ctx.globalAlpha=0.18; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/160,2.5); ctx.beginPath();
+        for(let i=0;i<n;i++){const x=(i/(n-1))*CW, y=getY(smooth[i]), ry=center+(center-y)*0.4;i===0?ctx.moveTo(x,ry):ctx.lineTo(x,ry);}
+        ctx.stroke();
       } else if(ws==='mirror'){
         const dotSize=Math.max(CW/120,5), dotGap=dotSize*1.6;
         const cols=Math.floor(CW/dotGap), colW=CW/cols;
@@ -1849,6 +1853,11 @@ function downloadWaveVideo(fmt){
           ctx.beginPath();
           for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=baseY-(animPts[i]/100)*aH*(0.5+(l/layers)*0.8);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
           ctx.stroke();
+          // 반사
+          ctx.globalAlpha=(0.12+(l/layers)*0.6)*0.3;
+          ctx.beginPath();
+          for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=baseY+(animPts[i]/100)*aH*(0.5+(l/layers)*0.8)*0.5;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+          ctx.stroke();
         }
       } else if(ws==='silhouette'){
         const barW=CW/n*0.7;
@@ -1858,6 +1867,11 @@ function downloadWaveVideo(fmt){
           grad.addColorStop(0,wc); grad.addColorStop(1,'rgba(255,255,255,0.08)');
           ctx.globalAlpha=0.85; ctx.fillStyle=grad;
           ctx.fillRect(x-CW/n*0.35,baseY-h,barW,h);
+          // 반사
+          const gradR=ctx.createLinearGradient(x,baseY,x,baseY+h*0.5);
+          gradR.addColorStop(0,'rgba(255,255,255,0.18)'); gradR.addColorStop(1,'rgba(255,255,255,0)');
+          ctx.globalAlpha=0.35; ctx.fillStyle=gradR;
+          ctx.fillRect(x-CW/n*0.35,baseY,barW,h*0.5);
         }
       } else { // dots
         const barW=Math.max(CW/n*0.5,3);
@@ -1867,6 +1881,12 @@ function downloadWaveVideo(fmt){
             const t3=dd/Math.max(numDots-1,1);
             ctx.globalAlpha=t3>0.6?0.4:0.85; ctx.fillStyle=wc;
             ctx.fillRect(x-barW/2,baseY-dd*barW*1.4,barW,barW);
+          }
+          // 반사
+          const refDots=Math.ceil(numDots*0.4);
+          for(let dd=0;dd<refDots;dd++){
+            ctx.globalAlpha=0.2*(1-dd/refDots); ctx.fillStyle=wc;
+            ctx.fillRect(x-barW/2,baseY+dd*barW*1.4,barW,barW);
           }
         });
       }
