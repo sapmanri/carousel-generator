@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.9.2';
+const VERSION = 'v1.9.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1779,7 +1779,12 @@ function downloadWaveVideo(fmt){
     waveSnapshot.push({ style: w, pts, amp, color, offset });
   });
 
-  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+  const mimeType = MediaRecorder.isTypeSupported('video/mp4')
+    ? 'video/mp4'
+    : MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : 'video/webm';
+  const ext = mimeType.startsWith('video/mp4') ? 'mp4' : 'webm';
   const stream = canvas.captureStream(FPS);
   const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8000000 });
   const chunks = [];
@@ -1787,7 +1792,7 @@ function downloadWaveVideo(fmt){
   recorder.onstop = () => {
     const blob = new Blob(chunks, { type: mimeType });
     const a = document.createElement('a');
-    a.download = `sapmanri_wave_${fmt}_${Date.now()}.webm`;
+    a.download = `sapmanri_wave_${fmt}_${Date.now()}.${ext}`;
     a.href = URL.createObjectURL(blob);
     a.click();
     btn.textContent = isV ? '↓ 파형 영상 9:16' : '↓ 파형 영상 1:1';
