@@ -159,9 +159,9 @@ input[type=range]::-moz-range-thumb{
       <div class="panel-section">
         <label>파형 스타일</label>
         <div class="btn-grid-2" id="waveGrid">
-          <div style="position:relative;">
-            <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
-            <input type="checkbox" id="vis_mirror" checked onchange="toggleWaveVisible('mirror',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)" style="width:100%;"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
+            <input type="checkbox" id="vis_mirror" checked onchange="toggleWaveVisible('mirror',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="position:relative;">
             <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
@@ -312,10 +312,6 @@ input[type=range]::-moz-range-thumb{
     <div class="analyze-wrap">
       <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
     </div>
-    <!-- 3 분석 버튼 (desktop: left col / mobile: bottom) -->
-    <div class="analyze-wrap">
-      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
-    </div>
 
     <!-- 5 재생·인스타캡션·채널영상 (desktop: right col, row 2) -->
     <div class="post-card-group">
@@ -378,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.5.3';
+const VERSION = 'v1.5.4';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
