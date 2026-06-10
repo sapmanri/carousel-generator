@@ -205,3 +205,14 @@ input[type=range]::-moz-range-thumb{
             />
           </div>
         </div>
+function toggleWaveVisible(wave, el){
+  if(!el.checked){
+    if(visibleWaves.size <= 1){ el.checked=true; return; }
+    visibleWaves.delete(wave);
+  } else {
+    visibleWaves.add(wave);
+  }
+  if(cachedResult) renderCard(cachedResult);
+}
+
+
