@@ -198,6 +198,7 @@ input[type=range]::-moz-range-thumb{
           <button class="opt-btn" data-design="typo" onclick="pickDesign(this)"><span class="name">타이포</span><span class="desc">블록 타이포</span></button>
           <button class="opt-btn" data-design="ivory" onclick="pickDesign(this)"><span class="name">아이보리</span><span class="desc">미니멀 · 밝음</span></button>
           <button class="opt-btn" data-design="crumple" onclick="pickDesign(this)"><span class="name">크럼플</span><span class="desc">구겨진 질감</span></button>
+          <button class="opt-btn" data-design="torn" onclick="pickDesign(this)"><span class="name">찢긴종이</span><span class="desc">우아 · 아이보리</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -377,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.4';
+const VERSION = 'v1.7.5';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -393,7 +394,8 @@ function updateKeyVisibility(){
 
 let imgSrc=null,b64=null,mtype='image/jpeg';
 let _lastImg=null;
-let _crumpleTexture=null; // cached crumple texture image // global image ref for renderers
+let _crumpleTexture=null;
+let _tornTexture=null; // cached crumple texture image // global image ref for renderers
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
 let cachedResult=null;
 
@@ -752,7 +754,7 @@ function renderCard(d){
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
     // Run design renderer (sets _lastWaveY/_lastWaveH, draws image overlays + text)
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo,ivory:renderIvory,crumple:renderCrumple})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo,ivory:renderIvory,crumple:renderCrumple,torn:renderTorn})[cardDesign](ctx,rd,CW,CH,isV);
 
     // Draw all visible waves
     const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
@@ -1916,6 +1918,111 @@ function renderCrumple(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.fillText(d.caption_line2||'',pad,capY+cs*1.75);
   setF(ctx,cs*0.86,'300','"Helvetica Neue",Arial,sans-serif');
   ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
+}
+
+function renderTorn(ctx,d,CW,CH,isV){
+  // ── 찢긴 종이 ── 아이보리 상단 + 사진이 틈새로 보이는 구조
+  // 사진은 이미 그려져 있음 — 아이보리 종이를 위에 덮고 찢긴 부분만 투명
+
+  const ivory = '#F5F1EB';
+  const tearColor = '#D4BFA0';
+
+  // 찢어진 라인 포인트 (렌더마다 고정)
+  const seed = 99;
+  const tearBaseY = isV ? CH*0.52 : CH*0.46;
+  const pts = [];
+  let x = 0;
+  let rng = seed;
+  const rand = () => { rng = (rng * 1664525 + 1013904223) & 0xffffffff; return (rng >>> 0) / 0xffffffff; };
+  while(x <= CW + 40){
+    pts.push({x, y: tearBaseY + (rand()-0.5)*120});
+    x += 8 + rand()*20;
+  }
+
+  // 상단 아이보리 영역
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(CW, 0);
+  ctx.closePath();
+  ctx.fillStyle = ivory;
+  ctx.fill();
+
+  // 찢긴 엣지 두께감
+  ctx.beginPath();
+  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  pts.slice().reverse().forEach(p => ctx.lineTo(p.x, p.y + 18 + rand()*22));
+  ctx.closePath();
+  ctx.fillStyle = tearColor;
+  ctx.fill();
+
+  // 찢긴 엣지 아래 그림자
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.25)';
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 8;
+  ctx.beginPath();
+  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.lineTo(CW, tearBaseY + 30);
+  ctx.lineTo(0, tearBaseY + 30);
+  ctx.closePath();
+  ctx.fillStyle = ivory;
+  ctx.fill();
+  ctx.restore();
+
+  // 파형 — 사진 위 (찢긴 아래 영역)
+  const wY = tearBaseY * 0.72, wH = tearBaseY * 0.36;
+  _lastWaveY = wY; _lastWaveH = wH;
+
+  // 아이보리 영역 텍스트
+  const pad = CW*0.10;
+  const textTop = CW*0.12;
+
+  // SAPMANRI 작게
+  setF(ctx, CW*0.018, '500', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(160,140,120,0.7)';
+  ctx.fillText('SAPMANRI', pad, textTop);
+
+  // 곡 제목 — serif, 우아하게
+  const titleSz = CW*(isV?0.065:0.060);
+  setF(ctx, titleSz, '300', '"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  ctx.fillStyle = '#2c2420';
+  // italic for style
+  ctx.font = `italic 300 ${titleSz*textScale}px "Cormorant Garamond","Noto Serif KR",Georgia,serif`;
+  const afterT = fillWrap(ctx, d.song_title, pad, textTop + titleSz*1.6, CW-pad*2, titleSz*1.3, '#2c2420');
+
+  // 언더 dot 장식
+  ctx.fillStyle = tearColor;
+  ctx.beginPath();
+  ctx.arc(pad, afterT + titleSz*0.5, CW*0.006, 0, Math.PI*2);
+  ctx.fill();
+
+  // 아티스트
+  setF(ctx, CW*0.022, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(120,100,80,0.65)';
+  ctx.fillText(d.artist, pad + CW*0.018, afterT + titleSz*0.5 + CW*0.008);
+
+  // 캡션 — 중앙 정렬, 작게
+  const cs = CW*0.020;
+  const capY = afterT + titleSz*1.1;
+  setF(ctx, cs, '300', '"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  ctx.fillStyle = 'rgba(80,65,50,0.55)';
+  ctx.textAlign = 'center';
+  ctx.fillText(d.caption_line1||'', CW/2, capY);
+  setF(ctx, cs, '400', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(50,38,28,0.75)';
+  ctx.fillText(d.caption_line2||'', CW/2, capY + cs*1.8);
+  setF(ctx, cs*0.88, '300', '"Cormorant Garamond",Georgia,serif');
+  ctx.fillStyle = 'rgba(80,65,50,0.4)';
+  ctx.fillText(d.caption_line3||'', CW/2, capY + cs*3.4);
+  ctx.textAlign = 'left';
+
+  // 하단 브랜딩
+  setF(ctx, CW*0.015, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(140,120,100,0.35)';
+  ctx.textAlign = 'right';
+  ctx.fillText('© SAPMANRI', CW-pad*0.7, tearBaseY - CW*0.025);
+  ctx.textAlign = 'left';
 }
 
 async function saveToArchive(result, apiKey){
