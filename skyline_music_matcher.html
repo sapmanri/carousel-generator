@@ -163,21 +163,21 @@ input[type=range]::-moz-range-thumb{
             <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)" style="width:100%;"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
             <input type="checkbox" id="vis_mirror" checked onchange="toggleWaveVisible('mirror',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
-          <div style="position:relative;">
-            <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
-            <input type="checkbox" id="vis_multiline" onchange="toggleWaveVisible('multiline',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <button class="opt-btn " data-wave="multiline" onclick="pickWave(this)" style="width:100%;"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
+            <input type="checkbox" id="vis_multiline"  onchange="toggleWaveVisible('multiline',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
-          <div style="position:relative;">
-            <button class="opt-btn" data-wave="dots" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
-            <input type="checkbox" id="vis_dots" onchange="toggleWaveVisible('dots',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <button class="opt-btn " data-wave="dots" onclick="pickWave(this)" style="width:100%;"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
+            <input type="checkbox" id="vis_dots"  onchange="toggleWaveVisible('dots',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
-          <div style="position:relative;">
-            <button class="opt-btn" data-wave="silhouette" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span></button>
-            <input type="checkbox" id="vis_silhouette" onchange="toggleWaveVisible('silhouette',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <button class="opt-btn " data-wave="silhouette" onclick="pickWave(this)" style="width:100%;"><span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span></button>
+            <input type="checkbox" id="vis_silhouette"  onchange="toggleWaveVisible('silhouette',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
-          <div style="position:relative;">
-            <button class="opt-btn" data-wave="trace" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span></button>
-            <input type="checkbox" id="vis_trace" onchange="toggleWaveVisible('trace',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <button class="opt-btn " data-wave="trace" onclick="pickWave(this)" style="width:100%;"><span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span></button>
+            <input type="checkbox" id="vis_trace"  onchange="toggleWaveVisible('trace',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
         </div>
       </div>
@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.5.5';
+const VERSION = 'v1.5.6';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
