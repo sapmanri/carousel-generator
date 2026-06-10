@@ -682,7 +682,6 @@ Respond ONLY as valid JSON:
     localStorage.setItem('smm_usedSongs',JSON.stringify(usedSongs));
 
     renderCard(cachedResult);
-    saveToArchive(cachedResult, key); // background archive
     document.getElementById('downloadBtn').style.display='block';
     document.getElementById('downloadGifBtn').style.display='block';
     document.getElementById('panelSliderWrap').style.display='block';
