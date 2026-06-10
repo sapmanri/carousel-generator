@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.1';
+const VERSION = 'v1.6.2';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -761,18 +761,21 @@ function renderCard(d){
     visibleWaves.forEach(w => {
       const s = waveSettings[w];
       waveStyle = w;
-      window.waveColor = s.color;
-      waveOffsetY = s.offset;
-      // Temporarily set density for resampling
-      const wPts = [];
+      // Active wave uses live slider values; others use stored settings
+      const isActive = (w === activeWave);
+      window.waveColor = isActive ? (window.waveColor||s.color) : s.color;
+      waveOffsetY = isActive ? (typeof waveOffsetY!='undefined'?waveOffsetY:s.offset) : s.offset;
+      const useDensity = isActive ? (parseInt(document.getElementById('densitySlider').value)||80) : s.density;
+      const useAmp = isActive ? ((parseInt(document.getElementById('ampSlider').value)||100)/100) : s.amp/100;
       const rp = d.line_points || [];
-      for(let i=0; i<s.density; i++){
-        const t=i/(s.density-1), fi=t*(rp.length-1);
+      const wPts = [];
+      for(let i=0; i<useDensity; i++){
+        const t=i/(useDensity-1), fi=t*(rp.length-1);
         const i0=Math.floor(fi), i1=Math.min(i0+1,rp.length-1);
         wPts.push(rp[i0]*(1-(fi-i0))+rp[i1]*(fi-i0));
       }
       const _wc = getWaveColors(ctx, CW, _baseWY, _baseWH);
-      drawWave(ctx, wPts, CW, _baseWY, _baseWH, _wc.main, _wc.glow, s.amp/100, CH);
+      drawWave(ctx, wPts, CW, _baseWY, _baseWH, _wc.main, _wc.glow, useAmp, CH);
     });
 
     // Restore active wave settings
