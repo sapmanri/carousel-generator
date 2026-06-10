@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.5.0 · sapmanri</title>
+<title>Writing Studio v2.5.1 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -67,7 +67,7 @@ header {
 .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
 
 /* ── 탭 패널 ── */
-.tab-panel { display: none; flex: 1; overflow: hidden; }
+.tab-panel { display: none; flex: 1; overflow: hidden; min-height: 0; }
 .tab-panel.active { display: flex; }
 
 /* ══════════════════════════════
@@ -233,7 +233,7 @@ header {
 /* ══════════════════════════════
    TAB 2 — 예시 글
 ══════════════════════════════ */
-.examples-layout { display: flex; flex: 1; min-height: 0; }
+.examples-layout { display: flex; flex: 1; }
 .examples-left {
   width: 200px; flex-shrink: 0;
   border-right: 1px solid var(--border);
@@ -468,7 +468,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.5.0</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.5.1</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -571,7 +571,7 @@ header {
 </div>
 
 <!-- ══ TAB 2: 예시 글 ══ -->
-<div class="tab-panel" id="tab-examples">
+<div class="tab-panel" id="tab-examples" style="overflow:auto">
   <div class="examples-layout">
     <aside class="examples-left">
       <div class="section-label" style="padding:12px 10px 8px; font-family:var(--mono); font-size:9px; letter-spacing:0.16em; color:var(--dim); text-transform:uppercase;">필터</div>
