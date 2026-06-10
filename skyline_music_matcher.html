@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.2';
+const VERSION = 'v1.8.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1739,11 +1739,8 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
 function downloadWaveVideo(fmt){
   if(!cachedResult||!imgSrc) return;
   const isV = fmt==='vertical';
-  const CW = isV ? 1080 : 1080;
-  const CH = isV ? 1920 : 1080;
-  const FPS = 30;
-  const DURATION = 6; // seconds
-  const TOTAL_FRAMES = FPS * DURATION;
+  const CW = 1080, CH = isV ? 1920 : 1080;
+  const FPS = 30, DURATION = 6, TOTAL_FRAMES = FPS * DURATION;
 
   const btn = isV ? document.getElementById('downloadGifBtn9') : document.getElementById('downloadGifBtn');
   btn.textContent='영상 생성 중...'; btn.disabled=true;
@@ -1753,21 +1750,27 @@ function downloadWaveVideo(fmt){
   const ctx = canvas.getContext('2d');
 
   const d = cachedResult;
-  const density = parseInt(document.getElementById('densitySlider').value)||80;
-  const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
 
-  const rawPts = d.line_points || [];
-  const pts = [];
-  for(let i=0;i<density;i++){
-    const t=i/(density-1), idx=t*(rawPts.length-1);
-    const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
-    pts.push(rawPts[i0]*(1-(idx-i0))+rawPts[i1]*(idx-i0));
-  }
+  // visibleWaves 스냅샷 (현재 체크된 파형 전부)
+  const waveSnapshot = [];
+  visibleWaves.forEach(w => {
+    const s = waveSettings[w];
+    const isActive = (w === activeWave);
+    const density = isActive ? (parseInt(document.getElementById('densitySlider').value)||80) : s.density;
+    const amp = isActive ? ((parseInt(document.getElementById('ampSlider').value)||100)/100) : s.amp/100;
+    const color = isActive ? (window.waveColor||'#ffffff') : s.color;
+    const offset = isActive ? waveOffsetY : s.offset;
+    const rawPts = d.line_points || [];
+    const pts = [];
+    for(let i=0;i<density;i++){
+      const t=i/(density-1), idx=t*(rawPts.length-1);
+      const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
+      pts.push(rawPts[i0]*(1-(idx-i0))+rawPts[i1]*(idx-i0));
+    }
+    waveSnapshot.push({ style: w, pts, amp, color, offset });
+  });
 
-  // MediaRecorder 설정
-  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-    ? 'video/webm;codecs=vp9'
-    : 'video/webm';
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
   const stream = canvas.captureStream(FPS);
   const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8000000 });
   const chunks = [];
@@ -1782,126 +1785,123 @@ function downloadWaveVideo(fmt){
     btn.disabled = false;
   };
 
-  // 배경 이미지 로드
   const bgImg = new Image();
   bgImg.onload = () => {
     recorder.start();
     let frame = 0;
 
-    const waveColor = window.waveColor || '#ffffff';
-    const offsetRatio = waveOffsetY; // -0.4 ~ 0.4
-    const baseY = CH * 0.72 + CH * offsetRatio * 0.5;
-    const maxH = CH * 0.32;
-
-    function drawFrame(){
-      if(frame >= TOTAL_FRAMES){ recorder.stop(); return; }
-      const phase = (frame / FPS) * Math.PI * 1.2; // 1 loop ~5sec
-
-      // 배경 이미지 draw
-      ctx.globalAlpha = 1;
-      const sc = Math.max(CW/bgImg.naturalWidth, CH/bgImg.naturalHeight);
-      const sw = bgImg.naturalWidth*sc, sh = bgImg.naturalHeight*sc;
-      ctx.drawImage(bgImg, (CW-sw)/2, (CH-sh)/2, sw, sh);
-
-      // 어두운 오버레이 (파형 가시성)
-      ctx.globalAlpha = 0.35;
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, CW, CH);
-      ctx.globalAlpha = 1;
-
-      // 파형 애니메이션 — phase shift로 움직임
-      const animPts = pts.map((v,i) => {
-        const wave = Math.sin(phase + i * 0.18) * 7 + Math.sin(phase*1.7 + i*0.07)*3;
-        return Math.max(0, Math.min(100, v + wave));
-      });
-
-      const wStyle = waveStyle;
-      const aH = maxH * ampRatio;
+    function drawOneWave(ws, animPts, wc, offset, amp){
       const n = animPts.length;
-      const wc = waveColor;
+      const baseY = CH * 0.72 + CH * offset * 0.5;
+      const maxH = CH * 0.32;
+      const aH = maxH * amp;
 
       ctx.save();
-      if(wStyle==='mirror'){
-        const dotSize = Math.max(CW/120, 5);
-        const dotGap = dotSize * 1.6;
-        const cols = Math.floor(CW/dotGap);
-        const colW = CW/cols;
+      if(ws === 'trace'){
+        // trace는 실제 drawTraceLine과 동일한 로직, waveOffsetY 반영
+        const smooth = animPts.map((v,i)=>{
+          const w=7; let sum=0,cnt=0;
+          for(let j=Math.max(0,i-w);j<=Math.min(n-1,i+w);j++){sum+=animPts[j];cnt++;}
+          return sum/cnt;
+        });
+        const center = CH*0.42 + offset*CH;
+        const spread = CH*0.28*amp;
+        const mn=Math.min(...smooth), mx=Math.max(...smooth), rng=mx-mn||1;
+        const getY = v => center - ((v-mn)/rng - 0.5)*spread*2;
+        const tc = (wc && wc!=='auto') ? wc : '#ffffff';
+        const tg = tc;
+        // glow
+        ctx.globalAlpha=0.22; ctx.strokeStyle=tg; ctx.lineWidth=Math.max(CW/55,7);
+        ctx.lineJoin='round'; ctx.lineCap='round'; ctx.beginPath();
+        for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=getY(smooth[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+        ctx.stroke();
+        // medium
+        ctx.globalAlpha=0.55; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/160,2.5); ctx.beginPath();
+        for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=getY(smooth[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+        ctx.stroke();
+        // thin core
+        ctx.globalAlpha=0.88; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/450,1); ctx.beginPath();
+        for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=getY(smooth[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+        ctx.stroke();
+        // dots
+        ctx.globalAlpha=0.65; ctx.fillStyle=tc;
+        for(let i=0;i<n;i+=6){const x=(i/(n-1))*CW,y=getY(smooth[i]);const r=Math.max(CW/300,2);ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+      } else if(ws==='mirror'){
+        const dotSize=Math.max(CW/120,5), dotGap=dotSize*1.6;
+        const cols=Math.floor(CW/dotGap), colW=CW/cols;
         for(let col=0;col<cols;col++){
-          const cx = col*colW + colW*0.5;
-          const t2 = col/(cols-1);
-          const fi = t2*(n-1);
+          const cx=col*colW+colW*0.5, t2=col/(cols-1), fi=t2*(n-1);
           const i0=Math.floor(fi),i1=Math.min(i0+1,n-1);
-          const h = (animPts[i0]*(1-(fi-i0))+animPts[i1]*(fi-i0))/100*aH;
-          const rows = Math.floor(h/dotGap);
+          const h=(animPts[i0]*(1-(fi-i0))+animPts[i1]*(fi-i0))/100*aH;
+          const rows=Math.floor(h/dotGap);
           for(let row=0;row<rows;row++){
-            const progress=row/Math.max(rows-1,1);
-            const cy=baseY-row*dotGap-dotGap*0.5;
-            ctx.globalAlpha=0.9-progress*0.55;
-            ctx.fillStyle=wc;
+            const progress=row/Math.max(rows-1,1), cy=baseY-row*dotGap-dotGap*0.5;
+            ctx.globalAlpha=0.9-progress*0.55; ctx.fillStyle=wc;
             const ds=dotSize*(0.5+(1-progress)*0.5);
             ctx.fillRect(cx-ds/2,cy-ds/2,ds,ds);
-            if(row<rows*0.6){
-              ctx.globalAlpha=(0.9-progress*0.55)*0.35*(1-row/(rows*0.6));
-              ctx.fillRect(cx-ds/2,baseY+row*dotGap,ds,ds);
-            }
+            if(row<rows*0.6){ctx.globalAlpha=(0.9-progress*0.55)*0.35*(1-row/(rows*0.6));ctx.fillRect(cx-ds/2,baseY+row*dotGap,ds,ds);}
           }
         }
-      } else if(wStyle==='multiline'){
-        const layers=6;
-        ctx.lineJoin='round'; ctx.lineCap='round';
+      } else if(ws==='multiline'){
+        const layers=6; ctx.lineJoin='round'; ctx.lineCap='round';
         for(let l=0;l<layers;l++){
-          ctx.globalAlpha=0.12+(l/layers)*0.6;
-          ctx.strokeStyle=wc;
-          ctx.lineWidth=Math.max(CW/(600+l*80),1);
+          ctx.globalAlpha=0.12+(l/layers)*0.6; ctx.strokeStyle=wc; ctx.lineWidth=Math.max(CW/(600+l*80),1);
           ctx.beginPath();
-          for(let i=0;i<n;i++){
-            const x=(i/(n-1))*CW;
-            const y=baseY-(animPts[i]/100)*aH*(0.5+(l/layers)*0.8);
-            i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-          }
+          for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=baseY-(animPts[i]/100)*aH*(0.5+(l/layers)*0.8);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
           ctx.stroke();
         }
-      } else if(wStyle==='silhouette'){
-        // 큰 실루엣 바
-        const barW = CW/n*0.7;
+      } else if(ws==='silhouette'){
+        const barW=CW/n*0.7;
         for(let i=0;i<n;i++){
-          const x=(i/(n-1))*CW;
-          const h=(animPts[i]/100)*aH;
+          const x=(i/(n-1))*CW, h=(animPts[i]/100)*aH;
           const grad=ctx.createLinearGradient(x,baseY-h,x,baseY);
-          grad.addColorStop(0,wc);
-          grad.addColorStop(1,'rgba(255,255,255,0.1)');
-          ctx.globalAlpha=0.85;
-          ctx.fillStyle=grad;
-          ctx.fillRect(x-barW/2,baseY-h,barW,h);
+          grad.addColorStop(0,wc); grad.addColorStop(1,'rgba(255,255,255,0.08)');
+          ctx.globalAlpha=0.85; ctx.fillStyle=grad;
+          ctx.fillRect(x-CW/n*0.35,baseY-h,barW,h);
         }
-      } else {
-        // dots
+      } else { // dots
         const barW=Math.max(CW/n*0.5,3);
         animPts.forEach((p,i)=>{
-          const x=(i/(n-1))*CW;
-          const h=(p/100)*aH;
-          const numDots=Math.ceil(h/(barW*1.4));
+          const x=(i/(n-1))*CW, h=(p/100)*aH, numDots=Math.ceil(h/(barW*1.4));
           for(let dd=0;dd<numDots;dd++){
             const t3=dd/Math.max(numDots-1,1);
-            ctx.globalAlpha=t3>0.6?0.4:0.85;
-            ctx.fillStyle=wc;
+            ctx.globalAlpha=t3>0.6?0.4:0.85; ctx.fillStyle=wc;
             ctx.fillRect(x-barW/2,baseY-dd*barW*1.4,barW,barW);
           }
         });
       }
       ctx.restore();
+    }
+
+    function drawFrame(){
+      if(frame >= TOTAL_FRAMES){ recorder.stop(); return; }
+      const phase = (frame/FPS)*Math.PI*1.2;
+
+      // 배경
+      ctx.globalAlpha=1;
+      const sc=Math.max(CW/bgImg.naturalWidth,CH/bgImg.naturalHeight);
+      const sw=bgImg.naturalWidth*sc, sh=bgImg.naturalHeight*sc;
+      ctx.drawImage(bgImg,(CW-sw)/2,(CH-sh)/2,sw,sh);
+      ctx.globalAlpha=0.35; ctx.fillStyle='#000'; ctx.fillRect(0,0,CW,CH);
+      ctx.globalAlpha=1;
+
+      // visibleWaves 전부 그리기
+      waveSnapshot.forEach(ws => {
+        const animPts = ws.pts.map((v,i) => {
+          const wave = Math.sin(phase + i*0.18)*7 + Math.sin(phase*1.7 + i*0.07)*3;
+          return Math.max(0, Math.min(100, v+wave));
+        });
+        drawOneWave(ws.style, animPts, ws.color, ws.offset, ws.amp);
+      });
 
       // 하단 텍스트
       ctx.globalAlpha=1;
-      const songTitle = d.song_title||'';
-      const artist = d.artist||'';
-      ctx.font = `300 ${CW*0.028}px 'Cormorant Garamond', serif`;
-      ctx.fillStyle='rgba(255,255,255,0.9)';
-      ctx.textAlign='left';
-      ctx.fillText(songTitle, CW*0.06, CH*0.93);
-      ctx.font = `300 ${CW*0.018}px 'Noto Sans KR', sans-serif`;
+      ctx.font=`300 ${CW*0.028}px 'Cormorant Garamond', serif`;
+      ctx.fillStyle='rgba(255,255,255,0.9)'; ctx.textAlign='left';
+      ctx.fillText(d.song_title||'', CW*0.06, CH*0.93);
+      ctx.font=`300 ${CW*0.018}px 'Noto Sans KR', sans-serif`;
       ctx.fillStyle='rgba(255,255,255,0.5)';
-      ctx.fillText(artist, CW*0.06, CH*0.96);
+      ctx.fillText(d.artist||'', CW*0.06, CH*0.96);
 
       frame++;
       setTimeout(drawFrame, 1000/FPS);
