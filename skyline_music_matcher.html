@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.5.7';
+const VERSION = 'v1.6.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -741,22 +741,39 @@ function renderCard(d){
     const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
-    // If activeWave not in visibleWaves, suppress its wave drawing
-    const _savedStyleForRender = waveStyle;
-    if(!visibleWaves.has(activeWave)) waveStyle='none';
+    // Run design renderer (sets _lastWaveY/_lastWaveH, draws image overlays + text)
     ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
-    waveStyle=_savedStyleForRender;
-    // Draw additional visible waves
-    visibleWaves.forEach(w=>{
-      if(w===activeWave)return;
-      const s=waveSettings[w];
-      const _ws=waveStyle,_wc=window.waveColor,_wo=waveOffsetY;
-      waveStyle=w; window.waveColor=s.color; waveOffsetY=s.offset;
-      const wY=(_lastWaveY>0?_lastWaveY:CH*0.60), wH=(_lastWaveH>0?_lastWaveH:CH*0.28);
-      const _sc=getWaveColors(ctx,CW,wY,wH);
-      drawWave(ctx,rd.line_points,CW,wY,wH,_sc.main,_sc.glow,s.amp/100,CH);
-      waveStyle=_ws; window.waveColor=_wc; waveOffsetY=_wo;
+
+    // Draw all visible waves
+    const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
+    const _baseWH = _lastWaveH > 0 ? _lastWaveH : CH*0.28;
+    const _savedStyle = waveStyle;
+    const _savedColor = window.waveColor;
+    const _savedOffset = waveOffsetY;
+    const _savedAmp = parseInt(document.getElementById('ampSlider').value);
+    const _savedDensity = parseInt(document.getElementById('densitySlider').value);
+
+    visibleWaves.forEach(w => {
+      const s = waveSettings[w];
+      waveStyle = w;
+      window.waveColor = s.color;
+      waveOffsetY = s.offset;
+      // Temporarily set density for resampling
+      const wPts = [];
+      const rp = d.line_points || [];
+      for(let i=0; i<s.density; i++){
+        const t=i/(s.density-1), fi=t*(rp.length-1);
+        const i0=Math.floor(fi), i1=Math.min(i0+1,rp.length-1);
+        wPts.push(rp[i0]*(1-(fi-i0))+rp[i1]*(fi-i0));
+      }
+      const _wc = getWaveColors(ctx, CW, _baseWY, _baseWH);
+      drawWave(ctx, wPts, CW, _baseWY, _baseWH, _wc.main, _wc.glow, s.amp/100, CH);
     });
+
+    // Restore active wave settings
+    waveStyle = _savedStyle;
+    window.waveColor = _savedColor;
+    waveOffsetY = _savedOffset;
     canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
     const prev=document.getElementById('cardPreview');
     prev.innerHTML=''; prev.appendChild(canvas);
@@ -1029,7 +1046,7 @@ function renderSapmanri(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
   g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
   const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
-  _lastWaveY=wY; _lastWaveH=wH; const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
   const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
   const titleSize=CW*0.052;
   setF(ctx,titleSize,'700','"Helvetica Neue",Arial,sans-serif');
@@ -1050,7 +1067,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.68, wH=splitY*0.38;
-  _lastWaveY=wY; _lastWaveH=wH; const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
   const pad=CW*0.07, ty=splitY+CW*0.048;
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
   ctx.fillStyle='#b87a6e'; ctx.fillRect(pad,ty+CW*0.02,CW*0.0018,CW*0.046);
@@ -1067,7 +1084,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
 function renderTheEdit(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
   const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
-  _lastWaveY=wY; _lastWaveH=wH; const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
   const bx=CW*0.07, bw=CW*0.86;
   const by=isV?CW*(0.6+panelPos*0.6):CH*(0.44+panelPos*0.3);
   // Draw box first with estimated height, then we'll just draw content and let it flow
@@ -1090,7 +1107,7 @@ function renderStayfolio(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.66, wH=splitY*0.4;
-  _lastWaveY=wY; _lastWaveH=wH; const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
   const pad=CW*0.075, ty=splitY+CW*0.04;
   ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(CW-pad,ty); ctx.strokeStyle='#d4cfc8'; ctx.lineWidth=1; ctx.stroke();
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#8c7355'; ctx.fillText('STAYFOLIO × SAPMANRI',pad,ty+CW*0.027);
@@ -1107,7 +1124,7 @@ function renderStayfolio(ctx,d,CW,CH,isV){
 function renderNike(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
   const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.26:CH*0.30;
-  _lastWaveY=wY; _lastWaveH=wH; const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
   const pad=CW*0.08;
   const base = isV ? CW*(0.6+panelPos*0.5) : CH*0.67;
   setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
@@ -1127,7 +1144,7 @@ function renderOhouse(ctx,d,CW,CH,isV){
   const radius=CW*0.04;
   let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
   const wY=cardY*0.65, wH=cardY*0.44;
-  _lastWaveY=wY; _lastWaveH=wH; const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
   ctx.fillStyle='#FAFAF8'; ctx.beginPath();
   ctx.moveTo(0,cardY+radius); ctx.arcTo(0,cardY,radius,cardY,radius); ctx.lineTo(CW-radius,cardY); ctx.arcTo(CW,cardY,CW,cardY+radius,radius); ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath(); ctx.fill();
   const pad=CW*0.07, ty=cardY+CW*0.048;
@@ -1154,7 +1171,7 @@ function renderApple(ctx,d,CW,CH,isV){
 
   // Waveform on photo — ice white, ultra thin
   const wY = splitY*0.6, wH = splitY*0.44;
-  _lastWaveY=wY; _lastWaveH=wH; const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
 
   // Black bottom panel — perfectly flat
   ctx.fillStyle='#000000'; ctx.fillRect(0,splitY,CW,CH-splitY);
@@ -1322,7 +1339,7 @@ function renderGirok(ctx,d,CW,CH,isV){
 
   // Waveform — soft pastel blue-purple
   const wY=splitY*0.62, wH=splitY*0.44;
-  const _sc7=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc7.main,_sc7.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
 
   // White bottom panel with rounded top corners
   const panelY=splitY;
@@ -1429,8 +1446,7 @@ function renderPolaroid(ctx,d,CW,CH,isV){
 
   // 파형 — 이미지 하단
   const wY=innerY+innerH*0.80, wH=innerH*0.22;
-  const _sc=getWaveColors(ctx,CW,wY,wH);
-  drawWave(ctx,d.line_points,CW,wY,wH,_sc.main,_sc.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
 
   // 하단 텍스트 영역
   const areaY=innerY+innerH;
@@ -1498,7 +1514,7 @@ function renderGrain(ctx,d,CW,CH,isV){
 
   // Waveform — white, near bottom
   const wY=isV?CH*0.62:CH*0.60, wH=isV?CH*0.22:CH*0.28;
-  const _sc9=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc9.main,'rgba(255,220,140,0.35)',d._ampRatio||1);
+  _lastWaveY=wY; _lastWaveH=wH;
 
   // Text — bottom, all white
   const pad=CW*0.08;
@@ -1537,7 +1553,7 @@ function renderCinema(ctx,d,CW,CH,isV){
 
   // Subtle waveform inside image area — near bottom of photo
   const wY=CH-botBarH-CW*0.04, wH=isV?CH*0.18:CH*0.22;
-  const _sc10=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc10.main,_sc10.glow,d._ampRatio||1,CH);
+  _lastWaveY=wY; _lastWaveH=wH;
 
   // Top bar: tiny channel name left + aspect ratio right
   const topPad=CW*0.06;
@@ -1821,7 +1837,6 @@ function downloadCard(){
 
 // ── WAVEFORM ENGINE ───────────────────────────────────────
 function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
-  if(waveStyle==='none') return;
   baseY = baseY + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
