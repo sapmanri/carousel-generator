@@ -375,7 +375,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.0';
+const VERSION = 'v1.7.1';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1733,78 +1733,73 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
 }
 
 function renderTypo(ctx,d,CW,CH,isV){
-  // ── 타이포 블록 ── 계단식 텍스트 박스 스타일
-  // 그라데이션 오버레이
-  let g=ctx.createLinearGradient(0,0,0,CH*0.4);
-  g.addColorStop(0,'rgba(0,0,0,0.25)'); g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.4);
-  g=ctx.createLinearGradient(0,CH*0.4,0,CH);
-  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.5,'rgba(0,0,0,0.82)'); g.addColorStop(1,'rgba(0,0,0,0.97)');
-  ctx.fillStyle=g; ctx.fillRect(0,CH*0.4,CW,CH*0.6);
+  // ── 타이포 블록 ── 각 줄마다 글자에 딱 맞는 박스 + 계단식
+  // 그라데이션 오버레이 (감성찾아삽만리 느낌)
+  let g=ctx.createLinearGradient(0,0,0,CH*0.35);
+  g.addColorStop(0,'rgba(0,0,0,0.3)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.35);
+  g=ctx.createLinearGradient(0,CH*0.38,0,CH);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.45,'rgba(0,0,0,0.75)'); g.addColorStop(1,'rgba(0,0,0,0.96)');
+  ctx.fillStyle=g; ctx.fillRect(0,CH*0.38,CW,CH*0.62);
 
   // 파형
   const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
   _lastWaveY=wY; _lastWaveH=wH;
 
-  // 타이포 블록 — 곡 제목을 단어/구절 단위로 쪼개서 계단식 배치
-  const pad = CW*0.08;
+  // ── 블록 타이포 ──
+  const pad = CW*0.07;
   const title = d.song_title || '';
   const artist = d.artist || '';
 
-  // Split title into chunks (by space, max 2 words per line)
+  // Split into lines — each word is its own block line
   const words = title.split(' ');
-  const chunks = [];
-  for(let i=0; i<words.length; i+=2){
-    chunks.push(words.slice(i,i+2).join(' '));
-  }
+  const titleSz = Math.min(CW*0.10, CW*0.10 / Math.max(1, words.reduce((m,w)=>Math.max(m,w.length),0)*0.065));
+  const lineH = titleSz * 1.3;
+  const boxPadX = CW*0.025;
+  const boxPadY = titleSz*0.18;
 
-  const titleSz = CW * (chunks.length > 2 ? 0.07 : 0.082);
-  const lineH = titleSz * 1.35;
-  const totalH = chunks.length * lineH;
-  const startY = isV ? CH*0.58 : CH*0.62;
-  // Offset so block lands nicely above caption
-  const blockY = Math.min(startY, CH - totalH - CW*0.22);
+  // Start position — anchor from bottom up
+  const blockBottom = isV ? CH*0.72 : CH*0.74;
+  const blockTop = blockBottom - words.length * lineH;
 
   setF(ctx, titleSz, '800', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
 
-  chunks.forEach((chunk, i) => {
-    const w = ctx.measureText(chunk).width;
-    const boxPad = CW*0.022;
-    const bx = pad + i * CW*0.028; // stagger right
-    const by = blockY + i * lineH;
-    const bw = w + boxPad*2;
-    const bh = titleSz * 1.18;
+  words.forEach((word, i) => {
+    const tw = ctx.measureText(word).width;
+    const bw = tw + boxPadX*2;
+    const bh = titleSz + boxPadY*2;
+    const bx = pad + i * CW*0.032; // stagger right per line
+    const by = blockTop + i * lineH;
 
-    // Box background — solid dark with slight alpha
-    ctx.fillStyle = 'rgba(10,8,6,0.82)';
+    // Box — solid dark
+    ctx.fillStyle = 'rgba(8,6,4,0.88)';
     ctx.fillRect(bx, by, bw, bh);
 
-    // Text
+    // Text — white
     ctx.fillStyle = '#ffffff';
-    ctx.fillText(chunk, bx + boxPad, by + bh*0.76);
+    ctx.fillText(word, bx + boxPadX, by + bh - boxPadY - titleSz*0.08);
   });
 
-  // Artist line — small, no box
-  const artistY = blockY + chunks.length * lineH + CW*0.02;
-  setF(ctx, CW*0.026, '400', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  // Artist — no box, plain
+  const artistY = blockBottom + titleSz*0.55;
+  setF(ctx, CW*0.025, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(255,255,255,0.42)';
   ctx.fillText(artist, pad, artistY);
 
-  // Caption
-  const cs = CW*0.024;
+  // Caption lines
+  const cs = CW*0.023;
   const capY = artistY + cs*2.2;
-  const sepY = capY - cs*0.8;
-  ctx.beginPath(); ctx.moveTo(pad,sepY); ctx.lineTo(pad+CW*0.065,sepY);
-  ctx.strokeStyle='rgba(255,255,255,0.16)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(pad,capY-cs*1.0); ctx.lineTo(pad+CW*0.06,capY-cs*1.0);
+  ctx.strokeStyle='rgba(255,255,255,0.14)'; ctx.lineWidth=1; ctx.stroke();
 
-  setF(ctx, cs, '300', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.fillText(d.caption_line1||'',pad,capY);
-  setF(ctx, cs, '500', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.fillText(d.caption_line2||'',pad,capY+cs*1.7);
-  setF(ctx, cs*0.86, '300', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.34)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
+  setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.45)'; ctx.fillText(d.caption_line1||'',pad,capY);
+  setF(ctx,cs,'500','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fillText(d.caption_line2||'',pad,capY+cs*1.75);
+  setF(ctx,cs*0.85,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
 
-  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.18)');
+  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.16)');
 }
 
 async function saveToArchive(result, apiKey){
