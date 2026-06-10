@@ -352,7 +352,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.3';
+const VERSION = 'v1.3.4';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1250,7 +1250,7 @@ function renderGirok(ctx,d,CW,CH,isV){
 
   // Waveform — soft pastel blue-purple
   const wY=splitY*0.62, wH=splitY*0.44;
-  const _sc7=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc7.main,_sc7.glow,d._ampRatio||1);
+  const _sc7=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc7.main,_sc7.glow,d._ampRatio||1,CH);
 
   // White bottom panel with rounded top corners
   const panelY=splitY;
@@ -1358,7 +1358,7 @@ function renderPolaroid(ctx,d,CW,CH,isV){
   // 파형 — 이미지 하단
   const wY=innerY+innerH*0.80, wH=innerH*0.22;
   const _sc=getWaveColors(ctx,CW,wY,wH);
-  drawWave(ctx,d.line_points,CW,wY,wH,_sc.main,_sc.glow,d._ampRatio||1);
+  drawWave(ctx,d.line_points,CW,wY,wH,_sc.main,_sc.glow,d._ampRatio||1,CH);
 
   // 하단 텍스트 영역
   const areaY=innerY+innerH;
@@ -1465,7 +1465,7 @@ function renderCinema(ctx,d,CW,CH,isV){
 
   // Subtle waveform inside image area — near bottom of photo
   const wY=CH-botBarH-CW*0.04, wH=isV?CH*0.18:CH*0.22;
-  const _sc10=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc10.main,_sc10.glow,d._ampRatio||1);
+  const _sc10=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc10.main,_sc10.glow,d._ampRatio||1,CH);
 
   // Top bar: tiny channel name left + aspect ratio right
   const topPad=CW*0.06;
@@ -1776,7 +1776,7 @@ function downloadCard(){
 }
 
 // ── WAVEFORM ENGINE ───────────────────────────────────────
-function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
+function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
 
