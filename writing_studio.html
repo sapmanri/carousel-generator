@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.3 · sapmanri</title>
+<title>Writing Studio v2.4.4 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -291,10 +291,20 @@ header {
 .example-card-body {
   padding: 12px; font-size: 12px; line-height: 1.8;
   color: var(--muted); white-space: pre-wrap; word-break: break-word;
-  max-height: 120px; overflow: hidden; cursor: pointer;
-  transition: max-height 0.3s;
+  max-height: 200px; overflow: hidden; cursor: pointer;
+  transition: max-height 0.4s ease;
+  position: relative;
 }
-.example-card-body.expanded { max-height: 400px; }
+.example-card-body::after {
+  content: '▾ 더 보기';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 36px; line-height: 36px; text-align: center;
+  background: linear-gradient(transparent, var(--s1));
+  font-family: var(--mono); font-size: 10px; color: var(--dim);
+  pointer-events: none;
+}
+.example-card-body.expanded { max-height: 1200px; }
+.example-card-body.expanded::after { display: none; }
 
 /* 새 예시 모달 */
 .modal-backdrop {
@@ -470,7 +480,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.3</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.4</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -1190,15 +1200,20 @@ function renderExamples() {
           </div>
         </div>`;
     } else {
+      // 제목/본문 분리 (첫 줄이 [제목] 형식이면 분리)
+      const lines = item.text.split('\n');
+      const titleLine = lines[0].startsWith('[') ? lines[0] : '';
+      const bodyText = titleLine ? lines.slice(1).join('\n').trim() : item.text;
+
       card.innerHTML = `
         <div class="example-card-header">
-          <span class="example-card-meta">${TYPE_LABEL[item.type]} · ${item.date}</span>
+          <span class="example-card-meta">${TYPE_LABEL[item.type]} · ${item.date}${titleLine ? ' · <em style="color:var(--muted);font-style:normal">' + escHtml(titleLine) + '</em>' : ''}</span>
           <div class="example-card-actions">
             <button class="icon-btn use" onclick="loadToEditor(${item.id})">불러오기</button>
             <button class="icon-btn" onclick="deleteExample(${item.id})">삭제</button>
           </div>
         </div>
-        <div class="example-card-body" onclick="this.classList.toggle('expanded')">${escHtml(item.text)}</div>`;
+        <div class="example-card-body" onclick="this.classList.toggle('expanded')">${escHtml(bodyText)}</div>`;
     }
     grid.appendChild(card);
   });
