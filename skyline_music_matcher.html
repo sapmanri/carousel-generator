@@ -161,23 +161,23 @@ input[type=range]::-moz-range-thumb{
         <div class="btn-grid-2" id="waveGrid">
           <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
             <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)" style="width:100%;"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
-            <input type="checkbox" id="vis_mirror" checked onchange="toggleWaveVisible('mirror',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+            <input type="checkbox" id="vis_mirror" checked onclick=\"event.stopPropagation();toggleWaveVisible('mirror',this)\" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
             <button class="opt-btn " data-wave="multiline" onclick="pickWave(this)" style="width:100%;"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
-            <input type="checkbox" id="vis_multiline"  onchange="toggleWaveVisible('multiline',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+            <input type="checkbox" id="vis_multiline"  onclick=\"event.stopPropagation();toggleWaveVisible('multiline',this)\" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
             <button class="opt-btn " data-wave="dots" onclick="pickWave(this)" style="width:100%;"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
-            <input type="checkbox" id="vis_dots"  onchange="toggleWaveVisible('dots',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+            <input type="checkbox" id="vis_dots"  onclick=\"event.stopPropagation();toggleWaveVisible('dots',this)\" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
             <button class="opt-btn " data-wave="silhouette" onclick="pickWave(this)" style="width:100%;"><span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span></button>
-            <input type="checkbox" id="vis_silhouette"  onchange="toggleWaveVisible('silhouette',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+            <input type="checkbox" id="vis_silhouette"  onclick=\"event.stopPropagation();toggleWaveVisible('silhouette',this)\" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
             <button class="opt-btn " data-wave="trace" onclick="pickWave(this)" style="width:100%;"><span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span></button>
-            <input type="checkbox" id="vis_trace"  onchange="toggleWaveVisible('trace',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+            <input type="checkbox" id="vis_trace"  onclick=\"event.stopPropagation();toggleWaveVisible('trace',this)\" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
         </div>
       </div>
@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.5.6';
+const VERSION = 'v1.5.7';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1577,47 +1577,6 @@ function renderCinema(ctx,d,CW,CH,isV){
 }
 
 function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
-  // Fish Audio style: vertical bars shaped by silhouette contour
-  const aH = maxH * (ampRatio||1);
-  const n = pts.length;
-  const barCount = Math.min(n, 80);
-  const barW = Math.max((CW / barCount) * 0.55, 2);
-  const gap = CW / barCount;
-
-  for(let i=0; i<barCount; i++){
-    const t = i/(barCount-1);
-    const idx = t*(n-1);
-    const i0=Math.floor(idx), i1=Math.min(i0+1,n-1);
-    const h = (pts[i0]*(1-(idx-i0)) + pts[i1]*(idx-i0)) / 100 * aH;
-    const x = i * gap + gap*0.5;
-
-    // Main bar (above baseline)
-    const alpha = 0.3 + (pts[Math.floor(t*(n-1))]/100) * 0.6;
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(x - barW/2, baseY - h, barW, h, barW*0.3);
-    ctx.fill();
-
-    // Glow
-    ctx.globalAlpha = alpha * 0.3;
-    ctx.fillStyle = glowColor;
-    ctx.beginPath();
-    ctx.roundRect(x - barW/2 - 1, baseY - h - 1, barW + 2, h + 2, barW*0.3);
-    ctx.fill();
-
-    // Mirror below (shorter, more transparent)
-    const mirrorH = h * 0.25;
-    ctx.globalAlpha = alpha * 0.2;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.roundRect(x - barW/2, baseY + 2, barW, mirrorH, barW*0.3);
-    ctx.fill();
-  }
-  ctx.globalAlpha = 1;
-}
-
-function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
   const barCount = Math.min(n, 80);
@@ -1868,14 +1827,6 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
   const n = pts.length;
 
   if(waveStyle === 'trace'){ drawTraceLine(ctx, pts, CW, CH, ampRatio); return; }
-  if(waveStyle === 'silhouette'){
-    drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
-    return;
-  }
-  if(waveStyle === 'silhouette'){
-    drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
-    return;
-  }
   if(waveStyle === 'silhouette'){
     drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
     return;
