@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.9.5';
+const VERSION = 'v1.9.6';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -585,7 +585,7 @@ async function analyze(){
 STEP 1 — MULTI-LAYER CONTOUR:
 Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon).
 
-STEP 2 — COMPOSITE WAVEFORM (80 points):
+STEP 2 — COMPOSITE WAVEFORM (160 points):
 Produce a composite height array of exactly 160 integers (0–100), left to right.
 - Take the HIGHEST prominent contour at each position
 - Reflect REAL geometry: buildings/peaks = high (60–100), flat fields/sky = low (5–30)
