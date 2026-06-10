@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.2.0 · sapmanri</title>
+<title>Writing Studio v2.3.0 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -122,6 +122,38 @@ header {
 }
 .btn-generate:hover { border-color: var(--accent); color: var(--accent); }
 .btn-generate:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.image-attach-area {
+  margin-top: 8px; border: 1px dashed var(--border); border-radius: 4px;
+  padding: 0; overflow: hidden; transition: border-color 0.2s;
+}
+.image-attach-area.has-image { border-color: var(--accent2); border-style: solid; }
+.image-attach-area.dragover { border-color: var(--accent); background: rgba(201,169,110,0.05); }
+
+.image-attach-inner {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; cursor: pointer;
+}
+.image-attach-inner:hover { background: var(--s2); }
+
+.image-preview-wrap { position: relative; }
+.image-preview {
+  width: 44px; height: 44px; object-fit: cover;
+  border-radius: 3px; display: block;
+}
+.image-remove-btn {
+  position: absolute; top: -4px; right: -4px;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--red); border: none; color: white;
+  font-size: 9px; cursor: pointer; line-height: 14px; text-align: center;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.image-attach-label {
+  font-family: var(--mono); font-size: 10px; color: var(--dim);
+  flex: 1; line-height: 1.5;
+}
+.image-attach-label span { color: var(--muted); }
 
 /* 예시 사용 현황 */
 .example-stat {
@@ -427,7 +459,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.2.0</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.3.0</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -467,7 +499,22 @@ header {
 
       <div class="section">
         <div class="section-label">컨텍스트</div>
-        <textarea class="ctx-textarea" id="ctxInput" placeholder="사진/영상 내용, 분위기, 키워드…"></textarea>
+        <textarea class="ctx-textarea" id="ctxInput" placeholder="사진/영상 내용, 분위기, 키워드…&#10;이미지 첨부 시 생략 가능"></textarea>
+
+        <div class="image-attach-area" id="imageAttachArea"
+          ondragover="onImageDragOver(event)" ondragleave="onImageDragLeave(event)" ondrop="onImageDrop(event)">
+          <div class="image-attach-inner" onclick="triggerImagePicker()">
+            <div class="image-preview-wrap" id="imagePreviewWrap" style="display:none">
+              <img class="image-preview" id="imagePreview" src="" alt="">
+              <button class="image-remove-btn" onclick="removeImage(event)">×</button>
+            </div>
+            <div class="image-attach-label" id="imageAttachLabel">
+              <span>📎 이미지 첨부</span><br>클릭하거나 드래그
+            </div>
+          </div>
+        </div>
+        <input type="file" id="imageFileInput" accept="image/*" style="display:none" onchange="onImageSelected(event)">
+
         <button class="btn-generate" id="genBtn" onclick="generateText()">글 생성하기 →</button>
       </div>
 
@@ -742,10 +789,62 @@ const TYPE_INSTRUCTION = {
 // ══════════════════════════════════════════
 let lastOriginal = '';
 
+// ── 이미지 관련 ──
+let attachedImageBase64 = null;
+let attachedImageType = null;
+
+function triggerImagePicker() {
+  document.getElementById('imageFileInput').click();
+}
+
+function onImageSelected(e) {
+  const file = e.target.files[0];
+  if (file) loadImageFile(file);
+}
+
+function onImageDragOver(e) {
+  e.preventDefault();
+  document.getElementById('imageAttachArea').classList.add('dragover');
+}
+function onImageDragLeave(e) {
+  document.getElementById('imageAttachArea').classList.remove('dragover');
+}
+function onImageDrop(e) {
+  e.preventDefault();
+  document.getElementById('imageAttachArea').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImageFile(file);
+}
+
+function loadImageFile(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    attachedImageBase64 = dataUrl.split(',')[1];
+    attachedImageType = file.type;
+    document.getElementById('imagePreview').src = dataUrl;
+    document.getElementById('imagePreviewWrap').style.display = 'block';
+    document.getElementById('imageAttachLabel').innerHTML = `<span style="color:var(--accent)">${file.name}</span><br>이미지 분석 후 글 생성`;
+    document.getElementById('imageAttachArea').classList.add('has-image');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(e) {
+  e.stopPropagation();
+  attachedImageBase64 = null;
+  attachedImageType = null;
+  document.getElementById('imagePreview').src = '';
+  document.getElementById('imagePreviewWrap').style.display = 'none';
+  document.getElementById('imageAttachLabel').innerHTML = '<span>📎 이미지 첨부</span><br>클릭하거나 드래그';
+  document.getElementById('imageAttachArea').classList.remove('has-image');
+  document.getElementById('imageFileInput').value = '';
+}
+
 async function generateText() {
   const key = getKey(); if (!key) return;
   const ctx = document.getElementById('ctxInput').value.trim();
-  if (!ctx) { toast('컨텍스트를 입력해주세요.'); return; }
+  if (!ctx && !attachedImageBase64) { toast('컨텍스트나 이미지를 입력해주세요.'); return; }
 
   const btn = document.getElementById('genBtn');
   btn.disabled = true;
@@ -785,6 +884,25 @@ ${TYPE_INSTRUCTION[currentType]}`;
     });
   }
 
+  // 4. 메시지 구성 (이미지 포함 여부)
+  let userContent;
+  if (attachedImageBase64) {
+    userContent = [
+      {
+        type: 'image',
+        source: { type: 'base64', media_type: attachedImageType, data: attachedImageBase64 }
+      },
+      {
+        type: 'text',
+        text: ctx
+          ? `이 이미지를 보고, 아래 내용도 참고해서 글을 써주세요.\n\n${ctx}`
+          : '이 이미지를 보고 글을 써주세요. 이미지의 분위기, 빛, 계절, 감각적 디테일을 Vase 문체로 담아주세요.'
+      }
+    ];
+  } else {
+    userContent = `다음 내용을 바탕으로 글을 써주세요:\n\n${ctx}`;
+  }
+
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -798,7 +916,7 @@ ${TYPE_INSTRUCTION[currentType]}`;
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1500,
         system,
-        messages: [{ role: 'user', content: `다음 내용을 바탕으로 글을 써주세요:\n\n${ctx}` }],
+        messages: [{ role: 'user', content: userContent }],
       }),
     });
     const data = await res.json();
