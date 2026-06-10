@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.5.3 · sapmanri</title>
+<title>Writing Studio v2.5.4 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -478,7 +478,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.5.3</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.5.4</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -837,6 +837,7 @@ function switchTab(name) {
 // 글 타입
 // ══════════════════════════════════════════
 let currentType = 'instagram';
+let editingExampleId = null; // 수정 중인 예시 id
 function setType(btn) {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -1089,6 +1090,22 @@ async function copyEditor() {
 function saveAsExample() {
   const text = document.getElementById('mainEditor').value.trim();
   if (!text) { toast('저장할 내용이 없어요.'); return; }
+  if (editingExampleId) {
+    // 수정 모드: 기존 글 업데이트
+    const idx = db.examples.findIndex(e => e.id === editingExampleId);
+    if (idx !== -1) {
+      db.examples[idx].text = text;
+      db.examples[idx].type = currentType;
+      db.examples[idx].date = new Date().toLocaleDateString('ko-KR');
+      saveDB();
+      editingExampleId = null;
+      updateCharCount();
+      toast('예시 글이 업데이트됐어요.');
+      updateExampleStat();
+      return;
+    }
+  }
+  // 새 글 등록
   db.examples.push({ id: Date.now(), type: currentType, text, date: new Date().toLocaleDateString('ko-KR') });
   saveDB();
   toast('예시 글로 저장했습니다.');
@@ -1214,14 +1231,20 @@ function renderExamples() {
 
       const acts = document.createElement('div');
       acts.className = 'example-card-actions';
+      const btnEdit = document.createElement('button');
+      btnEdit.className = 'icon-btn use';
+      btnEdit.textContent = '수정';
+      btnEdit.onclick = () => loadToEditorForEdit(item.id);
       const btnLoad = document.createElement('button');
-      btnLoad.className = 'icon-btn use';
+      btnLoad.className = 'icon-btn';
+      btnLoad.style.color = 'var(--dim)';
       btnLoad.textContent = '불러오기';
       btnLoad.onclick = () => loadToEditor(item.id);
       const btnDel = document.createElement('button');
       btnDel.className = 'icon-btn';
       btnDel.textContent = '삭제';
       btnDel.onclick = () => deleteExample(item.id);
+      acts.appendChild(btnEdit);
       acts.appendChild(btnLoad);
       acts.appendChild(btnDel);
       hdr.appendChild(acts);
@@ -1260,10 +1283,26 @@ function updateFilterCounts() {
 function loadToEditor(id) {
   const ex = db.examples.find(e => e.id === id);
   if (!ex) return;
+  editingExampleId = null; // 새 글로 저장
   document.getElementById('mainEditor').value = ex.text;
   onEditorInput();
   switchTab('write');
-  toast('에디터로 불러왔습니다.');
+  toast('불러왔습니다. 저장 시 새 글로 등록돼요.');
+}
+
+function loadToEditorForEdit(id) {
+  const ex = db.examples.find(e => e.id === id);
+  if (!ex) return;
+  editingExampleId = id; // 수정 모드
+  // 타입 맞추기
+  const typeBtn = document.querySelector(`[data-type="${ex.type}"]`);
+  if (typeBtn) setType(typeBtn);
+  document.getElementById('mainEditor').value = ex.text;
+  onEditorInput();
+  switchTab('write');
+  // 에디터 바에 수정 중 표시
+  document.getElementById('charCount').innerHTML = '<span style="color:var(--accent);font-size:10px">✎ 수정 중</span>';
+  toast('수정 모드. 저장 시 원본이 업데이트돼요.');
 }
 
 function deleteExample(id) {
