@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.8 · sapmanri</title>
+<title>Writing Studio v2.4.9 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -290,19 +290,9 @@ header {
 .icon-btn.use:hover { color: var(--green); }
 .example-card-body {
   padding: 12px; font-size: 12px; line-height: 1.8;
-  color: var(--text); white-space: pre-wrap; word-break: break-word;
-  max-height: 120px; overflow: hidden;
-  transition: max-height 0.4s ease;
+  color: #e2ddd6; white-space: pre-wrap; word-break: break-word;
 }
-.example-card-body.expanded {
-  max-height: none; overflow: visible;
-}
-.example-card-footer {
-  padding: 4px 12px 10px;
-  font-family: var(--mono); font-size: 10px; color: var(--accent2);
-  cursor: pointer; text-align: center; border-top: 1px solid var(--border);
-}
-.example-card-footer:hover { color: var(--accent); }
+.example-card-footer { display: none; }
 
 /* 새 예시 모달 */
 .modal-backdrop {
@@ -478,7 +468,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.8</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.9</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
