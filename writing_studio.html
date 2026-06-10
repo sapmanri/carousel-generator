@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.0.1 · sapmanri</title>
+<title>Writing Studio v2.1.0 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -374,6 +374,28 @@ header {
 
 .export-row { display: flex; gap: 8px; margin-top: 16px; }
 
+.btn-analyze {
+  width: 100%;
+  background: none; border: 1px solid var(--accent2); color: var(--accent);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  padding: 9px; border-radius: 4px; cursor: pointer; transition: all 0.2s;
+}
+.btn-analyze:hover { background: var(--accent2); color: var(--bg); }
+.btn-analyze:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.suggest-card {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 12px 14px; margin-bottom: 8px;
+  font-size: 13px; line-height: 1.75; color: var(--text);
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.suggest-card .suggest-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink:0; margin-top:8px; }
+.suggest-card .suggest-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink:0; }
+.btn-accept { background: none; border: 1px solid var(--green); color: var(--green); font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
+.btn-accept:hover { background: var(--green); color: var(--bg); }
+.btn-reject { background: none; border: 1px solid var(--dim); color: var(--dim); font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
+.btn-reject:hover { border-color: var(--red); color: var(--red); }
+
 /* 공통 */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -405,7 +427,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.0.1</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.1.0</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -544,6 +566,10 @@ header {
         <input class="add-rule-input" id="newRuleInput" placeholder="새 규칙 입력 (예: '그러나'보다 '하지만'을 선호한다)">
         <button class="btn-primary" onclick="addRule()">추가</button>
       </div>
+      <div style="margin-top:12px">
+        <button class="btn-analyze" id="analyzeBtn" onclick="analyzeStyle()">✦ 피드백 패턴 분석 → 규칙 제안</button>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:6px" id="analyzeHint"></div>
+      </div>
     </div>
 
     <div class="profile-section">
@@ -560,6 +586,23 @@ header {
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- 분석 제안 모달 -->
+<div class="modal-backdrop" id="analyzeModal">
+  <div class="modal" style="width:620px">
+    <div class="modal-header">
+      <span>문체 분석 결과 — 규칙 제안</span>
+      <button class="modal-close" onclick="closeAnalyzeModal()">×</button>
+    </div>
+    <div class="modal-body" id="analyzeModalBody" style="gap:8px">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--dim)">분석 중…</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="acceptAllSuggestions()">전체 추가</button>
+      <button class="btn-ghost" onclick="closeAnalyzeModal()">닫기</button>
+    </div>
   </div>
 </div>
 
@@ -1075,6 +1118,146 @@ function resetAll() {
   db = { examples: [], pairs: [], rules: [...DEFAULT_RULES] };
   saveDB(); renderExamples(); renderProfile();
   toast('초기화했습니다.');
+}
+
+// ══════════════════════════════════════════
+// 문체 분석 → 규칙 제안
+// ══════════════════════════════════════════
+let pendingSuggestions = [];
+
+async function analyzeStyle() {
+  const key = getKey(); if (!key) return;
+  if (db.pairs.length === 0 && db.examples.length === 0) {
+    toast('피드백 쌍이나 예시 글이 있어야 분석할 수 있어요.');
+    return;
+  }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>분석 중…';
+
+  // 분석용 프롬프트 구성
+  let prompt = `당신은 글쓰기 문체 분석 전문가입니다.
+아래는 한국 크리에이터 Vase Lim(@sapmanri)의 글쓰기 데이터입니다.
+
+## 현재 등록된 문체 규칙
+${db.rules.map((r,i) => `${i+1}. ${r}`).join('\n')}
+
+`;
+
+  if (db.pairs.length > 0) {
+    prompt += `## AI 초안 → Vase 수정본 패턴 (${db.pairs.length}개)
+`;
+    db.pairs.forEach((p, i) => {
+      prompt += `\n[패턴 ${i+1}] (${TYPE_LABEL[p.type]})\nAI 원본: ${p.original.slice(0,300)}\nVase 수정: ${p.edited.slice(0,300)}\n`;
+    });
+  }
+
+  if (db.examples.length > 0) {
+    prompt += `\n## Vase가 직접 쓴 예시 글 (${db.examples.length}개, 최근 5개)
+`;
+    db.examples.slice(-5).forEach((e, i) => {
+      prompt += `\n[예시 ${i+1}] (${TYPE_LABEL[e.type]})\n${e.text.slice(0,400)}\n`;
+    });
+  }
+
+  prompt += `
+## 분석 요청
+위 데이터를 바탕으로:
+1. 수정 패턴에서 반복되는 문체 특징을 찾아내세요
+2. 기존 규칙과 중복되지 않는 새 규칙을 3-6개 제안하세요
+3. 각 규칙은 구체적이고 실행 가능한 한 문장으로 작성하세요
+
+응답은 반드시 아래 JSON 형식으로만 답하세요. 설명이나 마크다운 없이 순수 JSON만:
+{"suggestions": ["규칙1", "규칙2", "규칙3"]}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    let text = data.content?.[0]?.text || '';
+    text = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(text);
+    pendingSuggestions = parsed.suggestions || [];
+
+    openAnalyzeModal(pendingSuggestions);
+  } catch(e) {
+    toast('분석 오류: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ 피드백 패턴 분석 → 규칙 제안';
+  }
+}
+
+function openAnalyzeModal(suggestions) {
+  const body = document.getElementById('analyzeModalBody');
+  if (suggestions.length === 0) {
+    body.innerHTML = '<div style="color:var(--dim);font-size:12px">새로 제안할 규칙이 없어요. 피드백 쌍을 더 쌓은 후 다시 시도해보세요.</div>';
+  } else {
+    body.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:12px">추가할 규칙을 선택하세요</div>';
+    suggestions.forEach((s, i) => {
+      const el = document.createElement('div');
+      el.className = 'suggest-card';
+      el.id = 'suggest-' + i;
+      el.innerHTML = `
+        <span class="suggest-dot"></span>
+        <span style="flex:1">${escHtml(s)}</span>
+        <div class="suggest-actions">
+          <button class="btn-accept" onclick="acceptSuggestion(${i})">추가</button>
+          <button class="btn-reject" onclick="rejectSuggestion(${i})">건너뜀</button>
+        </div>`;
+      body.appendChild(el);
+    });
+  }
+  document.getElementById('analyzeModal').classList.add('open');
+}
+
+function closeAnalyzeModal() {
+  document.getElementById('analyzeModal').classList.remove('open');
+}
+
+function acceptSuggestion(i) {
+  const s = pendingSuggestions[i];
+  if (!s) return;
+  db.rules.push(s);
+  saveDB();
+  const card = document.getElementById('suggest-' + i);
+  if (card) {
+    card.style.opacity = '0.4';
+    card.querySelector('.suggest-actions').innerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--green)">✓ 추가됨</span>';
+  }
+  renderProfile();
+  toast('규칙 추가됨');
+}
+
+function rejectSuggestion(i) {
+  const card = document.getElementById('suggest-' + i);
+  if (card) {
+    card.style.opacity = '0.3';
+    card.querySelector('.suggest-actions').innerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--dim)">건너뜀</span>';
+  }
+}
+
+function acceptAllSuggestions() {
+  pendingSuggestions.forEach((s, i) => {
+    const card = document.getElementById('suggest-' + i);
+    if (card && !card.style.opacity) acceptSuggestion(i);
+  });
+  toast('전체 추가됐습니다.');
 }
 
 // ══════════════════════════════════════════
