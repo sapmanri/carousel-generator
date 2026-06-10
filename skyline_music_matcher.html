@@ -352,7 +352,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.6';
+const VERSION = 'v1.3.7';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -957,7 +957,7 @@ function renderSapmanri(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
   g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
   const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(190,170,255,0.82)','rgba(140,100,255,0.35)',d._ampRatio||1);
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
   const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
   const titleSize=CW*0.052;
   setF(ctx,titleSize,'700','"Helvetica Neue",Arial,sans-serif');
@@ -978,7 +978,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.68, wH=splitY*0.38;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(184,122,110,0.88)','rgba(184,122,110,0.28)',d._ampRatio||1);
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
   const pad=CW*0.07, ty=splitY+CW*0.048;
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
   ctx.fillStyle='#b87a6e'; ctx.fillRect(pad,ty+CW*0.02,CW*0.0018,CW*0.046);
@@ -995,7 +995,7 @@ function renderMagazine(ctx,d,CW,CH,isV){
 function renderTheEdit(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
   const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,60,0,0.95)','rgba(255,60,0,0.3)',d._ampRatio||1);
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
   const bx=CW*0.07, bw=CW*0.86;
   const by=isV?CW*(0.6+panelPos*0.6):CH*(0.44+panelPos*0.3);
   // Draw box first with estimated height, then we'll just draw content and let it flow
@@ -1018,7 +1018,7 @@ function renderStayfolio(ctx,d,CW,CH,isV){
   let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
   ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
   const wY=splitY*0.66, wH=splitY*0.4;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(140,115,85,0.92)','rgba(140,115,85,0.28)',d._ampRatio||1);
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
   const pad=CW*0.075, ty=splitY+CW*0.04;
   ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(CW-pad,ty); ctx.strokeStyle='#d4cfc8'; ctx.lineWidth=1; ctx.stroke();
   setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#8c7355'; ctx.fillText('STAYFOLIO × SAPMANRI',pad,ty+CW*0.027);
@@ -1035,7 +1035,7 @@ function renderStayfolio(ctx,d,CW,CH,isV){
 function renderNike(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
   const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.26:CH*0.30;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.92)','rgba(255,255,255,0.22)',d._ampRatio||1);
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
   const pad=CW*0.08;
   const base = isV ? CW*(0.6+panelPos*0.5) : CH*0.67;
   setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
@@ -1055,7 +1055,7 @@ function renderOhouse(ctx,d,CW,CH,isV){
   const radius=CW*0.04;
   let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
   const wY=cardY*0.65, wH=cardY*0.44;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(0,200,150,0.92)','rgba(0,200,150,0.28)',d._ampRatio||1);
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
   ctx.fillStyle='#FAFAF8'; ctx.beginPath();
   ctx.moveTo(0,cardY+radius); ctx.arcTo(0,cardY,radius,cardY,radius); ctx.lineTo(CW-radius,cardY); ctx.arcTo(CW,cardY,CW,cardY+radius,radius); ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath(); ctx.fill();
   const pad=CW*0.07, ty=cardY+CW*0.048;
@@ -1082,7 +1082,7 @@ function renderApple(ctx,d,CW,CH,isV){
 
   // Waveform on photo — ice white, ultra thin
   const wY = splitY*0.6, wH = splitY*0.44;
-  drawWave(ctx,d.line_points,CW,wY,wH,'rgba(255,255,255,0.75)','rgba(255,255,255,0.15)',d._ampRatio||1);
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
 
   // Black bottom panel — perfectly flat
   ctx.fillStyle='#000000'; ctx.fillRect(0,splitY,CW,CH-splitY);
@@ -1837,7 +1837,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
         // Mirror reflection dot — below baseY, more visible
         if(row < rows * 0.7){
           const mirrorProgress = row / (rows * 0.7);
-          const mirrorAlpha = alpha * 0.5 * (1 - mirrorProgress);
+          const mirrorAlpha = alpha * 0.8 * (1 - mirrorProgress);
           ctx.globalAlpha = mirrorAlpha;
           ctx.fillStyle = progress > 0.4 ? glowColor : color;
           const ds2 = ds * (0.7 - mirrorProgress * 0.3);
