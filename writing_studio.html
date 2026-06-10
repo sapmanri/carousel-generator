@@ -599,25 +599,6 @@ header {
 // ══════════════════════════════════════════
 // 데이터 레이어
 // ══════════════════════════════════════════
-const DB_KEY = 'ws_sapmanri_v2';
-let db = loadDB();
-
-function loadDB() {
-  try {
-    const raw = localStorage.getItem(DB_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return {
-    examples: [],    // { id, type, text, date }
-    pairs: [],       // { id, type, original, edited, date }
-    rules: [...DEFAULT_RULES],
-  };
-}
-
-function saveDB() {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
-  updateStats();
-}
 
 // ── 기본 Vase 문체 규칙 (초기값) ──
 const DEFAULT_RULES = [
@@ -630,6 +611,26 @@ const DEFAULT_RULES = [
   '고양이 빼빼와 콩이 등장할 때는 사람처럼 묘사하지 않는다. 그냥 그 자리에 있는 것으로 충분하다.',
   '마침표로 끝나는 짧은 한 문장이 문단 전체를 마무리할 때 가장 강하다.',
 ];
+
+const DB_KEY = 'ws_sapmanri_v2';
+let db = loadDB();
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return {
+    examples: [],
+    pairs: [],
+    rules: [...DEFAULT_RULES],
+  };
+}
+
+function saveDB() {
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  updateStats();
+}
 
 // ══════════════════════════════════════════
 // 탭 전환
