@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.4 · sapmanri</title>
+<title>Writing Studio v2.4.5 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -291,20 +291,16 @@ header {
 .example-card-body {
   padding: 12px; font-size: 12px; line-height: 1.8;
   color: var(--muted); white-space: pre-wrap; word-break: break-word;
-  max-height: 200px; overflow: hidden; cursor: pointer;
+  max-height: 180px; overflow: hidden; cursor: pointer;
   transition: max-height 0.4s ease;
-  position: relative;
 }
-.example-card-body::after {
-  content: '▾ 더 보기';
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 36px; line-height: 36px; text-align: center;
-  background: linear-gradient(transparent, var(--s1));
+.example-card-body.expanded { max-height: 1200px; overflow-y: auto; }
+.example-card-footer {
+  padding: 4px 12px 8px;
   font-family: var(--mono); font-size: 10px; color: var(--dim);
-  pointer-events: none;
+  cursor: pointer; text-align: center;
 }
-.example-card-body.expanded { max-height: 1200px; }
-.example-card-body.expanded::after { display: none; }
+.example-card-footer:hover { color: var(--accent); }
 
 /* 새 예시 모달 */
 .modal-backdrop {
@@ -480,7 +476,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.4</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.5</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -1213,7 +1209,8 @@ function renderExamples() {
             <button class="icon-btn" onclick="deleteExample(${item.id})">삭제</button>
           </div>
         </div>
-        <div class="example-card-body" onclick="this.classList.toggle('expanded')">${escHtml(bodyText)}</div>`;
+        <div class="example-card-body" id="body-${item.id}" onclick="toggleCardBody(${item.id})">${escHtml(bodyText)}</div>
+        <div class="example-card-footer" id="footer-${item.id}" onclick="toggleCardBody(${item.id})">▾ 펼치기</div>`;
     }
     grid.appendChild(card);
   });
@@ -1682,6 +1679,14 @@ function acceptAllSuggestions() {
 // ══════════════════════════════════════════
 // 유틸
 // ══════════════════════════════════════════
+function toggleCardBody(id) {
+  const body = document.getElementById('body-' + id);
+  const footer = document.getElementById('footer-' + id);
+  if (!body) return;
+  const expanded = body.classList.toggle('expanded');
+  if (footer) footer.textContent = expanded ? '▴ 접기' : '▾ 펼치기';
+}
+
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
