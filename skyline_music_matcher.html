@@ -352,7 +352,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.4';
+const VERSION = 'v1.3.5';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1577,61 +1577,57 @@ function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRati
 }
 
 function drawTraceLine(ctx, pts, CW, CH){
-  // Draw contour tracing lines directly on image at actual positions
-  // pts are 0-100 where 100=top of image, 0=bottom
+  if(!pts||!pts.length) return;
   const n = pts.length;
-  const topMargin = CH * 0.05;   // top 5% reserved
-  const botMargin = CH * 0.15;   // bottom 15% reserved
-  const drawH = CH - topMargin - botMargin;
+  const topM = CH * 0.08;
+  const botM = CH * 0.12;
+  const drawH = CH - topM - botM;
+  const getY = v => topM + (1 - v/100) * drawH;
 
-  // Convert points to actual Y positions on image
-  const getY = (v) => topMargin + (1 - v/100) * drawH;
-
-  // Layer 1: wide soft glow (purple tint)
   ctx.save();
-  ctx.strokeStyle = 'rgba(160,130,255,0.35)';
-  ctx.lineWidth = Math.max(CW/120, 3);
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
-  ctx.filter = 'blur(3px)';
+
+  // Layer 1: thick purple glow
+  ctx.globalAlpha = 0.25;
+  ctx.strokeStyle = 'rgba(160,120,255,1)';
+  ctx.lineWidth = Math.max(CW/60, 6);
   ctx.beginPath();
   for(let i=0; i<n; i++){
-    const x = (i/(n-1)) * CW;
-    const y = getY(pts[i]);
-    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    const x=(i/(n-1))*CW, y=getY(pts[i]);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
 
-  // Layer 2: medium white line
-  ctx.filter = 'none';
-  ctx.strokeStyle = 'rgba(255,255,255,0.65)';
-  ctx.lineWidth = Math.max(CW/200, 1.5);
+  // Layer 2: medium white
+  ctx.globalAlpha = 0.6;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = Math.max(CW/180, 2);
   ctx.beginPath();
   for(let i=0; i<n; i++){
-    const x = (i/(n-1)) * CW;
-    const y = getY(pts[i]);
-    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    const x=(i/(n-1))*CW, y=getY(pts[i]);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
 
-  // Layer 3: thin bright core line
-  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
-  ctx.lineWidth = Math.max(CW/400, 0.8);
+  // Layer 3: thin bright core
+  ctx.globalAlpha = 0.9;
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = Math.max(CW/500, 0.8);
   ctx.beginPath();
   for(let i=0; i<n; i++){
-    const x = (i/(n-1)) * CW;
-    const y = getY(pts[i]);
-    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    const x=(i/(n-1))*CW, y=getY(pts[i]);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
 
-  // Layer 4: small dots at each data point (sparse, every 4th)
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
-  for(let i=0; i<n; i+=4){
-    const x = (i/(n-1)) * CW;
-    const y = getY(pts[i]);
+  // Layer 4: dots every 5th point
+  ctx.globalAlpha = 0.75;
+  ctx.fillStyle = '#ffffff';
+  for(let i=0; i<n; i+=5){
+    const x=(i/(n-1))*CW, y=getY(pts[i]);
     ctx.beginPath();
-    ctx.arc(x, y, Math.max(CW/300, 1.5), 0, Math.PI*2);
+    ctx.arc(x, y, Math.max(CW/250,2), 0, Math.PI*2);
     ctx.fill();
   }
 
