@@ -196,6 +196,7 @@ input[type=range]::-moz-range-thumb{
           <button class="opt-btn" data-design="grain" onclick="pickDesign(this)"><span class="name">필름그레인</span><span class="desc">노출 오버레이</span></button>
           <button class="opt-btn" data-design="cinema" onclick="pickDesign(this)"><span class="name">시네마</span><span class="desc">레터박스</span></button>
           <button class="opt-btn" data-design="typo" onclick="pickDesign(this)"><span class="name">타이포</span><span class="desc">블록 타이포</span></button>
+          <button class="opt-btn" data-design="ivory" onclick="pickDesign(this)"><span class="name">아이보리</span><span class="desc">미니멀 · 밝음</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -375,7 +376,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.2';
+const VERSION = 'v1.7.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -749,7 +750,7 @@ function renderCard(d){
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
     // Run design renderer (sets _lastWaveY/_lastWaveH, draws image overlays + text)
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo,ivory:renderIvory})[cardDesign](ctx,rd,CW,CH,isV);
 
     // Draw all visible waves
     const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
@@ -1802,6 +1803,43 @@ function renderTypo(ctx,d,CW,CH,isV){
   ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
 
   brand(ctx,CW,CH,pad,'rgba(255,255,255,0.16)');
+}
+
+function renderIvory(ctx,d,CW,CH,isV){
+  const splitY = isV ? CH*0.52 : CH*0.48;
+  const ivory = '#F6F3EE';
+  let g = ctx.createLinearGradient(0, splitY*0.7, 0, splitY);
+  g.addColorStop(0, 'rgba(246,243,238,0)');
+  g.addColorStop(1, 'rgba(246,243,238,0.6)');
+  ctx.fillStyle = g; ctx.fillRect(0, splitY*0.7, CW, splitY*0.3);
+  ctx.fillStyle = ivory; ctx.fillRect(0, splitY, CW, CH - splitY);
+  const wY = splitY * 0.78, wH = splitY * 0.38;
+  _lastWaveY = wY; _lastWaveH = wH;
+  const pad = CW * 0.08;
+  setF(ctx, CW*0.018, '500', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillText('SAPMANRI', pad, CW*0.07);
+  const titleSz = CW * (isV ? 0.072 : 0.068);
+  setF(ctx, titleSz, '800', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  const titleY = splitY + titleSz * 1.3;
+  const afterT = fillWrap(ctx, d.song_title, pad, titleY, CW - pad*2, titleSz*1.25, '#1a1714');
+  const underY = afterT + titleSz * 0.32;
+  ctx.beginPath(); ctx.moveTo(pad, underY); ctx.lineTo(pad + CW*0.12, underY);
+  ctx.strokeStyle = '#1a1714'; ctx.lineWidth = Math.max(CW/300, 2); ctx.stroke();
+  setF(ctx, CW*0.024, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = '#888480'; ctx.fillText(d.artist, pad, underY + CW*0.048);
+  const cs = CW * 0.022;
+  const capY = underY + CW*0.112;
+  ctx.beginPath(); ctx.moveTo(pad, capY - cs*0.6); ctx.lineTo(pad + CW*0.055, capY - cs*0.6);
+  ctx.strokeStyle = 'rgba(26,23,20,0.15)'; ctx.lineWidth = 1; ctx.stroke();
+  setF(ctx, cs, '300', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(26,23,20,0.45)'; ctx.fillText(d.caption_line1||'', pad, capY);
+  setF(ctx, cs, '500', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(26,23,20,0.82)'; ctx.fillText(d.caption_line2||'', pad, capY + cs*1.75);
+  setF(ctx, cs*0.86, '300', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(26,23,20,0.35)'; ctx.fillText(d.caption_line3||'', pad, capY + cs*3.3);
+  setF(ctx, CW*0.016, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(26,23,20,0.22)'; ctx.textAlign = 'right';
+  ctx.fillText('© SAPMANRI', CW - pad*0.7, CH - CW*0.022); ctx.textAlign = 'left';
 }
 
 async function saveToArchive(result, apiKey){
