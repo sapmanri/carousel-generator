@@ -160,59 +160,1861 @@ input[type=range]::-moz-range-thumb{
         <label>파형 스타일</label>
         <div class="btn-grid-2" id="waveGrid">
           <div style="position:relative;">
-            <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)" style="width:100%;">
-              <span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span>
-            </button>
-            <input type="checkbox" id="vis_mirror" checked 
-              onchange="toggleWaveVisible('mirror',this)"
-              style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;z-index:10;"
-            />
+            <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
+            <input type="checkbox" id="vis_mirror" checked onchange="toggleWaveVisible('mirror',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="position:relative;">
-            <button class="opt-btn " data-wave="multiline" onclick="pickWave(this)" style="width:100%;">
-              <span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span>
-            </button>
-            <input type="checkbox" id="vis_multiline"  
-              onchange="toggleWaveVisible('multiline',this)"
-              style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;z-index:10;"
-            />
+            <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
+            <input type="checkbox" id="vis_multiline" onchange="toggleWaveVisible('multiline',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="position:relative;">
-            <button class="opt-btn " data-wave="dots" onclick="pickWave(this)" style="width:100%;">
-              <span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span>
-            </button>
-            <input type="checkbox" id="vis_dots"  
-              onchange="toggleWaveVisible('dots',this)"
-              style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;z-index:10;"
-            />
+            <button class="opt-btn" data-wave="dots" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
+            <input type="checkbox" id="vis_dots" onchange="toggleWaveVisible('dots',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="position:relative;">
-            <button class="opt-btn " data-wave="silhouette" onclick="pickWave(this)" style="width:100%;">
-              <span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span>
-            </button>
-            <input type="checkbox" id="vis_silhouette"  
-              onchange="toggleWaveVisible('silhouette',this)"
-              style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;z-index:10;"
-            />
+            <button class="opt-btn" data-wave="silhouette" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span></button>
+            <input type="checkbox" id="vis_silhouette" onchange="toggleWaveVisible('silhouette',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
           <div style="position:relative;">
-            <button class="opt-btn " data-wave="trace" onclick="pickWave(this)" style="width:100%;">
-              <span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span>
-            </button>
-            <input type="checkbox" id="vis_trace"  
-              onchange="toggleWaveVisible('trace',this)"
-              style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;z-index:10;"
-            />
+            <button class="opt-btn" data-wave="trace" onclick="pickWave(this)" style="width:100%;padding-bottom:22px;"><span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span></button>
+            <input type="checkbox" id="vis_trace" onchange="toggleWaveVisible('trace',this)" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
         </div>
-function toggleWaveVisible(wave, el){
-  if(!el.checked){
-    if(visibleWaves.size <= 1){ el.checked=true; return; }
-    visibleWaves.delete(wave);
+      </div>
+      <div class="panel-section">
+        <label>카드 디자인</label>
+        <div class="design-scroll">
+          <button class="opt-btn active-design" data-design="sapmanri" onclick="pickDesign(this)"><span class="name">감성찾아삽만리</span><span class="desc">다크 · 감성</span></button>
+          <button class="opt-btn" data-design="magazine" onclick="pickDesign(this)"><span class="name">Magazine B</span><span class="desc">에디토리얼</span></button>
+          <button class="opt-btn" data-design="theedit" onclick="pickDesign(this)"><span class="name">디에디트</span><span class="desc">큐레이션</span></button>
+          <button class="opt-btn" data-design="stayfolio" onclick="pickDesign(this)"><span class="name">스테이폴리오</span><span class="desc">파인스테이</span></button>
+          <button class="opt-btn" data-design="nike" onclick="pickDesign(this)"><span class="name">Nike</span><span class="desc">강렬 · 대문자</span></button>
+          <button class="opt-btn" data-design="ohouse" onclick="pickDesign(this)"><span class="name">오늘의집</span><span class="desc">라이프스타일</span></button>
+          <button class="opt-btn" data-design="apple" onclick="pickDesign(this)"><span class="name">Apple</span><span class="desc">미니멀 · 여백</span></button>
+          <button class="opt-btn" data-design="girok" onclick="pickDesign(this)"><span class="name">기록</span><span class="desc">라이프로그</span></button>
+          <button class="opt-btn" data-design="polaroid" onclick="pickDesign(this)"><span class="name">폴라로이드</span><span class="desc">필름 · 따뜻함</span></button>
+          <button class="opt-btn" data-design="grain" onclick="pickDesign(this)"><span class="name">필름그레인</span><span class="desc">노출 오버레이</span></button>
+          <button class="opt-btn" data-design="cinema" onclick="pickDesign(this)"><span class="name">시네마</span><span class="desc">레터박스</span></button>
+        </div>
+      </div>
+      <div class="panel-section">
+        <label>카드 포맷</label>
+        <div class="btn-grid-2">
+          <button class="opt-btn active-fmt" data-fmt="square" onclick="pickFmt(this)"><span class="name">1 : 1</span><span class="desc">인스타그램</span></button>
+          <button class="opt-btn" data-fmt="vertical" onclick="pickFmt(this)"><span class="name">9 : 16</span><span class="desc">쇼츠 · 릴스</span></button>
+        </div>
+      </div>
+    </div><!-- /controls-top -->
+
+    <!-- 2 카드 프리뷰 + 슬라이더 (desktop: right col, row 1) -->
+    <div class="card-col">
+      <div class="card-preview" id="cardPreview">
+        <div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>
+      </div>
+      <div id="cropSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">프레임 위치</span>
+          <div style="display:flex;gap:6px;">
+            <button onclick="setCrop(0)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">◀ 좌</button>
+            <button onclick="setCrop(0.5)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">● 중앙</button>
+            <button onclick="setCrop(1)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">우 ▶</button>
+          </div>
+        </div>
+        <input type="range" id="cropSlider" min="0" max="100" value="50" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="cropOffsetX=this.value/100; if(cachedResult)renderCard(cachedResult);" />
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>왼쪽</span><span>오른쪽</span></div>
+      </div>
+      <div id="panelSliderWrap" style="display:none;background:#111;border:0.5px solid #1e1e1e;border-radius:8px;padding:14px 18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">텍스트 패널 위치</span>
+          <span style="font-size:10px;color:#666;" id="panelPosVal">50%</span>
+        </div>
+        <input type="range" id="panelSlider" min="20" max="80" value="50" style="width:100%;accent-color:#b87a6e;cursor:pointer;" oninput="panelPos=this.value/100; document.getElementById('panelPosVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:9px;color:#333;"><span>위로</span><span>아래로</span></div>
+      </div>
+    </div><!-- /card-col -->
+
+    <!-- 4 파형조절·캡션·다운로드 (desktop: left col) -->
+    <div class="after-card-group">
+      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <label>파형 조절</label>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:2px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">밀도</span><span style="font-size:10px;color:#666;" id="densityVal">80</span></div>
+            <input type="range" id="densitySlider" min="10" max="80" value="80" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>잔잔</span><span>촘촘</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">진폭</span><span style="font-size:10px;color:#666;" id="ampVal">100%</span></div>
+            <input type="range" id="ampSlider" min="20" max="200" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('ampVal').textContent=this.value+'%'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>낮게</span><span>높게</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">글씨 크기</span><span style="font-size:10px;color:#666;" id="textScaleVal">1.0×</span></div>
+            <input type="range" id="textScaleSlider" min="50" max="150" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
+          </div>
+          <!-- 파형 색상 -->
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:10px;color:#555;">파형 색상</span>
+              <span style="font-size:10px;color:#666;" id="waveColorLabel">자동</span>
+            </div>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+              <button onclick="setWaveColor('auto')" id="wcAuto" style="background:#1a1830;border:0.5px solid #7c6fd4;border-radius:4px;padding:4px 10px;font-size:10px;color:#a99ef0;cursor:pointer;font-family:var(--sans);">자동</button>
+              <button onclick="setWaveColor('#ffffff')" style="width:24px;height:24px;border-radius:50%;background:#ffffff;border:0.5px solid #444;cursor:pointer;"></button>
+              <button onclick="setWaveColor('#000000')" style="width:24px;height:24px;border-radius:50%;background:#000000;border:0.5px solid #444;cursor:pointer;"></button>
+              <button onclick="setWaveColor('#a99ef0')" style="width:24px;height:24px;border-radius:50%;background:#a99ef0;border:0.5px solid #444;cursor:pointer;"></button>
+              <button onclick="setWaveColor('#b87a6e')" style="width:24px;height:24px;border-radius:50%;background:#b87a6e;border:0.5px solid #444;cursor:pointer;"></button>
+              <button onclick="setWaveColor('#f5c842')" style="width:24px;height:24px;border-radius:50%;background:#f5c842;border:0.5px solid #444;cursor:pointer;"></button>
+              <input type="color" id="waveColorPicker" value="#ffffff"
+                style="width:24px;height:24px;border-radius:50%;border:0.5px solid #444;padding:0;cursor:pointer;background:none;"
+                oninput="setWaveColor(this.value)" title="직접 선택" />
+            </div>
+          </div>
+          <!-- 파형 위치 -->
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:10px;color:#555;">파형 위치</span>
+              <span style="font-size:10px;color:#666;" id="waveOffsetVal">중앙</span>
+            </div>
+            <input type="range" id="waveOffsetSlider" min="-40" max="40" value="0"
+              style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
+              oninput="waveOffsetY=this.value/100; document.getElementById('waveOffsetVal').textContent=this.value>0?'아래↓':this.value<0?'위↑':'중앙'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>위↑</span><span>아래↓</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <label style="margin-bottom:0;">캡션 직접 입력 <span style="font-size:9px;color:#333;font-weight:normal;text-transform:none;letter-spacing:0">— 비우면 AI 자동</span></label>
+          <div style="display:flex;gap:4px;">
+            <button class="lang-btn active-lang" data-lang="ko" onclick="pickLang(this)" style="background:#1a1830;border:0.5px solid #7c6fd4;border-radius:4px;padding:4px 10px;font-size:10px;color:#a99ef0;cursor:pointer;font-family:var(--sans);">한국어</button>
+            <button class="lang-btn" data-lang="en" onclick="pickLang(this)" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:4px;padding:4px 10px;font-size:10px;color:#666;cursor:pointer;font-family:var(--sans);">English</button>
+          </div>
+        </div>
+        <textarea id="manualCaption" placeholder="줄바꿈으로 구분, 최대 3줄&#10;예)&#10;바람이 멈춘 오후,&#10;Here Comes the Sun 이 흐른다&#10;— 그냥, 아무것도 안 해도 괜찮은 날" rows="4"
+          style="width:100%;background:#0a0a0a;border:0.5px solid #2a2a2a;border-radius:5px;padding:8px 11px;font-size:12px;color:#ccc;outline:none;font-family:var(--sans);resize:none;line-height:1.8;transition:border-color 0.15s;box-sizing:border-box;"
+          onfocus="this.style.borderColor='#444'" onblur="this.style.borderColor='#2a2a2a'"
+          oninput="if(cachedResult)renderCard(cachedResult)"></textarea>
+      </div>
+      <div style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;">
+          <input type="checkbox" id="videoRecToggle" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" onchange="if(cachedResult&&this.checked)findRelatedVideo();" />
+          <span style="font-size:10px;letter-spacing:0.12em;color:#555;text-transform:uppercase;">채널 영상 추천</span>
+        </label>
+      </div>
+      <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
+      <button class="btn-secondary btn-dl" id="downloadGifBtn" onclick="downloadWaveGif()" style="display:none;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 GIF 저장</button>
+      <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
+    </div><!-- /after-card-group -->
+
+    <!-- 3 분석 버튼 (desktop: left col / mobile: bottom) -->
+    <div class="analyze-wrap">
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+    </div>
+    <!-- 3 분석 버튼 (desktop: left col / mobile: bottom) -->
+    <div class="analyze-wrap">
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+    </div>
+
+    <!-- 5 재생·인스타캡션·채널영상 (desktop: right col, row 2) -->
+    <div class="post-card-group">
+      <div id="playerSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div>
+              <div id="playerSongTitle" style="font-size:13px;font-weight:500;color:#e8e8e8;"></div>
+              <div id="playerArtist" style="font-size:11px;color:#555;margin-top:2px;"></div>
+            </div>
+            <button onclick="loadPlayer()" style="background:#1a1830;border:0.5px solid #2d2850;border-radius:6px;padding:8px 14px;font-size:11px;color:#a99ef0;cursor:pointer;white-space:nowrap;font-family:var(--sans);">▶ 재생</button>
+          </div>
+          <div id="ytPlayerWrap" style="display:none;position:relative;padding-bottom:56.25%;height:0;overflow:hidden;">
+            <iframe id="ytFrame" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen allow="autoplay"></iframe>
+          </div>
+        </div>
+      </div>
+      <div id="instaCapSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">Instagram Caption</span>
+            <button onclick="generateInstaCaption()" id="instaCapBtn" style="background:#141414;border:0.5px solid #2a2a2a;border-radius:5px;padding:6px 12px;font-size:11px;color:#888;cursor:pointer;font-family:var(--sans);">✦ 캡션 생성</button>
+          </div>
+          <div id="instaCapText" style="display:none;padding:16px 18px;font-size:13px;color:#aaa;line-height:1.9;white-space:pre-wrap;font-family:var(--sans);"></div>
+          <div id="instaCapHint" style="display:none;padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사하세요</div>
+        </div>
+      </div>
+      <!-- 고정 댓글 -->
+      <div id="pinCommentSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">📌 고정 댓글</span>
+            <span style="font-size:9px;color:#333;letter-spacing:0.06em;">복사 후 게시물에 고정</span>
+          </div>
+          <div id="pinCommentText" style="padding:16px 18px;font-size:13px;color:#aaa;line-height:1.7;white-space:pre-wrap;font-family:var(--sans);"></div>
+        </div>
+      </div>
+      <!-- 고정 댓글 -->
+      <div id="pinCommentSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">📌 고정 댓글</span>
+            <span style="font-size:9px;color:#333;letter-spacing:0.06em;">캡션 생성 시 자동 생성</span>
+          </div>
+          <div id="pinCommentText" style="padding:16px 18px;font-size:13px;color:#aaa;line-height:1.9;white-space:pre-wrap;font-family:var(--sans);"></div>
+          <div style="padding:0 18px 14px;font-size:10px;color:#333;letter-spacing:0.06em;">텍스트 선택 후 복사 → 게시 후 댓글에 고정</div>
+        </div>
+      </div>
+      <div id="videoRecSection" style="display:none;">
+        <div style="background:#111;border:0.5px solid #1e1e1e;border-radius:10px;overflow:hidden;">
+          <div style="padding:12px 18px;border-bottom:0.5px solid #1e1e1e;">
+            <span style="font-size:10px;letter-spacing:0.12em;color:#444;text-transform:uppercase;">감성찾아삽만리 추천 영상</span>
+          </div>
+          <div id="videoRecList" style="padding:14px 18px;display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
+    </div><!-- /post-card-group -->
+
+  </div><!-- /workspace -->
+</main>
+
+<script>
+const VERSION = 'v1.5.0';
+document.addEventListener('DOMContentLoaded',()=>{
+  const el=document.getElementById('versionTag');
+  if(el) el.textContent=VERSION;
+});
+
+function updateKeyVisibility(){
+  const apiKey=localStorage.getItem('smm_apikey')||'';
+  const wrap=document.getElementById('keyWrap');
+  const status=document.getElementById('keyStatus');
+  if(apiKey){wrap.style.display='none';status.style.display='block';}
+  else{wrap.style.display='flex';status.style.display='none';}
+}
+
+let imgSrc=null,b64=null,mtype='image/jpeg';
+let _lastImg=null; // global image ref for renderers
+let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
+let cachedResult=null;
+
+window.addEventListener('load', ()=>{
+  const keyInput=document.getElementById('apiKey');
+  const savedKey=localStorage.getItem('smm_apikey');
+  if(savedKey)keyInput.value=savedKey;
+  keyInput.addEventListener('input',()=>{
+    localStorage.setItem('smm_apikey',keyInput.value);
+    updateKeyVisibility();
+  });
+
+  const gKeyInput=document.getElementById('googleKey');
+  const savedGKey=localStorage.getItem('smm_gkey');
+  if(savedGKey)gKeyInput.value=savedGKey;
+  gKeyInput.addEventListener('input',()=>{
+    localStorage.setItem('smm_gkey',gKeyInput.value);
+    updateKeyVisibility();
+  });
+  updateKeyVisibility();
+
+  // File handling
+  document.getElementById('fileInput').addEventListener('change',e=>loadFile(e.target.files[0]));
+  const zone=document.getElementById('uploadZone');
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('dragover')});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('dragover');if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0])});
+});
+
+function loadFile(f){
+  if(!f)return; mtype=f.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=ev=>{
+    imgSrc=ev.target.result; b64=ev.target.result.split(',')[1];
+    cachedResult=null;
+    // usedSongs persists across images intentionally
+    document.getElementById('uploadSection').style.display='none';
+    document.getElementById('workspaceSection').classList.add('visible');
+    document.getElementById('downloadBtn').style.display='none';
+    setPlaceholder();
+  };r.readAsDataURL(f);
+}
+
+function setPlaceholder(){document.getElementById('cardPreview').innerHTML='<div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>'}
+
+// Option pickers — rerender without re-analyzing if cached
+function pickWave(btn){
+  document.querySelectorAll('[data-wave]').forEach(b=>b.classList.remove('active-wave'));
+  btn.classList.add('active-wave'); waveStyle=btn.dataset.wave;
+  if(cachedResult) renderCard(cachedResult);
+}
+function pickDesign(btn){
+  document.querySelectorAll('[data-design]').forEach(b=>b.classList.remove('active-design'));
+  btn.classList.add('active-design'); cardDesign=btn.dataset.design;
+  if(cachedResult) renderCard(cachedResult);
+}
+let cropOffsetX=0.5;
+window.waveColor='auto';
+let waveOffsetY=0.0;
+const waveSettings={
+  mirror:{density:80,amp:100,color:'auto',offset:0.0},
+  multiline:{density:80,amp:100,color:'auto',offset:0.0},
+  dots:{density:80,amp:100,color:'auto',offset:0.0},
+  silhouette:{density:80,amp:100,color:'auto',offset:0.0},
+  trace:{density:80,amp:100,color:'auto',offset:0.0},
+};
+let activeWave='mirror';
+let visibleWaves=new Set(['mirror']);
+let captionLang='ko';
+// usedSongs: persist across sessions in localStorage (last 10)
+let usedSongs = JSON.parse(localStorage.getItem('smm_usedSongs')||'[]');
+let panelPos=0.5;
+let textScale=1.0; // 0.2=높이, 0.8=낮게 (splitY 비율) // 같은 이미지에서 나온 곡 히스토리
+
+function pickLang(btn){
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.remove('active-lang');
+    b.style.background='#141414'; b.style.borderColor='#2a2a2a'; b.style.color='#666';
+  });
+  btn.classList.add('active-lang');
+  btn.style.background='#1a1830'; btn.style.borderColor='#7c6fd4'; btn.style.color='#a99ef0';
+  captionLang=btn.dataset.lang;
+}
+
+function setWaveColor(val){
+  window.waveColor = val;
+  const label = document.getElementById('waveColorLabel');
+  const autoBtn = document.getElementById('wcAuto');
+  if(val === 'auto'){
+    label.textContent = '자동';
+    autoBtn.style.background='#1a1830'; autoBtn.style.borderColor='#7c6fd4'; autoBtn.style.color='#a99ef0';
   } else {
-    visibleWaves.add(wave);
+    label.textContent = val;
+    autoBtn.style.background='#141414'; autoBtn.style.borderColor='#2a2a2a'; autoBtn.style.color='#666';
   }
   if(cachedResult) renderCard(cachedResult);
 }
 
+function setWaveColor(val){
+  window.waveColor = val;
+  const label = document.getElementById('waveColorLabel');
+  const autoBtn = document.getElementById('wcAuto');
+  if(val === 'auto'){
+    label.textContent = '자동';
+    autoBtn.style.background='#1a1830'; autoBtn.style.borderColor='#7c6fd4'; autoBtn.style.color='#a99ef0';
+  } else {
+    label.textContent = val;
+    autoBtn.style.background='#141414'; autoBtn.style.borderColor='#2a2a2a'; autoBtn.style.color='#666';
+  }
+  if(cachedResult) renderCard(cachedResult);
+}
 
+function setCrop(v){
+  cropOffsetX=v;
+  document.getElementById('cropSlider').value=v*100;
+  if(cachedResult)renderCard(cachedResult);
+}
+function pickFmt(btn){
+  document.querySelectorAll('[data-fmt]').forEach(b=>b.classList.remove('active-fmt'));
+  btn.classList.add('active-fmt'); cardFmt=btn.dataset.fmt;
+  cropOffsetX=0.5;
+  document.getElementById('cropSlider').value=50;
+  document.getElementById('cropSliderWrap').style.display='none';
+  if(cachedResult) renderCard(cachedResult);
+}
+
+function resetAll(){
+  imgSrc=null;b64=null;cachedResult=null; // usedSongs preserved across images
+  document.getElementById('uploadSection').style.display='block';
+  document.getElementById('workspaceSection').classList.remove('visible');
+  document.getElementById('fileInput').value='';
+}
+
+// ── ANALYZE ───────────────────────────────────────────────
+async function analyze(){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('API 키를 입력해주세요.');return}
+  if(!b64)return;
+  const btn=document.getElementById('analyzeBtn');
+  btn.disabled=true; btn.textContent='분석 중...';
+  document.getElementById('downloadBtn').style.display='none';
+  document.getElementById('panelSliderWrap').style.display='none';
+  panelPos=0.5; textScale=1.0;
+  document.getElementById('textScaleSlider').value=100;
+  document.getElementById('textScaleVal').textContent='1.0×';
+  document.getElementById('playerSection').style.display='none';
+  document.getElementById('ytPlayerWrap').style.display='none';
+  document.getElementById('ytFrame').src='';
+  document.getElementById('instaCapSection').style.display='none';
+  document.getElementById('instaCapText').style.display='none';
+  document.getElementById('pinCommentSection').style.display='none';
+  document.getElementById('videoRecSection').style.display='none';
+  document.getElementById('videoRecList').innerHTML='';
+  document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
+
+  // ── STEP 1: 이미지 분석 — 파형 수치만 추출 ──
+  const promptStep1=`You are a visual analyst. Analyze this image and extract ONLY the waveform data. No music, no captions.
+
+STEP 1 — MULTI-LAYER CONTOUR:
+Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon).
+
+STEP 2 — COMPOSITE WAVEFORM (80 points):
+Produce a composite height array of exactly 80 integers (0–100), left to right.
+- Take the HIGHEST prominent contour at each position
+- Reflect REAL geometry: buildings/peaks = high (60–100), flat fields/sky = low (5–30)
+- Must have HIGH VARIANCE — span the full 0–100 range
+- Neighbouring points can change rapidly (±20–40)
+
+STEP 3 — WAVEFORM CHARACTERISTICS:
+- tempo_feel: "slow" | "medium" | "driving"
+- dynamic_range: integer 0–100
+- density: "sparse" | "moderate" | "dense"
+- contour_shape: "ascending" | "descending" | "arch" | "valley" | "plateau" | "jagged"
+- mood: "melancholic" | "peaceful" | "hopeful" | "tense" | "joyful" | "nostalgic"
+
+Respond ONLY as valid JSON:
+{
+  "image_description": "사진에 담긴 피사체/장소/계절/분위기 (한국어, 2-3문장)",
+  "line_description": "복합 컨투어 한 문장 (한국어)",
+  "line_traits": ["특성1","특성2","특성3"],
+  "waveform": {
+    "tempo_feel": "slow|medium|driving",
+    "dynamic_range": 0,
+    "density": "sparse|moderate|dense",
+    "contour_shape": "ascending|descending|arch|valley|plateau|jagged",
+    "mood": "melancholic|peaceful|hopeful|tense|joyful|nostalgic"
+  },
+  "line_points": [80개 정수, 0-100]
+}`;
+
+  try{
+    document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
+    const res1=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}]}]})
+    });
+    const data1=await res1.json();
+    if(data1.error)throw new Error(data1.error.message);
+    const step1=JSON.parse(data1.content[0].text.replace(/```json|```/g,'').trim());
+
+    // ── STEP 2: 곡 선택 — 이미지 없이 파형 수치 기반 ──
+    document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">음악을 찾는 중...</p></div>';
+
+    const bannedList = usedSongs.length > 0 ? usedSongs.join(', ') : 'none';
+    const promptStep2=`You are a music curator matching waveform data to globally famous songs.
+
+Waveform characteristics:
+- tempo_feel: ${step1.waveform.tempo_feel}
+- dynamic_range: ${step1.waveform.dynamic_range}/100
+- density: ${step1.waveform.density}
+- contour_shape: ${step1.waveform.contour_shape}
+- mood: ${step1.waveform.mood}
+- scene: ${step1.image_description}
+
+BANNED (do NOT suggest these under any circumstances): ${bannedList}
+
+STEP 1 — GENRE POOL:
+Select 3–5 genres from this list that genuinely fit the waveform. Be open to unexpected but fitting combinations.
+Available: post-classical | jazz | pop-soul | indie-alternative | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost
+
+STEP 2 — GENRE SELECTION:
+From the pool, pick the genre LEAST represented in the banned list.
+If all pool genres are banned, expand the pool with 2 more genres before selecting.
+
+STEP 3 — SONG:
+Match ONE globally famous, instantly recognisable song from the chosen genre.
+It must NOT appear in the banned list. If your first choice is banned, pick another.
+
+STEP 4 — CAPTION (${captionLang === 'ko' ? 'Korean' : 'English'}):
+3 short lines in a quiet slow-life vlogger voice. Line 2 weaves in the song title naturally.
+
+Respond ONLY as valid JSON:
+{
+  "genre_pool": ["genre1","genre2"],
+  "chosen_genre": "selected genre",
+  "song_title": "곡 제목",
+  "artist": "아티스트명",
+  "match_reason_ko": "파형이 이 곡과 닮은 이유 2문장 (한국어)",
+  "caption_line1": "첫 번째 줄",
+  "caption_line2": "두 번째 줄 — 곡 제목 포함",
+  "caption_line3": "— 세 번째 줄"
+}`;
+
+    const res2=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:promptStep2}]})
+    });
+    const data2=await res2.json();
+    if(data2.error)throw new Error(data2.error.message);
+    const step2=JSON.parse(data2.content[0].text.replace(/```json|```/g,'').trim());
+
+    // 두 결과 합치기
+    cachedResult={...step1, ...step2};
+
+    const songEntry=`${cachedResult.song_title} by ${cachedResult.artist} [${cachedResult.chosen_genre||''}]`;
+    usedSongs.push(songEntry);
+    if(usedSongs.length>10) usedSongs=usedSongs.slice(-10);
+    localStorage.setItem('smm_usedSongs',JSON.stringify(usedSongs));
+
+    renderCard(cachedResult);
+    document.getElementById('downloadBtn').style.display='block';
+    document.getElementById('downloadGifBtn').style.display='block';
+    document.getElementById('panelSliderWrap').style.display='block';
+    document.getElementById('panelSlider').value=50;
+    document.getElementById('panelPosVal').textContent='50%';
+    panelPos=0.5;
+    document.getElementById('playerSongTitle').textContent=cachedResult.song_title;
+    document.getElementById('playerArtist').textContent=cachedResult.artist;
+    document.getElementById('playerSection').style.display='block';
+    document.getElementById('ytPlayerWrap').style.display='none';
+    document.getElementById('ytFrame').src='';
+    document.getElementById('instaCapSection').style.display='block';
+    document.getElementById('instaCapText').style.display='none';
+    document.getElementById('instaCapHint').style.display='none';
+    document.getElementById('instaCapBtn').textContent='✦ 캡션 생성';
+    document.getElementById('videoRecSection').style.display='none';
+    document.getElementById('videoRecList').innerHTML='';
+    if(document.getElementById('videoRecToggle').checked) findRelatedVideo();
+  }catch(err){
+    document.getElementById('cardPreview').innerHTML=`<div class="placeholder"><p style="color:#c06060">오류: ${err.message}</p></div>`;
+  }
+  btn.disabled=false; btn.textContent='다시 분석하기';
+}
+
+function renderCard(d){
+  const isV=cardFmt==='vertical', CW=1080, CH=isV?1920:1080;
+
+  // Manual caption override — use if filled, else AI result
+  const manualCapLines=document.getElementById('manualCaption').value.trim().split('\n').filter(l=>l.trim());
+
+  // Waveform controls
+  const density = parseInt(document.getElementById('densitySlider').value)||80;
+  const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
+
+  // Downsample/resample line_points to desired density
+  const rawPts = d.line_points || [];
+  const resampledPts = [];
+  for(let i=0; i<density; i++){
+    const t = i/(density-1);
+    const idx = t*(rawPts.length-1);
+    const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
+    resampledPts.push(rawPts[i0]*(1-(idx-i0)) + rawPts[i1]*(idx-i0));
+  }
+
+  const rd={
+    ...d,
+    line_points: resampledPts,
+    _ampRatio: ampRatio,
+    caption_line1: manualCapLines[0] || d.caption_line1,
+    caption_line2: manualCapLines[1] || d.caption_line2,
+    caption_line3: manualCapLines[2] || d.caption_line3,
+  };
+  const canvas=document.createElement('canvas');
+  canvas.width=CW; canvas.height=CH;
+  const ctx=canvas.getContext('2d');
+  const img=new Image();
+  img.onload=()=>{
+    const sc=Math.max(CW/img.naturalWidth,CH/img.naturalHeight);
+    const sw=img.naturalWidth*sc, sh=img.naturalHeight*sc;
+    // Apply cropOffsetX for horizontal positioning
+    const maxOffsetX = Math.max(0, sw - CW);
+    const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
+    const oy = (CH-sh)/2;
+    ctx.drawImage(img, ox, oy, sw, sh);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
+    // Draw additional visible waves
+    visibleWaves.forEach(w=>{
+      if(w===activeWave)return;
+      const s=waveSettings[w];
+      const _ws=waveStyle,_wc=window.waveColor,_wo=waveOffsetY;
+      waveStyle=w; window.waveColor=s.color; waveOffsetY=s.offset;
+      const wY=isV?CH*0.62:CH*0.60, wH=isV?CH*0.22:CH*0.28;
+      const _sc=getWaveColors(ctx,CW,wY,wH);
+      drawWave(ctx,rd.line_points,CW,wY,wH,_sc.main,_sc.glow,s.amp/100,CH);
+      waveStyle=_ws; window.waveColor=_wc; waveOffsetY=_wo;
+    });
+    canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
+    const prev=document.getElementById('cardPreview');
+    prev.innerHTML=''; prev.appendChild(canvas);
+    window._cardCanvas=canvas;
+    // Show crop slider if vertical
+    document.getElementById('cropSliderWrap').style.display = isV ? 'block' : 'none';
+  };
+  img.src=imgSrc;
+}
+
+async function findRelatedVideo(){
+  const gkey=document.getElementById('googleKey').value.trim();
+  const akey=document.getElementById('apiKey').value.trim();
+  if(!gkey||!akey||!cachedResult)return;
+
+  const recList=document.getElementById('videoRecList');
+  const recSection=document.getElementById('videoRecSection');
+  recSection.style.display='block';
+  recList.innerHTML='<div style="font-size:12px;color:#444;padding:4px 0;">채널 영상 불러오는 중...</div>';
+
+  try{
+    // 1. Fetch all video titles (up to 200, 50 per page)
+    let videos=[], pageToken='';
+    for(let page=0; page<4; page++){
+      const url=`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&type=video&maxResults=50&order=date${pageToken?'&pageToken='+pageToken:''}&key=${gkey}`;
+      const res=await fetch(url);
+      const data=await res.json();
+      if(data.error)throw new Error(data.error.message);
+      videos.push(...(data.items||[]).map(v=>({
+        id:v.id.videoId,
+        title:v.snippet.title,
+        thumb:v.snippet.thumbnails?.medium?.url||''
+      })));
+      if(!data.nextPageToken)break;
+      pageToken=data.nextPageToken;
+    }
+
+    if(!videos.length)throw new Error('영상을 찾을 수 없어요');
+    recList.innerHTML='<div style="font-size:12px;color:#444;padding:4px 0;">AI가 어울리는 영상 고르는 중...</div>';
+
+    // 2. Ask Claude to pick 3 matching videos
+    const d=cachedResult;
+    const videoList=videos.map((v,i)=>`${i+1}. [${v.id}] ${v.title}`).join('\n');
+
+    const prompt=`You are helping match YouTube videos from the channel 감성찾아삽만리 (SAPMANRI) to a photo.
+
+Photo analysis:
+- Subject/scene: ${d.image_description||d.line_description}
+- Line description: ${d.line_description}
+- Mood traits: ${(d.line_traits||[]).join(', ')}
+- Matched song: "${d.song_title}" by ${d.artist}
+- Caption: ${d.caption_line1} / ${d.caption_line2}
+
+Channel videos (format: index. [videoId] title):
+${videoList}
+
+Pick the 3 most thematically and emotionally fitting videos. Consider: season, location type (countryside/water/urban/cafe), mood, time of day implied by the photo.
+
+Respond ONLY as JSON, no markdown:
+{"picks":[{"id":"videoId","title":"title","reason":"한국어로 1문장 추천 이유"}]}`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':akey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const aiData=await res.json();
+    if(aiData.error)throw new Error(aiData.error.message);
+    const picks=JSON.parse(aiData.content[0].text.replace(/```json|```/g,'').trim()).picks;
+
+    recList.innerHTML=picks.map(p=>`
+      <a href="https://www.youtube.com/watch?v=${p.id}" target="_blank"
+        style="display:flex;gap:12px;align-items:flex-start;text-decoration:none;padding:10px;background:#0a0a0a;border-radius:7px;border:0.5px solid #1e1e1e;transition:border-color 0.15s;"
+        onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#1e1e1e'">
+        <img src="https://img.youtube.com/vi/${p.id}/mqdefault.jpg"
+          style="width:96px;height:54px;object-fit:cover;border-radius:4px;flex-shrink:0;" />
+        <div style="min-width:0;">
+          <div style="font-size:12px;font-weight:500;color:#ccc;line-height:1.4;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${p.title}</div>
+          <div style="font-size:11px;color:#555;line-height:1.5;">${p.reason}</div>
+        </div>
+      </a>`).join('');
+
+  }catch(err){
+    recList.innerHTML=`<div style="font-size:12px;color:#555;padding:4px 0;">오류: ${err.message}</div>`;
+  }
+}
+
+async function generateInstaCaption(){
+  const key=document.getElementById('apiKey').value.trim();
+  if(!key){alert('API 키를 입력해주세요.');return}
+  if(!cachedResult)return;
+
+  const btn=document.getElementById('instaCapBtn');
+  btn.textContent='생성 중...'; btn.disabled=true;
+
+  const isEn = captionLang==='en';
+  const lang = isEn ? 'English' : '한국어';
+  const d=cachedResult;
+
+  const prompt=`You are writing an Instagram caption for 감성찾아삽만리 (SAPMANRI).
+
+WRITING STYLE: Quiet, lyrical, restrained Korean prose. Like a photo-essay titled "잠깐 멈춰." Emotions appear through objects and scenes, not explanations. Short sentences, generous line breaks. No motivational tone, no AI-polished language, no forced comfort.
+
+Context:
+- Scene: ${d.image_description||d.line_description}
+- Song: "${d.song_title}" by ${d.artist}
+- Why this line matches: ${d.match_reason_ko||''}
+
+OUTPUT EXACTLY IN THIS ORDER — NO EXCEPTIONS:
+
+1. ONE declarative sentence: "[이 장면/능선/스카이라인]은 ${d.song_title}의 악보다." Adapt the subject naturally to the scene.
+
+2. 4-6 short lyrical lines. Stay close to the visual. Let the landscape-song connection emerge quietly. No conclusion.
+
+3. Include 2 relevant SEO hashtags for this specific post (song title, artist, mood, or scene — whichever has the most search value). No fixed tags needed here.
+
+4. This exact line: Skyline Music Matcher™ by @sapmanri
+
+5. This separator on its own line: ===COMMENT===
+
+6. ONE warm question for pinned comment. Idea: "여기선 이런 음악이 흘렀어. 네가 있는 곳엔?" Vary naturally. Reference the song or scene briefly.
+
+All prose in ${lang}. No labels. No markdown.`
+
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const raw=data.content[0].text.trim();
+    // Split caption and pin comment — separated by ===COMMENT===
+    const parts=raw.split('===COMMENT===');
+    let body=parts[0].trim();
+    const pinComment=parts[1]?parts[1].trim():'';
+
+    // ── POST-PROCESS: enforce structure regardless of AI output ──
+    // 1. Strip any hashtags from body (we'll add our own)
+    body = body.replace(/#[\w가-힣]+/g,'').trim();
+    // 2. Strip any @mentions from body
+    body = body.replace(/@\w+/g,'').trim();
+    // 3. Strip "Skyline Music Matcher" lines if AI added them
+    body = body.split('\n').filter(l=>!l.includes('Skyline Music Matcher')).join('\n').trim();
+
+    // 4. Build declaration line
+    const subject = (d.line_description||'').includes('능선')?'이 능선은':
+                    (d.line_description||'').includes('지평선')?'이 지평선은':
+                    (d.line_description||'').includes('스카이라인')?'이 스카이라인은':
+                    (d.line_description||'').includes('실루엣')?'이 실루엣은':
+                    (d.line_description||'').includes('산')?'이 산선은':'이 선은';
+    const declaration = subject + ' ' + (d.song_title||'') + '의 악보다.';
+
+    // 5. Check if body already starts with declaration-like sentence
+    const firstLine = body.split('\n')[0];
+    const hasDeclaration = firstLine.includes(d.song_title) && (firstLine.includes('악보') || firstLine.includes('흐른') || firstLine.includes('음악'));
+    const finalBody = hasDeclaration ? body : declaration + '\n\n' + body;
+
+    // 6. Hashtags — 3 fixed + 2 from AI (SEO flexible)
+    const fixedTags = ['#SkylineScore','#sapmanri','#slowliving'];
+    // Extract 2 best SEO tags from AI response
+    const aiTags = (raw.match(/#[\w가-힣]+/g)||[])
+      .filter(t=>!fixedTags.map(f=>f.toLowerCase()).includes(t.toLowerCase()))
+      .filter(t=>t!=='#감성찾아삽만리')
+      .slice(0,2);
+    // Total: 3 fixed + 2 AI = exactly 5
+    const hashtags = [...fixedTags, ...aiTags].join(' ');
+
+    // 7. Assemble final caption
+    const caption = finalBody + '\n\n' + hashtags + '\n\nSkyline Music Matcher™ by @sapmanri';
+
+    document.getElementById('instaCapText').textContent=caption;
+    document.getElementById('instaCapText').style.display='block';
+    document.getElementById('instaCapHint').style.display='block';
+    btn.textContent='↺ 다시 생성';
+
+    // ── 고정 댓글 — AI 응답 or 코드 생성 fallback ──
+    let finalPinComment = pinComment;
+    if(!finalPinComment){
+      // Generate from template when AI doesn't provide it
+      const templates = [
+        `${d.song_title}이 흐르던 이 장면처럼, 지금 여러분 주변엔 어떤 선이 펼쳐져 있나요? 그 풍경에선 무슨 음악이 흐르고 있을 것 같아요? 🎵 #SkylineScore`,
+        `저는 이 풍경에서 ${d.song_title}을 들었어요. 지금 여러분이 보고 있는 하늘이나 능선에서는 어떤 노래가 떠오르나요? ☁️ #SkylineScore`,
+        `이 선이 ${d.song_title}의 악보였다면, 지금 여러분 창밖의 선은 어떤 노래일까요? 🎼 #SkylineScore`,
+      ];
+      finalPinComment = templates[Math.floor(Math.random()*templates.length)];
+    }
+    document.getElementById('pinCommentText').textContent=finalPinComment;
+    document.getElementById('pinCommentSection').style.display='block';
+  }catch(err){
+    document.getElementById('instaCapText').textContent='오류: '+err.message;
+    document.getElementById('instaCapText').style.display='block';
+    btn.textContent='✦ 캡션 생성';
+  }
+  btn.disabled=false;
+}
+
+async function loadPlayer(){
+  if(!cachedResult)return;
+  const gkey=document.getElementById('googleKey').value.trim();
+  if(!gkey){alert('Google API 키를 입력해주세요.');return;}
+
+  const btn=event.target;
+  btn.textContent='검색 중...'; btn.disabled=true;
+
+  const q=encodeURIComponent(`${cachedResult.song_title} ${cachedResult.artist} official`);
+  try{
+    const res=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&type=video&maxResults=1&key=${gkey}`);
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const vid=data.items?.[0]?.id?.videoId;
+    if(!vid)throw new Error('검색 결과가 없어요');
+    document.getElementById('ytFrame').src=`https://www.youtube.com/embed/${vid}?autoplay=1`;
+    document.getElementById('ytPlayerWrap').style.display='block';
+    btn.textContent='▶ 다시 재생'; btn.disabled=false;
+  }catch(err){
+    alert('재생 오류: '+err.message);
+    btn.textContent='▶ 재생'; btn.disabled=false;
+  }
+}
+
+function brand(ctx,CW,CH,pad,color){
+  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle=color; ctx.textAlign='right';
+  ctx.fillText('© SAPMANRI',CW-pad*0.7,CH-CW*0.022); ctx.textAlign='left';
+}
+
+// ── ADAPTIVE WAVE COLOR ──────────────────────────────────
+function getWaveColors(ctx, CW, zoneY, zoneH){
+  // Manual color override — always takes priority
+  const wc = window.waveColor || 'auto';
+  if(wc && wc !== 'auto'){
+    const h=wc;
+    const r=parseInt(h.slice(1,3),16), g=parseInt(h.slice(3,5),16), b=parseInt(h.slice(5,7),16);
+    return {
+      main: `rgba(${r},${g},${b},0.88)`,
+      glow: `rgba(${r},${g},${b},0.28)`
+    };
+  }
+  // Auto brightness detection
+  try {
+    const sampleY = Math.max(0, Math.floor(zoneY - zoneH * 0.5));
+    const sampleH = Math.min(Math.floor(zoneH * 1.2), ctx.canvas.height - sampleY);
+    if(sampleH <= 0) return {main:'rgba(255,255,255,0.82)', glow:'rgba(255,255,255,0.28)'};
+    const data = ctx.getImageData(0, sampleY, CW, sampleH).data;
+    let total = 0, count = 0;
+    for(let i = 0; i < data.length; i += 32){
+      const r=data[i], g=data[i+1], b=data[i+2];
+      total += 0.299*r + 0.587*g + 0.114*b;
+      count++;
+    }
+    const brightness = count > 0 ? total / count : 128;
+    if(brightness > 160){
+      return {main:'rgba(30,20,10,0.72)', glow:'rgba(30,20,10,0.25)'};
+    } else if(brightness > 90){
+      return {main:'rgba(255,255,255,0.90)', glow:'rgba(255,255,255,0.30)'};
+    } else {
+      return {main:'rgba(255,255,255,0.95)', glow:'rgba(200,180,255,0.35)'};
+    }
+  } catch(e){
+    return {main:'rgba(255,255,255,0.82)', glow:'rgba(255,255,255,0.28)'};
+  }
+}
+
+// ── DESIGN RENDERERS ─────────────────────────────────────
+
+function renderSapmanri(ctx,d,CW,CH,isV){
+  let g=ctx.createLinearGradient(0,0,0,CH*0.38); g.addColorStop(0,'rgba(0,0,0,0.28)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.38);
+  g=ctx.createLinearGradient(0,CH*0.42,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.48,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)'); ctx.fillStyle=g; ctx.fillRect(0,CH*0.42,CW,CH*0.58);
+  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  const pad=CW*0.08, base=isV?CH*0.72:CH*0.74;
+  const titleSize=CW*0.052;
+  setF(ctx,titleSize,'700','"Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,base,CW-pad*2,titleSize*1.25,'rgba(255,255,255,0.97)');
+  const artistY=afterT+titleSize*0.7;
+  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.4)'; ctx.fillText(d.artist,pad,artistY);
+  const sepY=artistY+CW*0.052;
+  ctx.beginPath(); ctx.moveTo(pad,sepY); ctx.lineTo(pad+CW*0.065,sepY); ctx.strokeStyle='rgba(255,255,255,0.16)'; ctx.lineWidth=1; ctx.stroke();
+  const cs=CW*0.024, cy=sepY+cs*2;
+  setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.fillText(d.caption_line1||'',pad,cy);
+  setF(ctx,cs,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.fillText(d.caption_line2||'',pad,cy+cs*1.7);
+  setF(ctx,cs*0.86,'300','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.34)'; ctx.fillText(d.caption_line3||'',pad,cy+cs*3.3);
+  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.18)');
+}
+
+function renderMagazine(ctx,d,CW,CH,isV){
+  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.38 + panelPos*0.4);
+  let g=ctx.createLinearGradient(0,0,0,splitY); g.addColorStop(0,'rgba(10,8,6,0.22)'); g.addColorStop(1,'rgba(10,8,6,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
+  ctx.fillStyle='#f2f0ec'; ctx.fillRect(0,splitY,CW,CH-splitY);
+  const wY=splitY*0.68, wH=splitY*0.38;
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  const pad=CW*0.07, ty=splitY+CW*0.048;
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(136,133,128,0.6)'; ctx.fillText('SAPMANRI',pad,ty);
+  ctx.fillStyle='#b87a6e'; ctx.fillRect(pad,ty+CW*0.02,CW*0.0018,CW*0.046);
+  const titleSz=CW*0.042;
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  const afterT=fillWrap(ctx,d.song_title,pad+CW*0.011,ty+CW*0.088,CW-pad*2,titleSz*1.25,'#1a1a1a');
+  setF(ctx,CW*0.022,'300','"Noto Serif KR",Georgia,serif'); ctx.fillStyle='#888580'; ctx.fillText(d.artist,pad+CW*0.011,afterT+CW*0.03);
+  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif'); ctx.fillStyle='#888580';
+  ctx.fillText(d.caption_line2||'',pad+CW*0.011,afterT+CW*0.075);
+  ctx.fillText(d.caption_line3||'',pad+CW*0.011,afterT+CW*0.112);
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#b5b2ad'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.8,CH-CW*0.02); ctx.textAlign='left';
+}
+
+function renderTheEdit(ctx,d,CW,CH,isV){
+  let g=ctx.createLinearGradient(0,CH*0.45,0,CH); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.5)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+  const wY=isV?CW*0.62:CH*0.47, wH=isV?CW*0.26:CH*0.28;
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  const bx=CW*0.07, bw=CW*0.86;
+  const by=isV?CW*(0.6+panelPos*0.6):CH*(0.44+panelPos*0.3);
+  // Draw box first with estimated height, then we'll just draw content and let it flow
+  const contentH = CW*0.52; // enough for all content
+  ctx.fillStyle='rgba(255,255,255,0.97)';
+  ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(bx,by,bw,contentH,CW*0.012); else ctx.rect(bx,by,bw,contentH); ctx.fill();
+  const px=bx+CW*0.05, py=by+CW*0.038;
+  ctx.fillStyle='#ff3c00'; ctx.fillRect(px,py,CW*0.036,CW*0.005);
+  setF(ctx,CW*0.017,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ff3c00'; ctx.fillText('SAPMANRI × SKYLINE',px,py+CW*0.034);
+  const titleSz=CW*0.044;
+  setF(ctx,titleSz,'700','"Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title.toUpperCase(),px,py+CW*0.086,bw-CW*0.1,titleSz*1.2,'#111111');
+  setF(ctx,CW*0.022,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#555'; ctx.fillText(d.artist,px,afterT+CW*0.032);
+  setF(ctx,CW*0.02,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#999'; ctx.fillText(d.caption_line2||'',px,afterT+CW*0.075);
+  setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#bbb'; ctx.textAlign='right'; ctx.fillText('© SAPMANRI',CW-CW*0.07,CH-CW*0.024); ctx.textAlign='left';
+}
+
+function renderStayfolio(ctx,d,CW,CH,isV){
+  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.4 + panelPos*0.4);
+  let g=ctx.createLinearGradient(0,splitY*0.38,0,splitY); g.addColorStop(0,'rgba(28,25,23,0)'); g.addColorStop(1,'rgba(28,25,23,0.68)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
+  ctx.fillStyle='#f7f4ef'; ctx.fillRect(0,splitY,CW,CH-splitY);
+  const wY=splitY*0.66, wH=splitY*0.4;
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  const pad=CW*0.075, ty=splitY+CW*0.04;
+  ctx.beginPath(); ctx.moveTo(pad,ty); ctx.lineTo(CW-pad,ty); ctx.strokeStyle='#d4cfc8'; ctx.lineWidth=1; ctx.stroke();
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#8c7355'; ctx.fillText('STAYFOLIO × SAPMANRI',pad,ty+CW*0.027);
+  const titleSz=CW*0.038;
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,ty+CW*0.074,CW-pad*2,titleSz*1.25,'#1c1917');
+  setF(ctx,CW*0.02,'300','"Noto Serif KR",Georgia,serif'); ctx.fillStyle='#7a7570'; ctx.fillText(d.artist,pad,afterT+CW*0.032);
+  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif'); ctx.fillStyle='#7a7570';
+  ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.075);
+  ctx.fillText(d.caption_line3||'',pad,afterT+CW*0.112);
+  setF(ctx,CW*0.013,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#b5b2ad'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.9,CH-CW*0.019); ctx.textAlign='left';
+}
+
+function renderNike(ctx,d,CW,CH,isV){
+  ctx.fillStyle='rgba(0,0,0,0.52)'; ctx.fillRect(0,0,CW,CH);
+  const wY=isV?CW*0.62:CH*0.46, wH=isV?CW*0.26:CH*0.30;
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  const pad=CW*0.08;
+  const base = isV ? CW*(0.6+panelPos*0.5) : CH*0.67;
+  setF(ctx,CW*0.015,'500','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.32)'; ctx.fillText('SAPMANRI',pad,base-CW*0.058);
+  const titleSz=CW*0.062;
+  setF(ctx,titleSz,'700','"Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title.toUpperCase(),pad,base,CW-pad*2,titleSz*1.2,'#ffffff');
+  setF(ctx,CW*0.026,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.fillText(d.artist,pad,afterT+CW*0.038);
+  ctx.fillStyle='#fff'; ctx.fillRect(pad,afterT+CW*0.062,CW*0.088,CW*0.004);
+  setF(ctx,CW*0.024,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='rgba(255,255,255,0.62)';
+  ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.102);
+  ctx.fillText(d.caption_line3||'',pad,afterT+CW*0.136);
+  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.2)');
+}
+
+function renderOhouse(ctx,d,CW,CH,isV){
+  const cardY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.4 + panelPos*0.4);
+  const radius=CW*0.04;
+  let g=ctx.createLinearGradient(0,cardY*0.45,0,cardY); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.4)'); ctx.fillStyle=g; ctx.fillRect(0,0,CW,cardY);
+  const wY=cardY*0.65, wH=cardY*0.44;
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+  ctx.fillStyle='#FAFAF8'; ctx.beginPath();
+  ctx.moveTo(0,cardY+radius); ctx.arcTo(0,cardY,radius,cardY,radius); ctx.lineTo(CW-radius,cardY); ctx.arcTo(CW,cardY,CW,cardY+radius,radius); ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath(); ctx.fill();
+  const pad=CW*0.07, ty=cardY+CW*0.048;
+  ctx.fillStyle='#00C896';
+  const tw=CW*0.23,th=CW*0.044;
+  ctx.beginPath(); if(ctx.roundRect)ctx.roundRect(pad,ty,tw,th,th/2); else ctx.rect(pad,ty,tw,th); ctx.fill();
+  setF(ctx,CW*0.019,'600','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.fillText('SKYLINE MUSIC',pad+tw/2,ty+th*0.68); ctx.textAlign='left';
+  const titleSz=CW*0.044;
+  setF(ctx,titleSz,'600','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,ty+CW*0.092,CW-pad*2,titleSz*1.25,'#1a1a1a');
+  setF(ctx,CW*0.024,'400','"Noto Sans KR",Arial,sans-serif'); ctx.fillStyle='#888'; ctx.fillText(d.artist,pad,afterT+CW*0.032);
+  setF(ctx,CW*0.022,'400','"Noto Sans KR",Arial,sans-serif'); ctx.fillStyle='#aaa'; ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.072);
+  ctx.fillStyle='#00C896'; ctx.fillRect(0,CH-CW*0.009,CW,CW*0.009);
+  setF(ctx,CW*0.014,'400','"Helvetica Neue",Arial,sans-serif'); ctx.fillStyle='#ccc'; ctx.textAlign='right'; ctx.fillText('SAPMANRI',CW-pad*0.8,CH-CW*0.024); ctx.textAlign='left';
+}
+
+function renderApple(ctx,d,CW,CH,isV){
+  const splitY = isV ? CW*(1.1 + panelPos*0.6) : CH*(0.35 + panelPos*0.4);
+
+  // Very subtle dark vignette on photo
+  const vg = ctx.createRadialGradient(CW/2,splitY/2,CW*0.1,CW/2,splitY/2,CW*0.75);
+  vg.addColorStop(0,'rgba(0,0,0,0)'); vg.addColorStop(1,'rgba(0,0,0,0.22)');
+  ctx.fillStyle=vg; ctx.fillRect(0,0,CW,splitY);
+
+  // Waveform on photo — ice white, ultra thin
+  const wY = splitY*0.6, wH = splitY*0.44;
+  const _wc=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_wc.main,_wc.glow,d._ampRatio||1,CH);
+
+  // Black bottom panel — perfectly flat
+  ctx.fillStyle='#000000'; ctx.fillRect(0,splitY,CW,CH-splitY);
+
+  // Thin 1px separator line between photo and panel
+  ctx.beginPath(); ctx.moveTo(0,splitY); ctx.lineTo(CW,splitY);
+  ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1; ctx.stroke();
+
+  const pad = CW*0.08;
+
+  // Category label — tiny, gray, letter-spaced
+  const labelY = splitY + CW*0.058;
+  setF(ctx,CW*0.018,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.35)';
+  ctx.fillText('SKYLINE MUSIC', pad, labelY);
+
+  // Song title — large, ultra-light weight, pure white
+  const titleSize = CW*0.068;
+  setF(ctx,titleSize,'200','"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  const afterT = fillWrap(ctx,d.song_title,pad,labelY+titleSize*1.1,CW-pad*2,titleSize*1.15,'#ffffff');
+
+  // Artist — small, mid-gray
+  setF(ctx,CW*0.024,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.38)';
+  ctx.fillText(d.artist, pad, afterT+CW*0.034);
+
+  // Hairline divider
+  const divY = afterT+CW*0.082;
+  ctx.beginPath(); ctx.moveTo(pad,divY); ctx.lineTo(CW-pad,divY);
+  ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
+
+  // Caption — centered, light gray, italic-ish
+  const capSize = CW*0.022;
+  setF(ctx,capSize,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.45)';
+  ctx.textAlign='center';
+  ctx.fillText(d.caption_line2||'', CW/2, divY+capSize*2.2);
+  setF(ctx,capSize*0.9,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.22)';
+  ctx.fillText(d.caption_line3||'', CW/2, divY+capSize*3.8);
+  ctx.textAlign='left';
+
+  // Branding — bottom right, barely visible
+  setF(ctx,CW*0.015,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.15)';
+  ctx.textAlign='right';
+  ctx.fillText('SAPMANRI', CW-pad*0.7, CH-CW*0.022);
+  ctx.textAlign='left';
+}
+
+const CHANNEL_ID = 'UCHhBukRCWSaBTcKolh2wN6Q';
+
+async function findRelatedVideo(){
+  const gkey=document.getElementById('googleKey').value.trim();
+  const akey=document.getElementById('apiKey').value.trim();
+  if(!gkey||!akey||!cachedResult)return;
+
+  const recList=document.getElementById('videoRecList');
+  const recSection=document.getElementById('videoRecSection');
+  recSection.style.display='block';
+  recList.innerHTML='<div style="font-size:12px;color:#444;padding:4px 0;">채널 영상 불러오는 중...</div>';
+
+  try{
+    // 1. Fetch all video titles (up to 200, 50 per page)
+    let videos=[], pageToken='';
+    for(let page=0; page<4; page++){
+      const url=`https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&type=video&maxResults=50&order=date${pageToken?'&pageToken='+pageToken:''}&key=${gkey}`;
+      const res=await fetch(url);
+      const data=await res.json();
+      if(data.error)throw new Error(data.error.message);
+      videos.push(...(data.items||[]).map(v=>({
+        id:v.id.videoId,
+        title:v.snippet.title,
+        thumb:v.snippet.thumbnails?.medium?.url||''
+      })));
+      if(!data.nextPageToken)break;
+      pageToken=data.nextPageToken;
+    }
+
+    if(!videos.length)throw new Error('영상을 찾을 수 없어요');
+    recList.innerHTML='<div style="font-size:12px;color:#444;padding:4px 0;">AI가 어울리는 영상 고르는 중...</div>';
+
+    // 2. Ask Claude to pick 3 matching videos
+    const d=cachedResult;
+    const videoList=videos.map((v,i)=>`${i+1}. [${v.id}] ${v.title}`).join('\n');
+
+    const prompt=`You are helping match YouTube videos from the channel 감성찾아삽만리 (SAPMANRI) to a photo.
+
+Photo analysis:
+- Subject/scene: ${d.image_description||d.line_description}
+- Line description: ${d.line_description}
+- Mood traits: ${(d.line_traits||[]).join(', ')}
+- Matched song: "${d.song_title}" by ${d.artist}
+- Caption: ${d.caption_line1} / ${d.caption_line2}
+
+Channel videos (format: index. [videoId] title):
+${videoList}
+
+Pick the 3 most thematically and emotionally fitting videos. Consider: season, location type (countryside/water/urban/cafe), mood, time of day implied by the photo.
+
+Respond ONLY as JSON, no markdown:
+{"picks":[{"id":"videoId","title":"title","reason":"한국어로 1문장 추천 이유"}]}`;
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':akey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const aiData=await res.json();
+    if(aiData.error)throw new Error(aiData.error.message);
+    const picks=JSON.parse(aiData.content[0].text.replace(/```json|```/g,'').trim()).picks;
+
+    recList.innerHTML=picks.map(p=>`
+      <a href="https://www.youtube.com/watch?v=${p.id}" target="_blank"
+        style="display:flex;gap:12px;align-items:flex-start;text-decoration:none;padding:10px;background:#0a0a0a;border-radius:7px;border:0.5px solid #1e1e1e;transition:border-color 0.15s;"
+        onmouseover="this.style.borderColor='#333'" onmouseout="this.style.borderColor='#1e1e1e'">
+        <img src="https://img.youtube.com/vi/${p.id}/mqdefault.jpg"
+          style="width:96px;height:54px;object-fit:cover;border-radius:4px;flex-shrink:0;" />
+        <div style="min-width:0;">
+          <div style="font-size:12px;font-weight:500;color:#ccc;line-height:1.4;margin-bottom:4px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${p.title}</div>
+          <div style="font-size:11px;color:#555;line-height:1.5;">${p.reason}</div>
+        </div>
+      </a>`).join('');
+
+  }catch(err){
+    recList.innerHTML=`<div style="font-size:12px;color:#555;padding:4px 0;">오류: ${err.message}</div>`;
+  }
+}
+
+
+async function loadPlayer(){
+  if(!cachedResult)return;
+  const gkey=document.getElementById('googleKey').value.trim();
+  if(!gkey){alert('Google API 키를 입력해주세요.');return;}
+
+  const btn=event.target;
+  btn.textContent='검색 중...'; btn.disabled=true;
+
+  const q=encodeURIComponent(`${cachedResult.song_title} ${cachedResult.artist} official`);
+  try{
+    const res=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${q}&type=video&maxResults=1&key=${gkey}`);
+    const data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    const vid=data.items?.[0]?.id?.videoId;
+    if(!vid)throw new Error('검색 결과가 없어요');
+    document.getElementById('ytFrame').src=`https://www.youtube.com/embed/${vid}?autoplay=1`;
+    document.getElementById('ytPlayerWrap').style.display='block';
+    btn.textContent='▶ 다시 재생'; btn.disabled=false;
+  }catch(err){
+    alert('재생 오류: '+err.message);
+    btn.textContent='▶ 재생'; btn.disabled=false;
+  }
+}
+
+function renderGirok(ctx,d,CW,CH,isV){
+  // ── 기록 앱 스타일 ──
+  // 흰 배경 + 연한 블루그레이 패널 + 파스텔 포인트 + 원형 이미지 클립
+  const splitY = isV ? CW*(1.2 + panelPos*0.6) : CH*(0.28 + panelPos*0.4);
+
+  // Photo area — full bleed top
+  // Light vignette
+  let g=ctx.createLinearGradient(0,0,0,splitY);
+  g.addColorStop(0,'rgba(255,255,255,0.05)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,splitY);
+
+  // Waveform — soft pastel blue-purple
+  const wY=splitY*0.62, wH=splitY*0.44;
+  const _sc7=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc7.main,_sc7.glow,d._ampRatio||1,CH);
+
+  // White bottom panel with rounded top corners
+  const panelY=splitY;
+  const r=CW*0.06;
+  ctx.fillStyle='#FFFFFF';
+  ctx.beginPath();
+  ctx.moveTo(0,panelY+r);
+  ctx.arcTo(0,panelY,r,panelY,r);
+  ctx.lineTo(CW-r,panelY);
+  ctx.arcTo(CW,panelY,CW,panelY+r,r);
+  ctx.lineTo(CW,CH); ctx.lineTo(0,CH); ctx.closePath();
+  ctx.fill();
+
+  // Subtle top border line
+  ctx.beginPath(); ctx.moveTo(r,panelY); ctx.lineTo(CW-r,panelY);
+  ctx.strokeStyle='rgba(0,0,0,0.06)'; ctx.lineWidth=1; ctx.stroke();
+
+  const pad=CW*0.08;
+  const ty=panelY+CW*0.06;
+
+  // Pastel pill tag — mood trait
+  const tag=(d.line_traits||[])[0]||'';
+  const tagW=ctx.measureText(tag).width+CW*0.06;
+  const tagH=CW*0.048; const tagX=pad; const tagY=ty;
+  ctx.fillStyle='#EEF0FF';
+  ctx.beginPath();
+  if(ctx.roundRect)ctx.roundRect(tagX,tagY,tagW,tagH,tagH/2);
+  else ctx.rect(tagX,tagY,tagW,tagH);
+  ctx.fill();
+  setF(ctx,CW*0.022,'500','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#7C6FD4'; ctx.textAlign='center';
+  ctx.fillText(tag,tagX+tagW/2,tagY+tagH*0.68); ctx.textAlign='left';
+
+  // Song title — large bold Korean style
+  const titleSz=CW*0.058;
+  setF(ctx,titleSz,'700','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,ty+tagH+titleSz*1.1,CW-pad*2,titleSz*1.3,'#1A1A1A');
+
+  // Artist — small gray
+  setF(ctx,CW*0.026,'400','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#AAAAAA';
+  ctx.fillText(d.artist,pad,afterT+CW*0.038);
+
+  // Divider line — light
+  const divY=afterT+CW*0.082;
+  ctx.beginPath(); ctx.moveTo(pad,divY); ctx.lineTo(CW-pad,divY);
+  ctx.strokeStyle='#F0F0F5'; ctx.lineWidth=1; ctx.stroke();
+
+  // Caption lines
+  const capSz=CW*0.026;
+  setF(ctx,capSz,'300','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#888888';
+  ctx.fillText(d.caption_line1||'',pad,divY+capSz*2);
+  setF(ctx,capSz,'500','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#444444';
+  ctx.fillText(d.caption_line2||'',pad,divY+capSz*3.7);
+  setF(ctx,capSz*0.9,'300','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#BBBBBB';
+  ctx.fillText(d.caption_line3||'',pad,divY+capSz*5.3);
+
+  // Two extra pastel trait pills bottom right
+  const traits=(d.line_traits||[]).slice(1,3);
+  let px=CW-pad;
+  traits.reverse().forEach(t=>{
+    setF(ctx,CW*0.019,'400','"Noto Sans KR","Helvetica Neue",Arial,sans-serif');
+    const tw=ctx.measureText(t).width+CW*0.05;
+    const th=CW*0.04; const tx=px-tw; const tyy=divY+capSz*6.2;
+    ctx.fillStyle='#F5F5FF';
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(tx,tyy,tw,th,th/2);
+    else ctx.rect(tx,tyy,tw,th);
+    ctx.fill();
+    ctx.fillStyle='#9B91E0'; ctx.textAlign='center';
+    ctx.fillText(t,tx+tw/2,tyy+th*0.68); ctx.textAlign='left';
+    px=tx-CW*0.018;
+  });
+
+  // Branding — bottom, dark small
+  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#CCCCCC'; ctx.textAlign='right';
+  ctx.fillText('SAPMANRI',CW-pad*0.7,CH-CW*0.022); ctx.textAlign='left';
+}
+
+function renderPolaroid(ctx,d,CW,CH,isV){
+  // ── 폴라로이드 ── 이미지는 이미 canvas에 그려져 있음 — 테두리만 덮어씌우기
+  const bs = CW*0.055;
+  const bt = CW*0.055;
+  const bb = isV ? CW*0.28 : CW*0.24;
+  const innerX=bs, innerY=bt;
+  const innerW=CW-bs*2, innerH=CH-bt-bb;
+
+  // 이미지 위에 크림 배경 테두리 그리기 (4방향)
+  ctx.fillStyle='#F7F5F0';
+  ctx.fillRect(0,0,CW,bt);                        // top
+  ctx.fillRect(0,0,bs,CH);                         // left
+  ctx.fillRect(CW-bs,0,bs,CH);                     // right
+  ctx.fillRect(0,CH-bb,CW,bb);                     // bottom
+
+  // 이미지 영역 하단 페이드 (흰쪽으로)
+  let fade=ctx.createLinearGradient(0,innerY+innerH*0.7,0,innerY+innerH);
+  fade.addColorStop(0,'rgba(247,245,240,0)');
+  fade.addColorStop(1,'rgba(247,245,240,0.5)');
+  ctx.fillStyle=fade; ctx.fillRect(innerX,innerY+innerH*0.7,innerW,innerH*0.3);
+
+  // 파형 — 이미지 하단
+  const wY=innerY+innerH*0.80, wH=innerH*0.22;
+  const _sc=getWaveColors(ctx,CW,wY,wH);
+  drawWave(ctx,d.line_points,CW,wY,wH,_sc.main,_sc.glow,d._ampRatio||1,CH);
+
+  // 하단 텍스트 영역
+  const areaY=innerY+innerH;
+  const cx=CW/2;
+
+  // 곡 제목
+  const titleSz=CW*(isV?0.052:0.056);
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  ctx.fillStyle='#1a1a1a'; ctx.textAlign='center';
+  ctx.fillText(d.song_title,cx,areaY+bb*0.28);
+
+  // 아티스트
+  setF(ctx,CW*0.02,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#aaa'; ctx.textAlign='center';
+  ctx.fillText(d.artist.toUpperCase(),cx,areaY+bb*0.46);
+
+  // 구분선
+  const lineY=areaY+bb*0.58;
+  ctx.beginPath(); ctx.moveTo(cx-CW*0.12,lineY); ctx.lineTo(cx+CW*0.12,lineY);
+  ctx.strokeStyle='rgba(0,0,0,0.10)'; ctx.lineWidth=1; ctx.stroke();
+
+  // Skyline Music Matcher™
+  setF(ctx,CW*0.019,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#888'; ctx.textAlign='center';
+  ctx.fillText('Skyline Music Matcher™',cx,areaY+bb*0.73);
+
+  // by @sapmanri
+  setF(ctx,CW*0.016,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='#bbb'; ctx.textAlign='center';
+  ctx.fillText('by @sapmanri',cx,areaY+bb*0.88);
+
+  ctx.textAlign='left';
+}
+
+function renderGrain(ctx,d,CW,CH,isV){
+  // ── 노출 오버레이 / 필름 그레인 ──
+  // 이미지 전체 + 강한 그레인 + 빈티지 컬러 번 + 파형
+  // Color burn overlay — warm amber vignette
+  let g=ctx.createRadialGradient(CW*0.5,CH*0.5,CH*0.15,CW*0.5,CH*0.5,CH*0.75);
+  g.addColorStop(0,'rgba(0,0,0,0)');
+  g.addColorStop(0.6,'rgba(30,18,8,0.22)');
+  g.addColorStop(1,'rgba(20,10,0,0.72)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+
+  // Horizontal light leak — top left
+  let leak=ctx.createLinearGradient(0,0,CW*0.5,CH*0.25);
+  leak.addColorStop(0,'rgba(255,180,60,0.22)');
+  leak.addColorStop(0.4,'rgba(255,120,30,0.08)');
+  leak.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=leak; ctx.fillRect(0,0,CW,CH);
+
+  // Film grain — canvas pixel noise
+  const gCanvas=document.createElement('canvas');
+  gCanvas.width=CW; gCanvas.height=CH;
+  const gCtx=gCanvas.getContext('2d');
+  const idata=gCtx.createImageData(CW,CH);
+  for(let i=0;i<idata.data.length;i+=4){
+    const v=Math.random()*60-30;
+    idata.data[i]=128+v; idata.data[i+1]=128+v; idata.data[i+2]=128+v; idata.data[i+3]=28;
+  }
+  gCtx.putImageData(idata,0,0);
+  ctx.globalCompositeOperation='overlay';
+  ctx.drawImage(gCanvas,0,0);
+  ctx.globalCompositeOperation='source-over';
+
+  // Waveform — white, near bottom
+  const wY=isV?CH*0.62:CH*0.60, wH=isV?CH*0.22:CH*0.28;
+  const _sc9=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc9.main,'rgba(255,220,140,0.35)',d._ampRatio||1);
+
+  // Text — bottom, all white
+  const pad=CW*0.08;
+  const base=isV?CH*0.80:CH*0.80;
+  const titleSz=CW*0.05;
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  const afterT=fillWrap(ctx,d.song_title,pad,base,CW-pad*2,titleSz*1.3,'rgba(255,255,255,0.95)');
+  setF(ctx,CW*0.024,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.42)';
+  ctx.fillText(d.artist,pad,afterT+CW*0.034);
+  const cs=CW*0.022;
+  setF(ctx,cs,'300 italic','"Cormorant Garamond",Georgia,serif');
+  ctx.fillStyle='rgba(255,255,255,0.58)';
+  ctx.fillText(d.caption_line2||'',pad,afterT+CW*0.075);
+  ctx.fillText(d.caption_line3||'',pad,afterT+CW*0.108);
+
+  // Film frame number — top right, mono
+  setF(ctx,CW*0.018,'400','"Courier New",monospace');
+  ctx.fillStyle='rgba(255,200,80,0.55)'; ctx.textAlign='right';
+  ctx.fillText('SAPMANRI  ♦  01A', CW-pad*0.7, CW*0.06);
+  ctx.textAlign='left';
+}
+
+function renderCinema(ctx,d,CW,CH,isV){
+  // ── 시네마스코프 ──
+  // 상하 letterbox + 하단 바에 곡명
+  const barH = isV ? CH*0.09 : CH*0.11;
+
+  // Top letterbox
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,CW,barH);
+  // Bottom letterbox — slightly taller for text
+  const botBarH = isV ? CH*0.14 : CH*0.17;
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,CH-botBarH,CW,botBarH);
+
+  // Subtle waveform inside image area — near bottom of photo
+  const wY=CH-botBarH-CW*0.04, wH=isV?CH*0.18:CH*0.22;
+  const _sc10=getWaveColors(ctx,CW,wY,wH); drawWave(ctx,d.line_points,CW,wY,wH,_sc10.main,_sc10.glow,d._ampRatio||1,CH);
+
+  // Top bar: tiny channel name left + aspect ratio right
+  const topPad=CW*0.06;
+  setF(ctx,CW*0.016,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.28)'; ctx.textAlign='left';
+  ctx.fillText('SAPMANRI', topPad, barH*0.66);
+  ctx.textAlign='right';
+  ctx.fillText('2.39:1', CW-topPad, barH*0.66);
+  ctx.textAlign='left';
+
+  // Thin separator line
+  ctx.beginPath(); ctx.moveTo(0,barH); ctx.lineTo(CW,barH);
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,CH-botBarH); ctx.lineTo(CW,CH-botBarH);
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+
+  // Bottom bar content
+  const pad=CW*0.06;
+  const midBot=CH-botBarH/2;
+
+  // Song title — left, large
+  const titleSz=CW*(isV?0.038:0.042);
+  setF(ctx,titleSz,'300','"Cormorant Garamond","Noto Serif KR",Georgia,serif');
+  ctx.fillStyle='rgba(255,255,255,0.95)'; ctx.textAlign='left';
+  ctx.fillText(d.song_title, pad, midBot+titleSz*0.38);
+
+  // Artist — right, small
+  setF(ctx,CW*0.02,'400','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.38)'; ctx.textAlign='right';
+  ctx.fillText(d.artist.toUpperCase(), CW-pad, midBot-titleSz*0.1);
+
+  // Caption line — right, italic, smaller
+  setF(ctx,CW*0.018,'300 italic','"Cormorant Garamond",Georgia,serif');
+  ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.textAlign='right';
+  ctx.fillText(d.caption_line2||'', CW-pad, midBot+titleSz*0.55);
+  ctx.textAlign='left';
+}
+
+function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
+  // Fish Audio style: vertical bars shaped by silhouette contour
+  const aH = maxH * (ampRatio||1);
+  const n = pts.length;
+  const barCount = Math.min(n, 80);
+  const barW = Math.max((CW / barCount) * 0.55, 2);
+  const gap = CW / barCount;
+
+  for(let i=0; i<barCount; i++){
+    const t = i/(barCount-1);
+    const idx = t*(n-1);
+    const i0=Math.floor(idx), i1=Math.min(i0+1,n-1);
+    const h = (pts[i0]*(1-(idx-i0)) + pts[i1]*(idx-i0)) / 100 * aH;
+    const x = i * gap + gap*0.5;
+
+    // Main bar (above baseline)
+    const alpha = 0.3 + (pts[Math.floor(t*(n-1))]/100) * 0.6;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(x - barW/2, baseY - h, barW, h, barW*0.3);
+    ctx.fill();
+
+    // Glow
+    ctx.globalAlpha = alpha * 0.3;
+    ctx.fillStyle = glowColor;
+    ctx.beginPath();
+    ctx.roundRect(x - barW/2 - 1, baseY - h - 1, barW + 2, h + 2, barW*0.3);
+    ctx.fill();
+
+    // Mirror below (shorter, more transparent)
+    const mirrorH = h * 0.25;
+    ctx.globalAlpha = alpha * 0.2;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(x - barW/2, baseY + 2, barW, mirrorH, barW*0.3);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
+  const aH = maxH * (ampRatio||1);
+  const n = pts.length;
+  const barCount = Math.min(n, 80);
+  const barW = Math.max((CW / barCount) * 0.55, 2);
+  const gap = CW / barCount;
+  for(let i=0; i<barCount; i++){
+    const t = i/(barCount-1);
+    const fi = t*(n-1);
+    const i0=Math.floor(fi), i1=Math.min(i0+1,n-1);
+    const h = (pts[i0]*(1-(fi-i0)) + pts[i1]*(fi-i0)) / 100 * aH;
+    const x = i * gap + gap*0.5;
+    const alpha = 0.3 + (pts[i0]/100) * 0.6;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    if(ctx.roundRect){
+      ctx.beginPath(); ctx.roundRect(x-barW/2, baseY-h, barW, h, barW*0.3); ctx.fill();
+    } else {
+      ctx.fillRect(x-barW/2, baseY-h, barW, h);
+    }
+    ctx.globalAlpha = alpha*0.2;
+    ctx.fillStyle = glowColor;
+    if(ctx.roundRect){
+      ctx.beginPath(); ctx.roundRect(x-barW/2, baseY+2, barW, h*0.2, barW*0.3); ctx.fill();
+    } else {
+      ctx.fillRect(x-barW/2, baseY+2, barW, h*0.2);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawTraceLine(ctx, pts, CW, CH, ampRatio){
+  if(!pts||!pts.length) return;
+  const n = pts.length;
+  const ar = ampRatio || 1;
+
+  // Smooth the points — 7-point moving average
+  const smooth = pts.map((v,i) => {
+    const w = 7;
+    let sum=0, cnt=0;
+    for(let j=Math.max(0,i-w); j<=Math.min(n-1,i+w); j++){ sum+=pts[j]; cnt++; }
+    return sum/cnt;
+  });
+
+  // Normalize to use middle 60% of image height, controlled by ampRatio
+  const center = CH * 0.42 + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
+  const spread = CH * 0.28 * ar;
+  const min = Math.min(...smooth), max = Math.max(...smooth);
+  const range = max - min || 1;
+  const getY = v => center - ((v - min) / range - 0.5) * spread * 2;
+
+  ctx.save();
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  // Apply manual color if set
+  const _tc = (window.waveColor && window.waveColor !== 'auto') ? window.waveColor : null;
+  const traceMain = _tc || '#ffffff';
+  const traceGlow = _tc || 'rgba(160,120,255,1)';
+
+  // Layer 1: thick glow
+  ctx.globalAlpha = 0.22;
+  ctx.strokeStyle = traceGlow;
+  ctx.lineWidth = Math.max(CW/55, 7);
+  ctx.beginPath();
+  for(let i=0; i<n; i++){
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Layer 2: medium white
+  ctx.globalAlpha = 0.55;
+  ctx.strokeStyle = traceMain;
+  ctx.lineWidth = Math.max(CW/160, 2.5);
+  ctx.beginPath();
+  for(let i=0; i<n; i++){
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Layer 3: thin bright core
+  ctx.globalAlpha = 0.88;
+  ctx.strokeStyle = traceMain;
+  ctx.lineWidth = Math.max(CW/450, 1);
+  ctx.beginPath();
+  for(let i=0; i<n; i++){
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Dots every 6th point
+  ctx.globalAlpha = 0.65;
+  ctx.fillStyle = traceMain;
+  for(let i=0; i<n; i+=6){
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(CW/280, 1.8), 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function downloadWaveGif(){
+  if(!cachedResult) return;
+  const btn = document.getElementById('downloadGifBtn');
+  btn.textContent='GIF 생성 중...'; btn.disabled=true;
+
+  const SIZE = 300;
+  const FRAMES = 10;  // 10 frames
+  const FPS = 10;
+
+  const gif = new GIF({
+    workers: 1,
+    quality: 15,
+    width: SIZE,
+    height: SIZE,
+    transparent: 0x000000,  // black = transparent
+    background: '#000000'
+  });
+
+  const d = cachedResult;
+  const density = parseInt(document.getElementById('densitySlider').value)||80;
+  const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
+
+  // Resample line_points
+  const rawPts = d.line_points || [];
+  const pts = [];
+  for(let i=0; i<density; i++){
+    const t = i/(density-1);
+    const idx = t*(rawPts.length-1);
+    const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
+    pts.push(rawPts[i0]*(1-(idx-i0)) + rawPts[i1]*(idx-i0));
+  }
+
+  for(let f=0; f<FRAMES; f++){
+    const canvas = document.createElement('canvas');
+    canvas.width = SIZE; canvas.height = SIZE;
+    const ctx = canvas.getContext('2d');
+
+    // Black background (will be transparent)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    // Animate: phase shift per frame
+    const phase = (f / FRAMES) * Math.PI * 2;
+    const animPts = pts.map((v, i) => {
+      const wave = Math.sin(phase + i * 0.3) * 8;
+      return Math.max(0, Math.min(100, v + wave));
+    });
+
+    const baseY = SIZE * 0.62;
+    const maxH = SIZE * 0.52;
+
+    // Draw wave — white for GIF
+    const wStyle = waveStyle;
+    const aH = maxH * ampRatio;
+    const n = animPts.length;
+
+    if(wStyle === 'mirror'){
+      const dotSize = Math.max(SIZE/160, 3);
+      const dotGap = dotSize * 1.55;
+      const cols = Math.floor(SIZE/dotGap);
+      const colW = SIZE/cols;
+      for(let col=0; col<cols; col++){
+        const cx2 = col*colW + colW*0.5;
+        const t2 = col/(cols-1);
+        const idx2 = t2*(n-1);
+        const i0=Math.floor(idx2), i1=Math.min(i0+1,n-1);
+        const h = (animPts[i0]*(1-(idx2-i0))+animPts[i1]*(idx2-i0))/100*aH;
+        const rows = Math.floor(h/dotGap);
+        for(let row=0; row<rows; row++){
+          const progress = row/Math.max(rows-1,1);
+          const cy2 = baseY - row*dotGap - dotGap*0.5;
+          const alpha = (0.85 - progress*0.6);
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = '#ffffff';
+          const ds = dotSize*(0.5+(1-progress)*0.5);
+          ctx.beginPath(); ctx.rect(cx2-ds/2, cy2-ds/2, ds, ds); ctx.fill();
+          // mirror
+          if(row < rows*0.7){
+            ctx.globalAlpha = alpha*0.4*(1-row/(rows*0.7));
+            ctx.beginPath(); ctx.rect(cx2-ds/2, baseY+row*dotGap, ds, ds); ctx.fill();
+          }
+        }
+      }
+    } else if(wStyle === 'multiline'){
+      const layers = 6;
+      ctx.lineJoin='round'; ctx.lineCap='round';
+      for(let l=0; l<layers; l++){
+        const alpha2 = 0.12 + (l/layers)*0.55;
+        const scale2 = 0.5 + (l/layers)*0.8;
+        ctx.globalAlpha = alpha2;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = Math.max(SIZE/(700+l*80), 0.5);
+        ctx.beginPath();
+        for(let i=0; i<n; i++){
+          const x = (i/(n-1))*SIZE;
+          const y = baseY - (animPts[i]/100)*aH*scale2;
+          i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+    } else {
+      // dots
+      const barW = Math.max(SIZE/0.38/n, 2);
+      ctx.globalAlpha = 0.85;
+      animPts.forEach((p,i)=>{
+        const x = (i/(n-1))*SIZE;
+        const h2 = (p/100)*aH;
+        const numDots = Math.ceil(h2/(barW*1.35));
+        for(let d2=0; d2<numDots; d2++){
+          const t3 = d2/Math.max(numDots-1,1);
+          ctx.fillStyle = t3>0.6 ? 'rgba(255,255,255,0.4)' : '#ffffff';
+          ctx.fillRect(x-barW/2, baseY-d2*barW*1.35, barW, barW);
+        }
+      });
+    }
+
+    ctx.globalAlpha = 1;
+    gif.addFrame(canvas, {delay: Math.floor(1000/FPS), copy: true});
+  }
+
+  gif.on('finished', blob=>{
+    const a = document.createElement('a');
+    a.download = `sapmanri_wave_${Date.now()}.gif`;
+    a.href = URL.createObjectURL(blob);
+    a.click();
+    btn.textContent='↓ 파형 GIF 저장'; btn.disabled=false;
+  });
+
+  gif.render();
+}
+
+function downloadCard(){
+  if(!window._cardCanvas)return;
+  const a=document.createElement('a'); a.download=`sapmanri_${Date.now()}.jpg`;
+  a.href=window._cardCanvas.toDataURL('image/jpeg',0.95); a.click();
+}
+
+// ── WAVEFORM ENGINE ───────────────────────────────────────
+function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
+  baseY = baseY + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
+  const aH = maxH * (ampRatio||1);
+  const n = pts.length;
+
+  if(waveStyle === 'trace'){ drawTraceLine(ctx, pts, CW, CH, ampRatio); return; }
+  if(waveStyle === 'silhouette'){
+    drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
+    return;
+  }
+  if(waveStyle === 'silhouette'){
+    drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
+    return;
+  }
+  if(waveStyle === 'silhouette'){
+    drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
+    return;
+  }
+  if(waveStyle === 'mirror'){
+    // ── Dotted pixel skyline — buildings made of scattered dots ──
+    const dotSize = Math.max(CW / 160, 5);
+    const dotGap = dotSize * 1.55;
+    const cols = Math.floor(CW / dotGap);
+    const colW = CW / cols;
+
+    // Map pts to columns
+    const getH = (col) => {
+      const t = col / (cols - 1);
+      const idx = t * (n - 1);
+      const i0 = Math.floor(idx), i1 = Math.min(i0 + 1, n - 1);
+      const frac = idx - i0;
+      return (pts[i0] * (1 - frac) + pts[i1] * frac) / 100 * aH;
+    };
+
+    for(let col = 0; col < cols; col++){
+      const cx = col * colW + colW * 0.5;
+      const h = getH(col);
+      const rows = Math.floor(h / dotGap);
+
+      for(let row = 0; row < rows; row++){
+        const progress = row / Math.max(rows - 1, 1); // 0=bottom, 1=top
+        const cy = baseY - row * dotGap - dotGap * 0.5;
+
+        // Density: both bottom AND top rows sparse, dense in middle
+        const topFade = 1 - progress * 0.75;
+        const bottomFade = Math.min(1, row / 3); // bottom 3 rows fade in
+        const density = topFade * bottomFade;
+        if(Math.random() > density) continue;
+
+        // Size: top dots smaller
+        const ds = dotSize * (0.5 + (1 - progress) * 0.5);
+
+        // Alpha: bottom bright, top fades out
+        const alpha = (0.85 - progress * 0.6) * (0.6 + Math.random() * 0.4);
+
+        // Color: interpolate between glowColor (top) and color (bottom)
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = progress > 0.6 ? glowColor : color;
+
+        ctx.beginPath();
+        ctx.rect(cx - ds/2, cy - ds/2, ds, ds);
+        ctx.fill();
+
+        // Mirror reflection dot — below baseY, more visible
+        if(row < rows * 0.7){
+          const mirrorProgress = row / (rows * 0.7);
+          const mirrorAlpha = alpha * 0.8 * (1 - mirrorProgress);
+          ctx.globalAlpha = mirrorAlpha;
+          ctx.fillStyle = progress > 0.4 ? glowColor : color;
+          const ds2 = ds * (0.7 - mirrorProgress * 0.3);
+          const mcy = baseY + row * dotGap + dotGap * 0.5;
+          ctx.beginPath();
+          ctx.rect(cx - ds2/2, mcy - ds2/2, ds2, ds2);
+          ctx.fill();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+
+    // Subtle center line
+    ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
+    ctx.strokeStyle='rgba(255,255,255,0.1)'; ctx.lineWidth=1; ctx.stroke();
+
+  } else if(waveStyle === 'multiline'){
+    // ── Image 3 style: multiple thin overlapping lines ───
+    const layers = 8;
+    ctx.lineJoin='round'; ctx.lineCap='round';
+
+    for(let l=0; l<layers; l++){
+      const t = l/(layers-1); // 0=outermost, 1=innermost
+      const scale = 0.3 + t*0.7; // inner layers are taller
+      const alpha = 0.08 + t*0.55;
+      const jitter = (layers-l)*CW*0.0018;
+
+      // top line
+      ctx.beginPath();
+      pts.forEach((p,i)=>{
+        const x=(i/(n-1))*CW;
+        const j=(Math.random()-0.5)*jitter;
+        const y=baseY-(p/100)*aH*scale+j;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle=color.replace('1)',`${alpha})`).replace(/rgba\((.+),[\d.]+\)/,`rgba($1,${alpha})`);
+      ctx.lineWidth=Math.max(CW/(600+l*80), 0.6);
+      ctx.stroke();
+
+      // mirror bottom line
+      ctx.beginPath();
+      pts.forEach((p,i)=>{
+        const x=(i/(n-1))*CW;
+        const j=(Math.random()-0.5)*jitter;
+        const y=baseY+(p/100)*aH*scale*0.6+j;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      });
+      ctx.strokeStyle=glowColor.replace(/[\d.]+\)$/,`${alpha*0.6})`);
+      ctx.lineWidth=Math.max(CW/(700+l*80), 0.5);
+      ctx.stroke();
+    }
+
+    // Bright center line
+    ctx.beginPath();
+    pts.forEach((p,i)=>{
+      const x=(i/(n-1))*CW, y=baseY-(p/100)*aH;
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle='rgba(255,255,255,0.7)'; ctx.lineWidth=CW/700; ctx.stroke();
+
+    ctx.beginPath(); ctx.moveTo(0,baseY); ctx.lineTo(CW,baseY);
+    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.stroke();
+
+  } else if(waveStyle === 'dots'){
+    // ── Image 2 style: dotted gradient bars ──────────────
+    const barW = Math.max((CW/n)*0.38, 3);
+    const dotH = Math.max(barW*0.9, 3);
+    const dotGap = dotH*1.35;
+
+    pts.forEach((p,i)=>{
+      const x=(i/(n-1))*CW;
+      const h=(p/100)*aH;
+      const numDots = Math.ceil(h/dotGap);
+
+      for(let d=0; d<numDots; d++){
+        const progress = d/Math.max(numDots-1,1); // 0=center, 1=tip
+        // Gradient color: warm pink→orange like image 2
+        const alpha = 0.9 - progress*0.5;
+        // Interpolate between two hues based on horizontal position
+        const hueShift = (i/n); // 0=left, 1=right
+        // color from glowColor/color with alpha
+        const col = color.replace(/[\d.]+\)$/, `${alpha})`);
+
+        const dotSize = barW*(0.5+progress*0.5);
+        // top
+        ctx.beginPath();
+        ctx.arc(x, baseY - d*dotGap - dotH, dotSize/2, 0, Math.PI*2);
+        ctx.fillStyle=col; ctx.fill();
+        // bottom mirror
+        if(d < numDots*0.7){
+          const mirrorAlpha = alpha*0.45;
+          ctx.beginPath();
+          ctx.arc(x, baseY + d*dotGap + dotH, dotSize*0.45/2, 0, Math.PI*2);
+          ctx.fillStyle=glowColor.replace(/[\d.]+\)$/, `${mirrorAlpha})`);
+          ctx.fill();
+        }
+      }
+    });
+  }
+}
+
+// ── TEXT HELPERS ──────────────────────────────────────────
+function setF(ctx,sz,wt,fam){ctx.font=`${wt} ${sz*textScale}px ${fam}`}
+function fillWrap(ctx,text,x,y,maxW,lh,color){
+  ctx.fillStyle=color;
+  const words=text.split(' '); let line='',cy=y;
+  words.forEach((w,i)=>{
+    const t=line+(line?' ':'')+w;
+    if(ctx.measureText(t).width>maxW&&line){ctx.fillText(line,x,cy);line=w;cy+=lh;}else line=t;
+    if(i===words.length-1)ctx.fillText(line,x,cy);
+  });return cy;
+}
+</script>
+</body>
+</html>
