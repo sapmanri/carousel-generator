@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.9.4';
+const VERSION = 'v1.9.5';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -629,7 +629,7 @@ Respond ONLY as valid JSON:
     document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">음악을 찾는 중...</p></div>';
 
     const bannedList = usedSongs.length > 0 ? usedSongs.join(', ') : 'none';
-    const promptStep2=`You are a music curator matching waveform data to globally famous songs.
+    const promptStep2=`You are a music curator matching waveform data to songs.
 
 Waveform characteristics:
 - tempo_feel: ${step1.waveform.tempo_feel}
@@ -641,16 +641,22 @@ Waveform characteristics:
 
 BANNED (do NOT suggest these under any circumstances): ${bannedList}
 
+DIVERSITY RULE — strictly follow this ratio:
+- 30% chance: well-known mainstream song (widely recognised, chart hit)
+- 70% chance: lesser-known or indie/niche song (album cuts, underground artists, regional artists, niche genres, B-sides)
+Use a random internal decision. Do NOT default to famous songs.
+
 STEP 1 — GENRE POOL:
 Select 3–5 genres from this list that genuinely fit the waveform. Be open to unexpected but fitting combinations.
-Available: post-classical | jazz | pop-soul | indie-alternative | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost
+Available: post-classical | jazz | pop-soul | indie-folk | indie-electronic | classical | world-ethnic | electronic-ambient | r-and-b | rock-folk | cinematic-ost | shoegaze | lo-fi | city-pop | bossa-nova | minimalist-classical | neo-soul | dream-pop
 
 STEP 2 — GENRE SELECTION:
 From the pool, pick the genre LEAST represented in the banned list.
 If all pool genres are banned, expand the pool with 2 more genres before selecting.
 
 STEP 3 — SONG:
-Match ONE globally famous, instantly recognisable song from the chosen genre.
+Following the 70% indie / 30% mainstream diversity rule, pick ONE song.
+Prefer deep cuts, lesser-known artists, or regional gems over obvious choices.
 It must NOT appear in the banned list. If your first choice is banned, pick another.
 
 STEP 4 — CAPTION (${captionLang === 'ko' ? 'Korean' : 'English'}):
