@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.5.1';
+const VERSION = 'v1.5.2';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -441,8 +441,32 @@ function setPlaceholder(){document.getElementById('cardPreview').innerHTML='<div
 
 // Option pickers — rerender without re-analyzing if cached
 function pickWave(btn){
-  document.querySelectorAll('[data-wave]').forEach(b=>b.classList.remove('active-wave'));
-  btn.classList.add('active-wave'); waveStyle=btn.dataset.wave;
+  // Save current wave settings
+  waveSettings[activeWave]={
+    density:parseInt(document.getElementById('densitySlider').value),
+    amp:parseInt(document.getElementById('ampSlider').value),
+    textScale:parseFloat(document.getElementById('textScaleSlider').value)/100,
+    color:window.waveColor,
+    offset:waveOffsetY
+  };
+  // Switch active wave
+  document.querySelectorAll('[data-wave]').forEach(b=>{if(b.tagName==='BUTTON')b.classList.remove('active-wave');});
+  btn.classList.add('active-wave');
+  activeWave=btn.dataset.wave;
+  waveStyle=activeWave;
+  // Restore settings for new wave
+  const s=waveSettings[activeWave];
+  document.getElementById('densitySlider').value=s.density;
+  document.getElementById('densityVal').textContent=s.density;
+  document.getElementById('ampSlider').value=s.amp;
+  document.getElementById('ampVal').textContent=s.amp+'%';
+  document.getElementById('textScaleSlider').value=s.textScale*100;
+  document.getElementById('textScaleVal').textContent=s.textScale.toFixed(1)+'×';
+  textScale=s.textScale;
+  setWaveColor(s.color);
+  waveOffsetY=s.offset;
+  const ofs=document.getElementById('waveOffsetSlider');
+  if(ofs){ofs.value=Math.round(s.offset*100); document.getElementById('waveOffsetVal').textContent=s.offset>0?'아래↓':s.offset<0?'위↑':'중앙';}
   if(cachedResult) renderCard(cachedResult);
 }
 function pickDesign(btn){
@@ -728,7 +752,7 @@ function renderCard(d){
       const s=waveSettings[w];
       const _ws=waveStyle,_wc=window.waveColor,_wo=waveOffsetY;
       waveStyle=w; window.waveColor=s.color; waveOffsetY=s.offset;
-      const wY=_lastWaveY||CH*0.60, wH=_lastWaveH||CH*0.28;
+      const wY=(_lastWaveY>0?_lastWaveY:CH*0.60), wH=(_lastWaveH>0?_lastWaveH:CH*0.28);
       const _sc=getWaveColors(ctx,CW,wY,wH);
       drawWave(ctx,rd.line_points,CW,wY,wH,_sc.main,_sc.glow,s.amp/100,CH);
       waveStyle=_ws; window.waveColor=_wc; waveOffsetY=_wo;
