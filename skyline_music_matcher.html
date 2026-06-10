@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.2';
+const VERSION = 'v1.6.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -764,7 +764,7 @@ function renderCard(d){
       // Active wave uses live slider values; others use stored settings
       const isActive = (w === activeWave);
       window.waveColor = isActive ? (window.waveColor||s.color) : s.color;
-      waveOffsetY = isActive ? (typeof waveOffsetY!='undefined'?waveOffsetY:s.offset) : s.offset;
+      waveOffsetY = isActive ? waveOffsetY : s.offset;
       const useDensity = isActive ? (parseInt(document.getElementById('densitySlider').value)||80) : s.density;
       const useAmp = isActive ? ((parseInt(document.getElementById('ampSlider').value)||100)/100) : s.amp/100;
       const rp = d.line_points || [];
