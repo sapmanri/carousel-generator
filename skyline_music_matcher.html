@@ -352,7 +352,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.7';
+const VERSION = 'v1.3.8';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1576,58 +1576,70 @@ function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRati
   ctx.globalAlpha = 1;
 }
 
-function drawTraceLine(ctx, pts, CW, CH){
+function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   if(!pts||!pts.length) return;
   const n = pts.length;
-  const topM = CH * 0.08;
-  const botM = CH * 0.12;
-  const drawH = CH - topM - botM;
-  const getY = v => topM + (1 - v/100) * drawH;
+  const ar = ampRatio || 1;
+
+  // Smooth the points — 7-point moving average
+  const smooth = pts.map((v,i) => {
+    const w = 7;
+    let sum=0, cnt=0;
+    for(let j=Math.max(0,i-w); j<=Math.min(n-1,i+w); j++){ sum+=pts[j]; cnt++; }
+    return sum/cnt;
+  });
+
+  // Normalize to use middle 60% of image height, controlled by ampRatio
+  const center = CH * 0.42;
+  const spread = CH * 0.28 * ar;
+  const min = Math.min(...smooth), max = Math.max(...smooth);
+  const range = max - min || 1;
+  const getY = v => center - ((v - min) / range - 0.5) * spread * 2;
 
   ctx.save();
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
 
   // Layer 1: thick purple glow
-  ctx.globalAlpha = 0.25;
+  ctx.globalAlpha = 0.22;
   ctx.strokeStyle = 'rgba(160,120,255,1)';
-  ctx.lineWidth = Math.max(CW/60, 6);
+  ctx.lineWidth = Math.max(CW/55, 7);
   ctx.beginPath();
   for(let i=0; i<n; i++){
-    const x=(i/(n-1))*CW, y=getY(pts[i]);
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
 
   // Layer 2: medium white
-  ctx.globalAlpha = 0.6;
+  ctx.globalAlpha = 0.55;
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = Math.max(CW/180, 2);
+  ctx.lineWidth = Math.max(CW/160, 2.5);
   ctx.beginPath();
   for(let i=0; i<n; i++){
-    const x=(i/(n-1))*CW, y=getY(pts[i]);
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
 
   // Layer 3: thin bright core
-  ctx.globalAlpha = 0.9;
+  ctx.globalAlpha = 0.88;
   ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = Math.max(CW/500, 0.8);
+  ctx.lineWidth = Math.max(CW/450, 1);
   ctx.beginPath();
   for(let i=0; i<n; i++){
-    const x=(i/(n-1))*CW, y=getY(pts[i]);
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
 
-  // Layer 4: dots every 5th point
-  ctx.globalAlpha = 0.75;
+  // Dots every 6th point
+  ctx.globalAlpha = 0.65;
   ctx.fillStyle = '#ffffff';
-  for(let i=0; i<n; i+=5){
-    const x=(i/(n-1))*CW, y=getY(pts[i]);
+  for(let i=0; i<n; i+=6){
+    const x=(i/(n-1))*CW, y=getY(smooth[i]);
     ctx.beginPath();
-    ctx.arc(x, y, Math.max(CW/250,2), 0, Math.PI*2);
+    ctx.arc(x, y, Math.max(CW/280, 1.8), 0, Math.PI*2);
     ctx.fill();
   }
 
@@ -1776,7 +1788,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
 
-  if(waveStyle === 'trace'){ drawTraceLine(ctx, pts, CW, CH); return; }
+  if(waveStyle === 'trace'){ drawTraceLine(ctx, pts, CW, CH, ampRatio); return; }
   if(waveStyle === 'silhouette'){
     drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
     return;
