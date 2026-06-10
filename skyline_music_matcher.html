@@ -4,7 +4,6 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Skyline Music Matcher — 감성찾아삽만리</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
@@ -304,7 +303,12 @@ input[type=range]::-moz-range-thumb{
         </label>
       </div>
       <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
-      <button class="btn-secondary btn-dl" id="downloadGifBtn" onclick="downloadWaveGif()" style="display:none;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 GIF 저장</button>
+      <div id="downloadGifWrap" style="display:none;flex-direction:column;gap:5px;">
+        <div style="display:flex;gap:5px;">
+          <button class="btn-secondary btn-dl" id="downloadGifBtn" onclick="downloadWaveVideo('square')" style="flex:1;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 영상 1:1</button>
+          <button class="btn-secondary btn-dl" id="downloadGifBtn9" onclick="downloadWaveVideo('vertical')" style="flex:1;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 영상 9:16</button>
+        </div>
+      </div>
       <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
     </div><!-- /after-card-group -->
 
@@ -374,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.9';
+const VERSION = 'v1.8.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -561,7 +565,7 @@ async function analyze(){
   const btn=document.getElementById('analyzeBtn');
   btn.disabled=true; btn.textContent='분석 중...';
   document.getElementById('downloadBtn').style.display='none';
-  document.getElementById('panelSliderWrap').style.display='none';
+  document.getElementById('downloadGifWrap').style.display='none';
   panelPos=0.5; textScale=1.0;
   document.getElementById('textScaleSlider').value=100;
   document.getElementById('textScaleVal').textContent='1.0×';
@@ -683,7 +687,7 @@ Respond ONLY as valid JSON:
 
     renderCard(cachedResult);
     document.getElementById('downloadBtn').style.display='block';
-    document.getElementById('downloadGifBtn').style.display='block';
+    document.getElementById('downloadGifWrap').style.display='flex';
     document.getElementById('panelSliderWrap').style.display='block';
     document.getElementById('panelSlider').value=50;
     document.getElementById('panelPosVal').textContent='50%';
@@ -1732,136 +1736,181 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   ctx.restore();
 }
 
-function downloadWaveGif(){
-  if(!cachedResult) return;
-  const btn = document.getElementById('downloadGifBtn');
-  btn.textContent='GIF 생성 중...'; btn.disabled=true;
+function downloadWaveVideo(fmt){
+  if(!cachedResult||!imgSrc) return;
+  const isV = fmt==='vertical';
+  const CW = isV ? 1080 : 1080;
+  const CH = isV ? 1920 : 1080;
+  const FPS = 30;
+  const DURATION = 4; // seconds
+  const TOTAL_FRAMES = FPS * DURATION;
 
-  const SIZE = 300;
-  const FRAMES = 10;  // 10 frames
-  const FPS = 10;
+  const btn = isV ? document.getElementById('downloadGifBtn9') : document.getElementById('downloadGifBtn');
+  btn.textContent='영상 생성 중...'; btn.disabled=true;
 
-  const gif = new GIF({
-    workers: 1,
-    quality: 15,
-    width: SIZE,
-    height: SIZE,
-    transparent: 0x000000,  // black = transparent
-    background: '#000000'
-  });
+  const canvas = document.createElement('canvas');
+  canvas.width = CW; canvas.height = CH;
+  const ctx = canvas.getContext('2d');
 
   const d = cachedResult;
   const density = parseInt(document.getElementById('densitySlider').value)||80;
   const ampRatio = (parseInt(document.getElementById('ampSlider').value)||100) / 100;
 
-  // Resample line_points
   const rawPts = d.line_points || [];
   const pts = [];
-  for(let i=0; i<density; i++){
-    const t = i/(density-1);
-    const idx = t*(rawPts.length-1);
+  for(let i=0;i<density;i++){
+    const t=i/(density-1), idx=t*(rawPts.length-1);
     const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
-    pts.push(rawPts[i0]*(1-(idx-i0)) + rawPts[i1]*(idx-i0));
+    pts.push(rawPts[i0]*(1-(idx-i0))+rawPts[i1]*(idx-i0));
   }
 
-  for(let f=0; f<FRAMES; f++){
-    const canvas = document.createElement('canvas');
-    canvas.width = SIZE; canvas.height = SIZE;
-    const ctx = canvas.getContext('2d');
-
-    // Black background (will be transparent)
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, SIZE, SIZE);
-
-    // Animate: phase shift per frame
-    const phase = (f / FRAMES) * Math.PI * 2;
-    const animPts = pts.map((v, i) => {
-      const wave = Math.sin(phase + i * 0.3) * 8;
-      return Math.max(0, Math.min(100, v + wave));
-    });
-
-    const baseY = SIZE * 0.62;
-    const maxH = SIZE * 0.52;
-
-    // Draw wave — white for GIF
-    const wStyle = waveStyle;
-    const aH = maxH * ampRatio;
-    const n = animPts.length;
-
-    if(wStyle === 'mirror'){
-      const dotSize = Math.max(SIZE/160, 3);
-      const dotGap = dotSize * 1.55;
-      const cols = Math.floor(SIZE/dotGap);
-      const colW = SIZE/cols;
-      for(let col=0; col<cols; col++){
-        const cx2 = col*colW + colW*0.5;
-        const t2 = col/(cols-1);
-        const idx2 = t2*(n-1);
-        const i0=Math.floor(idx2), i1=Math.min(i0+1,n-1);
-        const h = (animPts[i0]*(1-(idx2-i0))+animPts[i1]*(idx2-i0))/100*aH;
-        const rows = Math.floor(h/dotGap);
-        for(let row=0; row<rows; row++){
-          const progress = row/Math.max(rows-1,1);
-          const cy2 = baseY - row*dotGap - dotGap*0.5;
-          const alpha = (0.85 - progress*0.6);
-          ctx.globalAlpha = alpha;
-          ctx.fillStyle = '#ffffff';
-          const ds = dotSize*(0.5+(1-progress)*0.5);
-          ctx.beginPath(); ctx.rect(cx2-ds/2, cy2-ds/2, ds, ds); ctx.fill();
-          // mirror
-          if(row < rows*0.7){
-            ctx.globalAlpha = alpha*0.4*(1-row/(rows*0.7));
-            ctx.beginPath(); ctx.rect(cx2-ds/2, baseY+row*dotGap, ds, ds); ctx.fill();
-          }
-        }
-      }
-    } else if(wStyle === 'multiline'){
-      const layers = 6;
-      ctx.lineJoin='round'; ctx.lineCap='round';
-      for(let l=0; l<layers; l++){
-        const alpha2 = 0.12 + (l/layers)*0.55;
-        const scale2 = 0.5 + (l/layers)*0.8;
-        ctx.globalAlpha = alpha2;
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = Math.max(SIZE/(700+l*80), 0.5);
-        ctx.beginPath();
-        for(let i=0; i<n; i++){
-          const x = (i/(n-1))*SIZE;
-          const y = baseY - (animPts[i]/100)*aH*scale2;
-          i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-        }
-        ctx.stroke();
-      }
-    } else {
-      // dots
-      const barW = Math.max(SIZE/0.38/n, 2);
-      ctx.globalAlpha = 0.85;
-      animPts.forEach((p,i)=>{
-        const x = (i/(n-1))*SIZE;
-        const h2 = (p/100)*aH;
-        const numDots = Math.ceil(h2/(barW*1.35));
-        for(let d2=0; d2<numDots; d2++){
-          const t3 = d2/Math.max(numDots-1,1);
-          ctx.fillStyle = t3>0.6 ? 'rgba(255,255,255,0.4)' : '#ffffff';
-          ctx.fillRect(x-barW/2, baseY-d2*barW*1.35, barW, barW);
-        }
-      });
-    }
-
-    ctx.globalAlpha = 1;
-    gif.addFrame(canvas, {delay: Math.floor(1000/FPS), copy: true});
-  }
-
-  gif.on('finished', blob=>{
+  // MediaRecorder 설정
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+    ? 'video/webm;codecs=vp9'
+    : 'video/webm';
+  const stream = canvas.captureStream(FPS);
+  const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8000000 });
+  const chunks = [];
+  recorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+  recorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mimeType });
     const a = document.createElement('a');
-    a.download = `sapmanri_wave_${Date.now()}.gif`;
+    a.download = `sapmanri_wave_${fmt}_${Date.now()}.webm`;
     a.href = URL.createObjectURL(blob);
     a.click();
-    btn.textContent='↓ 파형 GIF 저장'; btn.disabled=false;
-  });
+    btn.textContent = isV ? '↓ 파형 영상 9:16' : '↓ 파형 영상 1:1';
+    btn.disabled = false;
+  };
 
-  gif.render();
+  // 배경 이미지 로드
+  const bgImg = new Image();
+  bgImg.onload = () => {
+    recorder.start();
+    let frame = 0;
+
+    const waveColor = window.waveColor || '#ffffff';
+    const baseY = CH * 0.72;
+    const maxH = CH * 0.32;
+
+    function drawFrame(){
+      if(frame >= TOTAL_FRAMES){ recorder.stop(); return; }
+      const phase = (frame / FPS) * Math.PI * 1.2; // 1 loop ~5sec
+
+      // 배경 이미지 draw
+      ctx.globalAlpha = 1;
+      const sc = Math.max(CW/bgImg.naturalWidth, CH/bgImg.naturalHeight);
+      const sw = bgImg.naturalWidth*sc, sh = bgImg.naturalHeight*sc;
+      ctx.drawImage(bgImg, (CW-sw)/2, (CH-sh)/2, sw, sh);
+
+      // 어두운 오버레이 (파형 가시성)
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, CW, CH);
+      ctx.globalAlpha = 1;
+
+      // 파형 애니메이션 — phase shift로 움직임
+      const animPts = pts.map((v,i) => {
+        const wave = Math.sin(phase + i * 0.18) * 7 + Math.sin(phase*1.7 + i*0.07)*3;
+        return Math.max(0, Math.min(100, v + wave));
+      });
+
+      const wStyle = waveStyle;
+      const aH = maxH * ampRatio;
+      const n = animPts.length;
+      const wc = waveColor;
+
+      ctx.save();
+      if(wStyle==='mirror'){
+        const dotSize = Math.max(CW/120, 5);
+        const dotGap = dotSize * 1.6;
+        const cols = Math.floor(CW/dotGap);
+        const colW = CW/cols;
+        for(let col=0;col<cols;col++){
+          const cx = col*colW + colW*0.5;
+          const t2 = col/(cols-1);
+          const fi = t2*(n-1);
+          const i0=Math.floor(fi),i1=Math.min(i0+1,n-1);
+          const h = (animPts[i0]*(1-(fi-i0))+animPts[i1]*(fi-i0))/100*aH;
+          const rows = Math.floor(h/dotGap);
+          for(let row=0;row<rows;row++){
+            const progress=row/Math.max(rows-1,1);
+            const cy=baseY-row*dotGap-dotGap*0.5;
+            ctx.globalAlpha=0.9-progress*0.55;
+            ctx.fillStyle=wc;
+            const ds=dotSize*(0.5+(1-progress)*0.5);
+            ctx.fillRect(cx-ds/2,cy-ds/2,ds,ds);
+            if(row<rows*0.6){
+              ctx.globalAlpha=(0.9-progress*0.55)*0.35*(1-row/(rows*0.6));
+              ctx.fillRect(cx-ds/2,baseY+row*dotGap,ds,ds);
+            }
+          }
+        }
+      } else if(wStyle==='multiline'){
+        const layers=6;
+        ctx.lineJoin='round'; ctx.lineCap='round';
+        for(let l=0;l<layers;l++){
+          ctx.globalAlpha=0.12+(l/layers)*0.6;
+          ctx.strokeStyle=wc;
+          ctx.lineWidth=Math.max(CW/(600+l*80),1);
+          ctx.beginPath();
+          for(let i=0;i<n;i++){
+            const x=(i/(n-1))*CW;
+            const y=baseY-(animPts[i]/100)*aH*(0.5+(l/layers)*0.8);
+            i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+          }
+          ctx.stroke();
+        }
+      } else if(wStyle==='silhouette'){
+        // 큰 실루엣 바
+        const barW = CW/n*0.7;
+        for(let i=0;i<n;i++){
+          const x=(i/(n-1))*CW;
+          const h=(animPts[i]/100)*aH;
+          const grad=ctx.createLinearGradient(x,baseY-h,x,baseY);
+          grad.addColorStop(0,wc);
+          grad.addColorStop(1,'rgba(255,255,255,0.1)');
+          ctx.globalAlpha=0.85;
+          ctx.fillStyle=grad;
+          ctx.fillRect(x-barW/2,baseY-h,barW,h);
+        }
+      } else {
+        // dots
+        const barW=Math.max(CW/n*0.5,3);
+        animPts.forEach((p,i)=>{
+          const x=(i/(n-1))*CW;
+          const h=(p/100)*aH;
+          const numDots=Math.ceil(h/(barW*1.4));
+          for(let dd=0;dd<numDots;dd++){
+            const t3=dd/Math.max(numDots-1,1);
+            ctx.globalAlpha=t3>0.6?0.4:0.85;
+            ctx.fillStyle=wc;
+            ctx.fillRect(x-barW/2,baseY-dd*barW*1.4,barW,barW);
+          }
+        });
+      }
+      ctx.restore();
+
+      // 하단 텍스트
+      ctx.globalAlpha=1;
+      const songTitle = d.song_title||'';
+      const artist = d.artist||'';
+      ctx.font = `300 ${CW*0.028}px 'Cormorant Garamond', serif`;
+      ctx.fillStyle='rgba(255,255,255,0.9)';
+      ctx.textAlign='left';
+      ctx.fillText(songTitle, CW*0.06, CH*0.93);
+      ctx.font = `300 ${CW*0.018}px 'Noto Sans KR', sans-serif`;
+      ctx.fillStyle='rgba(255,255,255,0.5)';
+      ctx.fillText(artist, CW*0.06, CH*0.96);
+
+      frame++;
+      requestAnimationFrame(drawFrame);
+    }
+    drawFrame();
+  };
+  bgImg.crossOrigin='anonymous';
+  bgImg.src = imgSrc;
 }
+
 
 function downloadCard(){
   if(!window._cardCanvas)return;
