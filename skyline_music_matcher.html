@@ -375,7 +375,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.1';
+const VERSION = 'v1.7.2';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -955,7 +955,9 @@ All prose in ${lang}. No labels. No markdown.`
 
     // 5. Check if body already starts with declaration-like sentence
     const firstLine = body.split('\n')[0];
-    const hasDeclaration = firstLine.includes(d.song_title) && (firstLine.includes('악보') || firstLine.includes('흐른') || firstLine.includes('음악'));
+    // AI가 선언문을 만들었으면 코드 선언 추가 안 함
+    const declWords = ['악보','선율','리듬','흐름','사운드트랙','재즈','노래','음악','진동','박자','숨결','이다'];
+    const hasDeclaration = firstLine.includes(d.song_title) && declWords.some(w => firstLine.includes(w));
     const finalBody = hasDeclaration ? body : declaration + '\n\n' + body;
 
     // 6. Hashtags — 3 fixed + 2 from AI (SEO flexible)
