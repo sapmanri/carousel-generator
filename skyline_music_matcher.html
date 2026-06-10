@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.1';
+const VERSION = 'v1.8.2';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1742,7 +1742,7 @@ function downloadWaveVideo(fmt){
   const CW = isV ? 1080 : 1080;
   const CH = isV ? 1920 : 1080;
   const FPS = 30;
-  const DURATION = 4; // seconds
+  const DURATION = 6; // seconds
   const TOTAL_FRAMES = FPS * DURATION;
 
   const btn = isV ? document.getElementById('downloadGifBtn9') : document.getElementById('downloadGifBtn');
@@ -1789,7 +1789,8 @@ function downloadWaveVideo(fmt){
     let frame = 0;
 
     const waveColor = window.waveColor || '#ffffff';
-    const baseY = CH * 0.72;
+    const offsetRatio = waveOffsetY; // -0.4 ~ 0.4
+    const baseY = CH * 0.72 + CH * offsetRatio * 0.5;
     const maxH = CH * 0.32;
 
     function drawFrame(){
@@ -1903,7 +1904,7 @@ function downloadWaveVideo(fmt){
       ctx.fillText(artist, CW*0.06, CH*0.96);
 
       frame++;
-      requestAnimationFrame(drawFrame);
+      setTimeout(drawFrame, 1000/FPS);
     }
     drawFrame();
   };
