@@ -197,6 +197,7 @@ input[type=range]::-moz-range-thumb{
           <button class="opt-btn" data-design="cinema" onclick="pickDesign(this)"><span class="name">시네마</span><span class="desc">레터박스</span></button>
           <button class="opt-btn" data-design="typo" onclick="pickDesign(this)"><span class="name">타이포</span><span class="desc">블록 타이포</span></button>
           <button class="opt-btn" data-design="ivory" onclick="pickDesign(this)"><span class="name">아이보리</span><span class="desc">미니멀 · 밝음</span></button>
+          <button class="opt-btn" data-design="crumple" onclick="pickDesign(this)"><span class="name">크럼플</span><span class="desc">구겨진 질감</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -376,7 +377,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.3';
+const VERSION = 'v1.7.4';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -391,7 +392,8 @@ function updateKeyVisibility(){
 }
 
 let imgSrc=null,b64=null,mtype='image/jpeg';
-let _lastImg=null; // global image ref for renderers
+let _lastImg=null;
+let _crumpleTexture=null; // cached crumple texture image // global image ref for renderers
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
 let cachedResult=null;
 
@@ -750,7 +752,7 @@ function renderCard(d){
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
     // Run design renderer (sets _lastWaveY/_lastWaveH, draws image overlays + text)
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo,ivory:renderIvory})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo,ivory:renderIvory,crumple:renderCrumple})[cardDesign](ctx,rd,CW,CH,isV);
 
     // Draw all visible waves
     const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
@@ -1840,6 +1842,80 @@ function renderIvory(ctx,d,CW,CH,isV){
   setF(ctx, CW*0.016, '400', '"Helvetica Neue",Arial,sans-serif');
   ctx.fillStyle = 'rgba(26,23,20,0.22)'; ctx.textAlign = 'right';
   ctx.fillText('© SAPMANRI', CW - pad*0.7, CH - CW*0.022); ctx.textAlign = 'left';
+}
+
+function renderCrumple(ctx,d,CW,CH,isV){
+  // ── 크럼플 ── 구겨진 비닐 텍스처 오버레이
+  // 어두운 그라데이션
+  let g=ctx.createLinearGradient(0,0,0,CH);
+  g.addColorStop(0,'rgba(0,0,0,0.35)'); g.addColorStop(0.4,'rgba(0,0,0,0.1)'); g.addColorStop(1,'rgba(0,0,0,0.88)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
+
+  // 파형
+  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
+  _lastWaveY=wY; _lastWaveH=wH;
+
+  // 텍스처 오버레이
+  const drawTexture = () => {
+    if(_crumpleTexture){
+      ctx.globalCompositeOperation='screen';
+      ctx.globalAlpha=0.18;
+      ctx.drawImage(_crumpleTexture, 0, 0, CW, CH);
+      ctx.globalCompositeOperation='source-over';
+      ctx.globalAlpha=1;
+      // 추가 오버레이 — overlay blend
+      ctx.globalCompositeOperation='overlay';
+      ctx.globalAlpha=0.12;
+      ctx.drawImage(_crumpleTexture, 0, 0, CW, CH);
+      ctx.globalCompositeOperation='source-over';
+      ctx.globalAlpha=1;
+    }
+  };
+
+  if(_crumpleTexture){
+    drawTexture();
+  } else {
+    // Load texture
+    const tex = new Image();
+    tex.crossOrigin='anonymous';
+    tex.onload = () => { _crumpleTexture=tex; };
+    tex.src = 'https://sapmanri.github.io/carousel-generator/crumple_texture.png';
+  }
+
+  const pad = CW*0.08;
+  const base = isV ? CH*0.68 : CH*0.70;
+
+  // 브랜드 + 날짜 — 상단
+  setF(ctx, CW*0.016, '500', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.4)';
+  ctx.fillText('SAPMANRI', pad, CW*0.065);
+  ctx.textAlign='right';
+  ctx.fillText('© ' + new Date().getFullYear(), CW-pad*0.7, CW*0.065);
+  ctx.textAlign='left';
+
+  // 곡 제목 — 크고 bold, lowercase
+  const titleSz = CW*(isV?0.075:0.08);
+  setF(ctx, titleSz, '900', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+  const afterT = fillWrap(ctx, d.song_title.toLowerCase(), pad, base, CW-pad*2, titleSz*1.2, 'rgba(255,255,255,0.95)');
+
+  // 아티스트 — 오른쪽 정렬, 작게
+  setF(ctx, CW*0.022, '300', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.38)';
+  ctx.textAlign='right';
+  ctx.fillText(d.artist, CW-pad, afterT+CW*0.04);
+  ctx.textAlign='left';
+
+  // 캡션
+  const cs=CW*0.022;
+  const capY=afterT+CW*0.082;
+  ctx.beginPath(); ctx.moveTo(pad,capY-cs*0.6); ctx.lineTo(pad+CW*0.05,capY-cs*0.6);
+  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.stroke();
+  setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.fillText(d.caption_line1||'',pad,capY);
+  setF(ctx,cs,'500','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.fillText(d.caption_line2||'',pad,capY+cs*1.75);
+  setF(ctx,cs*0.86,'300','"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
 }
 
 async function saveToArchive(result, apiKey){
