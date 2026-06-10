@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.9 · sapmanri</title>
+<title>Writing Studio v2.5.0 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -233,7 +233,7 @@ header {
 /* ══════════════════════════════
    TAB 2 — 예시 글
 ══════════════════════════════ */
-.examples-layout { display: flex; flex: 1; overflow: hidden; }
+.examples-layout { display: flex; flex: 1; min-height: 0; }
 .examples-left {
   width: 200px; flex-shrink: 0;
   border-right: 1px solid var(--border);
@@ -249,7 +249,7 @@ header {
 .ex-filter-btn.active { color: var(--text); background: var(--s2); border-color: var(--border); }
 .ex-count { font-family: var(--mono); font-size: 10px; color: var(--dim); }
 
-.examples-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.examples-main { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .examples-toolbar {
   height: 48px; flex-shrink: 0;
   border-bottom: 1px solid var(--border);
@@ -269,7 +269,7 @@ header {
 }
 .btn-primary:hover { border-color: var(--accent); color: var(--accent); }
 
-.examples-grid { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.examples-grid { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
 .example-card {
   background: var(--s1); border: 1px solid var(--border);
   border-radius: 5px; overflow: hidden; transition: border-color 0.15s;
@@ -468,7 +468,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.9</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.5.0</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
