@@ -216,11 +216,6 @@ input[type=range]::-moz-range-thumb{
       </div>
     </div><!-- /card-col -->
 
-    <!-- 3 분석 버튼 (desktop: left col) -->
-    <div class="analyze-wrap">
-      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
-    </div>
-
     <!-- 4 파형조절·캡션·다운로드 (desktop: left col) -->
     <div class="after-card-group">
       <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
@@ -284,6 +279,10 @@ input[type=range]::-moz-range-thumb{
       <button class="btn-secondary btn-dl" id="downloadGifBtn" onclick="downloadWaveGif()" style="display:none;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 GIF 저장</button>
       <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
     </div><!-- /after-card-group -->
+    <!-- 3 분석 버튼 (desktop: left col / mobile: bottom) -->
+    <div class="analyze-wrap">
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+    </div>
 
     <!-- 5 재생·인스타캡션·채널영상 (desktop: right col, row 2) -->
     <div class="post-card-group">
@@ -346,7 +345,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.0';
+const VERSION = 'v1.3.1';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
