@@ -158,12 +158,27 @@ input[type=range]::-moz-range-thumb{
     <div class="controls-top">
       <div class="panel-section">
         <label>파형 스타일</label>
-        <div class="btn-grid-2">
-          <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
-          <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
-          <button class="opt-btn" data-wave="dots" onclick="pickWave(this)"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
-          <button class="opt-btn" data-wave="silhouette" onclick="pickWave(this)"><span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span></button>
-          <button class="opt-btn" data-wave="trace" onclick="pickWave(this)"><span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span></button>
+        <div class="btn-grid-2" id="waveGrid">
+          <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)" style="position:relative;padding-bottom:22px;">
+            <span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span>
+            <span onclick="event.stopPropagation();toggleWaveVisible('mirror',this)" data-wave="mirror" style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:3px;border:1.5px solid #7c6fd4;background:#1a1830;display:flex;align-items:center;justify-content:center;cursor:pointer;" class="wave-vis-check active-vis">✓</span>
+          </button>
+          <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)" style="position:relative;padding-bottom:22px;">
+            <span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span>
+            <span onclick="event.stopPropagation();toggleWaveVisible('multiline',this)" data-wave="multiline" style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:3px;border:1.5px solid #333;background:#141414;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;" class="wave-vis-check"></span>
+          </button>
+          <button class="opt-btn" data-wave="dots" onclick="pickWave(this)" style="position:relative;padding-bottom:22px;">
+            <span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span>
+            <span onclick="event.stopPropagation();toggleWaveVisible('dots',this)" data-wave="dots" style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:3px;border:1.5px solid #333;background:#141414;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;" class="wave-vis-check"></span>
+          </button>
+          <button class="opt-btn" data-wave="silhouette" onclick="pickWave(this)" style="position:relative;padding-bottom:22px;">
+            <span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span>
+            <span onclick="event.stopPropagation();toggleWaveVisible('silhouette',this)" data-wave="silhouette" style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:3px;border:1.5px solid #333;background:#141414;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;" class="wave-vis-check"></span>
+          </button>
+          <button class="opt-btn" data-wave="trace" onclick="pickWave(this)" style="position:relative;padding-bottom:22px;">
+            <span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span>
+            <span onclick="event.stopPropagation();toggleWaveVisible('trace',this)" data-wave="trace" style="position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:14px;height:14px;border-radius:3px;border:1.5px solid #333;background:#141414;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;" class="wave-vis-check"></span>
+          </button>
         </div>
       </div>
       <div class="panel-section">
@@ -363,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.4.0';
+const VERSION = 'v1.5.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -437,7 +452,19 @@ function pickDesign(btn){
 }
 let cropOffsetX=0.5;
 window.waveColor='auto';
-let waveOffsetY=0.0; // -0.4~+0.4, 0=default
+let waveOffsetY=0.0;
+
+// Per-wave settings store
+const waveDefaults = {
+  mirror:     {density:80, amp:100, textScale:1.0, color:'auto', offset:0.0},
+  multiline:  {density:80, amp:100, textScale:1.0, color:'auto', offset:0.0},
+  dots:       {density:80, amp:100, textScale:1.0, color:'auto', offset:0.0},
+  silhouette: {density:80, amp:100, textScale:1.0, color:'auto', offset:0.0},
+  trace:      {density:80, amp:100, textScale:1.0, color:'auto', offset:0.0},
+};
+const waveSettings = JSON.parse(JSON.stringify(waveDefaults)); // deep copy
+let activeWave = 'mirror';    // currently editing
+let visibleWaves = new Set(['mirror']); // currently shown on card
 let captionLang='ko';
 // usedSongs: persist across sessions in localStorage (last 10)
 let usedSongs = JSON.parse(localStorage.getItem('smm_usedSongs')||'[]');
@@ -697,6 +724,33 @@ function renderCard(d){
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
     ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
+    // Draw additional visible waves (non-active ones)
+    visibleWaves.forEach(w => {
+      if(w === activeWave) return; // already drawn by renderer
+      const s = waveSettings[w];
+      const savedStyle = waveStyle;
+      const savedColor = window.waveColor;
+      const savedOffset = waveOffsetY;
+      const savedDensity = parseInt(document.getElementById('densitySlider').value);
+      const savedAmp = parseInt(document.getElementById('ampSlider').value);
+      waveStyle = w;
+      window.waveColor = s.color;
+      waveOffsetY = s.offset;
+      // Find wY and wH used by current design
+      const wY = isV ? CH*0.62 : CH*0.60;
+      const wH = isV ? CH*0.22 : CH*0.28;
+      const _sc = getWaveColors(ctx, CW, wY, wH);
+      // Temporarily set density/amp sliders for this wave
+      document.getElementById('densitySlider').value = s.density;
+      document.getElementById('ampSlider').value = s.amp;
+      drawWave(ctx, rd.line_points, CW, wY, wH, _sc.main, _sc.glow, s.amp/100, CH);
+      // Restore
+      waveStyle = savedStyle;
+      window.waveColor = savedColor;
+      waveOffsetY = savedOffset;
+      document.getElementById('densitySlider').value = savedDensity;
+      document.getElementById('ampSlider').value = savedAmp;
+    });
     canvas.style.cssText='max-width:100%;max-height:600px;display:block;border-radius:4px';
     const prev=document.getElementById('cardPreview');
     prev.innerHTML=''; prev.appendChild(canvas);
