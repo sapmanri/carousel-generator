@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.7';
+const VERSION = 'v1.6.8';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -889,7 +889,14 @@ async function generateInstaCaption(){
 
   const prompt=`You are writing an Instagram caption for 감성찾아삽만리 (SAPMANRI).
 
-WRITING STYLE: Quiet, lyrical, restrained Korean prose. Like a photo-essay titled "잠깐 멈춰." Emotions appear through objects and scenes, not explanations. Short sentences, generous line breaks. No motivational tone, no AI-polished language, no forced comfort.
+WRITING STYLE:
+Do NOT write like a poet describing a beautiful scene. Do NOT use grand metaphors or decorative language.
+The user's voice is quiet Korean prose that begins from an ordinary scene and slowly arrives at a small personal realization.
+Avoid phrases like: "이 선은 음악의 악보다", "이 공간은 숨결이다", "계절이 깊어진다", "나무는 아직 그늘 만드는 법을 모른다." These are too polished, too literary, too artificial.
+Instead: write as if an ordinary person stood in front of this photo for a while and quietly noticed something inside their own heart. The writing should not praise the scene from the outside — it should move FROM the photo INTO an inner thought.
+Use humble, slightly plain Korean. Let it feel lived-in, not composed.
+The voice sounds like: "별것 아닌 장면인데, 이상하게 오래 마음에 남았다." / "그냥 앉아 있어도 되는 오후가 있다." / "괜히 서둘러 살았구나 싶었다." / "아무 일도 일어나지 않아서 오히려 좋았다." / "오늘은 그 정도면 충분했다."
+Feel less like a poem, more like a quiet note written after coming home. Simple, restrained, warm, a little imperfect.
 
 Context:
 - Scene: ${d.image_description||d.line_description}
