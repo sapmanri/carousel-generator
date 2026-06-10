@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.0 · sapmanri</title>
+<title>Writing Studio v2.4.1 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -470,7 +470,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.0</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.1</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -1434,9 +1434,9 @@ ${db.rules.map((r, i) => `${i+1}. ${r}`).join('\n')}`;
     document.getElementById('refineResult').textContent = text;
     document.getElementById('refineResultWrap').style.display = 'block';
 
-    if (refineMode === 'proofread') {
-      document.getElementById('refineApplyBtn').style.display = 'inline-block';
-    }
+    document.getElementById('refineApplyBtn').style.display = 'inline-block';
+    document.getElementById('refineApplyBtn').textContent =
+      refineMode === 'proofread' ? '에디터에 적용' : '제안 결과를 에디터에 적용';
     document.getElementById('refineSavePairBtn').style.display = 'inline-block';
 
   } catch(e) {
