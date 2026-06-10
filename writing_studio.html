@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.2 · sapmanri</title>
+<title>Writing Studio v2.4.3 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -470,7 +470,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.2</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.3</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -699,7 +699,7 @@ header {
             </div>
             <div style="flex:1">
               <div style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:0.1em;margin-bottom:6px">AI 제안</div>
-              <div id="refineResult" style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:12px;line-height:1.9;color:var(--muted);white-space:pre-wrap;min-height:220px;max-height:280px;overflow-y:auto;user-select:text"></div>
+              <div id="refineSuggestResult" style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:12px;line-height:1.9;color:var(--muted);white-space:pre-wrap;min-height:220px;max-height:280px;overflow-y:auto;user-select:text"></div>
             </div>
           </div>
           <div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:8px">
@@ -1452,17 +1452,18 @@ ${db.rules.map((r, i) => `${i+1}. ${r}`).join('\n')}`;
 
     document.getElementById('refineResultLabel').textContent =
       refineMode === 'proofread' ? '교열 결과' : '원본 · 제안';
-    document.getElementById('refineResult').textContent = text;
     document.getElementById('refineResultWrap').style.display = 'block';
 
     if (refineMode === 'proofread') {
       document.getElementById('refineResultSingle').style.display = 'block';
       document.getElementById('refineResultSplit').style.display = 'none';
+      document.getElementById('refineResult').textContent = text;
       document.getElementById('refineApplyBtn').textContent = '에디터에 적용';
     } else {
       document.getElementById('refineResultSingle').style.display = 'none';
       document.getElementById('refineResultSplit').style.display = 'block';
       document.getElementById('refineOriginalEditable').value = refineOriginal;
+      document.getElementById('refineSuggestResult').textContent = text;
       document.getElementById('refineApplyBtn').textContent = '편집한 원본을 에디터에 적용';
     }
     document.getElementById('refineApplyBtn').style.display = 'inline-block';
