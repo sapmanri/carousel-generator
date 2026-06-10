@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.5.2';
+const VERSION = 'v1.5.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -745,7 +745,11 @@ function renderCard(d){
     const ox = isV ? -(maxOffsetX * cropOffsetX) : (CW-sw)/2;
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
+    // If activeWave not in visibleWaves, suppress its wave drawing
+    const _savedStyleForRender = waveStyle;
+    if(!visibleWaves.has(activeWave)) waveStyle='none';
     ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
+    waveStyle=_savedStyleForRender;
     // Draw additional visible waves
     visibleWaves.forEach(w=>{
       if(w===activeWave)return;
@@ -1862,6 +1866,7 @@ function downloadCard(){
 
 // ── WAVEFORM ENGINE ───────────────────────────────────────
 function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
+  if(waveStyle==='none') return;
   baseY = baseY + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
