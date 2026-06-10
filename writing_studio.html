@@ -5,916 +5,742 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Writing Studio · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0c0c0c;
+  --s1: #141414;
+  --s2: #1c1c1c;
+  --s3: #242424;
+  --border: #282828;
+  --border2: #353535;
+  --text: #e2ddd6;
+  --muted: #7a7570;
+  --dim: #434040;
+  --accent: #c9a96e;
+  --accent2: #8a7a5a;
+  --green: #8aaa88;
+  --red: #c47a6a;
+  --serif: 'Noto Serif KR', serif;
+  --sans: 'Noto Sans KR', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; display: flex; flex-direction: column; overflow: hidden; }
 
-  :root {
-    --bg: #0d0d0d;
-    --surface: #161616;
-    --surface2: #1e1e1e;
-    --border: #2a2a2a;
-    --border-hover: #3a3a3a;
-    --text: #e8e4dc;
-    --text-muted: #7a7670;
-    --text-dim: #4a4845;
+/* ── 헤더 ── */
+header {
+  height: 48px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+}
+.logo { font-family: var(--serif); font-size: 13px; letter-spacing: 0.1em; color: var(--muted); }
+.logo em { color: var(--accent); font-style: normal; }
 
-    /* 타입별 액센트 */
-    --accent-instagram: #c9a96e;   /* 따뜻한 골드 */
-    --accent-youtube:   #8aabca;   /* 차분한 블루 */
-    --accent-blog:      #9db89a;   /* 세이지 그린 */
-    --accent-ui:        #b8a0c8;   /* 연 라벤더 */
-    --accent-active: var(--accent-instagram);
+.header-nav { display: flex; gap: 2px; }
+.nav-tab {
+  background: none; border: none; color: var(--dim);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+  padding: 6px 14px; border-radius: 4px; cursor: pointer;
+  transition: all 0.15s;
+}
+.nav-tab:hover { color: var(--muted); background: var(--s2); }
+.nav-tab.active { color: var(--text); background: var(--s2); }
 
-    --radius: 6px;
-    --font-serif: 'Noto Serif KR', serif;
-    --font-sans: 'Noto Sans KR', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-  }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.api-key-wrap { position: relative; }
+.api-key-field {
+  background: var(--s1); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--mono); font-size: 11px; padding: 5px 10px;
+  border-radius: 4px; width: 0; overflow: hidden; opacity: 0;
+  transition: width 0.3s, opacity 0.3s; outline: none;
+}
+.api-key-field.open { width: 200px; opacity: 1; }
+.api-key-field:focus { border-color: var(--accent); }
+.btn-ghost {
+  background: none; border: 1px solid var(--border); color: var(--muted);
+  font-family: var(--mono); font-size: 10px; padding: 5px 10px;
+  border-radius: 4px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn-ghost:hover { border-color: var(--border2); color: var(--text); }
 
-  html { height: 100%; }
+/* ── 탭 패널 ── */
+.tab-panel { display: none; flex: 1; overflow: hidden; }
+.tab-panel.active { display: flex; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-sans);
-    font-weight: 300;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+/* ══════════════════════════════
+   TAB 1 — 쓰기
+══════════════════════════════ */
+.write-layout { display: flex; flex: 1; overflow: hidden; }
 
-  /* ── 헤더 ── */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 20px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
+/* 왼쪽 설정 */
+.write-left {
+  width: 220px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.section { padding: 16px; border-bottom: 1px solid var(--border); }
+.section-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.16em;
+  color: var(--dim); text-transform: uppercase; margin-bottom: 10px;
+}
+.type-list, .mode-list { display: flex; flex-direction: column; gap: 3px; }
+.type-btn, .mode-btn {
+  background: none; border: 1px solid transparent; color: var(--muted);
+  font-family: var(--sans); font-weight: 300; font-size: 12px;
+  padding: 7px 10px; border-radius: 4px; cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 8px; transition: all 0.15s;
+}
+.type-btn:hover, .mode-btn:hover { color: var(--text); background: var(--s2); }
+.type-btn.active, .mode-btn.active {
+  color: var(--text); background: var(--s2); border-color: var(--border);
+}
+.type-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--dim); flex-shrink: 0; transition: background 0.3s;
+}
+.type-btn.active .type-dot { background: var(--accent); }
 
-  .logo {
-    font-family: var(--font-serif);
-    font-weight: 300;
-    font-size: 15px;
-    letter-spacing: 0.12em;
-    color: var(--text-muted);
-  }
-  .logo span {
-    color: var(--accent-active);
-    transition: color 0.4s;
-  }
+.ctx-textarea {
+  width: 100%; background: var(--s1); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--sans); font-weight: 300;
+  font-size: 12px; line-height: 1.7; padding: 9px 10px;
+  border-radius: 4px; resize: vertical; min-height: 90px;
+  outline: none; transition: border-color 0.15s;
+}
+.ctx-textarea:focus { border-color: var(--accent); }
+.ctx-textarea::placeholder { color: var(--dim); }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
+.btn-generate {
+  width: 100%; margin-top: 8px;
+  background: var(--s2); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--sans); font-size: 12px; font-weight: 400;
+  padding: 9px; border-radius: 4px; cursor: pointer; transition: all 0.15s;
+}
+.btn-generate:hover { border-color: var(--accent); color: var(--accent); }
+.btn-generate:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  .api-toggle {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 5px 10px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .api-toggle:hover { border-color: var(--border-hover); color: var(--text); }
+/* 예시 사용 현황 */
+.example-stat {
+  font-family: var(--mono); font-size: 10px; color: var(--dim);
+  line-height: 1.8;
+}
+.example-stat span { color: var(--accent); }
 
-  .api-key-row {
-    display: none;
-    align-items: center;
-    gap: 8px;
-  }
-  .api-key-row.visible { display: flex; }
+/* 에디터 중앙 */
+.write-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.editor-bar {
+  height: 38px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px; padding: 0 16px;
+}
+.bar-btn {
+  background: none; border: none; color: var(--dim);
+  font-family: var(--mono); font-size: 10px; padding: 3px 7px;
+  border-radius: 3px; cursor: pointer; transition: all 0.15s;
+}
+.bar-btn:hover { color: var(--text); background: var(--s2); }
+.bar-sep { width: 1px; height: 14px; background: var(--border); }
+.char-count { margin-left: auto; font-family: var(--mono); font-size: 10px; color: var(--dim); }
 
-  .api-key-input {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 5px 10px;
-    border-radius: var(--radius);
-    width: 220px;
-    outline: none;
-  }
-  .api-key-input:focus { border-color: var(--accent-active); }
+.editor-box { flex: 1; display: flex; overflow: hidden; }
+.main-editor {
+  flex: 1; background: transparent; border: none;
+  color: var(--text); font-family: var(--serif); font-weight: 300;
+  font-size: 15px; line-height: 2; padding: 28px 36px;
+  outline: none; resize: none; overflow-y: auto;
+}
+.main-editor::placeholder { color: var(--dim); font-style: italic; }
 
-  /* ── 레이아웃 ── */
-  .workspace {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
+/* 오른쪽: diff / 피드백 */
+.write-right {
+  width: 280px; flex-shrink: 0;
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.right-header {
+  height: 38px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 14px;
+  font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.1em;
+}
+.right-scroll { flex: 1; overflow-y: auto; padding: 14px; }
 
-  /* ── 왼쪽 패널 ── */
-  .panel-left {
-    width: 260px;
-    flex-shrink: 0;
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-  }
+/* diff 패널 */
+.diff-block { margin-bottom: 14px; }
+.diff-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em;
+  color: var(--dim); text-transform: uppercase; margin-bottom: 6px;
+}
+.diff-text {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 4px; padding: 10px; font-size: 12px; line-height: 1.75;
+  color: var(--muted); white-space: pre-wrap; word-break: break-word;
+  max-height: 160px; overflow-y: auto;
+}
+.diff-text.original { border-color: var(--dim); }
+.diff-text.edited { border-color: var(--green); color: var(--text); }
 
-  .panel-section {
-    padding: 20px 20px 16px;
-    border-bottom: 1px solid var(--border);
-  }
+.save-pair-btn {
+  width: 100%; margin-top: 8px;
+  background: none; border: 1px solid var(--green); color: var(--green);
+  font-family: var(--mono); font-size: 10px; padding: 7px;
+  border-radius: 4px; cursor: pointer; transition: all 0.15s;
+}
+.save-pair-btn:hover { background: var(--green); color: var(--bg); }
 
-  .panel-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
+.no-diff {
+  padding: 24px 0; text-align: center;
+  font-size: 12px; color: var(--dim); line-height: 1.8;
+}
 
-  /* 타입 선택 */
-  .type-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+/* ══════════════════════════════
+   TAB 2 — 예시 글
+══════════════════════════════ */
+.examples-layout { display: flex; flex: 1; overflow: hidden; }
+.examples-left {
+  width: 200px; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 16px 12px; display: flex; flex-direction: column; gap: 3px;
+}
+.ex-filter-btn {
+  background: none; border: 1px solid transparent; color: var(--muted);
+  font-family: var(--sans); font-weight: 300; font-size: 12px;
+  padding: 7px 10px; border-radius: 4px; cursor: pointer; text-align: left;
+  transition: all 0.15s; display: flex; align-items: center; justify-content: space-between;
+}
+.ex-filter-btn:hover { color: var(--text); background: var(--s2); }
+.ex-filter-btn.active { color: var(--text); background: var(--s2); border-color: var(--border); }
+.ex-count { font-family: var(--mono); font-size: 10px; color: var(--dim); }
 
-  .type-btn {
-    background: none;
-    border: 1px solid transparent;
-    color: var(--text-muted);
-    font-family: var(--font-sans);
-    font-weight: 300;
-    font-size: 13px;
-    padding: 8px 12px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.2s;
-  }
-  .type-btn:hover { color: var(--text); background: var(--surface2); }
-  .type-btn.active {
-    color: var(--text);
-    background: var(--surface2);
-    border-color: var(--border);
-  }
-  .type-btn .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--text-dim);
-    flex-shrink: 0;
-    transition: background 0.3s;
-  }
-  .type-btn.active .dot { background: var(--accent-active); }
+.examples-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.examples-toolbar {
+  height: 48px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; padding: 0 16px;
+}
+.examples-toolbar input {
+  flex: 1; background: var(--s1); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--sans); font-weight: 300; font-size: 12px;
+  padding: 6px 10px; border-radius: 4px; outline: none;
+}
+.examples-toolbar input:focus { border-color: var(--accent); }
+.examples-toolbar input::placeholder { color: var(--dim); }
+.btn-primary {
+  background: var(--s2); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--sans); font-size: 12px; padding: 6px 14px;
+  border-radius: 4px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn-primary:hover { border-color: var(--accent); color: var(--accent); }
 
-  /* 스타일 선택 */
-  .style-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+.examples-grid { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.example-card {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 5px; overflow: hidden; transition: border-color 0.15s;
+}
+.example-card:hover { border-color: var(--border2); }
+.example-card-header {
+  padding: 9px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.example-card-meta { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+.example-card-actions { display: flex; gap: 6px; }
+.icon-btn {
+  background: none; border: none; color: var(--dim);
+  font-size: 11px; cursor: pointer; padding: 2px 5px;
+  border-radius: 3px; transition: color 0.15s;
+}
+.icon-btn:hover { color: var(--red); }
+.icon-btn.use:hover { color: var(--green); }
+.example-card-body {
+  padding: 12px; font-size: 12px; line-height: 1.8;
+  color: var(--muted); white-space: pre-wrap; word-break: break-word;
+  max-height: 120px; overflow: hidden; cursor: pointer;
+  transition: max-height 0.3s;
+}
+.example-card-body.expanded { max-height: 400px; }
 
-  .style-btn {
-    background: none;
-    border: 1px solid transparent;
-    color: var(--text-muted);
-    font-family: var(--font-sans);
-    font-weight: 300;
-    font-size: 12px;
-    padding: 6px 12px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s;
-  }
-  .style-btn:hover { color: var(--text); background: var(--surface2); }
-  .style-btn.active {
-    color: var(--accent-active);
-    background: var(--surface2);
-    border-color: var(--border);
-  }
+/* 새 예시 모달 */
+.modal-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 100;
+  align-items: center; justify-content: center;
+}
+.modal-backdrop.open { display: flex; }
+.modal {
+  background: var(--s1); border: 1px solid var(--border);
+  border-radius: 8px; width: 560px; max-width: 90vw;
+  display: flex; flex-direction: column; max-height: 80vh;
+}
+.modal-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--mono); font-size: 12px; color: var(--text);
+}
+.modal-close {
+  background: none; border: none; color: var(--dim);
+  font-size: 16px; cursor: pointer; transition: color 0.15s;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+.modal-label { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.1em; margin-bottom: 6px; }
+.modal-select {
+  width: 100%; background: var(--s2); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--sans); font-weight: 300; font-size: 12px;
+  padding: 7px 10px; border-radius: 4px; outline: none;
+}
+.modal-textarea {
+  width: 100%; background: var(--s2); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--serif); font-weight: 300; font-size: 13px; line-height: 1.9;
+  padding: 10px 12px; border-radius: 4px; resize: vertical; min-height: 200px;
+  outline: none; transition: border-color 0.15s;
+}
+.modal-textarea:focus { border-color: var(--accent); }
+.modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+.btn-save {
+  background: var(--accent2); border: 1px solid var(--accent); color: var(--text);
+  font-family: var(--sans); font-size: 12px; padding: 7px 20px;
+  border-radius: 4px; cursor: pointer; transition: all 0.15s;
+}
+.btn-save:hover { background: var(--accent); }
 
-  /* 컨텍스트 입력 */
-  .context-area {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-sans);
-    font-weight: 300;
-    font-size: 12px;
-    line-height: 1.7;
-    padding: 10px 12px;
-    border-radius: var(--radius);
-    resize: vertical;
-    min-height: 100px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .context-area:focus { border-color: var(--accent-active); }
-  .context-area::placeholder { color: var(--text-dim); }
+/* ══════════════════════════════
+   TAB 3 — 문체 프로필
+══════════════════════════════ */
+.profile-layout { flex: 1; overflow-y: auto; padding: 32px; max-width: 760px; margin: 0 auto; width: 100%; }
+.profile-section { margin-bottom: 36px; }
+.profile-section-title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+  color: var(--accent); text-transform: uppercase; margin-bottom: 16px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.rule-list { display: flex; flex-direction: column; gap: 8px; }
+.rule-item {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 4px;
+  padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; line-height: 1.7; color: var(--muted);
+}
+.rule-item .rule-dot {
+  width: 4px; height: 4px; border-radius: 50%; background: var(--accent);
+  flex-shrink: 0; margin-top: 8px;
+}
+.rule-item button {
+  margin-left: auto; background: none; border: none; color: var(--dim);
+  font-size: 10px; cursor: pointer; padding: 2px; flex-shrink: 0;
+  transition: color 0.15s;
+}
+.rule-item button:hover { color: var(--red); }
 
-  .generate-btn {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-sans);
-    font-weight: 400;
-    font-size: 13px;
-    padding: 10px;
-    border-radius: var(--radius);
-    cursor: pointer;
-    margin-top: 10px;
-    transition: all 0.2s;
-    letter-spacing: 0.04em;
-  }
-  .generate-btn:hover {
-    background: var(--border);
-    border-color: var(--accent-active);
-    color: var(--accent-active);
-  }
-  .generate-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+.add-rule-row { display: flex; gap: 8px; margin-top: 10px; }
+.add-rule-input {
+  flex: 1; background: var(--s1); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--sans); font-weight: 300; font-size: 12px;
+  padding: 7px 10px; border-radius: 4px; outline: none;
+}
+.add-rule-input:focus { border-color: var(--accent); }
+.add-rule-input::placeholder { color: var(--dim); }
 
-  /* API 서버 모드 토글 */
-  .server-toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  .toggle-switch {
-    width: 32px;
-    height: 18px;
-    background: var(--border);
-    border-radius: 9px;
-    cursor: pointer;
-    position: relative;
-    transition: background 0.2s;
-  }
-  .toggle-switch.on { background: var(--accent-active); }
-  .toggle-switch::after {
-    content: '';
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    background: white;
-    border-radius: 50%;
-    top: 3px;
-    left: 3px;
-    transition: left 0.2s;
-  }
-  .toggle-switch.on::after { left: 17px; }
+.feedback-pair {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 5px;
+  overflow: hidden; margin-bottom: 8px;
+}
+.feedback-pair-header {
+  padding: 8px 12px; border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 10px; color: var(--dim);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.feedback-pair-body { display: flex; }
+.fp-col { flex: 1; padding: 10px 12px; font-size: 12px; line-height: 1.75; }
+.fp-col:first-child { border-right: 1px solid var(--border); color: var(--dim); }
+.fp-col:last-child { color: var(--text); }
+.fp-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
+  margin-bottom: 6px; text-transform: uppercase;
+}
+.fp-label.orig { color: var(--dim); }
+.fp-label.edit { color: var(--green); }
 
-  /* ── 메인 에디터 ── */
-  .editor-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat-box {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 4px;
+  padding: 14px; text-align: center;
+}
+.stat-num { font-family: var(--mono); font-size: 22px; color: var(--accent); }
+.stat-lbl { font-size: 11px; color: var(--dim); margin-top: 4px; }
 
-  .editor-toolbar {
-    border-bottom: 1px solid var(--border);
-    padding: 10px 24px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
+.export-row { display: flex; gap: 8px; margin-top: 16px; }
 
-  .toolbar-btn {
-    background: none;
-    border: 1px solid transparent;
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .toolbar-btn:hover { color: var(--text); background: var(--surface2); }
+/* 공통 */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-  .toolbar-divider {
-    width: 1px;
-    height: 16px;
-    background: var(--border);
-  }
+.empty-hint { padding: 32px; text-align: center; color: var(--dim); font-size: 12px; line-height: 2; }
 
-  .char-count {
-    margin-left: auto;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-  }
+/* 토스트 */
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: var(--s2); border: 1px solid var(--border2); color: var(--text);
+  font-family: var(--mono); font-size: 11px; padding: 8px 16px;
+  border-radius: 5px; z-index: 999; opacity: 0;
+  transition: opacity 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
 
-  .editor-main {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-  }
-
-  .editor-textarea {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-family: var(--font-serif);
-    font-weight: 300;
-    font-size: 15px;
-    line-height: 1.9;
-    padding: 32px 40px;
-    outline: none;
-    resize: none;
-    overflow-y: auto;
-  }
-  .editor-textarea::placeholder { color: var(--text-dim); font-style: italic; }
-
-  /* ── 오른쪽 패널 (미리보기/출력) ── */
-  .panel-right {
-    width: 300px;
-    flex-shrink: 0;
-    border-left: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .panel-right-header {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 0.14em;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .copy-all-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .copy-all-btn:hover { color: var(--accent-active); border-color: var(--accent-active); }
-
-  .output-scroll {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-  }
-
-  .output-block {
-    margin-bottom: 20px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-
-  .output-block-header {
-    padding: 8px 12px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .output-block-label {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-  }
-
-  .copy-btn {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    cursor: pointer;
-    transition: color 0.2s;
-    padding: 0;
-  }
-  .copy-btn:hover { color: var(--accent-active); }
-
-  .output-block-content {
-    padding: 12px;
-    font-size: 12px;
-    line-height: 1.8;
-    color: var(--text-muted);
-    white-space: pre-wrap;
-    word-break: break-word;
-  }
-
-  /* 로딩 */
-  .loading-indicator {
-    display: none;
-    padding: 20px;
-    text-align: center;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-  }
-  .loading-indicator.visible { display: block; }
-
-  .loading-dots::after {
-    content: '...';
-    animation: dots 1.4s infinite;
-  }
-  @keyframes dots {
-    0%, 20% { content: '.'; }
-    40% { content: '..'; }
-    60%, 100% { content: '...'; }
-  }
-
-  /* API 서버 상태 */
-  .server-status {
-    padding: 12px 20px;
-    border-top: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    display: none;
-  }
-  .server-status.visible { display: block; }
-  .server-status code {
-    color: var(--accent-active);
-    background: var(--surface);
-    padding: 2px 6px;
-    border-radius: 3px;
-  }
-
-  /* 스크롤바 */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
-
-  /* 빈 상태 */
-  .empty-state {
-    padding: 40px 20px;
-    text-align: center;
-    color: var(--text-dim);
-    font-size: 12px;
-    line-height: 1.8;
-  }
-  .empty-state-icon {
-    font-size: 24px;
-    margin-bottom: 12px;
-    opacity: 0.4;
-  }
-
-  /* 반응형 */
-  @media (max-width: 900px) {
-    .panel-right { display: none; }
-  }
-  @media (max-width: 640px) {
-    .panel-left { width: 200px; }
-    header { padding: 14px 16px; }
-    .editor-textarea { padding: 20px; }
-  }
+/* 로딩 스피너 */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block; width: 10px; height: 10px;
+  border: 1px solid var(--dim); border-top-color: var(--accent);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+  margin-right: 6px;
+}
 </style>
 </head>
 <body>
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <span>sapmanri</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em></div>
+  <nav class="header-nav">
+    <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
+    <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
+    <button class="nav-tab" onclick="switchTab('profile')">문체 프로필</button>
+  </nav>
   <div class="header-right">
-    <div class="api-key-row" id="apiKeyRow">
-      <input type="password" class="api-key-input" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off">
+    <div class="api-key-wrap">
+      <input type="password" class="api-key-field" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
     </div>
-    <button class="api-toggle" id="apiToggle" onclick="toggleApiKey()">API Key</button>
+    <button class="btn-ghost" onclick="toggleApiKey()">API Key</button>
   </div>
 </header>
 
-<!-- 워크스페이스 -->
-<div class="workspace">
+<!-- ══ TAB 1: 쓰기 ══ -->
+<div class="tab-panel active" id="tab-write">
+  <div class="write-layout">
 
-  <!-- 왼쪽: 설정 패널 -->
-  <aside class="panel-left">
-
-    <!-- 글 타입 -->
-    <div class="panel-section">
-      <div class="panel-label">글 타입</div>
-      <div class="type-list">
-        <button class="type-btn active" data-type="instagram" onclick="setType(this)">
-          <span class="dot"></span> 인스타그램 캡션
-        </button>
-        <button class="type-btn" data-type="youtube" onclick="setType(this)">
-          <span class="dot"></span> 유튜브 설명란
-        </button>
-        <button class="type-btn" data-type="blog" onclick="setType(this)">
-          <span class="dot"></span> 블로그 글
-        </button>
-        <button class="type-btn" data-type="ui" onclick="setType(this)">
-          <span class="dot"></span> UI 문구 / 카드
-        </button>
+    <!-- 왼쪽 -->
+    <aside class="write-left">
+      <div class="section">
+        <div class="section-label">글 타입</div>
+        <div class="type-list">
+          <button class="type-btn active" data-type="instagram" onclick="setType(this)">
+            <span class="type-dot"></span>인스타 캡션
+          </button>
+          <button class="type-btn" data-type="youtube" onclick="setType(this)">
+            <span class="type-dot"></span>유튜브 설명란
+          </button>
+          <button class="type-btn" data-type="blog" onclick="setType(this)">
+            <span class="type-dot"></span>블로그 글
+          </button>
+          <button class="type-btn" data-type="ui" onclick="setType(this)">
+            <span class="type-dot"></span>UI 문구
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- 글쓰기 스타일 -->
-    <div class="panel-section">
-      <div class="panel-label">글쓰기 스타일</div>
-      <div class="style-list">
-        <button class="style-btn active" data-style="vase" onclick="setStyle(this)">Vase 문체</button>
-        <button class="style-btn" data-style="editorial" onclick="setStyle(this)">에디토리얼</button>
-        <button class="style-btn" data-style="seo" onclick="setStyle(this)">SEO 최적화</button>
-        <button class="style-btn" data-style="simple" onclick="setStyle(this)">간결체</button>
-        <button class="style-btn" data-style="english" onclick="setStyle(this)">영어 (글로벌)</button>
+      <div class="section">
+        <div class="section-label">컨텍스트</div>
+        <textarea class="ctx-textarea" id="ctxInput" placeholder="사진/영상 내용, 분위기, 키워드…"></textarea>
+        <button class="btn-generate" id="genBtn" onclick="generateText()">글 생성하기 →</button>
       </div>
-    </div>
 
-    <!-- 컨텍스트 -->
-    <div class="panel-section">
-      <div class="panel-label">컨텍스트</div>
-      <textarea class="context-area" id="contextInput"
-        placeholder="영상/사진 내용, 주제, 키워드, 분위기 등을 자유롭게 입력하세요"></textarea>
-      <button class="generate-btn" id="generateBtn" onclick="generateText()">
-        글 생성하기 →
-      </button>
-    </div>
-
-    <!-- API 서버 모드 -->
-    <div class="panel-section">
-      <div class="panel-label">외부 앱 연동</div>
-      <div class="server-toggle-row">
-        <span>API 수신 대기</span>
-        <div class="toggle-switch" id="serverToggle" onclick="toggleServer()"></div>
+      <div class="section">
+        <div class="section-label">참조 중인 예시</div>
+        <div class="example-stat" id="exampleStat">
+          예시 글 <span id="exCount">0</span>개 저장됨<br>
+          피드백 쌍 <span id="pairCount">0</span>개 누적
+        </div>
       </div>
-    </div>
+    </aside>
 
-  </aside>
-
-  <!-- 중앙: 에디터 -->
-  <main class="editor-area">
-    <div class="editor-toolbar">
-      <button class="toolbar-btn" onclick="clearEditor()">지우기</button>
-      <div class="toolbar-divider"></div>
-      <button class="toolbar-btn" onclick="copyEditor()">복사</button>
-      <button class="toolbar-btn" onclick="saveToHistory()">저장</button>
-      <span class="char-count" id="charCount">0자</span>
-    </div>
-    <div class="editor-main">
-      <textarea class="editor-textarea" id="editorTextarea"
-        placeholder="여기에 직접 쓰거나, 왼쪽에서 글을 생성하세요."
-        oninput="updateCharCount()"></textarea>
-    </div>
-  </main>
-
-  <!-- 오른쪽: 출력 패널 -->
-  <aside class="panel-right">
-    <div class="panel-right-header">
-      <span>출력 / 히스토리</span>
-      <button class="copy-all-btn" onclick="copyAll()">전체 복사</button>
-    </div>
-    <div class="output-scroll" id="outputScroll">
-      <div class="loading-indicator" id="loadingIndicator">
-        <div class="loading-dots">생성 중</div>
+    <!-- 에디터 -->
+    <main class="write-center">
+      <div class="editor-bar">
+        <button class="bar-btn" onclick="clearEditor()">지우기</button>
+        <div class="bar-sep"></div>
+        <button class="bar-btn" onclick="copyEditor()">복사</button>
+        <button class="bar-btn" onclick="saveAsExample()">예시로 저장</button>
+        <span class="char-count" id="charCount">0자</span>
       </div>
-      <div class="empty-state" id="emptyState">
-        <div class="empty-state-icon">✦</div>
-        컨텍스트를 입력하고<br>글을 생성해보세요.
+      <div class="editor-box">
+        <textarea class="main-editor" id="mainEditor"
+          placeholder="여기에 직접 쓰거나, 왼쪽에서 생성하세요."
+          oninput="onEditorInput()"></textarea>
       </div>
-    </div>
-    <div class="server-status" id="serverStatus">
-      POST <code id="serverEndpoint">—</code>
-    </div>
-  </aside>
+    </main>
 
+    <!-- 오른쪽: diff -->
+    <aside class="write-right">
+      <div class="right-header">
+        <span>수정 전 · 후</span>
+        <button class="btn-ghost" id="savePairBtnTop" onclick="savePair()" style="display:none">피드백 저장</button>
+      </div>
+      <div class="right-scroll" id="diffPanel">
+        <div class="no-diff">글을 생성하면<br>원본이 여기 표시돼요.<br><br>수정 후 저장하면<br>문체 학습에 반영됩니다.</div>
+      </div>
+    </aside>
+
+  </div>
 </div>
 
+<!-- ══ TAB 2: 예시 글 ══ -->
+<div class="tab-panel" id="tab-examples">
+  <div class="examples-layout">
+    <aside class="examples-left">
+      <div class="section-label" style="padding:12px 10px 8px; font-family:var(--mono); font-size:9px; letter-spacing:0.16em; color:var(--dim); text-transform:uppercase;">필터</div>
+      <button class="ex-filter-btn active" data-filter="all" onclick="setExFilter(this)">
+        전체 <span class="ex-count" id="fc-all">0</span>
+      </button>
+      <button class="ex-filter-btn" data-filter="instagram" onclick="setExFilter(this)">
+        인스타 캡션 <span class="ex-count" id="fc-instagram">0</span>
+      </button>
+      <button class="ex-filter-btn" data-filter="youtube" onclick="setExFilter(this)">
+        유튜브 <span class="ex-count" id="fc-youtube">0</span>
+      </button>
+      <button class="ex-filter-btn" data-filter="blog" onclick="setExFilter(this)">
+        블로그 <span class="ex-count" id="fc-blog">0</span>
+      </button>
+      <button class="ex-filter-btn" data-filter="ui" onclick="setExFilter(this)">
+        UI 문구 <span class="ex-count" id="fc-ui">0</span>
+      </button>
+      <button class="ex-filter-btn" data-filter="feedback" onclick="setExFilter(this)">
+        피드백 쌍 <span class="ex-count" id="fc-feedback">0</span>
+      </button>
+    </aside>
+    <div class="examples-main">
+      <div class="examples-toolbar">
+        <input type="text" id="exSearch" placeholder="검색…" oninput="renderExamples()">
+        <button class="btn-primary" onclick="openAddModal()">+ 예시 추가</button>
+        <button class="btn-ghost" onclick="importData()">가져오기</button>
+        <button class="btn-ghost" onclick="exportData()">내보내기</button>
+      </div>
+      <div class="examples-grid" id="examplesGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TAB 3: 문체 프로필 ══ -->
+<div class="tab-panel" id="tab-profile">
+  <div class="profile-layout">
+
+    <div class="profile-section">
+      <div class="profile-section-title">통계</div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-num" id="stat-examples">0</div><div class="stat-lbl">예시 글</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-pairs">0</div><div class="stat-lbl">피드백 쌍</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-rules">0</div><div class="stat-lbl">문체 규칙</div></div>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">문체 규칙 <span style="color:var(--dim); font-size:9px">(AI에게 직접 전달됩니다)</span></div>
+      <div class="rule-list" id="ruleList"></div>
+      <div class="add-rule-row">
+        <input class="add-rule-input" id="newRuleInput" placeholder="새 규칙 입력 (예: '그러나'보다 '하지만'을 선호한다)">
+        <button class="btn-primary" onclick="addRule()">추가</button>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">피드백 쌍 <span style="color:var(--dim); font-size:9px">(원본 → 수정본 패턴)</span></div>
+      <div id="pairsList"></div>
+    </div>
+
+    <div class="profile-section">
+      <div class="profile-section-title">데이터 관리</div>
+      <div class="export-row">
+        <button class="btn-primary" onclick="exportData()">전체 내보내기 (JSON)</button>
+        <button class="btn-ghost" onclick="importData()">가져오기</button>
+        <button class="btn-ghost" style="color:var(--red); border-color:var(--red)" onclick="resetAll()">초기화</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- 예시 추가 모달 -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span>예시 글 추가</span>
+      <button class="modal-close" onclick="closeAddModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="modal-label">글 타입</div>
+        <select class="modal-select" id="modalType">
+          <option value="instagram">인스타그램 캡션</option>
+          <option value="youtube">유튜브 설명란</option>
+          <option value="blog">블로그 글</option>
+          <option value="ui">UI 문구</option>
+        </select>
+      </div>
+      <div>
+        <div class="modal-label">글 내용 (직접 쓴 글)</div>
+        <textarea class="modal-textarea" id="modalText" placeholder="여기에 실제로 쓴 글을 붙여넣으세요."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeAddModal()">취소</button>
+      <button class="btn-save" onclick="saveExample()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
 <script>
-// ── 상태 ──
+// ══════════════════════════════════════════
+// 데이터 레이어
+// ══════════════════════════════════════════
+const DB_KEY = 'ws_sapmanri_v2';
+let db = loadDB();
+
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return {
+    examples: [],    // { id, type, text, date }
+    pairs: [],       // { id, type, original, edited, date }
+    rules: [...DEFAULT_RULES],
+  };
+}
+
+function saveDB() {
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  updateStats();
+}
+
+// ── 기본 Vase 문체 규칙 (초기값) ──
+const DEFAULT_RULES = [
+  '감정을 직접 설명하지 않는다. 사물과 장면을 통해 감정이 드러나게 한다.',
+  '짧은 문장과 긴 문장을 리듬감 있게 교차한다. 같은 길이의 문장이 연속되면 단조로워진다.',
+  '결론을 서두르지 않는다. 독자와 함께 천천히 도달한다.',
+  '여백을 남긴다. 모든 것을 설명하려 하지 않는다.',
+  '\'그러나\', \'하지만\' 같은 역접 접속사보다 장면의 전환으로 대비를 표현한다.',
+  '계절과 빛, 소리, 온도 같은 감각적 디테일을 구체적으로 쓴다.',
+  '고양이 빼빼와 콩이 등장할 때는 사람처럼 묘사하지 않는다. 그냥 그 자리에 있는 것으로 충분하다.',
+  '마침표로 끝나는 짧은 한 문장이 문단 전체를 마무리할 때 가장 강하다.',
+];
+
+// ══════════════════════════════════════════
+// 탭 전환
+// ══════════════════════════════════════════
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    if (t.textContent.trim() === ({write:'쓰기', examples:'예시 글', profile:'문체 프로필'}[name])) t.classList.add('active');
+  });
+  if (name === 'examples') renderExamples();
+  if (name === 'profile') renderProfile();
+}
+
+// ══════════════════════════════════════════
+// API Key
+// ══════════════════════════════════════════
+function toggleApiKey() {
+  document.getElementById('apiKey').classList.toggle('open');
+}
+function getKey() {
+  const v = document.getElementById('apiKey').value.trim();
+  if (!v) { toast('API Key를 입력해주세요.'); return null; }
+  return v;
+}
+
+// ══════════════════════════════════════════
+// 글 타입
+// ══════════════════════════════════════════
 let currentType = 'instagram';
-let currentStyle = 'vase';
-let outputHistory = [];
-let serverMode = false;
-let serverId = null;
-
-const ACCENT_MAP = {
-  instagram: 'var(--accent-instagram)',
-  youtube:   'var(--accent-youtube)',
-  blog:      'var(--accent-blog)',
-  ui:        'var(--accent-ui)',
-};
-
-// ── 타입 변경 ──
 function setType(btn) {
   document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   currentType = btn.dataset.type;
-  document.documentElement.style.setProperty('--accent-active', ACCENT_MAP[currentType]);
-  updateContextPlaceholder();
 }
 
-// ── 스타일 변경 ──
-function setStyle(btn) {
-  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentStyle = btn.dataset.style;
-}
+const TYPE_LABEL = { instagram: '인스타 캡션', youtube: '유튜브', blog: '블로그', ui: 'UI 문구' };
 
-// ── 컨텍스트 플레이스홀더 ──
-const PLACEHOLDERS = {
-  instagram: '사진 분위기, 장소, 담고 싶은 감정, 키워드를 입력하세요\n예) 비 오는 가평 오후, 빼빼가 창가에 앉아있는 사진, 고요함',
-  youtube:   '영상 제목, 내용 요약, 주요 장면, SEO 키워드를 입력하세요',
-  blog:      '글의 주제, 소재, 분위기, 포함할 내용을 입력하세요',
-  ui:        '어떤 앱/기능의 문구인지, 어떤 상황인지 설명해주세요',
-};
-function updateContextPlaceholder() {
-  document.getElementById('contextInput').placeholder = PLACEHOLDERS[currentType] || '';
-}
-updateContextPlaceholder();
+const TYPE_INSTRUCTION = {
+  instagram: `인스타그램 캡션을 작성한다.
+- 첫 줄: 짧고 선언적인 한 문장 (질문이나 해시태그 없이)
+- 본문: 2-4문장 산문, 장면 묘사 위주
+- 마지막: 해시태그 5개 (#sapmanri #slowliving 고정, 나머지 3개는 내용 기반)
+- 총 150-220자 (해시태그 제외)`,
 
-// ── API Key ──
-function toggleApiKey() {
-  const row = document.getElementById('apiKeyRow');
-  row.classList.toggle('visible');
-}
-function getApiKey() {
-  const v = document.getElementById('apiKeyInput').value.trim();
-  if (!v) { alert('API Key를 입력해주세요.'); return null; }
-  return v;
-}
+  youtube: `유튜브 영상 설명란을 작성한다.
+- 첫 2줄: 핵심 키워드 포함, 자연스러운 문장 (검색 최적화)
+- 본문: 3-5문장 영상 소개
+- 해시태그: 5-8개
+- 한국어 기본, 필요시 영어 병기`,
 
-// ── 스타일별 시스템 프롬프트 ──
-const STYLE_PROMPTS = {
-  vase: `당신은 감성찾아삽만리(@sapmanri)의 글쓰기 도구입니다.
-Vase Lim의 고유한 문체를 따라 글을 씁니다:
-- 감정을 직접 설명하지 않고 사물과 장면을 통해 전달
-- 짧은 문장과 긴 문장을 리듬감 있게 섞음
-- 결론을 서두르지 않고 독자와 함께 도달
-- 한국어, 일상의 고요함을 담는 산문체
-- 과하지 않은 표현, 여백을 남기는 문체`,
+  blog: `네이버 블로그 포스트를 작성한다.
+- 핵심 키워드 자연스럽게 10회 이상 포함
+- 1500자 이상
+- SEO 최적화된 첫 단락`,
 
-  editorial: `당신은 Magazine B나 에디터가 쓰는 에디토리얼 문체로 글을 씁니다.
-명확하고 정제된 문장, 필요한 정보만 담되 감각적인 표현 사용.`,
-
-  seo: `당신은 한국어 SEO에 최적화된 글을 씁니다.
-검색 알고리즘과 독자 모두를 고려, 핵심 키워드를 자연스럽게 포함.
-유튜브, 네이버 블로그 기준으로 작성.`,
-
-  simple: `간결하고 명확하게 씁니다. 군더더기 없이, 핵심만.`,
-
-  english: `Write in English, natural and global-friendly tone.
-For YouTube or Instagram reach beyond Korea. Clear, evocative, and searchable.`,
+  ui: `앱/웹 UI 문구를 작성한다.
+- 간결하고 능동태
+- 버튼, 레이블, 빈 상태 메시지 등 필요한 요소별로 작성
+- 3가지 버전 제안`,
 };
 
-const TYPE_PROMPTS = {
-  instagram: `인스타그램 캡션을 작성합니다.
-형식: 첫 줄은 선언적 한 문장 ("이 능선은...의 악보다" 같은 형식은 참고만), 이후 짧은 산문, 마지막에 해시태그 5개 (고정: #sapmanri #slowliving 포함, 나머지 3개는 내용 기반).
-총 길이: 150-250자 (해시태그 제외).`,
+// ══════════════════════════════════════════
+// 글 생성 (핵심: 예시 + 피드백 + 규칙 주입)
+// ══════════════════════════════════════════
+let lastOriginal = '';
 
-  youtube: `유튜브 영상 설명란을 작성합니다.
-형식:
-1. 첫 2줄: SEO + 감성 동시 공략 (검색어 포함, 하지만 자연스럽게)
-2. 본문: 3-5문장 영상 소개
-3. 챕터 타임스탬프 (있다면 포함)
-4. 해시태그: 5-8개
-영어와 한국어 병기 가능.`,
-
-  blog: `네이버 블로그 포스트를 작성합니다.
-핵심 키워드를 본문에 자연스럽게 10회 이상 포함.
-1500자 이상. 서론-본문-결론 구조.
-첫 단락이 SEO 핵심 문장으로 시작.`,
-
-  ui: `앱이나 웹의 UI 문구, 카드 텍스트, 버튼 레이블, 빈 상태 메시지 등을 작성합니다.
-간결하고 명확하게, 사용자의 관점에서. 능동태.
-필요한 경우 다양한 버전으로 제안.`,
-};
-
-// ── 글 생성 ──
 async function generateText() {
-  const apiKey = getApiKey();
-  if (!apiKey) return;
+  const key = getKey(); if (!key) return;
+  const ctx = document.getElementById('ctxInput').value.trim();
+  if (!ctx) { toast('컨텍스트를 입력해주세요.'); return; }
 
-  const context = document.getElementById('contextInput').value.trim();
-  if (!context) { alert('컨텍스트를 입력해주세요.'); return; }
-
-  const btn = document.getElementById('generateBtn');
+  const btn = document.getElementById('genBtn');
   btn.disabled = true;
-  btn.textContent = '생성 중...';
+  btn.innerHTML = '<span class="spinner"></span>생성 중…';
 
-  document.getElementById('emptyState').style.display = 'none';
-  document.getElementById('loadingIndicator').classList.add('visible');
+  // 1. 관련 예시 선택 (같은 타입 최대 5개, 최신순)
+  const typeExamples = db.examples
+    .filter(e => e.type === currentType)
+    .slice(-5);
 
-  const systemPrompt = `${STYLE_PROMPTS[currentStyle]}\n\n${TYPE_PROMPTS[currentType]}`;
-  const userPrompt = `다음 내용을 바탕으로 글을 작성해주세요:\n\n${context}`;
+  // 2. 피드백 쌍 선택 (최대 4개)
+  const typePairs = db.pairs
+    .filter(p => p.type === currentType)
+    .slice(-4);
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
+  // 3. 시스템 프롬프트 구성
+  let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 글쓰기 도구입니다.
+Vase의 문체로 글을 씁니다. 아래의 규칙, 예시, 피드백 패턴을 철저히 따르세요.
+
+## 문체 규칙
+${db.rules.map((r, i) => `${i+1}. ${r}`).join('\n')}
+
+## 글 타입 지시
+${TYPE_INSTRUCTION[currentType]}`;
+
+  if (typeExamples.length > 0) {
+    system += `\n\n## Vase가 직접 쓴 예시 글 (이 문체와 어조를 그대로 따르세요)\n`;
+    typeExamples.forEach((e, i) => {
+      system += `\n--- 예시 ${i+1} ---\n${e.text}\n`;
     });
+  }
 
-    const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
-
-    const text = data.content?.[0]?.text || '';
-
-    // 에디터에 삽입
-    document.getElementById('editorTextarea').value = text;
-    updateCharCount();
-
-    // 히스토리에 추가
-    addToHistory({
-      type: currentType,
-      style: currentStyle,
-      context: context.slice(0, 40) + (context.length > 40 ? '…' : ''),
-      text: text,
-      time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+  if (typePairs.length > 0) {
+    system += `\n\n## 피드백 패턴 (AI 초안 → Vase 수정본. 이 패턴에서 Vase의 선호를 파악하세요)\n`;
+    typePairs.forEach((p, i) => {
+      system += `\n--- 패턴 ${i+1} ---\n[AI 초안]: ${p.original}\n[Vase 수정]: ${p.edited}\n`;
     });
-
-  } catch (err) {
-    alert('오류: ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '글 생성하기 →';
-    document.getElementById('loadingIndicator').classList.remove('visible');
-  }
-}
-
-// ── 히스토리 추가 ──
-const TYPE_LABELS = { instagram: 'IG 캡션', youtube: 'YT 설명', blog: '블로그', ui: 'UI 문구' };
-
-function addToHistory(item) {
-  outputHistory.unshift(item);
-  renderHistory();
-}
-
-function renderHistory() {
-  const scroll = document.getElementById('outputScroll');
-  const loading = document.getElementById('loadingIndicator');
-
-  scroll.innerHTML = '';
-  scroll.appendChild(loading);
-
-  outputHistory.forEach((item, idx) => {
-    const block = document.createElement('div');
-    block.className = 'output-block';
-    block.innerHTML = `
-      <div class="output-block-header">
-        <span class="output-block-label">${TYPE_LABELS[item.type]} · ${item.style} · ${item.time}</span>
-        <button class="copy-btn" onclick="copyBlock(${idx})">복사</button>
-      </div>
-      <div class="output-block-content" id="block-${idx}">${escapeHtml(item.text)}</div>
-    `;
-    block.querySelector('.output-block-content').addEventListener('click', () => {
-      document.getElementById('editorTextarea').value = item.text;
-      updateCharCount();
-    });
-    scroll.appendChild(block);
-  });
-}
-
-function escapeHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-// ── 에디터 유틸 ──
-function updateCharCount() {
-  const len = document.getElementById('editorTextarea').value.length;
-  document.getElementById('charCount').textContent = len.toLocaleString() + '자';
-}
-
-function clearEditor() {
-  if (document.getElementById('editorTextarea').value && confirm('에디터 내용을 지우시겠어요?')) {
-    document.getElementById('editorTextarea').value = '';
-    updateCharCount();
-  }
-}
-
-async function copyEditor() {
-  const text = document.getElementById('editorTextarea').value;
-  if (!text) return;
-  await navigator.clipboard.writeText(text);
-  showToast('복사했습니다.');
-}
-
-function saveToHistory() {
-  const text = document.getElementById('editorTextarea').value.trim();
-  if (!text) return;
-  addToHistory({
-    type: currentType,
-    style: currentStyle,
-    context: '수동 저장',
-    text: text,
-    time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-  });
-  showToast('저장했습니다.');
-}
-
-async function copyBlock(idx) {
-  await navigator.clipboard.writeText(outputHistory[idx].text);
-  showToast('복사했습니다.');
-}
-
-async function copyAll() {
-  const all = outputHistory.map(i => `[${TYPE_LABELS[i.type]}]\n${i.text}`).join('\n\n---\n\n');
-  await navigator.clipboard.writeText(all);
-  showToast('전체 복사했습니다.');
-}
-
-// ── 토스트 ──
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.textContent = msg;
-  Object.assign(t.style, {
-    position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
-    background: '#2a2a2a', color: '#e8e4dc', border: '1px solid #3a3a3a',
-    padding: '8px 16px', borderRadius: '6px', fontSize: '12px',
-    fontFamily: "'JetBrains Mono', monospace", zIndex: 9999,
-    transition: 'opacity 0.3s',
-  });
-  document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 1800);
-}
-
-// ── API 서버 모드 (BroadcastChannel 기반) ──
-// 같은 origin의 다른 탭/앱이 BroadcastChannel('writing_studio')로 요청을 보내면 처리
-let bc = null;
-
-function toggleServer() {
-  serverMode = !serverMode;
-  const toggle = document.getElementById('serverToggle');
-  const statusEl = document.getElementById('serverStatus');
-  const endpointEl = document.getElementById('serverEndpoint');
-
-  toggle.classList.toggle('on', serverMode);
-
-  if (serverMode) {
-    bc = new BroadcastChannel('writing_studio');
-    bc.onmessage = handleServerRequest;
-    const origin = window.location.origin + window.location.pathname;
-    endpointEl.textContent = 'BroadcastChannel: writing_studio';
-    statusEl.classList.add('visible');
-    showToast('API 수신 대기 중...');
-  } else {
-    if (bc) { bc.close(); bc = null; }
-    statusEl.classList.remove('visible');
-  }
-}
-
-async function handleServerRequest(event) {
-  const { requestId, type, style, context, apiKey } = event.data;
-  if (!requestId) return;
-
-  // 타입·스타일 자동 설정
-  if (type) {
-    const btn = document.querySelector(`[data-type="${type}"]`);
-    if (btn) setType(btn);
-  }
-  if (style) {
-    const btn = document.querySelector(`[data-style="${style}"]`);
-    if (btn) setStyle(btn);
-  }
-  if (context) document.getElementById('contextInput').value = context;
-  if (apiKey) document.getElementById('apiKeyInput').value = apiKey;
-
-  // 생성
-  const key = apiKey || document.getElementById('apiKeyInput').value.trim();
-  if (!key || !context) {
-    bc.postMessage({ requestId, error: 'apiKey or context missing' });
-    return;
   }
 
-  const systemPrompt = `${STYLE_PROMPTS[style || currentStyle]}\n\n${TYPE_PROMPTS[type || currentType]}`;
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -927,21 +753,359 @@ async function handleServerRequest(event) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1500,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: context }],
+        system,
+        messages: [{ role: 'user', content: `다음 내용을 바탕으로 글을 써주세요:\n\n${ctx}` }],
       }),
     });
     const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
     const text = data.content?.[0]?.text || '';
-    bc.postMessage({ requestId, text });
-    addToHistory({ type: type || currentType, style: style || currentStyle, context: context.slice(0,40), text, time: new Date().toLocaleTimeString('ko-KR', { hour:'2-digit', minute:'2-digit' }) });
-  } catch (err) {
-    bc.postMessage({ requestId, error: err.message });
+
+    lastOriginal = text;
+    document.getElementById('mainEditor').value = text;
+    onEditorInput();
+    renderDiff(text, null);
+    document.getElementById('savePairBtnTop').style.display = 'block';
+    toast('생성 완료');
+  } catch(e) {
+    toast('오류: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '글 생성하기 →';
   }
 }
 
-// ── 초기화 ──
-updateCharCount();
+// ══════════════════════════════════════════
+// 에디터
+// ══════════════════════════════════════════
+function onEditorInput() {
+  const val = document.getElementById('mainEditor').value;
+  document.getElementById('charCount').textContent = val.length.toLocaleString() + '자';
+  if (lastOriginal && val !== lastOriginal) renderDiff(lastOriginal, val);
+}
+
+function clearEditor() {
+  if (!document.getElementById('mainEditor').value) return;
+  if (!confirm('에디터를 지울까요?')) return;
+  document.getElementById('mainEditor').value = '';
+  lastOriginal = '';
+  onEditorInput();
+  document.getElementById('diffPanel').innerHTML = '<div class="no-diff">글을 생성하면<br>원본이 여기 표시돼요.<br><br>수정 후 저장하면<br>문체 학습에 반영됩니다.</div>';
+  document.getElementById('savePairBtnTop').style.display = 'none';
+}
+
+async function copyEditor() {
+  const v = document.getElementById('mainEditor').value;
+  if (!v) return;
+  await navigator.clipboard.writeText(v);
+  toast('복사했습니다.');
+}
+
+function saveAsExample() {
+  const text = document.getElementById('mainEditor').value.trim();
+  if (!text) { toast('저장할 내용이 없어요.'); return; }
+  db.examples.push({ id: Date.now(), type: currentType, text, date: new Date().toLocaleDateString('ko-KR') });
+  saveDB();
+  toast('예시 글로 저장했습니다.');
+  updateExampleStat();
+}
+
+// ══════════════════════════════════════════
+// Diff 패널
+// ══════════════════════════════════════════
+function renderDiff(original, edited) {
+  const panel = document.getElementById('diffPanel');
+  if (!edited) {
+    panel.innerHTML = `
+      <div class="diff-block">
+        <div class="diff-label">생성된 원본</div>
+        <div class="diff-text original">${escHtml(original)}</div>
+      </div>
+      <div class="no-diff" style="padding:16px 0">수정하면 비교가 표시됩니다.</div>`;
+    return;
+  }
+  panel.innerHTML = `
+    <div class="diff-block">
+      <div class="diff-label">AI 원본</div>
+      <div class="diff-text original">${escHtml(original)}</div>
+    </div>
+    <div class="diff-block">
+      <div class="diff-label" style="color:var(--green)">Vase 수정본</div>
+      <div class="diff-text edited">${escHtml(edited)}</div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+// 피드백 쌍 저장
+// ══════════════════════════════════════════
+function savePair() {
+  const edited = document.getElementById('mainEditor').value.trim();
+  if (!lastOriginal || !edited) { toast('원본과 수정본이 모두 있어야 합니다.'); return; }
+  if (edited === lastOriginal) { toast('수정된 내용이 없어요.'); return; }
+  db.pairs.push({
+    id: Date.now(), type: currentType,
+    original: lastOriginal, edited,
+    date: new Date().toLocaleDateString('ko-KR'),
+  });
+  saveDB();
+  lastOriginal = edited; // 저장 후 현재 버전이 새 기준
+  toast('피드백 저장 완료. 다음 생성부터 반영됩니다.');
+  updateExampleStat();
+}
+
+// ══════════════════════════════════════════
+// 예시 글 탭
+// ══════════════════════════════════════════
+let currentFilter = 'all';
+function setExFilter(btn) {
+  document.querySelectorAll('.ex-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.filter;
+  renderExamples();
+}
+
+function renderExamples() {
+  const search = document.getElementById('exSearch')?.value.toLowerCase() || '';
+  const grid = document.getElementById('examplesGrid');
+  grid.innerHTML = '';
+
+  // 필터
+  let items = [];
+  if (currentFilter === 'feedback') {
+    items = db.pairs.map(p => ({ ...p, _kind: 'pair' }));
+  } else {
+    items = db.examples
+      .filter(e => currentFilter === 'all' || e.type === currentFilter)
+      .map(e => ({ ...e, _kind: 'example' }));
+  }
+
+  if (search) items = items.filter(i =>
+    (i.text || i.original || '').toLowerCase().includes(search)
+  );
+
+  // 카운트 업데이트
+  updateFilterCounts();
+
+  if (items.length === 0) {
+    grid.innerHTML = '<div class="empty-hint">저장된 예시가 없어요.<br>직접 쓴 글을 추가하거나<br>생성 후 수정하면 피드백 쌍이 쌓입니다.</div>';
+    return;
+  }
+
+  items.slice().reverse().forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'example-card';
+    if (item._kind === 'pair') {
+      card.innerHTML = `
+        <div class="example-card-header">
+          <span class="example-card-meta">피드백 쌍 · ${TYPE_LABEL[item.type]} · ${item.date}</span>
+          <div class="example-card-actions">
+            <button class="icon-btn" onclick="deletePair(${item.id})">삭제</button>
+          </div>
+        </div>
+        <div style="display:flex">
+          <div style="flex:1; padding:10px 12px; font-size:12px; line-height:1.75; color:var(--dim); border-right:1px solid var(--border)">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px">AI 원본</div>
+            ${escHtml(item.original.slice(0,200))}${item.original.length>200?'…':''}
+          </div>
+          <div style="flex:1; padding:10px 12px; font-size:12px; line-height:1.75; color:var(--text)">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:4px">수정본</div>
+            ${escHtml(item.edited.slice(0,200))}${item.edited.length>200?'…':''}
+          </div>
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div class="example-card-header">
+          <span class="example-card-meta">${TYPE_LABEL[item.type]} · ${item.date}</span>
+          <div class="example-card-actions">
+            <button class="icon-btn use" onclick="loadToEditor(${item.id})">불러오기</button>
+            <button class="icon-btn" onclick="deleteExample(${item.id})">삭제</button>
+          </div>
+        </div>
+        <div class="example-card-body" onclick="this.classList.toggle('expanded')">${escHtml(item.text)}</div>`;
+    }
+    grid.appendChild(card);
+  });
+}
+
+function updateFilterCounts() {
+  document.getElementById('fc-all').textContent = db.examples.length;
+  ['instagram','youtube','blog','ui'].forEach(t => {
+    const el = document.getElementById('fc-' + t);
+    if (el) el.textContent = db.examples.filter(e => e.type === t).length;
+  });
+  document.getElementById('fc-feedback').textContent = db.pairs.length;
+}
+
+function loadToEditor(id) {
+  const ex = db.examples.find(e => e.id === id);
+  if (!ex) return;
+  document.getElementById('mainEditor').value = ex.text;
+  onEditorInput();
+  switchTab('write');
+  toast('에디터로 불러왔습니다.');
+}
+
+function deleteExample(id) {
+  if (!confirm('삭제할까요?')) return;
+  db.examples = db.examples.filter(e => e.id !== id);
+  saveDB(); renderExamples();
+}
+function deletePair(id) {
+  if (!confirm('삭제할까요?')) return;
+  db.pairs = db.pairs.filter(p => p.id !== id);
+  saveDB(); renderExamples();
+}
+
+// 모달
+function openAddModal() {
+  document.getElementById('modalText').value = '';
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+}
+function saveExample() {
+  const type = document.getElementById('modalType').value;
+  const text = document.getElementById('modalText').value.trim();
+  if (!text) { toast('내용을 입력해주세요.'); return; }
+  db.examples.push({ id: Date.now(), type, text, date: new Date().toLocaleDateString('ko-KR') });
+  saveDB(); closeAddModal(); renderExamples();
+  toast('저장했습니다.');
+}
+
+// ══════════════════════════════════════════
+// 문체 프로필 탭
+// ══════════════════════════════════════════
+function renderProfile() {
+  // 규칙
+  const list = document.getElementById('ruleList');
+  list.innerHTML = '';
+  db.rules.forEach((r, i) => {
+    const el = document.createElement('div');
+    el.className = 'rule-item';
+    el.innerHTML = `<span class="rule-dot"></span><span style="flex:1">${escHtml(r)}</span>
+      <button onclick="deleteRule(${i})">×</button>`;
+    list.appendChild(el);
+  });
+
+  // 피드백 쌍
+  const pList = document.getElementById('pairsList');
+  pList.innerHTML = '';
+  if (db.pairs.length === 0) {
+    pList.innerHTML = '<div class="empty-hint">아직 피드백 쌍이 없어요.<br>생성 → 수정 → 저장하면 여기 쌓입니다.</div>';
+  } else {
+    db.pairs.slice().reverse().forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'feedback-pair';
+      el.innerHTML = `
+        <div class="feedback-pair-header">
+          <span>${TYPE_LABEL[p.type]} · ${p.date}</span>
+          <button class="icon-btn" onclick="deletePair(${p.id}); renderProfile()">삭제</button>
+        </div>
+        <div class="feedback-pair-body">
+          <div class="fp-col"><div class="fp-label orig">AI 원본</div>${escHtml(p.original.slice(0,300))}${p.original.length>300?'…':''}</div>
+          <div class="fp-col"><div class="fp-label edit">수정본</div>${escHtml(p.edited.slice(0,300))}${p.edited.length>300?'…':''}</div>
+        </div>`;
+      pList.appendChild(el);
+    });
+  }
+
+  // 통계
+  document.getElementById('stat-examples').textContent = db.examples.length;
+  document.getElementById('stat-pairs').textContent = db.pairs.length;
+  document.getElementById('stat-rules').textContent = db.rules.length;
+}
+
+function addRule() {
+  const input = document.getElementById('newRuleInput');
+  const val = input.value.trim();
+  if (!val) return;
+  db.rules.push(val);
+  saveDB();
+  input.value = '';
+  renderProfile();
+  toast('규칙 추가됨');
+}
+
+function deleteRule(i) {
+  if (!confirm('이 규칙을 삭제할까요?')) return;
+  db.rules.splice(i, 1);
+  saveDB(); renderProfile();
+}
+
+// ══════════════════════════════════════════
+// 내보내기 / 가져오기
+// ══════════════════════════════════════════
+function exportData() {
+  const json = JSON.stringify(db, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `sapmanri_writing_studio_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  toast('내보냈습니다.');
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (confirm(`가져오면 현재 데이터와 병합됩니다. 계속할까요?\n예시 ${data.examples?.length||0}개, 피드백 ${data.pairs?.length||0}개, 규칙 ${data.rules?.length||0}개`)) {
+          db.examples = [...db.examples, ...(data.examples||[])];
+          db.pairs = [...db.pairs, ...(data.pairs||[])];
+          if (data.rules?.length) db.rules = data.rules;
+          saveDB(); renderExamples(); renderProfile();
+          toast('가져왔습니다.');
+        }
+      } catch { toast('파일 형식 오류'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+function resetAll() {
+  if (!confirm('모든 예시, 피드백, 규칙이 삭제됩니다. 정말 초기화할까요?')) return;
+  db = { examples: [], pairs: [], rules: [...DEFAULT_RULES] };
+  saveDB(); renderExamples(); renderProfile();
+  toast('초기화했습니다.');
+}
+
+// ══════════════════════════════════════════
+// 유틸
+// ══════════════════════════════════════════
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function updateStats() {
+  updateExampleStat();
+  updateFilterCounts();
+}
+
+function updateExampleStat() {
+  document.getElementById('exCount').textContent = db.examples.length;
+  document.getElementById('pairCount').textContent = db.pairs.length;
+}
+
+// 엔터로 규칙 추가
+document.getElementById('newRuleInput')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') addRule();
+});
+
+// 초기화
+updateStats();
 </script>
 </body>
 </html>
