@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.9';
+const VERSION = 'v1.9.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -758,6 +758,8 @@ function renderCard(d){
     bgOnly.width=CW; bgOnly.height=CH;
     bgOnly.getContext('2d').drawImage(canvas, 0, 0);
     window._bgCanvas = bgOnly;
+    window._bgWaveY = _lastWaveY;
+    window._bgWaveH = _lastWaveH;
 
     // Draw all visible waves
     const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
@@ -1809,8 +1811,10 @@ function downloadWaveVideo(fmt){
 
     function drawOneWave(ws, animPts, wc, offset, amp){
       const n = animPts.length;
-      const baseY = CH * 0.72 + offset * CH;
-      const maxH = CH * 0.32;
+      const _waveY = (window._bgWaveY > 0) ? window._bgWaveY : CH * 0.60;
+      const _waveH = (window._bgWaveH > 0) ? window._bgWaveH : CH * 0.28;
+      const baseY = _waveY + offset * CH;
+      const maxH = _waveH;
       const aH = maxH * amp;
       // 'auto' 색상이면 흰색으로 fallback
       if(!wc || wc === 'auto') wc = '#ffffff';
@@ -1823,7 +1827,7 @@ function downloadWaveVideo(fmt){
           for(let j=Math.max(0,i-w);j<=Math.min(n-1,i+w);j++){sum+=animPts[j];cnt++;}
           return sum/cnt;
         });
-        const center = CH*0.42 + offset*CH;
+        const center = _waveY + offset * CH;
         const spread = CH*0.28*amp;
         const mn=Math.min(...smooth), mx=Math.max(...smooth), rng=mx-mn||1;
         const getY = v => center - ((v-mn)/rng - 0.5)*spread*2;
