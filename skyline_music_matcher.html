@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.6';
+const VERSION = 'v1.6.7';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1611,8 +1611,8 @@ function renderCinema(ctx,d,CW,CH,isV){
 function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
-  const barCount = Math.min(n, 80);
-  const barW = Math.max((CW / barCount) * 0.55, 2);
+  const barCount = n; // use full density
+  const barW = Math.max((CW / barCount) * 0.55, 1.5);
   const gap = CW / barCount;
   for(let i=0; i<barCount; i++){
     const t = i/(barCount-1);
@@ -1628,12 +1628,22 @@ function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRati
     } else {
       ctx.fillRect(x-barW/2, baseY-h, barW, h);
     }
-    ctx.globalAlpha = alpha*0.2;
+    // Mirror reflection — stronger
+    const mirrorH = h * 0.45;
+    ctx.globalAlpha = alpha * 0.55;
+    ctx.fillStyle = color;
+    if(ctx.roundRect){
+      ctx.beginPath(); ctx.roundRect(x-barW/2, baseY+2, barW, mirrorH, barW*0.3); ctx.fill();
+    } else {
+      ctx.fillRect(x-barW/2, baseY+2, barW, mirrorH);
+    }
+    // Fade bottom
+    ctx.globalAlpha = alpha * 0.2;
     ctx.fillStyle = glowColor;
     if(ctx.roundRect){
-      ctx.beginPath(); ctx.roundRect(x-barW/2, baseY+2, barW, h*0.2, barW*0.3); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(x-barW/2, baseY+mirrorH*0.5, barW, mirrorH*0.5, barW*0.3); ctx.fill();
     } else {
-      ctx.fillRect(x-barW/2, baseY+2, barW, h*0.2);
+      ctx.fillRect(x-barW/2, baseY+mirrorH*0.5, barW, mirrorH*0.5);
     }
   }
   ctx.globalAlpha = 1;
