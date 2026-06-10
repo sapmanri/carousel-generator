@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.9.1';
+const VERSION = 'v1.9.2';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1683,8 +1683,9 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   });
 
   // Normalize to use middle 60% of image height, controlled by ampRatio
-  const center = CH * 0.42 + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
-  const spread = CH * 0.28 * ar;
+  const _traceBaseY = (_lastWaveY > 0) ? _lastWaveY : CH * 0.42;
+  const center = _traceBaseY + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
+  const spread = (_lastWaveH > 0 ? _lastWaveH : CH * 0.28) * ar;
   const min = Math.min(...smooth), max = Math.max(...smooth);
   const range = max - min || 1;
   const getY = v => center - ((v - min) / range - 0.5) * spread * 2;
@@ -1827,8 +1828,8 @@ function downloadWaveVideo(fmt){
           for(let j=Math.max(0,i-w);j<=Math.min(n-1,i+w);j++){sum+=animPts[j];cnt++;}
           return sum/cnt;
         });
-        const center = CH * 0.42 + offset * CH;
-        const spread = CH*0.28*amp;
+        const center = _waveY + offset * CH;
+        const spread = _waveH * amp;
         const mn=Math.min(...smooth), mx=Math.max(...smooth), rng=mx-mn||1;
         const getY = v => center - ((v-mn)/rng - 0.5)*spread*2;
         const tc = (wc && wc!=='auto') ? wc : '#ffffff';
