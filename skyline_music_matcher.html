@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.3';
+const VERSION = 'v1.6.4';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -758,15 +758,20 @@ function renderCard(d){
     const _savedAmp = parseInt(document.getElementById('ampSlider').value);
     const _savedDensity = parseInt(document.getElementById('densitySlider').value);
 
+    // Snapshot live slider values for activeWave BEFORE loop
+    const _liveOffset = waveOffsetY;
+    const _liveColor = window.waveColor;
+    const _liveDensity = parseInt(document.getElementById('densitySlider').value)||80;
+    const _liveAmp = (parseInt(document.getElementById('ampSlider').value)||100)/100;
+
     visibleWaves.forEach(w => {
       const s = waveSettings[w];
       waveStyle = w;
-      // Active wave uses live slider values; others use stored settings
       const isActive = (w === activeWave);
-      window.waveColor = isActive ? (window.waveColor||s.color) : s.color;
-      waveOffsetY = isActive ? waveOffsetY : s.offset;
-      const useDensity = isActive ? (parseInt(document.getElementById('densitySlider').value)||80) : s.density;
-      const useAmp = isActive ? ((parseInt(document.getElementById('ampSlider').value)||100)/100) : s.amp/100;
+      window.waveColor = isActive ? _liveColor : s.color;
+      waveOffsetY = isActive ? _liveOffset : s.offset;
+      const useDensity = isActive ? _liveDensity : s.density;
+      const useAmp = isActive ? _liveAmp : s.amp/100;
       const rp = d.line_points || [];
       const wPts = [];
       for(let i=0; i<useDensity; i++){
