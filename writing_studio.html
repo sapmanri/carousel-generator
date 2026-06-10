@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.1 · sapmanri</title>
+<title>Writing Studio v2.4.2 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -470,7 +470,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.1</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.2</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -684,7 +684,28 @@ header {
       <!-- 결과 영역 -->
       <div id="refineResultWrap" style="display:none">
         <div class="modal-label" id="refineResultLabel">결과</div>
-        <div id="refineResult" style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:14px;font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap;max-height:280px;overflow-y:auto"></div>
+
+        <!-- 교열 모드: 결과만 -->
+        <div id="refineResultSingle" style="display:none">
+          <div id="refineResult" style="background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:14px;font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap;max-height:280px;overflow-y:auto"></div>
+        </div>
+
+        <!-- 제안 모드: 원본 + 제안 나란히 -->
+        <div id="refineResultSplit" style="display:none">
+          <div style="display:flex;gap:8px">
+            <div style="flex:1">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:0.1em;margin-bottom:6px">원본 (편집 가능)</div>
+              <textarea id="refineOriginalEditable" style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:4px;padding:12px;font-family:'Noto Serif KR',serif;font-size:13px;line-height:1.9;color:var(--text);resize:none;outline:none;min-height:220px;max-height:280px;overflow-y:auto"></textarea>
+            </div>
+            <div style="flex:1">
+              <div style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:0.1em;margin-bottom:6px">AI 제안</div>
+              <div id="refineResult" style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:12px;line-height:1.9;color:var(--muted);white-space:pre-wrap;min-height:220px;max-height:280px;overflow-y:auto;user-select:text"></div>
+            </div>
+          </div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:8px">
+            왼쪽 원본을 직접 편집하거나, 오른쪽 제안을 참고해 수정하세요. 완료 후 "에디터에 적용" 클릭.
+          </div>
+        </div>
       </div>
 
     </div>
@@ -1430,13 +1451,21 @@ ${db.rules.map((r, i) => `${i+1}. ${r}`).join('\n')}`;
     refineEdited = text;
 
     document.getElementById('refineResultLabel').textContent =
-      refineMode === 'proofread' ? '교열 결과' : '제안';
+      refineMode === 'proofread' ? '교열 결과' : '원본 · 제안';
     document.getElementById('refineResult').textContent = text;
     document.getElementById('refineResultWrap').style.display = 'block';
 
+    if (refineMode === 'proofread') {
+      document.getElementById('refineResultSingle').style.display = 'block';
+      document.getElementById('refineResultSplit').style.display = 'none';
+      document.getElementById('refineApplyBtn').textContent = '에디터에 적용';
+    } else {
+      document.getElementById('refineResultSingle').style.display = 'none';
+      document.getElementById('refineResultSplit').style.display = 'block';
+      document.getElementById('refineOriginalEditable').value = refineOriginal;
+      document.getElementById('refineApplyBtn').textContent = '편집한 원본을 에디터에 적용';
+    }
     document.getElementById('refineApplyBtn').style.display = 'inline-block';
-    document.getElementById('refineApplyBtn').textContent =
-      refineMode === 'proofread' ? '에디터에 적용' : '제안 결과를 에디터에 적용';
     document.getElementById('refineSavePairBtn').style.display = 'inline-block';
 
   } catch(e) {
@@ -1448,10 +1477,17 @@ ${db.rules.map((r, i) => `${i+1}. ${r}`).join('\n')}`;
 }
 
 function applyRefineResult() {
-  if (!refineEdited) return;
-  document.getElementById('mainEditor').value = refineEdited;
+  let applyText;
+  if (refineMode === 'proofread') {
+    applyText = refineEdited;
+  } else {
+    // 제안 모드: 왼쪽에서 직접 편집한 원본 텍스트 적용
+    applyText = document.getElementById('refineOriginalEditable').value.trim();
+    if (!applyText) { toast('원본을 편집해주세요.'); return; }
+  }
+  document.getElementById('mainEditor').value = applyText;
   onEditorInput();
-  renderDiff(refineOriginal, refineEdited);
+  renderDiff(refineOriginal, applyText);
   document.getElementById('savePairBtnTop').style.display = 'block';
   closeRefineModal();
   toast('에디터에 적용됐어요. 오른쪽에서 비교해보세요.');
