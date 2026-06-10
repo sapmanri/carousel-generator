@@ -195,6 +195,7 @@ input[type=range]::-moz-range-thumb{
           <button class="opt-btn" data-design="polaroid" onclick="pickDesign(this)"><span class="name">폴라로이드</span><span class="desc">필름 · 따뜻함</span></button>
           <button class="opt-btn" data-design="grain" onclick="pickDesign(this)"><span class="name">필름그레인</span><span class="desc">노출 오버레이</span></button>
           <button class="opt-btn" data-design="cinema" onclick="pickDesign(this)"><span class="name">시네마</span><span class="desc">레터박스</span></button>
+          <button class="opt-btn" data-design="typo" onclick="pickDesign(this)"><span class="name">타이포</span><span class="desc">블록 타이포</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -374,7 +375,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.9';
+const VERSION = 'v1.7.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
