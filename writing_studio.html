@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.3.0 · sapmanri</title>
+<title>Writing Studio v2.3.1 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -459,17 +459,19 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.3.0</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.3.1</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
     <button class="nav-tab" onclick="switchTab('profile')">문체 프로필</button>
   </nav>
   <div class="header-right">
-    <div class="api-key-wrap">
-      <input type="password" class="api-key-field" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
+    <div class="api-key-wrap" id="apiKeyWrap" style="display:none;align-items:center;gap:4px">
+      <input type="password" class="api-key-field open" id="apiKey" placeholder="sk-ant-..." autocomplete="off"
+        onkeydown="if(event.key==='Enter') saveApiKey()">
+      <button class="btn-ghost" onclick="saveApiKey()">저장</button>
     </div>
-    <button class="btn-ghost" onclick="toggleApiKey()">API Key</button>
+    <button class="btn-ghost" id="apiKeyBtn" onclick="toggleApiKey()">API Key</button>
   </div>
 </header>
 
@@ -739,14 +741,7 @@ function switchTab(name) {
 // ══════════════════════════════════════════
 // API Key
 // ══════════════════════════════════════════
-function toggleApiKey() {
-  document.getElementById('apiKey').classList.toggle('open');
-}
-function getKey() {
-  const v = document.getElementById('apiKey').value.trim();
-  if (!v) { toast('API Key를 입력해주세요.'); return null; }
-  return v;
-}
+// toggleApiKey & getKey → 위로 이동
 
 // ══════════════════════════════════════════
 // 글 타입
@@ -788,6 +783,44 @@ const TYPE_INSTRUCTION = {
 // 글 생성 (핵심: 예시 + 피드백 + 규칙 주입)
 // ══════════════════════════════════════════
 let lastOriginal = '';
+
+// ══════════════════════════════════════════
+// API Key — localStorage 저장
+// ══════════════════════════════════════════
+const API_KEY_STORAGE = 'ws_sapmanri_apikey';
+
+function initApiKey() {
+  const saved = localStorage.getItem(API_KEY_STORAGE);
+  if (saved) {
+    document.getElementById('apiKey').value = saved;
+    document.getElementById('apiKeyBtn').textContent = 'API Key ✓';
+    document.getElementById('apiKeyBtn').style.color = 'var(--accent)';
+  }
+}
+
+function toggleApiKey() {
+  const wrap = document.getElementById('apiKeyWrap');
+  const isOpen = wrap.style.display !== 'none';
+  wrap.style.display = isOpen ? 'none' : 'flex';
+  if (!isOpen) document.getElementById('apiKey').focus();
+}
+
+function saveApiKey() {
+  const val = document.getElementById('apiKey').value.trim();
+  if (!val) { toast('키를 입력해주세요.'); return; }
+  localStorage.setItem(API_KEY_STORAGE, val);
+  document.getElementById('apiKeyWrap').style.display = 'none';
+  document.getElementById('apiKeyBtn').textContent = 'API Key ✓';
+  document.getElementById('apiKeyBtn').style.color = 'var(--accent)';
+  toast('API Key 저장됨.');
+}
+
+function getKey() {
+  const v = document.getElementById('apiKey').value.trim()
+    || localStorage.getItem(API_KEY_STORAGE) || '';
+  if (!v) { toast('API Key를 입력해주세요.'); toggleApiKey(); return null; }
+  return v;
+}
 
 // ── 이미지 관련 ──
 let attachedImageBase64 = null;
@@ -1419,6 +1452,7 @@ function seedEssaysIfEmpty() {
 }
 
 seedEssaysIfEmpty();
+initApiKey();
 updateStats();
 </script>
 </body>
