@@ -256,6 +256,17 @@ input[type=range]::-moz-range-thumb{
                 oninput="setWaveColor(this.value)" title="직접 선택" />
             </div>
           </div>
+          <!-- 파형 위치 -->
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+              <span style="font-size:10px;color:#555;">파형 위치</span>
+              <span style="font-size:10px;color:#666;" id="waveOffsetVal">중앙</span>
+            </div>
+            <input type="range" id="waveOffsetSlider" min="-40" max="40" value="0"
+              style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
+              oninput="waveOffsetY=this.value/100; document.getElementById('waveOffsetVal').textContent=this.value>0?'아래↓':this.value<0?'위↑':'중앙'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>위↑</span><span>아래↓</span></div>
+          </div>
         </div>
       </div>
       <div class="panel-section" style="border-top:0.5px solid #1e1e1e;padding-top:18px;">
@@ -352,7 +363,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.8';
+const VERSION = 'v1.3.9';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -425,7 +436,8 @@ function pickDesign(btn){
   if(cachedResult) renderCard(cachedResult);
 }
 let cropOffsetX=0.5;
-window.waveColor='auto'; // 'auto' or hex — global
+window.waveColor='auto';
+let waveOffsetY=0.0; // -0.4~+0.4, 0=default
 let captionLang='ko';
 // usedSongs: persist across sessions in localStorage (last 10)
 let usedSongs = JSON.parse(localStorage.getItem('smm_usedSongs')||'[]');
@@ -1590,7 +1602,7 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   });
 
   // Normalize to use middle 60% of image height, controlled by ampRatio
-  const center = CH * 0.42;
+  const center = CH * 0.42 + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
   const spread = CH * 0.28 * ar;
   const min = Math.min(...smooth), max = Math.max(...smooth);
   const range = max - min || 1;
@@ -1600,9 +1612,14 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
 
-  // Layer 1: thick purple glow
+  // Apply manual color if set
+  const _tc = (window.waveColor && window.waveColor !== 'auto') ? window.waveColor : null;
+  const traceMain = _tc || '#ffffff';
+  const traceGlow = _tc || 'rgba(160,120,255,1)';
+
+  // Layer 1: thick glow
   ctx.globalAlpha = 0.22;
-  ctx.strokeStyle = 'rgba(160,120,255,1)';
+  ctx.strokeStyle = traceGlow;
   ctx.lineWidth = Math.max(CW/55, 7);
   ctx.beginPath();
   for(let i=0; i<n; i++){
@@ -1613,7 +1630,7 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
 
   // Layer 2: medium white
   ctx.globalAlpha = 0.55;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = traceMain;
   ctx.lineWidth = Math.max(CW/160, 2.5);
   ctx.beginPath();
   for(let i=0; i<n; i++){
@@ -1624,7 +1641,7 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
 
   // Layer 3: thin bright core
   ctx.globalAlpha = 0.88;
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = traceMain;
   ctx.lineWidth = Math.max(CW/450, 1);
   ctx.beginPath();
   for(let i=0; i<n; i++){
@@ -1635,7 +1652,7 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
 
   // Dots every 6th point
   ctx.globalAlpha = 0.65;
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = traceMain;
   for(let i=0; i<n; i+=6){
     const x=(i/(n-1))*CW, y=getY(smooth[i]);
     ctx.beginPath();
