@@ -163,6 +163,7 @@ input[type=range]::-moz-range-thumb{
           <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
           <button class="opt-btn" data-wave="dots" onclick="pickWave(this)"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
           <button class="opt-btn" data-wave="silhouette" onclick="pickWave(this)"><span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span></button>
+          <button class="opt-btn" data-wave="trace" onclick="pickWave(this)"><span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -351,7 +352,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.2';
+const VERSION = 'v1.3.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1575,6 +1576,68 @@ function drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRati
   ctx.globalAlpha = 1;
 }
 
+function drawTraceLine(ctx, pts, CW, CH){
+  // Draw contour tracing lines directly on image at actual positions
+  // pts are 0-100 where 100=top of image, 0=bottom
+  const n = pts.length;
+  const topMargin = CH * 0.05;   // top 5% reserved
+  const botMargin = CH * 0.15;   // bottom 15% reserved
+  const drawH = CH - topMargin - botMargin;
+
+  // Convert points to actual Y positions on image
+  const getY = (v) => topMargin + (1 - v/100) * drawH;
+
+  // Layer 1: wide soft glow (purple tint)
+  ctx.save();
+  ctx.strokeStyle = 'rgba(160,130,255,0.35)';
+  ctx.lineWidth = Math.max(CW/120, 3);
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.filter = 'blur(3px)';
+  ctx.beginPath();
+  for(let i=0; i<n; i++){
+    const x = (i/(n-1)) * CW;
+    const y = getY(pts[i]);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Layer 2: medium white line
+  ctx.filter = 'none';
+  ctx.strokeStyle = 'rgba(255,255,255,0.65)';
+  ctx.lineWidth = Math.max(CW/200, 1.5);
+  ctx.beginPath();
+  for(let i=0; i<n; i++){
+    const x = (i/(n-1)) * CW;
+    const y = getY(pts[i]);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Layer 3: thin bright core line
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  ctx.lineWidth = Math.max(CW/400, 0.8);
+  ctx.beginPath();
+  for(let i=0; i<n; i++){
+    const x = (i/(n-1)) * CW;
+    const y = getY(pts[i]);
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // Layer 4: small dots at each data point (sparse, every 4th)
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  for(let i=0; i<n; i+=4){
+    const x = (i/(n-1)) * CW;
+    const y = getY(pts[i]);
+    ctx.beginPath();
+    ctx.arc(x, y, Math.max(CW/300, 1.5), 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
 function downloadWaveGif(){
   if(!cachedResult) return;
   const btn = document.getElementById('downloadGifBtn');
@@ -1717,6 +1780,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio){
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
 
+  if(waveStyle === 'trace'){ drawTraceLine(ctx, pts, CW, CH); return; }
   if(waveStyle === 'silhouette'){
     drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
     return;
