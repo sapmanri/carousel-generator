@@ -305,8 +305,8 @@ input[type=range]::-moz-range-thumb{
       <button class="btn-secondary btn-dl" id="downloadBtn" onclick="downloadCard()">↓ 카드 이미지 저장</button>
       <div id="downloadGifWrap" style="display:none;flex-direction:column;gap:5px;">
         <div style="display:flex;gap:5px;">
-          <button class="btn-secondary btn-dl" id="downloadGifBtn" onclick="downloadWaveVideo('square')" style="flex:1;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 영상 1:1</button>
-          <button class="btn-secondary btn-dl" id="downloadGifBtn9" onclick="downloadWaveVideo('vertical')" style="flex:1;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 영상 9:16</button>
+          <button class="btn-secondary" id="downloadGifBtn" onclick="downloadWaveVideo('square')" style="flex:1;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 영상 1:1</button>
+          <button class="btn-secondary" id="downloadGifBtn9" onclick="downloadWaveVideo('vertical')" style="flex:1;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 영상 9:16</button>
         </div>
       </div>
       <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.0';
+const VERSION = 'v1.8.1';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
