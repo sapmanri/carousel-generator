@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.5';
+const VERSION = 'v1.8.6';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1792,7 +1792,7 @@ function downloadWaveVideo(fmt){
 
     function drawOneWave(ws, animPts, wc, offset, amp){
       const n = animPts.length;
-      const baseY = CH * 0.72 + CH * offset * 0.5;
+      const baseY = CH * 0.72 + offset * CH;
       const maxH = CH * 0.32;
       const aH = maxH * amp;
       // 'auto' 색상이면 흰색으로 fallback
