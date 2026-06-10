@@ -195,10 +195,6 @@ input[type=range]::-moz-range-thumb{
           <button class="opt-btn" data-design="polaroid" onclick="pickDesign(this)"><span class="name">폴라로이드</span><span class="desc">필름 · 따뜻함</span></button>
           <button class="opt-btn" data-design="grain" onclick="pickDesign(this)"><span class="name">필름그레인</span><span class="desc">노출 오버레이</span></button>
           <button class="opt-btn" data-design="cinema" onclick="pickDesign(this)"><span class="name">시네마</span><span class="desc">레터박스</span></button>
-          <button class="opt-btn" data-design="typo" onclick="pickDesign(this)"><span class="name">타이포</span><span class="desc">블록 타이포</span></button>
-          <button class="opt-btn" data-design="ivory" onclick="pickDesign(this)"><span class="name">아이보리</span><span class="desc">미니멀 · 밝음</span></button>
-          <button class="opt-btn" data-design="crumple" onclick="pickDesign(this)"><span class="name">크럼플</span><span class="desc">구겨진 질감</span></button>
-          <button class="opt-btn" data-design="torn" onclick="pickDesign(this)"><span class="name">찢긴종이</span><span class="desc">우아 · 아이보리</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -378,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.7';
+const VERSION = 'v1.7.8';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -393,9 +389,7 @@ function updateKeyVisibility(){
 }
 
 let imgSrc=null,b64=null,mtype='image/jpeg';
-let _lastImg=null;
-let _crumpleTexture=null;
-let _tornTexture=null; // cached crumple texture image // global image ref for renderers
+let _lastImg=null; // cached crumple texture image // global image ref for renderers
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
 let cachedResult=null;
 
@@ -475,18 +469,6 @@ function toggleWaveVisible(wave,el){
   if(!el.checked){if(visibleWaves.size<=1){el.checked=true;return;}visibleWaves.delete(wave);}else{visibleWaves.add(wave);}
   if(cachedResult)renderCard(cachedResult);
 }
-
-// Preload textures
-(function preloadTextures(){
-  const tex1 = new Image();
-  tex1.crossOrigin = 'anonymous';
-  tex1.onload = () => { _crumpleTexture = tex1; };
-  tex1.src = 'https://sapmanri.github.io/carousel-generator/crumple_texture.png';
-  const tex2 = new Image();
-  tex2.crossOrigin = 'anonymous';
-  tex2.onload = () => { _tornTexture = tex2; };
-  tex2.src = 'https://sapmanri.github.io/carousel-generator/torn_paper.png';
-})();
 
 function pickDesign(btn){
   document.querySelectorAll('[data-design]').forEach(b=>b.classList.remove('active-design'));
@@ -766,7 +748,7 @@ function renderCard(d){
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
     // Run design renderer (sets _lastWaveY/_lastWaveH, draws image overlays + text)
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo,ivory:renderIvory,crumple:renderCrumple,torn:renderTorn})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
 
     // Draw all visible waves
     const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
@@ -1749,333 +1731,6 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   }
 
   ctx.restore();
-}
-
-function renderTypo(ctx,d,CW,CH,isV){
-  // ── 원고지 ── 교대 색상 칸에 단어 배치
-  let g=ctx.createLinearGradient(0,0,0,CH*0.35);
-  g.addColorStop(0,'rgba(0,0,0,0.3)'); g.addColorStop(1,'rgba(0,0,0,0)');
-  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.35);
-  g=ctx.createLinearGradient(0,CH*0.38,0,CH);
-  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.5,'rgba(0,0,0,0.78)'); g.addColorStop(1,'rgba(0,0,0,0.97)');
-  ctx.fillStyle=g; ctx.fillRect(0,CH*0.38,CW,CH*0.62);
-
-  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
-  _lastWaveY=wY; _lastWaveH=wH;
-
-  const pad = CW*0.07;
-  const words = d.song_title.split(' ');
-  const blockBottom = isV ? CH*(0.58+panelPos*0.22) : CH*(0.55+panelPos*0.24);
-
-  // 원고지 칸 색상 교대 — 흰/검 or 진한/연한
-  const colors = [
-    {bg:'rgba(255,255,255,0.92)', text:'#111111'},
-    {bg:'rgba(20,16,12,0.88)',    text:'#ffffff'},
-    {bg:'rgba(255,255,255,0.92)', text:'#111111'},
-    {bg:'rgba(20,16,12,0.88)',    text:'#ffffff'},
-    {bg:'rgba(255,255,255,0.92)', text:'#111111'},
-  ];
-
-  // 전체 높이 계산
-  const titleSz = CW*(isV?0.082:0.088);
-  const cellH = titleSz * 1.4;
-  const totalH = words.length * cellH;
-  const startY = blockBottom - totalH;
-
-  setF(ctx, titleSz, '800', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-
-  words.forEach((word, i) => {
-    const c = colors[i % colors.length];
-    const by = startY + i * cellH;
-
-    // 칸 — 화면 왼쪽부터 오른쪽까지 꽉 채움
-    ctx.fillStyle = c.bg;
-    ctx.fillRect(0, by, CW, cellH);
-
-    // 단어
-    ctx.fillStyle = c.text;
-    ctx.fillText(word, pad, by + cellH*0.72);
-  });
-
-  // 아티스트
-  const artistY = blockBottom + CW*0.02;
-  setF(ctx, CW*0.024, '400', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.4)';
-  ctx.fillText(d.artist, pad, artistY);
-
-  // 캡션
-  const cs=CW*0.022;
-  const capY=artistY+cs*2;
-  ctx.beginPath(); ctx.moveTo(pad,capY-cs*0.6); ctx.lineTo(pad+CW*0.05,capY-cs*0.6);
-  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.stroke();
-  setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.fillText(d.caption_line1||'',pad,capY);
-  setF(ctx,cs,'500','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.fillText(d.caption_line2||'',pad,capY+cs*1.75);
-  setF(ctx,cs*0.86,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
-  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.16)');
-}
-
-function renderIvory(ctx,d,CW,CH,isV){
-  const splitY = isV ? CH*(0.42+panelPos*0.22) : CH*(0.36+panelPos*0.26);
-  const ivory = '#F6F3EE';
-  let g = ctx.createLinearGradient(0, splitY*0.7, 0, splitY);
-  g.addColorStop(0, 'rgba(246,243,238,0)');
-  g.addColorStop(1, 'rgba(246,243,238,0.6)');
-  ctx.fillStyle = g; ctx.fillRect(0, splitY*0.7, CW, splitY*0.3);
-  ctx.fillStyle = ivory; ctx.fillRect(0, splitY, CW, CH - splitY);
-  const wY = splitY * 0.78, wH = splitY * 0.38;
-  _lastWaveY = wY; _lastWaveH = wH;
-  const pad = CW * 0.08;
-  setF(ctx, CW*0.018, '500', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillText('SAPMANRI', pad, CW*0.07);
-  const titleSz = CW * (isV ? 0.072 : 0.068);
-  setF(ctx, titleSz, '800', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-  const titleY = splitY + titleSz * 1.3;
-  const afterT = fillWrap(ctx, d.song_title, pad, titleY, CW - pad*2, titleSz*1.25, '#1a1714');
-  const underY = afterT + titleSz * 0.32;
-  ctx.beginPath(); ctx.moveTo(pad, underY); ctx.lineTo(pad + CW*0.12, underY);
-  ctx.strokeStyle = '#1a1714'; ctx.lineWidth = Math.max(CW/300, 2); ctx.stroke();
-  setF(ctx, CW*0.024, '400', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle = '#888480'; ctx.fillText(d.artist, pad, underY + CW*0.048);
-  const cs = CW * 0.022;
-  const capY = underY + CW*0.112;
-  ctx.beginPath(); ctx.moveTo(pad, capY - cs*0.6); ctx.lineTo(pad + CW*0.055, capY - cs*0.6);
-  ctx.strokeStyle = 'rgba(26,23,20,0.15)'; ctx.lineWidth = 1; ctx.stroke();
-  setF(ctx, cs, '300', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(26,23,20,0.45)'; ctx.fillText(d.caption_line1||'', pad, capY);
-  setF(ctx, cs, '500', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(26,23,20,0.82)'; ctx.fillText(d.caption_line2||'', pad, capY + cs*1.75);
-  setF(ctx, cs*0.86, '300', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(26,23,20,0.35)'; ctx.fillText(d.caption_line3||'', pad, capY + cs*3.3);
-  setF(ctx, CW*0.016, '400', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(26,23,20,0.22)'; ctx.textAlign = 'right';
-  ctx.fillText('© SAPMANRI', CW - pad*0.7, CH - CW*0.022); ctx.textAlign = 'left';
-}
-
-function renderCrumple(ctx,d,CW,CH,isV){
-  // ── 크럼플 ── 구겨진 비닐 텍스처 오버레이
-  // 어두운 그라데이션
-  let g=ctx.createLinearGradient(0,0,0,CH);
-  g.addColorStop(0,'rgba(0,0,0,0.35)'); g.addColorStop(0.4,'rgba(0,0,0,0.1)'); g.addColorStop(1,'rgba(0,0,0,0.88)');
-  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH);
-
-  // 파형
-  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
-  _lastWaveY=wY; _lastWaveH=wH;
-
-  // 구겨진 주름 — canvas에 직접 그리기
-  ctx.save();
-  const rng2 = (s) => { let x=s; return () => { x=(x*1664525+1013904223)&0xffffffff; return (x>>>0)/0xffffffff; }; };
-  const r2 = rng2(77);
-  // 흰 하이라이트 주름선
-  for(let i=0; i<20; i++){
-    const x0=r2()*CW, y0=r2()*CH, x1=r2()*CW, y1=r2()*CH;
-    const alpha = 0.04 + r2()*0.12;
-    ctx.globalAlpha=alpha;
-    ctx.strokeStyle='#ffffff';
-    ctx.lineWidth=1+r2()*2;
-    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
-  }
-  // 어두운 그림자선
-  for(let i=0; i<14; i++){
-    const x0=r2()*CW, y0=r2()*CH, x1=r2()*CW, y1=r2()*CH;
-    ctx.globalAlpha=0.03+r2()*0.08;
-    ctx.strokeStyle='#000000';
-    ctx.lineWidth=1+r2()*3;
-    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
-  }
-  // 대각선 광택
-  for(let i=0; i<40; i++){
-    ctx.globalAlpha=Math.max(0,0.04-Math.abs(i-20)*0.002);
-    ctx.strokeStyle='rgba(255,255,255,0.8)';
-    ctx.lineWidth=2;
-    ctx.beginPath(); ctx.moveTo(i*CW/20,0); ctx.lineTo(CW,CH-i*CH/20); ctx.stroke();
-  }
-  ctx.globalAlpha=1; ctx.restore();
-
-  const pad = CW*0.08;
-  const base = isV ? CH*0.68 : CH*0.70;
-
-  // 브랜드 + 날짜 — 상단
-  setF(ctx, CW*0.016, '500', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.4)';
-  ctx.fillText('SAPMANRI', pad, CW*0.065);
-  ctx.textAlign='right';
-  ctx.fillText('© ' + new Date().getFullYear(), CW-pad*0.7, CW*0.065);
-  ctx.textAlign='left';
-
-  // 곡 제목 — 크고 bold, lowercase
-  const titleSz = CW*(isV?0.075:0.08);
-  setF(ctx, titleSz, '900', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-  const afterT = fillWrap(ctx, d.song_title.toLowerCase(), pad, base, CW-pad*2, titleSz*1.2, 'rgba(255,255,255,0.95)');
-
-  // 아티스트 — 오른쪽 정렬, 작게
-  setF(ctx, CW*0.022, '300', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.38)';
-  ctx.textAlign='right';
-  ctx.fillText(d.artist, CW-pad, afterT+CW*0.04);
-  ctx.textAlign='left';
-
-  // 캡션
-  const cs=CW*0.022;
-  const capY=afterT+CW*0.082;
-  ctx.beginPath(); ctx.moveTo(pad,capY-cs*0.6); ctx.lineTo(pad+CW*0.05,capY-cs*0.6);
-  ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1; ctx.stroke();
-  setF(ctx,cs,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.42)'; ctx.fillText(d.caption_line1||'',pad,capY);
-  setF(ctx,cs,'500','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.82)'; ctx.fillText(d.caption_line2||'',pad,capY+cs*1.75);
-  setF(ctx,cs*0.86,'300','"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
-}
-
-function renderTorn(ctx,d,CW,CH,isV){
-  // ── 찢긴 종이 ── 아이보리 상단 + 사진이 틈새로 보이는 구조
-  // 사진은 이미 그려져 있음 — 아이보리 종이를 위에 덮고 찢긴 부분만 투명
-
-  const ivory = '#F5F1EB';
-  const tearColor = '#D4BFA0';
-
-  // 찢어진 라인 포인트 (렌더마다 고정)
-  const seed = 99;
-  const tearBaseY = isV ? CH*(0.40+panelPos*0.24) : CH*(0.34+panelPos*0.28);
-  const pts = [];
-  let x = 0;
-  let rng = seed;
-  const rand = () => { rng = (rng * 1664525 + 1013904223) & 0xffffffff; return (rng >>> 0) / 0xffffffff; };
-  while(x <= CW + 40){
-    pts.push({x, y: tearBaseY + (rand()-0.5)*220});
-    x += 6 + rand()*18;
-  }
-
-  // 상단 아이보리 영역
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  pts.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(CW, 0);
-  ctx.closePath();
-  ctx.fillStyle = ivory;
-  ctx.fill();
-
-  // 찢긴 엣지 두께감
-  ctx.beginPath();
-  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-  pts.slice().reverse().forEach(p => ctx.lineTo(p.x, p.y + 28 + rand()*45));
-  ctx.closePath();
-  ctx.fillStyle = tearColor;
-  ctx.fill();
-
-  // 찢긴 엣지 아래 그림자
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.25)';
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 8;
-  ctx.beginPath();
-  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-  ctx.lineTo(CW, tearBaseY + 30);
-  ctx.lineTo(0, tearBaseY + 30);
-  ctx.closePath();
-  ctx.fillStyle = ivory;
-  ctx.fill();
-  ctx.restore();
-
-  // 파형 — 사진 위 (찢긴 아래 영역)
-  const wY = tearBaseY * 0.72, wH = tearBaseY * 0.36;
-  _lastWaveY = wY; _lastWaveH = wH;
-
-  // 아이보리 영역 텍스트
-  const pad = CW*0.10;
-  const textTop = CW*0.12;
-
-  // SAPMANRI 작게
-  setF(ctx, CW*0.018, '500', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(160,140,120,0.7)';
-  ctx.fillText('SAPMANRI', pad, textTop);
-
-  // 곡 제목 — serif, 우아하게
-  const titleSz = CW*(isV?0.065:0.060);
-  setF(ctx, titleSz, '300', '"Cormorant Garamond","Noto Serif KR",Georgia,serif');
-  ctx.fillStyle = '#2c2420';
-  // italic for style
-  ctx.font = `italic 300 ${titleSz*textScale}px "Cormorant Garamond","Noto Serif KR",Georgia,serif`;
-  const afterT = fillWrap(ctx, d.song_title, pad, textTop + titleSz*1.6, CW-pad*2, titleSz*1.3, '#2c2420');
-
-  // 언더 dot 장식
-  ctx.fillStyle = tearColor;
-  ctx.beginPath();
-  ctx.arc(pad, afterT + titleSz*0.5, CW*0.006, 0, Math.PI*2);
-  ctx.fill();
-
-  // 아티스트
-  setF(ctx, CW*0.022, '400', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(120,100,80,0.65)';
-  ctx.fillText(d.artist, pad + CW*0.018, afterT + titleSz*0.5 + CW*0.008);
-
-  // 캡션 — 중앙 정렬, 작게
-  const cs = CW*0.020;
-  const capY = afterT + titleSz*1.1;
-  setF(ctx, cs, '300', '"Cormorant Garamond","Noto Serif KR",Georgia,serif');
-  ctx.fillStyle = 'rgba(80,65,50,0.55)';
-  ctx.textAlign = 'center';
-  ctx.fillText(d.caption_line1||'', CW/2, capY);
-  setF(ctx, cs, '400', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(50,38,28,0.75)';
-  ctx.fillText(d.caption_line2||'', CW/2, capY + cs*1.8);
-  setF(ctx, cs*0.88, '300', '"Cormorant Garamond",Georgia,serif');
-  ctx.fillStyle = 'rgba(80,65,50,0.4)';
-  ctx.fillText(d.caption_line3||'', CW/2, capY + cs*3.4);
-  ctx.textAlign = 'left';
-
-  // 하단 브랜딩
-  setF(ctx, CW*0.015, '400', '"Helvetica Neue",Arial,sans-serif');
-  ctx.fillStyle = 'rgba(140,120,100,0.35)';
-  ctx.textAlign = 'right';
-  ctx.fillText('© SAPMANRI', CW-pad*0.7, tearBaseY - CW*0.025);
-  ctx.textAlign = 'left';
-}
-
-async function saveToArchive(result, apiKey){
-  // Save song + waveform to GitHub archive (background, silent)
-  try {
-    const REPO = 'sapmanri/carousel-generator';
-    const PATH = 'song_archive.json';
-    // Fetch current archive
-    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, {
-      headers: {'Authorization': `token ${apiKey}`, 'Accept': 'application/vnd.github.v3+json'}
-    });
-    const fileData = await res.json();
-    const current = JSON.parse(atob(fileData.content.replace(/\n/g,'')));
-    
-    // Check if already archived
-    const key = result.song_title + ' - ' + result.artist;
-    if(current.songs.find(s => s.key === key)) return; // already saved
-    
-    // Add new entry
-    current.songs.push({
-      key,
-      song_title: result.song_title,
-      artist: result.artist,
-      genre: result.chosen_genre || '',
-      line_points: result.line_points,
-      waveform: result.waveform,
-      saved_at: new Date().toISOString().slice(0,10)
-    });
-    current.updated = new Date().toISOString().slice(0,10);
-    
-    // Save back
-    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(current, null, 2))));
-    await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, {
-      method: 'PUT',
-      headers: {'Authorization': `token ${apiKey}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json'},
-      body: JSON.stringify({message: `archive: ${key}`, content: b64, sha: fileData.sha, branch: 'main'})
-    });
-    console.log('archived:', key);
-  } catch(e) {
-    // Silent fail — archive is best-effort
-    console.log('archive skip:', e.message);
-  }
 }
 
 function downloadWaveGif(){
