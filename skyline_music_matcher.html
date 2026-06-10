@@ -363,7 +363,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.9';
+const VERSION = 'v1.4.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1802,6 +1802,7 @@ function downloadCard(){
 
 // ── WAVEFORM ENGINE ───────────────────────────────────────
 function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
+  baseY = baseY + (typeof waveOffsetY !== 'undefined' ? waveOffsetY * CH : 0);
   const aH = maxH * (ampRatio||1);
   const n = pts.length;
 
