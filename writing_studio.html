@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.4.5 · sapmanri</title>
+<title>Writing Studio v2.4.6 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -476,7 +476,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.5</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.4.6</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -1196,21 +1196,50 @@ function renderExamples() {
           </div>
         </div>`;
     } else {
-      // 제목/본문 분리 (첫 줄이 [제목] 형식이면 분리)
+      // 제목/본문 분리
       const lines = item.text.split('\n');
       const titleLine = lines[0].startsWith('[') ? lines[0] : '';
-      const bodyText = titleLine ? lines.slice(1).join('\n').trim() : item.text;
+      const bodyText = (titleLine ? lines.slice(1).join('\n').trim() : item.text) || item.text;
 
-      card.innerHTML = `
-        <div class="example-card-header">
-          <span class="example-card-meta">${TYPE_LABEL[item.type]} · ${item.date}${titleLine ? ' · <em style="color:var(--muted);font-style:normal">' + escHtml(titleLine) + '</em>' : ''}</span>
-          <div class="example-card-actions">
-            <button class="icon-btn use" onclick="loadToEditor(${item.id})">불러오기</button>
-            <button class="icon-btn" onclick="deleteExample(${item.id})">삭제</button>
-          </div>
-        </div>
-        <div class="example-card-body" id="body-${item.id}" onclick="toggleCardBody(${item.id})">${escHtml(bodyText)}</div>
-        <div class="example-card-footer" id="footer-${item.id}" onclick="toggleCardBody(${item.id})">▾ 펼치기</div>`;
+      // header
+      const hdr = document.createElement('div');
+      hdr.className = 'example-card-header';
+
+      const meta = document.createElement('span');
+      meta.className = 'example-card-meta';
+      meta.textContent = TYPE_LABEL[item.type] + ' · ' + item.date + (titleLine ? ' · ' + titleLine : '');
+      hdr.appendChild(meta);
+
+      const acts = document.createElement('div');
+      acts.className = 'example-card-actions';
+      const btnLoad = document.createElement('button');
+      btnLoad.className = 'icon-btn use';
+      btnLoad.textContent = '불러오기';
+      btnLoad.onclick = () => loadToEditor(item.id);
+      const btnDel = document.createElement('button');
+      btnDel.className = 'icon-btn';
+      btnDel.textContent = '삭제';
+      btnDel.onclick = () => deleteExample(item.id);
+      acts.appendChild(btnLoad);
+      acts.appendChild(btnDel);
+      hdr.appendChild(acts);
+      card.appendChild(hdr);
+
+      // body
+      const body = document.createElement('div');
+      body.className = 'example-card-body';
+      body.id = 'body-' + item.id;
+      body.textContent = bodyText;
+      body.onclick = () => toggleCardBody(item.id);
+      card.appendChild(body);
+
+      // footer
+      const footer = document.createElement('div');
+      footer.className = 'example-card-footer';
+      footer.id = 'footer-' + item.id;
+      footer.textContent = '▾ 펼치기';
+      footer.onclick = () => toggleCardBody(item.id);
+      card.appendChild(footer);
     }
     grid.appendChild(card);
   });
