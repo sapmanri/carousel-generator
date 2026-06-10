@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.4';
+const VERSION = 'v1.8.5';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1795,6 +1795,8 @@ function downloadWaveVideo(fmt){
       const baseY = CH * 0.72 + CH * offset * 0.5;
       const maxH = CH * 0.32;
       const aH = maxH * amp;
+      // 'auto' 색상이면 흰색으로 fallback
+      if(!wc || wc === 'auto') wc = '#ffffff';
 
       ctx.save();
       if(ws === 'trace'){
