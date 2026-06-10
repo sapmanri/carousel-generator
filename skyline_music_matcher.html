@@ -158,10 +158,11 @@ input[type=range]::-moz-range-thumb{
     <div class="controls-top">
       <div class="panel-section">
         <label>파형 스타일</label>
-        <div class="btn-grid-3">
+        <div class="btn-grid-2">
           <button class="opt-btn active-wave" data-wave="mirror" onclick="pickWave(this)"><span class="icon">⛰️</span><span class="name">미러</span><span class="desc">실루엣 반영</span></button>
           <button class="opt-btn" data-wave="multiline" onclick="pickWave(this)"><span class="icon">≋≋≋</span><span class="name">멀티선</span><span class="desc">섬세한 겹선</span></button>
           <button class="opt-btn" data-wave="dots" onclick="pickWave(this)"><span class="icon">⠿⠿⠿</span><span class="name">도트</span><span class="desc">그라디언트 바</span></button>
+          <button class="opt-btn" data-wave="silhouette" onclick="pickWave(this)"><span class="icon">▋▋▋</span><span class="name">실루엣</span><span class="desc">막대형 실루엣</span></button>
         </div>
       </div>
       <div class="panel-section">
@@ -279,6 +280,11 @@ input[type=range]::-moz-range-thumb{
       <button class="btn-secondary btn-dl" id="downloadGifBtn" onclick="downloadWaveGif()" style="display:none;color:#88d4a0;border-color:#1e3028;background:#0f1f18;">↓ 파형 GIF 저장</button>
       <button class="btn-secondary btn-reset" onclick="resetAll()">다른 사진 선택</button>
     </div><!-- /after-card-group -->
+
+    <!-- 3 분석 버튼 (desktop: left col / mobile: bottom) -->
+    <div class="analyze-wrap">
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+    </div>
     <!-- 3 분석 버튼 (desktop: left col / mobile: bottom) -->
     <div class="analyze-wrap">
       <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
@@ -345,7 +351,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.3.1';
+const VERSION = 'v1.3.2';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
