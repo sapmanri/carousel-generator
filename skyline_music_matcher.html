@@ -240,7 +240,7 @@ input[type=range]::-moz-range-thumb{
         <div style="display:flex;flex-direction:column;gap:12px;margin-top:2px;">
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">밀도</span><span style="font-size:10px;color:#666;" id="densityVal">80</span></div>
-            <input type="range" id="densitySlider" min="10" max="80" value="80" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
+            <input type="range" id="densitySlider" min="10" max="160" value="120" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="document.getElementById('densityVal').textContent=this.value; if(cachedResult)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>잔잔</span><span>촘촘</span></div>
           </div>
           <div>
@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.5';
+const VERSION = 'v1.6.6';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -479,11 +479,11 @@ let cropOffsetX=0.5;
 window.waveColor='auto';
 let waveOffsetY=0.0;
 const waveSettings={
-  mirror:{density:80,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  multiline:{density:80,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  dots:{density:80,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  silhouette:{density:80,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  trace:{density:80,amp:100,textScale:1.0,color:'auto',offset:0.0},
+  mirror:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
+  multiline:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
+  dots:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
+  silhouette:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
+  trace:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
 };
 let activeWave='mirror';
 let visibleWaves=new Set(['mirror']);
@@ -582,7 +582,7 @@ STEP 1 — MULTI-LAYER CONTOUR:
 Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon).
 
 STEP 2 — COMPOSITE WAVEFORM (80 points):
-Produce a composite height array of exactly 80 integers (0–100), left to right.
+Produce a composite height array of exactly 160 integers (0–100), left to right.
 - Take the HIGHEST prominent contour at each position
 - Reflect REAL geometry: buildings/peaks = high (60–100), flat fields/sky = low (5–30)
 - Must have HIGH VARIANCE — span the full 0–100 range
@@ -607,7 +607,7 @@ Respond ONLY as valid JSON:
     "contour_shape": "ascending|descending|arch|valley|plateau|jagged",
     "mood": "melancholic|peaceful|hopeful|tense|joyful|nostalgic"
   },
-  "line_points": [80개 정수, 0-100]
+  "line_points": [160개 정수, 0-100]
 }`;
 
   try{
@@ -615,7 +615,7 @@ Respond ONLY as valid JSON:
     const res1=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}]}]})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1600,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}]}]})
     });
     const data1=await res1.json();
     if(data1.error)throw new Error(data1.error.message);
