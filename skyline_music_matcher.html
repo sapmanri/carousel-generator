@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.7';
+const VERSION = 'v1.8.8';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1908,7 +1908,8 @@ function downloadWaveVideo(fmt){
 
     function drawFrame(){
       if(frame >= TOTAL_FRAMES){ recorder.stop(); return; }
-      const phase = (frame/FPS)*Math.PI*1.2;
+      // DURATION 끝에서 phase가 2π 배수 → 완벽한 루프
+      const phase = (frame/TOTAL_FRAMES) * Math.PI * 2;
 
       // 카드 배경 복사 (텍스트/디자인 포함)
       ctx.globalAlpha=1;
