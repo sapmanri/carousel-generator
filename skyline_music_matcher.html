@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.7.5';
+const VERSION = 'v1.7.6';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -475,6 +475,18 @@ function toggleWaveVisible(wave,el){
   if(!el.checked){if(visibleWaves.size<=1){el.checked=true;return;}visibleWaves.delete(wave);}else{visibleWaves.add(wave);}
   if(cachedResult)renderCard(cachedResult);
 }
+
+// Preload textures
+(function preloadTextures(){
+  const tex1 = new Image();
+  tex1.crossOrigin = 'anonymous';
+  tex1.onload = () => { _crumpleTexture = tex1; };
+  tex1.src = 'https://sapmanri.github.io/carousel-generator/crumple_texture.png';
+  const tex2 = new Image();
+  tex2.crossOrigin = 'anonymous';
+  tex2.onload = () => { _tornTexture = tex2; };
+  tex2.src = 'https://sapmanri.github.io/carousel-generator/torn_paper.png';
+})();
 
 function pickDesign(btn){
   document.querySelectorAll('[data-design]').forEach(b=>b.classList.remove('active-design'));
@@ -1766,7 +1778,7 @@ function renderTypo(ctx,d,CW,CH,isV){
   const boxPadY = titleSz*0.18;
 
   // Start position — anchor from bottom up
-  const blockBottom = isV ? CH*0.72 : CH*0.74;
+  const blockBottom = isV ? CH*(0.58+panelPos*0.22) : CH*(0.55+panelPos*0.24);
   const blockTop = blockBottom - words.length * lineH;
 
   setF(ctx, titleSz, '800', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
@@ -1810,7 +1822,7 @@ function renderTypo(ctx,d,CW,CH,isV){
 }
 
 function renderIvory(ctx,d,CW,CH,isV){
-  const splitY = isV ? CH*0.52 : CH*0.48;
+  const splitY = isV ? CH*(0.42+panelPos*0.22) : CH*(0.36+panelPos*0.26);
   const ivory = '#F6F3EE';
   let g = ctx.createLinearGradient(0, splitY*0.7, 0, splitY);
   g.addColorStop(0, 'rgba(246,243,238,0)');
@@ -1929,7 +1941,7 @@ function renderTorn(ctx,d,CW,CH,isV){
 
   // 찢어진 라인 포인트 (렌더마다 고정)
   const seed = 99;
-  const tearBaseY = isV ? CH*0.52 : CH*0.46;
+  const tearBaseY = isV ? CH*(0.40+panelPos*0.24) : CH*(0.34+panelPos*0.28);
   const pts = [];
   let x = 0;
   let rng = seed;
