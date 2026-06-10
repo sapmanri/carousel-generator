@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.8.8';
+const VERSION = 'v1.8.9';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -752,6 +752,12 @@ function renderCard(d){
     ctx.drawImage(img, ox, oy, sw, sh);
     // Run design renderer (sets _lastWaveY/_lastWaveH, draws image overlays + text)
     ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
+
+    // 파형 없는 배경 스냅샷 저장 (영상에서 사용)
+    const bgOnly = document.createElement('canvas');
+    bgOnly.width=CW; bgOnly.height=CH;
+    bgOnly.getContext('2d').drawImage(canvas, 0, 0);
+    window._bgCanvas = bgOnly;
 
     // Draw all visible waves
     const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
@@ -1785,8 +1791,8 @@ function downloadWaveVideo(fmt){
     btn.disabled = false;
   };
 
-  // 카드 canvas를 배경으로 사용 (텍스트/디자인 포함)
-  const cardCanvas = window._cardCanvas;
+  // 파형 없는 배경 canvas 사용 (텍스트/디자인만, 파형 중복 방지)
+  const cardCanvas = window._bgCanvas || window._cardCanvas;
   if(!cardCanvas){
     alert('먼저 카드를 생성해주세요.');
     btn.textContent=isV?'↓ 파형 영상 9:16':'↓ 파형 영상 1:1'; btn.disabled=false; return;
