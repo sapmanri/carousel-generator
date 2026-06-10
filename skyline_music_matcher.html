@@ -378,7 +378,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.9.0';
+const VERSION = 'v1.9.1';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1827,7 +1827,7 @@ function downloadWaveVideo(fmt){
           for(let j=Math.max(0,i-w);j<=Math.min(n-1,i+w);j++){sum+=animPts[j];cnt++;}
           return sum/cnt;
         });
-        const center = _waveY + offset * CH;
+        const center = CH * 0.42 + offset * CH;
         const spread = CH*0.28*amp;
         const mn=Math.min(...smooth), mx=Math.max(...smooth), rng=mx-mn||1;
         const getY = v => center - ((v-mn)/rng - 0.5)*spread*2;
