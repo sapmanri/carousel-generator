@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.8';
+const VERSION = 'v1.6.9';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -748,7 +748,7 @@ function renderCard(d){
     const oy = (CH-sh)/2;
     ctx.drawImage(img, ox, oy, sw, sh);
     // Run design renderer (sets _lastWaveY/_lastWaveH, draws image overlays + text)
-    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema})[cardDesign](ctx,rd,CW,CH,isV);
+    ({sapmanri:renderSapmanri,magazine:renderMagazine,theedit:renderTheEdit,stayfolio:renderStayfolio,nike:renderNike,ohouse:renderOhouse,apple:renderApple,girok:renderGirok,polaroid:renderPolaroid,grain:renderGrain,cinema:renderCinema,typo:renderTypo})[cardDesign](ctx,rd,CW,CH,isV);
 
     // Draw all visible waves
     const _baseWY = _lastWaveY > 0 ? _lastWaveY : CH*0.60;
@@ -1729,6 +1729,81 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   }
 
   ctx.restore();
+}
+
+function renderTypo(ctx,d,CW,CH,isV){
+  // ── 타이포 블록 ── 계단식 텍스트 박스 스타일
+  // 그라데이션 오버레이
+  let g=ctx.createLinearGradient(0,0,0,CH*0.4);
+  g.addColorStop(0,'rgba(0,0,0,0.25)'); g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,CW,CH*0.4);
+  g=ctx.createLinearGradient(0,CH*0.4,0,CH);
+  g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(0.5,'rgba(0,0,0,0.82)'); g.addColorStop(1,'rgba(0,0,0,0.97)');
+  ctx.fillStyle=g; ctx.fillRect(0,CH*0.4,CW,CH*0.6);
+
+  // 파형
+  const wY=isV?CH*0.50:CH*0.50, wH=isV?CH*0.28:CH*0.32;
+  _lastWaveY=wY; _lastWaveH=wH;
+
+  // 타이포 블록 — 곡 제목을 단어/구절 단위로 쪼개서 계단식 배치
+  const pad = CW*0.08;
+  const title = d.song_title || '';
+  const artist = d.artist || '';
+
+  // Split title into chunks (by space, max 2 words per line)
+  const words = title.split(' ');
+  const chunks = [];
+  for(let i=0; i<words.length; i+=2){
+    chunks.push(words.slice(i,i+2).join(' '));
+  }
+
+  const titleSz = CW * (chunks.length > 2 ? 0.07 : 0.082);
+  const lineH = titleSz * 1.35;
+  const totalH = chunks.length * lineH;
+  const startY = isV ? CH*0.58 : CH*0.62;
+  // Offset so block lands nicely above caption
+  const blockY = Math.min(startY, CH - totalH - CW*0.22);
+
+  setF(ctx, titleSz, '800', '"Helvetica Neue","Noto Sans KR",Arial,sans-serif');
+
+  chunks.forEach((chunk, i) => {
+    const w = ctx.measureText(chunk).width;
+    const boxPad = CW*0.022;
+    const bx = pad + i * CW*0.028; // stagger right
+    const by = blockY + i * lineH;
+    const bw = w + boxPad*2;
+    const bh = titleSz * 1.18;
+
+    // Box background — solid dark with slight alpha
+    ctx.fillStyle = 'rgba(10,8,6,0.82)';
+    ctx.fillRect(bx, by, bw, bh);
+
+    // Text
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(chunk, bx + boxPad, by + bh*0.76);
+  });
+
+  // Artist line — small, no box
+  const artistY = blockY + chunks.length * lineH + CW*0.02;
+  setF(ctx, CW*0.026, '400', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fillText(artist, pad, artistY);
+
+  // Caption
+  const cs = CW*0.024;
+  const capY = artistY + cs*2.2;
+  const sepY = capY - cs*0.8;
+  ctx.beginPath(); ctx.moveTo(pad,sepY); ctx.lineTo(pad+CW*0.065,sepY);
+  ctx.strokeStyle='rgba(255,255,255,0.16)'; ctx.lineWidth=1; ctx.stroke();
+
+  setF(ctx, cs, '300', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.48)'; ctx.fillText(d.caption_line1||'',pad,capY);
+  setF(ctx, cs, '500', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.88)'; ctx.fillText(d.caption_line2||'',pad,capY+cs*1.7);
+  setF(ctx, cs*0.86, '300', '"Helvetica Neue",Arial,sans-serif');
+  ctx.fillStyle='rgba(255,255,255,0.34)'; ctx.fillText(d.caption_line3||'',pad,capY+cs*3.3);
+
+  brand(ctx,CW,CH,pad,'rgba(255,255,255,0.18)');
 }
 
 async function saveToArchive(result, apiKey){
