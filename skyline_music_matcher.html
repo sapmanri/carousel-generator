@@ -374,7 +374,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.6.4';
+const VERSION = 'v1.6.5';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -682,6 +682,7 @@ Respond ONLY as valid JSON:
     localStorage.setItem('smm_usedSongs',JSON.stringify(usedSongs));
 
     renderCard(cachedResult);
+    saveToArchive(cachedResult, key); // background archive
     document.getElementById('downloadBtn').style.display='block';
     document.getElementById('downloadGifBtn').style.display='block';
     document.getElementById('panelSliderWrap').style.display='block';
@@ -897,7 +898,9 @@ Context:
 
 OUTPUT EXACTLY IN THIS ORDER — NO EXCEPTIONS:
 
-1. ONE declarative sentence: "[이 장면/능선/스카이라인]은 ${d.song_title}의 악보다." Adapt the subject naturally to the scene.
+1. ONE declarative sentence using this structure: "[이 장면/능선/스카이라인/공간]은 ${d.song_title}의 [WORD]다."
+Choose [WORD] that best fits the song's genre and mood — one of: 악보, 선율, 리듬, 흐름, 사운드트랙, 재즈, 노래, 음악, 진동, 박자, 숨결
+Do NOT always use 악보. Pick the most fitting word for this specific song and scene.
 
 2. 4-6 short lyrical lines. Stay close to the visual. Let the landscape-song connection emerge quietly. No conclusion.
 
@@ -1709,6 +1712,48 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   }
 
   ctx.restore();
+}
+
+async function saveToArchive(result, apiKey){
+  // Save song + waveform to GitHub archive (background, silent)
+  try {
+    const REPO = 'sapmanri/carousel-generator';
+    const PATH = 'song_archive.json';
+    // Fetch current archive
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, {
+      headers: {'Authorization': `token ${apiKey}`, 'Accept': 'application/vnd.github.v3+json'}
+    });
+    const fileData = await res.json();
+    const current = JSON.parse(atob(fileData.content.replace(/\n/g,'')));
+    
+    // Check if already archived
+    const key = result.song_title + ' - ' + result.artist;
+    if(current.songs.find(s => s.key === key)) return; // already saved
+    
+    // Add new entry
+    current.songs.push({
+      key,
+      song_title: result.song_title,
+      artist: result.artist,
+      genre: result.chosen_genre || '',
+      line_points: result.line_points,
+      waveform: result.waveform,
+      saved_at: new Date().toISOString().slice(0,10)
+    });
+    current.updated = new Date().toISOString().slice(0,10);
+    
+    // Save back
+    const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(current, null, 2))));
+    await fetch(`https://api.github.com/repos/${REPO}/contents/${PATH}`, {
+      method: 'PUT',
+      headers: {'Authorization': `token ${apiKey}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json'},
+      body: JSON.stringify({message: `archive: ${key}`, content: b64, sha: fileData.sha, branch: 'main'})
+    });
+    console.log('archived:', key);
+  } catch(e) {
+    // Silent fail — archive is best-effort
+    console.log('archive skip:', e.message);
+  }
 }
 
 function downloadWaveGif(){
