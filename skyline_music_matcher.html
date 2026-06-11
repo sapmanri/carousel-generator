@@ -257,7 +257,7 @@ input[type=range]::-moz-range-thumb{
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
           </div>
           <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">선 굵기</span><span style="font-size:10px;color:#666;" id="strokeWidthVal">1.0×</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">선 굵기 <span style="color:#333;">(트레이스·오선지)</span></span><span style="font-size:10px;color:#666;" id="strokeWidthVal">1.0×</span></div>
             <input type="range" id="strokeWidthSlider" min="10" max="500" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="window.strokeScale=this.value/100; document.getElementById('strokeWidthVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>가늘게</span><span>굵게</span></div>
           </div>
@@ -425,7 +425,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.6';
+const VERSION = 'v2.0.7';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -588,7 +588,7 @@ function drawStaffOverlay(ctx, pts, CW, CH, color, lineW, amp){
   const mn=Math.min(...pts), mx=Math.max(...pts), rng=mx-mn||1;
   const getY = v => baseY - ((v-mn)/rng - 0.5)*spread*2;
 
-  const staffGap = Math.max(CW/120, 6) * ar;
+  const staffGap = Math.max(CW/120, 6) * ar * (window.strokeScale||1.0);
   const offsets = [-2,-1,0,1,2].map(i => i * staffGap);
 
   ctx.save();
