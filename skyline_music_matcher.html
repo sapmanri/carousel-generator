@@ -256,6 +256,11 @@ input[type=range]::-moz-range-thumb{
             <input type="range" id="textScaleSlider" min="50" max="150" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
           </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">선 굵기</span><span style="font-size:10px;color:#666;" id="strokeWidthVal">1.0×</span></div>
+            <input type="range" id="strokeWidthSlider" min="10" max="500" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="window.strokeScale=this.value/100; document.getElementById('strokeWidthVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>가늘게</span><span>굵게</span></div>
+          </div>
           <!-- 파형 색상 -->
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
@@ -420,7 +425,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.5';
+const VERSION = 'v2.0.6';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -438,6 +443,7 @@ let imgSrc=null,b64=null,mtype='image/jpeg';
 let _lastImg=null; // cached crumple texture image // global image ref for renderers
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
 window.edgeEnabled=false; window.edgeThresh=30; window.edgeColor='#ffffff'; window.edgeWidth=1.5; window.edgeStyle='crayon';
+window.strokeScale=1.0;
 let cachedResult=null;
 
 window.addEventListener('load', ()=>{
@@ -572,7 +578,8 @@ function setEdgeStyle(style){
 function drawStaffOverlay(ctx, pts, CW, CH, color, lineW, amp){
   if(!pts||!pts.length) return;
   const ec = color || '#ffffff';
-  const baseLw = Math.max(CW/600, 1.2);
+  const ss = window.strokeScale || 1.0;
+  const baseLw = Math.max(CW/600, 1.2) * ss;
   const ar = amp || 1;
   const n = pts.length;
 
@@ -1838,9 +1845,10 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   const traceGlow = _tc || 'rgba(160,120,255,1)';
 
   // Layer 1: thick glow
+  const _ss = window.strokeScale || 1.0;
   ctx.globalAlpha = 0.22;
   ctx.strokeStyle = traceGlow;
-  ctx.lineWidth = Math.max(CW/55, 7);
+  ctx.lineWidth = Math.max(CW/55, 7)*_ss;
   ctx.beginPath();
   for(let i=0; i<n; i++){
     const x=(i/(n-1))*CW, y=getY(smooth[i]);
@@ -1851,7 +1859,7 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   // Layer 2: medium white
   ctx.globalAlpha = 0.55;
   ctx.strokeStyle = traceMain;
-  ctx.lineWidth = Math.max(CW/160, 2.5);
+  ctx.lineWidth = Math.max(CW/160, 2.5)*_ss;
   ctx.beginPath();
   for(let i=0; i<n; i++){
     const x=(i/(n-1))*CW, y=getY(smooth[i]);
@@ -1862,7 +1870,7 @@ function drawTraceLine(ctx, pts, CW, CH, ampRatio){
   // Layer 3: thin bright core
   ctx.globalAlpha = 0.88;
   ctx.strokeStyle = traceMain;
-  ctx.lineWidth = Math.max(CW/450, 1);
+  ctx.lineWidth = Math.max(CW/450, 1)*_ss;
   ctx.beginPath();
   for(let i=0; i<n; i++){
     const x=(i/(n-1))*CW, y=getY(smooth[i]);
@@ -1980,23 +1988,23 @@ function downloadWaveVideo(fmt){
         const tc = (wc && wc!=='auto') ? wc : '#ffffff';
         const tg = tc;
         // glow
-        ctx.globalAlpha=0.22; ctx.strokeStyle=tg; ctx.lineWidth=Math.max(CW/55,7);
+        ctx.globalAlpha=0.22; ctx.strokeStyle=tg; ctx.lineWidth=Math.max(CW/55,7)*(window.strokeScale||1);
         ctx.lineJoin='round'; ctx.lineCap='round'; ctx.beginPath();
         for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=getY(smooth[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
         ctx.stroke();
         // medium
-        ctx.globalAlpha=0.55; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/160,2.5); ctx.beginPath();
+        ctx.globalAlpha=0.55; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/160,2.5)*(window.strokeScale||1); ctx.beginPath();
         for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=getY(smooth[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
         ctx.stroke();
         // thin core
-        ctx.globalAlpha=0.88; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/450,1); ctx.beginPath();
+        ctx.globalAlpha=0.88; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/450,1)*(window.strokeScale||1); ctx.beginPath();
         for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=getY(smooth[i]);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
         ctx.stroke();
         // dots
         ctx.globalAlpha=0.65; ctx.fillStyle=tc;
         for(let i=0;i<n;i+=6){const x=(i/(n-1))*CW,y=getY(smooth[i]);const r=Math.max(CW/300,2);ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
         // 반사 (뒤집힌 선)
-        ctx.globalAlpha=0.18; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/160,2.5); ctx.beginPath();
+        ctx.globalAlpha=0.18; ctx.strokeStyle=tc; ctx.lineWidth=Math.max(CW/160,2.5)*(window.strokeScale||1); ctx.beginPath();
         for(let i=0;i<n;i++){const x=(i/(n-1))*CW, y=getY(smooth[i]), ry=center+(center-y)*0.4;i===0?ctx.moveTo(x,ry):ctx.lineTo(x,ry);}
         ctx.stroke();
       } else if(ws==='mirror'){
@@ -2018,7 +2026,7 @@ function downloadWaveVideo(fmt){
       } else if(ws==='multiline'){
         const layers=6; ctx.lineJoin='round'; ctx.lineCap='round';
         for(let l=0;l<layers;l++){
-          ctx.globalAlpha=0.12+(l/layers)*0.6; ctx.strokeStyle=wc; ctx.lineWidth=Math.max(CW/(600+l*80),1);
+          ctx.globalAlpha=0.12+(l/layers)*0.6; ctx.strokeStyle=wc; ctx.lineWidth=Math.max(CW/(600+l*80),1)*(window.strokeScale||1);
           ctx.beginPath();
           for(let i=0;i<n;i++){const x=(i/(n-1))*CW,y=baseY-(animPts[i]/100)*aH*(0.5+(l/layers)*0.8);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
           ctx.stroke();
