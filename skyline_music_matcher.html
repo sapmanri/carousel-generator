@@ -303,13 +303,21 @@ input[type=range]::-moz-range-thumb{
           <input type="checkbox" id="edgeToggle" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;"
             onchange="window.edgeEnabled=this.checked; if(cachedResult)renderCard(cachedResult);" />
         </div>
+        <!-- 스타일 선택 -->
+        <div style="display:flex;gap:6px;margin-bottom:10px;">
+          <button id="edgeStyleCrayon" onclick="setEdgeStyle('crayon')"
+            style="flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #7c6fd4;background:#1a1830;color:#a99ef0;font-family:var(--sans);">✏️ 색연필</button>
+          <button id="edgeStyleScore" onclick="setEdgeStyle('score')"
+            style="flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #333;background:#141414;color:#666;font-family:var(--sans);">🎼 오선지</button>
+        </div>
         <div id="edgeControls" style="display:flex;flex-direction:column;gap:10px;">
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">강도</span><span style="font-size:10px;color:#666;" id="edgeThreshVal">30</span></div>
+          <!-- 색연필 전용 -->
+          <div id="crayonControls">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">감도</span><span style="font-size:10px;color:#666;" id="edgeThreshVal">30</span></div>
             <input type="range" id="edgeThreshSlider" min="5" max="240" value="30"
               style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
               oninput="document.getElementById('edgeThreshVal').textContent=this.value; window.edgeThresh=parseInt(this.value); if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
-            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>약하게</span><span>강하게</span></div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>적게</span><span>많이</span></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">선 굵기</span><span style="font-size:10px;color:#666;" id="edgeWidthVal">1.5</span></div>
@@ -318,7 +326,6 @@ input[type=range]::-moz-range-thumb{
               oninput="document.getElementById('edgeWidthVal').textContent=(this.value/10).toFixed(1); window.edgeWidth=this.value/10; if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>가늘게</span><span>굵게</span></div>
           </div>
-
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
             <span style="font-size:10px;color:#555;">색상</span>
             <button onclick="setEdgeColor('#ffffff')" style="width:22px;height:22px;border-radius:50%;background:#ffffff;border:0.5px solid #444;cursor:pointer;"></button>
@@ -414,7 +421,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.2';
+const VERSION = 'v2.0.3';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -431,7 +438,7 @@ function updateKeyVisibility(){
 let imgSrc=null,b64=null,mtype='image/jpeg';
 let _lastImg=null; // cached crumple texture image // global image ref for renderers
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
-window.edgeEnabled=false; window.edgeThresh=30; window.edgeColor='#ffffff'; window.edgeWidth=1.5; window.edgeBlur=3;
+window.edgeEnabled=false; window.edgeThresh=30; window.edgeColor='#ffffff'; window.edgeWidth=1.5; window.edgeStyle='crayon';
 let cachedResult=null;
 
 window.addEventListener('load', ()=>{
@@ -543,6 +550,83 @@ function pickLang(btn){
   btn.classList.add('active-lang');
   btn.style.background='#1a1830'; btn.style.borderColor='#7c6fd4'; btn.style.color='#a99ef0';
   captionLang=btn.dataset.lang;
+}
+
+function setEdgeStyle(style){
+  window.edgeStyle = style;
+  const crayon = document.getElementById('edgeStyleCrayon');
+  const score = document.getElementById('edgeStyleScore');
+  const crayonCtrl = document.getElementById('crayonControls');
+  if(style==='crayon'){
+    crayon.style.cssText='flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #7c6fd4;background:#1a1830;color:#a99ef0;font-family:var(--sans);';
+    score.style.cssText='flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #333;background:#141414;color:#666;font-family:var(--sans);';
+    if(crayonCtrl) crayonCtrl.style.display='block';
+  } else {
+    score.style.cssText='flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #7c6fd4;background:#1a1830;color:#a99ef0;font-family:var(--sans);';
+    crayon.style.cssText='flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #333;background:#141414;color:#666;font-family:var(--sans);';
+    if(crayonCtrl) crayonCtrl.style.display='none';
+  }
+  if(cachedResult && window.edgeEnabled) renderCard(cachedResult);
+}
+
+function drawStaffOverlay(ctx, pts, CW, CH, color, lineW){
+  if(!pts||!pts.length) return;
+  const ec = color || '#ffffff';
+  const lw = lineW || 1.5;
+  const n = pts.length;
+
+  // line_points 기준 경로 계산 (renderCard와 동일한 baseY)
+  const baseY = (window._bgWaveY > 0 ? window._bgWaveY : CH*0.42);
+  const spread = (window._bgWaveH > 0 ? window._bgWaveH : CH*0.28);
+  const mn=Math.min(...pts), mx=Math.max(...pts), rng=mx-mn||1;
+  const getY = v => baseY - ((v-mn)/rng - 0.5)*spread*2;
+
+  // 5선 간격
+  const staffGap = lw * 3.5;
+  const offsets = [-2,-1,0,1,2].map(i => i * staffGap);
+
+  ctx.save();
+  ctx.strokeStyle = ec;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  // 오선 5줄 그리기
+  offsets.forEach((off, li) => {
+    ctx.globalAlpha = 0.7 + Math.random()*0.1;
+    ctx.lineWidth = lw * (0.8 + Math.random()*0.2);
+    ctx.beginPath();
+    for(let i=0;i<n;i++){
+      const x=(i/(n-1))*CW;
+      const y=getY(pts[i]) + off + (Math.random()-0.5)*lw*0.3;
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  });
+
+  // 음자리표 (간단한 트레블 클레프 느낌)
+  const clefX = CW*0.04;
+  const clefY = getY(pts[Math.floor(n*0.02)]);
+  ctx.globalAlpha = 0.85;
+  ctx.font = `${staffGap*5}px serif`;
+  ctx.fillStyle = ec;
+  ctx.textAlign = 'center';
+  ctx.fillText('𝄞', clefX, clefY + staffGap*1.5);
+
+  // 음표 랜덤 배치
+  const noteSymbols = ['♩','♪','♫','♬'];
+  const numNotes = Math.floor(8 + Math.random()*6);
+  ctx.font = `${staffGap*3.5}px serif`;
+  for(let i=0;i<numNotes;i++){
+    const t = 0.08 + (i/numNotes)*0.88;
+    const idx = Math.floor(t*(n-1));
+    const x = t*CW;
+    const lineOff = offsets[Math.floor(Math.random()*5)];
+    const y = getY(pts[idx]) + lineOff - staffGap*1.2;
+    ctx.globalAlpha = 0.75 + Math.random()*0.2;
+    ctx.fillText(noteSymbols[Math.floor(Math.random()*noteSymbols.length)], x, y);
+  }
+
+  ctx.restore();
 }
 
 function setEdgeColor(c){
@@ -847,7 +931,11 @@ function renderCard(d){
     waveOffsetY = _savedOffset;
     // 엣지 오버레이 (체크된 경우)
     if(window.edgeEnabled && img){
-      drawEdgeOverlay(ctx, img, CW, CH);
+      if(window.edgeStyle === 'score'){
+        drawStaffOverlay(ctx, rd.line_points, CW, CH, window.edgeColor, window.edgeWidth||1.5);
+      } else {
+        drawEdgeOverlay(ctx, img, CW, CH);
+      }
     }
     // _bgCanvas는 파형 제외, 엣지 포함
     const bgOnly2 = document.createElement('canvas');
@@ -2054,7 +2142,7 @@ function drawEdgeOverlay(ctx, img, CW, CH){
   const edgeCanvas = document.createElement('canvas');
   edgeCanvas.width = CW; edgeCanvas.height = CH;
   const ectx = edgeCanvas.getContext('2d');
-  const threshVal = (thresh / 100) * maxMag * 0.4;
+  const threshVal = (1 - thresh/240) * maxMag * 0.5;
   const hw = Math.max(lineW / 2, 0.5);
 
   ectx.fillStyle = ec;
