@@ -3,27 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.6.5 · sapmanri</title>
+<title>감성찾아삽만리 · Writing Studio v2.7.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #0c0c0c;
-  --s1: #141414;
-  --s2: #1c1c1c;
-  --s3: #242424;
-  --border: #282828;
-  --border2: #353535;
-  --text: #e2ddd6;
-  --muted: #7a7570;
-  --dim: #434040;
-  --accent: #c9a96e;
-  --accent2: #8a7a5a;
+  --bg: #1a1a1a;
+  --s1: #222222;
+  --s2: #2a2a2a;
+  --s3: #323232;
+  --border: #333333;
+  --border2: #444444;
+  --text: #ffffff;
+  --muted: rgba(255,255,255,0.6);
+  --dim: rgba(255,255,255,0.3);
+  --accent: #b87a6e;
+  --accent2: #8a5a50;
   --green: #8aaa88;
   --red: #c47a6a;
-  --serif: 'Noto Serif KR', serif;
-  --sans: 'Noto Sans KR', sans-serif;
+  --serif: "Cormorant Garamond","Noto Serif KR",Georgia,serif;
+  --sans: "Noto Sans KR","Helvetica Neue",Arial,sans-serif;
   --mono: 'JetBrains Mono', monospace;
 }
 html, body { height: 100%; }
@@ -486,7 +486,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.6.5</span></div>
+  <div class="logo"><span style="font-family:var(--serif);font-size:15px;letter-spacing:0.05em">감성찾아삽만리</span> <span style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-left:8px;letter-spacing:0.12em">WRITING STUDIO</span> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.7.0</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
