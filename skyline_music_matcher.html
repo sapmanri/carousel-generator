@@ -306,7 +306,7 @@ input[type=range]::-moz-range-thumb{
         <div id="edgeControls" style="display:flex;flex-direction:column;gap:10px;">
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">강도</span><span style="font-size:10px;color:#666;" id="edgeThreshVal">30</span></div>
-            <input type="range" id="edgeThreshSlider" min="5" max="80" value="30"
+            <input type="range" id="edgeThreshSlider" min="5" max="240" value="30"
               style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
               oninput="document.getElementById('edgeThreshVal').textContent=this.value; window.edgeThresh=parseInt(this.value); if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>약하게</span><span>강하게</span></div>
@@ -318,13 +318,7 @@ input[type=range]::-moz-range-thumb{
               oninput="document.getElementById('edgeWidthVal').textContent=(this.value/10).toFixed(1); window.edgeWidth=this.value/10; if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>가늘게</span><span>굵게</span></div>
           </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">블러</span><span style="font-size:10px;color:#666;" id="edgeBlurVal">3</span></div>
-            <input type="range" id="edgeBlurSlider" min="0" max="200" value="10"
-              style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
-              oninput="document.getElementById('edgeBlurVal').textContent=this.value; window.edgeBlur=parseInt(this.value); if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
-            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>선명</span><span>둔하게</span></div>
-          </div>
+
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
             <span style="font-size:10px;color:#555;">색상</span>
             <button onclick="setEdgeColor('#ffffff')" style="width:22px;height:22px;border-radius:50%;background:#ffffff;border:0.5px solid #444;cursor:pointer;"></button>
@@ -420,7 +414,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.1';
+const VERSION = 'v2.0.2';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -2011,47 +2005,10 @@ function downloadWaveVideo(fmt){
 }
 
 
-function gaussianBlurGray(gray, W, H, radius){
-  if(radius <= 0) return gray;
-  const r = Math.min(Math.round(radius), 100);
-  const tmp = new Float32Array(W * H);
-  const out = new Float32Array(W * H);
-  // Box blur 3회 반복 ≈ Gaussian
-  for(let pass=0; pass<3; pass++){
-    const src = pass===0 ? gray : (pass===1 ? tmp : out);
-    const dst = pass===0 ? tmp : (pass===1 ? out : tmp);
-    // horizontal
-    for(let y=0; y<H; y++){
-      let sum=0, cnt=0;
-      for(let x=0; x<r; x++){ sum+=src[y*W+x]; cnt++; }
-      for(let x=0; x<W; x++){
-        if(x+r<W){ sum+=src[y*W+x+r]; cnt++; }
-        if(x-r-1>=0){ sum-=src[y*W+x-r-1]; cnt--; }
-        dst[y*W+x]=sum/cnt;
-      }
-    }
-    // vertical
-    const tmp2 = new Float32Array(W*H);
-    for(let x=0; x<W; x++){
-      let sum=0, cnt=0;
-      for(let y=0; y<r; y++){ sum+=dst[y*W+x]; cnt++; }
-      for(let y=0; y<H; y++){
-        if(y+r<H){ sum+=dst[(y+r)*W+x]; cnt++; }
-        if(y-r-1>=0){ sum-=dst[(y-r-1)*W+x]; cnt--; }
-        tmp2[y*W+x]=sum/cnt;
-      }
-    }
-    tmp2.forEach((v,i)=>dst[i]=v);
-  }
-  return pass%2===0 ? tmp : out;
-}
-
 function drawEdgeOverlay(ctx, img, CW, CH){
   const thresh = window.edgeThresh || 30;
   const ec = window.edgeColor || '#ffffff';
   const lineW = window.edgeWidth || 1.5;
-  const blurAmt = window.edgeBlur !== undefined ? window.edgeBlur : 10;
-
   // hex → rgb
   const r0 = parseInt(ec.slice(1,3),16);
   const g0 = parseInt(ec.slice(3,5),16);
@@ -2073,8 +2030,6 @@ function drawEdgeOverlay(ctx, img, CW, CH){
   for(let i=0; i<CW*CH; i++){
     gray[i] = data[i*4]*0.299 + data[i*4+1]*0.587 + data[i*4+2]*0.114;
   }
-  if(blurAmt > 0) gray = gaussianBlurGray(gray, CW, CH, blurAmt);
-
   // 3. Sobel
   const Kx = [-1,0,1,-2,0,2,-1,0,1];
   const Ky = [-1,-2,-1,0,0,0,1,2,1];
