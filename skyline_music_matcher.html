@@ -420,7 +420,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.4';
+const VERSION = 'v2.0.5';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -569,20 +569,19 @@ function setEdgeStyle(style){
   if(cachedResult && window.edgeEnabled) renderCard(cachedResult);
 }
 
-function drawStaffOverlay(ctx, pts, CW, CH, color, lineW){
+function drawStaffOverlay(ctx, pts, CW, CH, color, lineW, amp){
   if(!pts||!pts.length) return;
   const ec = color || '#ffffff';
-  const lw = lineW || 1.5;
+  const baseLw = Math.max(CW/600, 1.2);
+  const ar = amp || 1;
   const n = pts.length;
 
-  // line_points 기준 경로 계산 (renderCard와 동일한 baseY)
   const baseY = (window._bgWaveY > 0 ? window._bgWaveY : CH*0.42);
-  const spread = (window._bgWaveH > 0 ? window._bgWaveH : CH*0.28);
+  const spread = (window._bgWaveH > 0 ? window._bgWaveH : CH*0.28) * ar;
   const mn=Math.min(...pts), mx=Math.max(...pts), rng=mx-mn||1;
   const getY = v => baseY - ((v-mn)/rng - 0.5)*spread*2;
 
-  // 5선 간격
-  const staffGap = lw * 3.5;
+  const staffGap = Math.max(CW/120, 6) * ar;
   const offsets = [-2,-1,0,1,2].map(i => i * staffGap);
 
   ctx.save();
@@ -590,20 +589,18 @@ function drawStaffOverlay(ctx, pts, CW, CH, color, lineW){
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
 
-  // 오선 5줄 그리기
-  offsets.forEach((off, li) => {
+  offsets.forEach((off) => {
     ctx.globalAlpha = 0.7 + Math.random()*0.1;
-    ctx.lineWidth = lw * (0.8 + Math.random()*0.2);
+    ctx.lineWidth = baseLw * (0.8 + Math.random()*0.2);
     ctx.beginPath();
     for(let i=0;i<n;i++){
       const x=(i/(n-1))*CW;
-      const y=getY(pts[i]) + off + (Math.random()-0.5)*lw*0.3;
+      const y=getY(pts[i]) + off + (Math.random()-0.5)*baseLw*0.3;
       i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
     }
     ctx.stroke();
   });
 
-  // 음자리표 (간단한 트레블 클레프 느낌)
   const clefX = CW*0.04;
   const clefY = getY(pts[Math.floor(n*0.02)]);
   ctx.globalAlpha = 0.85;
@@ -612,7 +609,6 @@ function drawStaffOverlay(ctx, pts, CW, CH, color, lineW){
   ctx.textAlign = 'center';
   ctx.fillText('𝄞', clefX, clefY + staffGap*1.5);
 
-  // 음표 랜덤 배치
   const noteSymbols = ['♩','♪','♫','♬'];
   const numNotes = Math.floor(8 + Math.random()*6);
   ctx.font = `${staffGap*3.5}px serif`;
@@ -628,7 +624,6 @@ function drawStaffOverlay(ctx, pts, CW, CH, color, lineW){
 
   ctx.restore();
 }
-
 function setEdgeColor(c){
   window.edgeColor = c;
   const picker = document.getElementById('edgeColorPicker');
@@ -1970,7 +1965,7 @@ function downloadWaveVideo(fmt){
 
       ctx.save();
       if(ws === 'staff'){
-        drawStaffOverlay(ctx, animPts, CW, CH, wc, Math.max(CW/400,1.5)*amp);
+        drawStaffOverlay(ctx, animPts, CW, CH, wc, Math.max(CW/400,1.5), amp);
       } else if(ws === 'trace'){
         // trace는 실제 drawTraceLine과 동일한 로직, waveOffsetY 반영
         const smooth = animPts.map((v,i)=>{
@@ -2192,7 +2187,7 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
   if(waveStyle === 'staff'){
     const sc = waveSettings['staff'] || {};
     const staffColor = (sc.color && sc.color!=='auto') ? sc.color : (window.waveColor||'#ffffff');
-    drawStaffOverlay(ctx, pts, CW, CH, staffColor, Math.max(CW/400,1.5) * (ampRatio||1));
+    drawStaffOverlay(ctx, pts, CW, CH, staffColor, Math.max(CW/400,1.5), ampRatio||1);
     return;
   }
   if(waveStyle === 'silhouette'){
