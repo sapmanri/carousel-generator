@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.6.2 · sapmanri</title>
+<title>Writing Studio v2.6.3 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -441,7 +441,15 @@ header {
   display: flex; align-items: flex-start; gap: 10px;
 }
 .suggest-card .suggest-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink:0; margin-top:8px; }
-.suggest-card .suggest-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink:0; }
+.suggest-card .suggest-actions { display: flex; gap: 6px; flex-shrink:0; margin-top:8px; }
+.suggest-card-text {
+  flex: 1; font-size: 13px; line-height: 1.75; color: var(--text);
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 4px; padding: 8px 10px; resize: vertical;
+  font-family: var(--sans); font-weight: 300; min-height: 60px;
+  outline: none; width: 100%;
+}
+.suggest-card-text:focus { border-color: var(--accent); }
 .btn-accept { background: none; border: 1px solid var(--green); color: var(--green); font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
 .btn-accept:hover { background: var(--green); color: var(--bg); }
 .btn-reject { background: none; border: 1px solid var(--dim); color: var(--dim); font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 3px; cursor: pointer; transition: all 0.15s; }
@@ -478,7 +486,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.6.2</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.6.3</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -1785,13 +1793,42 @@ function openAnalyzeModal(suggestions) {
       const el = document.createElement('div');
       el.className = 'suggest-card';
       el.id = 'suggest-' + i;
-      el.innerHTML = `
-        <span class="suggest-dot"></span>
-        <span style="flex:1">${escHtml(s)}</span>
-        <div class="suggest-actions">
-          <button class="btn-accept" onclick="acceptSuggestion(${i})">추가</button>
-          <button class="btn-reject" onclick="rejectSuggestion(${i})">건너뜀</button>
-        </div>`;
+      el.style.flexDirection = 'column';
+      el.style.gap = '8px';
+
+      const topRow = document.createElement('div');
+      topRow.style.cssText = 'display:flex;align-items:flex-start;gap:8px';
+
+      const dot = document.createElement('span');
+      dot.className = 'suggest-dot';
+      dot.style.marginTop = '4px';
+
+      const ta = document.createElement('textarea');
+      ta.className = 'suggest-card-text';
+      ta.id = 'suggest-text-' + i;
+      ta.value = s;
+
+      topRow.appendChild(dot);
+      topRow.appendChild(ta);
+      el.appendChild(topRow);
+
+      const actions = document.createElement('div');
+      actions.className = 'suggest-actions';
+      actions.style.justifyContent = 'flex-end';
+
+      const btnA = document.createElement('button');
+      btnA.className = 'btn-accept';
+      btnA.textContent = '추가';
+      btnA.onclick = () => acceptSuggestion(i);
+
+      const btnR = document.createElement('button');
+      btnR.className = 'btn-reject';
+      btnR.textContent = '건너뜀';
+      btnR.onclick = () => rejectSuggestion(i);
+
+      actions.appendChild(btnA);
+      actions.appendChild(btnR);
+      el.appendChild(actions);
       body.appendChild(el);
     });
   }
@@ -1803,14 +1840,18 @@ function closeAnalyzeModal() {
 }
 
 function acceptSuggestion(i) {
-  const s = pendingSuggestions[i];
+  // textarea에서 수정된 값 가져오기
+  const ta = document.getElementById('suggest-text-' + i);
+  const s = ta ? ta.value.trim() : pendingSuggestions[i];
   if (!s) return;
   db.rules.push(s);
   saveDB();
   const card = document.getElementById('suggest-' + i);
   if (card) {
     card.style.opacity = '0.4';
-    card.querySelector('.suggest-actions').innerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--green)">✓ 추가됨</span>';
+    card.style.pointerEvents = 'none';
+    const actions = card.querySelector('.suggest-actions');
+    if (actions) actions.innerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--green)">✓ 추가됨</span>';
   }
   renderProfile();
   toast('규칙 추가됨');
