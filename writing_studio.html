@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.6.1 · sapmanri</title>
+<title>Writing Studio v2.6.2 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -478,7 +478,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.6.1</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.6.2</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -823,7 +823,9 @@ async function loadDB() {
     const json = await res.json();
     if (!json.sha) throw new Error(json.message || '파일 없음');
     githubFileSha = json.sha;
-    const data = JSON.parse(atob(json.content.replace(/\n/g, '')));
+    const b64 = json.content.replace(/\n/g, '');
+    const bytes2 = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const data = JSON.parse(new TextDecoder().decode(bytes2));
     db.examples = data.examples || [];
     db.pairs = data.pairs || [];
     db.rules = data.rules?.length ? data.rules : [...DEFAULT_RULES];
@@ -843,7 +845,10 @@ async function saveDB() {
   isSaving = true;
   showDbStatus('저장 중…', 'loading');
   try {
-    const body = { message: 'Update profile_data', content: btoa(unescape(encodeURIComponent(JSON.stringify(db, null, 2)))), sha: githubFileSha };
+    const jsonStr = JSON.stringify(db, null, 2);
+    const bytes = new TextEncoder().encode(jsonStr);
+    const binStr = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+    const body = { message: 'Update profile_data', content: btoa(binStr), sha: githubFileSha };
     const res = await fetch(
       `https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`,
       { method: 'PUT', headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
