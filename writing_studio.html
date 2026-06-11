@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Writing Studio v2.6.3 · sapmanri</title>
+<title>Writing Studio v2.6.4 · sapmanri</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -486,7 +486,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.6.3</span></div>
+  <div class="logo">Writing Studio · <em>sapmanri</em> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.6.4</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -1797,16 +1797,17 @@ function openAnalyzeModal(suggestions) {
       el.style.gap = '8px';
 
       const topRow = document.createElement('div');
-      topRow.style.cssText = 'display:flex;align-items:flex-start;gap:8px';
+      topRow.style.cssText = 'display:flex;align-items:flex-start;gap:8px;width:100%';
 
       const dot = document.createElement('span');
       dot.className = 'suggest-dot';
-      dot.style.marginTop = '4px';
+      dot.style.cssText = 'margin-top:6px;flex-shrink:0';
 
       const ta = document.createElement('textarea');
       ta.className = 'suggest-card-text';
       ta.id = 'suggest-text-' + i;
       ta.value = s;
+      ta.style.cssText = 'flex:1;min-width:0;width:100%';
 
       topRow.appendChild(dot);
       topRow.appendChild(ta);
