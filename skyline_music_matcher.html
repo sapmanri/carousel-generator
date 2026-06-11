@@ -311,6 +311,20 @@ input[type=range]::-moz-range-thumb{
               oninput="document.getElementById('edgeThreshVal').textContent=this.value; window.edgeThresh=parseInt(this.value); if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>약하게</span><span>강하게</span></div>
           </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">선 굵기</span><span style="font-size:10px;color:#666;" id="edgeWidthVal">1.5</span></div>
+            <input type="range" id="edgeWidthSlider" min="5" max="40" value="15"
+              style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
+              oninput="document.getElementById('edgeWidthVal').textContent=(this.value/10).toFixed(1); window.edgeWidth=this.value/10; if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>가늘게</span><span>굵게</span></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">블러</span><span style="font-size:10px;color:#666;" id="edgeBlurVal">3</span></div>
+            <input type="range" id="edgeBlurSlider" min="0" max="12" value="3"
+              style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
+              oninput="document.getElementById('edgeBlurVal').textContent=this.value; window.edgeBlur=parseInt(this.value); if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
+            <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>선명</span><span>둔하게</span></div>
+          </div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
             <span style="font-size:10px;color:#555;">색상</span>
             <button onclick="setEdgeColor('#ffffff')" style="width:22px;height:22px;border-radius:50%;background:#ffffff;border:0.5px solid #444;cursor:pointer;"></button>
@@ -406,7 +420,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.9.7';
+const VERSION = 'v1.9.8';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -423,7 +437,7 @@ function updateKeyVisibility(){
 let imgSrc=null,b64=null,mtype='image/jpeg';
 let _lastImg=null; // cached crumple texture image // global image ref for renderers
 let waveStyle='mirror',cardDesign='sapmanri',cardFmt='square';
-window.edgeEnabled=false; window.edgeThresh=30; window.edgeColor='#ffffff';
+window.edgeEnabled=false; window.edgeThresh=30; window.edgeColor='#ffffff'; window.edgeWidth=1.5; window.edgeBlur=3;
 let cachedResult=null;
 
 window.addEventListener('load', ()=>{
@@ -1998,81 +2012,90 @@ function downloadWaveVideo(fmt){
 
 
 function drawEdgeOverlay(ctx, img, CW, CH){
-  // 오프스크린에 이미지 그리기
-  const off = document.createElement('canvas');
-  off.width = CW; off.height = CH;
-  const octx = off.getContext('2d');
-  const sc = Math.max(CW/img.naturalWidth, CH/img.naturalHeight);
-  const sw = img.naturalWidth*sc, sh = img.naturalHeight*sc;
-  octx.drawImage(img, (CW-sw)/2, (CH-sh)/2, sw, sh);
-
-  const imageData = octx.getImageData(0, 0, CW, CH);
-  const data = imageData.data;
   const thresh = window.edgeThresh || 30;
   const ec = window.edgeColor || '#ffffff';
+  const lineW = window.edgeWidth || 1.5;
+  const blurAmt = window.edgeBlur !== undefined ? window.edgeBlur : 3;
 
   // hex → rgb
   const r0 = parseInt(ec.slice(1,3),16);
   const g0 = parseInt(ec.slice(3,5),16);
   const b0 = parseInt(ec.slice(5,7),16);
 
-  // Sobel 엣지 디텍션
-  const out = new Uint8ClampedArray(CW * CH * 4);
-  const gray = new Float32Array(CW * CH);
+  // 1. 이미지를 블러 처리한 오프스크린 canvas
+  const off = document.createElement('canvas');
+  off.width = CW; off.height = CH;
+  const octx = off.getContext('2d');
+  const sc = Math.max(CW/img.naturalWidth, CH/img.naturalHeight);
+  const sw = img.naturalWidth*sc, sh = img.naturalHeight*sc;
+  if(blurAmt > 0){
+    octx.filter = `blur(${blurAmt}px)`;
+  }
+  octx.drawImage(img, (CW-sw)/2, (CH-sh)/2, sw, sh);
+  octx.filter = 'none';
 
-  // 그레이스케일
+  const imageData = octx.getImageData(0, 0, CW, CH);
+  const data = imageData.data;
+
+  // 2. 그레이스케일
+  const gray = new Float32Array(CW * CH);
   for(let i=0; i<CW*CH; i++){
     gray[i] = data[i*4]*0.299 + data[i*4+1]*0.587 + data[i*4+2]*0.114;
   }
 
+  // 3. Sobel
   const Kx = [-1,0,1,-2,0,2,-1,0,1];
   const Ky = [-1,-2,-1,0,0,0,1,2,1];
-
+  const mag = new Float32Array(CW * CH);
+  let maxMag = 0;
   for(let y=1; y<CH-1; y++){
     for(let x=1; x<CW-1; x++){
       let gx=0, gy=0, k=0;
       for(let ky=-1; ky<=1; ky++){
         for(let kx=-1; kx<=1; kx++){
           const v = gray[(y+ky)*CW+(x+kx)];
-          gx += v * Kx[k];
-          gy += v * Ky[k];
-          k++;
+          gx += v * Kx[k]; gy += v * Ky[k]; k++;
         }
       }
-      const mag = Math.sqrt(gx*gx + gy*gy);
-      const idx = (y*CW+x)*4;
-      if(mag > thresh * 2){
-        // 색연필 느낌 — magnitude로 투명도 조절 + 약간 지터
-        const alpha = Math.min(255, (mag - thresh*2) * 1.2);
-        // 색연필 노이즈 (±1px 불규칙성)
-        const jitter = Math.random() < 0.15 ? 0 : 1;
-        if(jitter){
-          out[idx]   = r0;
-          out[idx+1] = g0;
-          out[idx+2] = b0;
-          out[idx+3] = alpha * 0.75;
+      const m = Math.sqrt(gx*gx + gy*gy);
+      mag[y*CW+x] = m;
+      if(m > maxMag) maxMag = m;
+    }
+  }
+
+  // 4. 엣지 canvas에 선으로 그리기 (fillRect로 굵기 표현)
+  const edgeCanvas = document.createElement('canvas');
+  edgeCanvas.width = CW; edgeCanvas.height = CH;
+  const ectx = edgeCanvas.getContext('2d');
+  const threshVal = (thresh / 100) * maxMag * 0.4;
+  const hw = Math.max(lineW / 2, 0.5);
+
+  ectx.fillStyle = ec;
+  for(let y=1; y<CH-1; y++){
+    for(let x=1; x<CW-1; x++){
+      const m = mag[y*CW+x];
+      if(m > threshVal){
+        const alpha = Math.min(1, (m - threshVal) / (maxMag * 0.3));
+        // 색연필 노이즈
+        const jitter = Math.random();
+        if(jitter > 0.12){
+          ectx.globalAlpha = alpha * 0.82 * (0.7 + Math.random()*0.3);
+          const ox = (Math.random()-0.5) * lineW * 0.4;
+          const oy = (Math.random()-0.5) * lineW * 0.4;
+          ectx.fillRect(x - hw + ox, y - hw + oy, lineW, lineW);
         }
-      } else {
-        out[idx+3] = 0;
       }
     }
   }
 
-  // 결과 그리기
-  const edgeData = new ImageData(out, CW, CH);
-  const edgeCanvas = document.createElement('canvas');
-  edgeCanvas.width = CW; edgeCanvas.height = CH;
-  edgeCanvas.getContext('2d').putImageData(edgeData, 0, 0);
-
-  // 색연필 텍스처 — 살짝 블러 후 재적용
+  // 5. 색연필 겹침 — 약간 오프셋으로 2~3번 그리기
   ctx.save();
-  ctx.globalAlpha = 0.9;
+  ctx.globalAlpha = 0.85;
   ctx.drawImage(edgeCanvas, 0, 0);
-  // 두 번째 레이어 약간 오프셋 (색연필 겹침 효과)
-  ctx.globalAlpha = 0.25;
-  ctx.drawImage(edgeCanvas, 0.8, 0.8);
-  ctx.globalAlpha = 0.15;
-  ctx.drawImage(edgeCanvas, -0.5, 0.3);
+  ctx.globalAlpha = 0.2;
+  ctx.drawImage(edgeCanvas, lineW*0.4, lineW*0.3);
+  ctx.globalAlpha = 0.1;
+  ctx.drawImage(edgeCanvas, -lineW*0.3, lineW*0.2);
   ctx.restore();
 }
 
