@@ -361,7 +361,23 @@ input[type=range]::-moz-range-thumb{
 
     <!-- 3 분석 버튼 (desktop: left col / mobile: bottom) -->
     <div class="analyze-wrap">
-      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">분석하기</button>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()" style="display:none;">분석하기</button>
+      <!-- 분석 방식 선택 -->
+      <div id="analysisChoice" style="display:none;flex-direction:column;gap:8px;">
+        <button class="btn-analyze" onclick="startAIAnalysis()" style="background:#1a1a2e;border:0.5px solid #7c6fd4;">
+          🤖 AI 분석
+        </button>
+        <button class="btn-analyze" onclick="startManualTrace()" style="background:#1a2e1a;border:0.5px solid #4d8c4d;font-size:12px;">
+          ✏️ 수동 보정
+        </button>
+      </div>
+      <!-- 수동 보정 모드 -->
+      <div id="manualTraceWrap" style="display:none;flex-direction:column;gap:8px;">
+        <div style="font-size:10px;color:#888;text-align:center;line-height:1.6;">능선을 따라 손가락으로<br/>선을 그려주세요</div>
+        <button onclick="confirmManualTrace()" style="padding:10px;border-radius:6px;border:0.5px solid #4d8c4d;background:#1a2e1a;color:#88d4a0;font-size:12px;cursor:pointer;font-family:var(--sans);">✓ 완료 → 분석 시작</button>
+        <button onclick="clearManualTrace()" style="padding:8px;border-radius:6px;border:0.5px solid #333;background:#111;color:#666;font-size:11px;cursor:pointer;font-family:var(--sans);">↺ 다시 그리기</button>
+        <button onclick="cancelManualTrace()" style="padding:6px;border-radius:6px;border:none;background:none;color:#444;font-size:10px;cursor:pointer;font-family:var(--sans);">← AI 분석으로</button>
+      </div>
     </div>
 
     <!-- 5 재생·인스타캡션·채널영상 (desktop: right col, row 2) -->
@@ -425,7 +441,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.7';
+const VERSION = 'v2.0.8';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -482,8 +498,157 @@ function loadFile(f){
     document.getElementById('uploadSection').style.display='none';
     document.getElementById('workspaceSection').classList.add('visible');
     document.getElementById('downloadBtn').style.display='none';
-    setPlaceholder();
+    window.manualPath = null;
+    showAnalysisChoice();
   };r.readAsDataURL(f);
+}
+
+function showAnalysisChoice(){
+  setPlaceholder();
+  document.getElementById('analysisChoice').style.display='flex';
+  document.getElementById('manualTraceWrap').style.display='none';
+  document.getElementById('analyzeBtn').style.display='none';
+}
+
+function startAIAnalysis(){
+  document.getElementById('analysisChoice').style.display='none';
+  document.getElementById('analyzeBtn').style.display='block';
+  analyze();
+}
+
+function startManualTrace(){
+  document.getElementById('analysisChoice').style.display='none';
+  document.getElementById('manualTraceWrap').style.display='flex';
+
+  // 카드 프리뷰에 사진 + 그리기 캔버스 오버레이
+  const preview = document.getElementById('cardPreview');
+  preview.style.position='relative';
+  preview.innerHTML='';
+
+  // 배경 이미지
+  const bg = document.createElement('img');
+  bg.src = imgSrc;
+  bg.style.cssText='width:100%;display:block;border-radius:4px;';
+  preview.appendChild(bg);
+
+  // 그리기 캔버스 오버레이
+  const drawCanvas = document.createElement('canvas');
+  drawCanvas.id = 'manualCanvas';
+  drawCanvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair;touch-action:none;border-radius:4px;';
+  preview.appendChild(drawCanvas);
+
+  bg.onload = () => {
+    drawCanvas.width = bg.offsetWidth;
+    drawCanvas.height = bg.offsetHeight;
+    initManualDraw(drawCanvas);
+  };
+  if(bg.complete) { drawCanvas.width=bg.offsetWidth; drawCanvas.height=bg.offsetHeight; initManualDraw(drawCanvas); }
+}
+
+function initManualDraw(canvas){
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+  let pathPoints = []; // {x, y} 절대 픽셀
+  window._manualPathPoints = pathPoints;
+
+  // 가이드 그리기
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle='rgba(255,255,255,0.15)';
+  ctx.setLineDash([4,8]);
+  ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(0, canvas.height*0.4);
+  ctx.lineTo(canvas.width, canvas.height*0.4);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  function getPos(e){
+    const rect=canvas.getBoundingClientRect();
+    const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+    if(e.touches){
+      return {x:(e.touches[0].clientX-rect.left)*scaleX, y:(e.touches[0].clientY-rect.top)*scaleY};
+    }
+    return {x:(e.clientX-rect.left)*scaleX, y:(e.clientY-rect.top)*scaleY};
+  }
+
+  function startDraw(e){
+    e.preventDefault();
+    drawing=true;
+    pathPoints.length=0;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const p=getPos(e); pathPoints.push(p);
+    ctx.beginPath(); ctx.moveTo(p.x,p.y);
+    ctx.strokeStyle='rgba(255,255,255,0.9)';
+    ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.setLineDash([]);
+  }
+  function moveDraw(e){
+    if(!drawing)return; e.preventDefault();
+    const p=getPos(e); pathPoints.push(p);
+    ctx.lineTo(p.x,p.y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x,p.y);
+  }
+  function endDraw(e){ drawing=false; }
+
+  canvas.addEventListener('mousedown',startDraw);
+  canvas.addEventListener('mousemove',moveDraw);
+  canvas.addEventListener('mouseup',endDraw);
+  canvas.addEventListener('touchstart',startDraw,{passive:false});
+  canvas.addEventListener('touchmove',moveDraw,{passive:false});
+  canvas.addEventListener('touchend',endDraw);
+}
+
+function clearManualTrace(){
+  const canvas = document.getElementById('manualCanvas');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(window._manualPathPoints) window._manualPathPoints.length=0;
+}
+
+function cancelManualTrace(){
+  window.manualPath=null;
+  showAnalysisChoice();
+}
+
+function confirmManualTrace(){
+  const pts = window._manualPathPoints||[];
+  if(pts.length < 5){
+    alert('능선을 먼저 그려주세요!'); return;
+  }
+  const canvas = document.getElementById('manualCanvas');
+  const W = canvas.width, H = canvas.height;
+
+  // x좌표별로 y값 매핑 (160개 버킷)
+  const buckets = new Array(160).fill(null);
+  pts.forEach(p => {
+    const idx = Math.min(159, Math.floor((p.x/W)*160));
+    if(buckets[idx]===null || p.y < buckets[idx]) buckets[idx]=p.y;
+  });
+
+  // 빈 버킷 보간
+  let last=null;
+  for(let i=0;i<160;i++){
+    if(buckets[i]!==null){last=buckets[i];}
+    else if(last!==null){buckets[i]=last;}
+  }
+  last=null;
+  for(let i=159;i>=0;i--){
+    if(buckets[i]!==null){last=buckets[i];}
+    else if(last!==null){buckets[i]=last;}
+  }
+  if(buckets.every(v=>v===null)){alert('능선을 다시 그려주세요!');return;}
+
+  // y값 → 0~100 정규화 (위가 100, 아래가 0)
+  const vals = buckets.map(v=>v===null?50:v);
+  const mn=Math.min(...vals), mx=Math.max(...vals), rng=mx-mn||1;
+  window.manualPath = vals.map(v => Math.round((1-(v-mn)/rng)*100));
+
+  // 확인 표시
+  document.getElementById('manualTraceWrap').style.display='none';
+  document.getElementById('analyzeBtn').style.display='block';
+  document.getElementById('analyzeBtn').textContent='✓ 수동 보정 완료 — 분석 시작';
+  analyze();
 }
 
 function setPlaceholder(){document.getElementById('cardPreview').innerHTML='<div class="placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><p>분석하기를 누르면<br/>카드가 여기에 생성됩니다</p></div>'}
@@ -682,6 +847,11 @@ function pickFmt(btn){
 
 function resetAll(){
   imgSrc=null;b64=null;cachedResult=null; // usedSongs preserved across images
+  window.manualPath=null;
+  document.getElementById('analysisChoice').style.display='none';
+  document.getElementById('manualTraceWrap').style.display='none';
+  document.getElementById('analyzeBtn').style.display='none';
+  document.getElementById('analyzeBtn').textContent='분석하기';
   document.getElementById('uploadSection').style.display='block';
   document.getElementById('workspaceSection').classList.remove('visible');
   document.getElementById('fileInput').value='';
@@ -710,7 +880,10 @@ async function analyze(){
   document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
 
   // ── STEP 1: 이미지 분석 — 파형 수치만 추출 ──
-  const promptStep1=`You are a visual analyst. Analyze this image and extract ONLY the waveform data. No music, no captions.
+  const manualHint = window.manualPath
+    ? `\nUSER-DRAWN CONTOUR (priority reference):\nThe user manually drew a contour on this image. Use these 160 height values (0=bottom, 100=top) as PRIMARY reference for line_points:\n[${window.manualPath.join(',')}]\nStay close to the user's drawn line. Adjust only where it clearly misses major features.\n`
+    : '';
+  const promptStep1=`You are a visual analyst. Analyze this image and extract ONLY the waveform data. No music, no captions.${manualHint}
 
 STEP 1 — MULTI-LAYER CONTOUR:
 Identify every prominent contour layer (grass/crop tops, rooflines, treeline, mountain ridge, horizon).
