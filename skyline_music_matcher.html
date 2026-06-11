@@ -313,14 +313,14 @@ input[type=range]::-moz-range-thumb{
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">선 굵기</span><span style="font-size:10px;color:#666;" id="edgeWidthVal">1.5</span></div>
-            <input type="range" id="edgeWidthSlider" min="5" max="40" value="15"
+            <input type="range" id="edgeWidthSlider" min="5" max="120" value="15"
               style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
               oninput="document.getElementById('edgeWidthVal').textContent=(this.value/10).toFixed(1); window.edgeWidth=this.value/10; if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>가늘게</span><span>굵게</span></div>
           </div>
           <div>
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">블러</span><span style="font-size:10px;color:#666;" id="edgeBlurVal">3</span></div>
-            <input type="range" id="edgeBlurSlider" min="0" max="12" value="3"
+            <input type="range" id="edgeBlurSlider" min="0" max="40" value="3"
               style="width:100%;accent-color:#7c6fd4;cursor:pointer;"
               oninput="document.getElementById('edgeBlurVal').textContent=this.value; window.edgeBlur=parseInt(this.value); if(cachedResult&&window.edgeEnabled)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>선명</span><span>둔하게</span></div>
@@ -420,7 +420,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v1.9.8';
+const VERSION = 'v1.9.9';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
