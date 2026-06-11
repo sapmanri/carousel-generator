@@ -178,6 +178,10 @@ input[type=range]::-moz-range-thumb{
             <button class="opt-btn " data-wave="trace" onclick="pickWave(this)" style="width:100%;"><span class="icon">〰️</span><span class="name">트레이스</span><span class="desc">능선 직접 그리기</span></button>
             <input type="checkbox" id="vis_trace"  onclick="toggleWaveVisible('trace',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
           </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+            <button class="opt-btn " data-wave="staff" onclick="pickWave(this)" style="width:100%;"><span class="icon">𝄞</span><span class="name">오선지</span><span class="desc">능선 위 악보</span></button>
+            <input type="checkbox" id="vis_staff" onclick="toggleWaveVisible('staff',this)" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;" />
+          </div>
         </div>
       </div>
       <div class="panel-section">
@@ -303,13 +307,8 @@ input[type=range]::-moz-range-thumb{
           <input type="checkbox" id="edgeToggle" style="width:14px;height:14px;accent-color:#7c6fd4;cursor:pointer;"
             onchange="window.edgeEnabled=this.checked; if(cachedResult)renderCard(cachedResult);" />
         </div>
-        <!-- 스타일 선택 -->
-        <div style="display:flex;gap:6px;margin-bottom:10px;">
-          <button id="edgeStyleCrayon" onclick="setEdgeStyle('crayon')"
-            style="flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #7c6fd4;background:#1a1830;color:#a99ef0;font-family:var(--sans);">✏️ 색연필</button>
-          <button id="edgeStyleScore" onclick="setEdgeStyle('score')"
-            style="flex:1;padding:5px;font-size:10px;border-radius:4px;cursor:pointer;border:0.5px solid #333;background:#141414;color:#666;font-family:var(--sans);">🎼 오선지</button>
-        </div>
+        <!-- 스타일: 색연필만 -->
+        <div style="margin-bottom:10px;font-size:10px;color:#555;">✏️ 색연필 스타일</div>
         <div id="edgeControls" style="display:flex;flex-direction:column;gap:10px;">
           <!-- 색연필 전용 -->
           <div id="crayonControls">
@@ -421,7 +420,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.3';
+const VERSION = 'v2.0.4';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -532,6 +531,7 @@ const waveSettings={
   dots:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
   silhouette:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
   trace:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
+  staff:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
 };
 let activeWave='mirror';
 let visibleWaves=new Set(['mirror']);
@@ -1969,7 +1969,9 @@ function downloadWaveVideo(fmt){
       if(!wc || wc === 'auto') wc = '#ffffff';
 
       ctx.save();
-      if(ws === 'trace'){
+      if(ws === 'staff'){
+        drawStaffOverlay(ctx, animPts, CW, CH, wc, Math.max(CW/400,1.5)*amp);
+      } else if(ws === 'trace'){
         // trace는 실제 drawTraceLine과 동일한 로직, waveOffsetY 반영
         const smooth = animPts.map((v,i)=>{
           const w=7; let sum=0,cnt=0;
@@ -2187,6 +2189,12 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
   const n = pts.length;
 
   if(waveStyle === 'trace'){ drawTraceLine(ctx, pts, CW, CH, ampRatio); return; }
+  if(waveStyle === 'staff'){
+    const sc = waveSettings['staff'] || {};
+    const staffColor = (sc.color && sc.color!=='auto') ? sc.color : (window.waveColor||'#ffffff');
+    drawStaffOverlay(ctx, pts, CW, CH, staffColor, Math.max(CW/400,1.5) * (ampRatio||1));
+    return;
+  }
   if(waveStyle === 'silhouette'){
     drawSilhouetteWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio);
     return;
