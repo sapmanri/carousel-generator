@@ -28,5 +28,110 @@
       "wordmark": "SAPMANRI",
       "pages": 7
     }
+  },
+  {
+    "id": "magazine-b-style",
+    "title": "Magazine B 스타일",
+    "subtitle": "캐러셀 생성기 style: magazine-b · v1.0",
+    "file": "magazine_b_style.md",
+    "tags": ["캐러셀", "에디토리얼", "세리프", "여백"],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": ["#b87a6e", "#faf9f7", "#f2f0ec", "#1a1a1a"],
+      "name": "Magazine B",
+      "fonts": ["Cormorant Garamond", "Noto Sans KR"],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "nike-style",
+    "title": "Nike 스타일",
+    "subtitle": "캐러셀 생성기 style: nike · v1.0",
+    "file": "nike_style.md",
+    "tags": ["캐러셀", "강렬", "대문자", "흑백"],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": ["#ffffff", "#111111", "#888888", "#000000"],
+      "name": "NIKE",
+      "fonts": ["Helvetica Neue"],
+      "sample": "SLOW DAYS"
+    }
+  },
+  {
+    "id": "ohouse-style",
+    "title": "오늘의집(Ohouse) 스타일",
+    "subtitle": "캐러셀 생성기 style: ohouse · v1.0",
+    "file": "ohouse_style.md",
+    "tags": ["캐러셀", "라이프스타일", "Pill", "틸그린"],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": ["#00C896", "#FAFAF8", "#E6FAF4", "#F5F3EF"],
+      "name": "오늘의집",
+      "fonts": ["Noto Sans KR"],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "theedit-style",
+    "title": "디에디트(The Edit) 스타일",
+    "subtitle": "캐러셀 생성기 style: theedit · v1.0",
+    "file": "theedit_style.md",
+    "tags": ["캐러셀", "큐레이션", "정보형", "화이트"],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": ["#ff3c00", "#ffffff", "#f5f5f5", "#111111"],
+      "name": "THE EDIT",
+      "fonts": ["Helvetica Neue"],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "stayfolio-style",
+    "title": "스테이폴리오(Stayfolio) 스타일",
+    "subtitle": "캐러셀 생성기 style: stayfolio · v1.0",
+    "file": "stayfolio_style.md",
+    "tags": ["캐러셀", "파인스테이", "세리프", "여백"],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": ["#8c7355", "#f7f4ef", "#d4cfc8", "#1c1917"],
+      "name": "STAYFOLIO",
+      "fonts": ["Cormorant Garamond", "Noto Serif KR"],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "sapmanri-dark-style",
+    "title": "감성찾아삽만리 (다크·감성) 스타일",
+    "subtitle": "캐러셀 생성기 style: sapmanri · v1.0",
+    "file": "sapmanri_dark_style.md",
+    "tags": ["캐러셀", "다크", "채널 시그니처", "산세리프"],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": ["#b87a6e", "#0e0e0e", "#1a1a1a", "#ffffff"],
+      "name": "SAPMANRI",
+      "fonts": ["Helvetica Neue", "Noto Sans KR"],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "applemd-style",
+    "title": "Apple (미니멀·여백) 스타일",
+    "subtitle": "캐러셀 생성기 style: applemd · v1.0",
+    "file": "applemd_style.md",
+    "tags": ["캐러셀", "미니멀", "블랙", "여백"],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": ["#ffffff", "#000000", "#333333", "#666666"],
+      "name": "Apple",
+      "fonts": ["Helvetica Neue"],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
   }
 ]
