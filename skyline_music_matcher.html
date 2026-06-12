@@ -256,7 +256,7 @@ input[type=range]::-moz-range-thumb{
             <input type="range" id="textScaleSlider" min="50" max="150" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="textScale=this.value/100; document.getElementById('textScaleVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>작게</span><span>크게</span></div>
           </div>
-          <div>
+          <div id="strokeWidthWrap" style="display:none;">
             <div style="display:flex;justify-content:space-between;margin-bottom:6px;"><span style="font-size:10px;color:#555;">선 굵기 <span style="color:#333;">(트레이스·오선지)</span></span><span style="font-size:10px;color:#666;" id="strokeWidthVal">1.0×</span></div>
             <input type="range" id="strokeWidthSlider" min="10" max="500" value="100" style="width:100%;accent-color:#7c6fd4;cursor:pointer;" oninput="window.strokeScale=this.value/100; document.getElementById('strokeWidthVal').textContent=(this.value/100).toFixed(1)+'×'; if(cachedResult)renderCard(cachedResult);" />
             <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:#333;"><span>가늘게</span><span>굵게</span></div>
@@ -441,7 +441,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.8';
+const VERSION = 'v2.0.9';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -661,7 +661,8 @@ function pickWave(btn){
     amp:parseInt(document.getElementById('ampSlider').value),
     textScale:parseFloat(document.getElementById('textScaleSlider').value)/100,
     color:window.waveColor,
-    offset:waveOffsetY
+    offset:waveOffsetY,
+    strokeScale:window.strokeScale||1.0
   };
   // Switch active wave
   document.querySelectorAll('[data-wave]').forEach(b=>{if(b.tagName==='BUTTON')b.classList.remove('active-wave');});
@@ -681,6 +682,15 @@ function pickWave(btn){
   waveOffsetY=s.offset;
   const ofs=document.getElementById('waveOffsetSlider');
   if(ofs){ofs.value=Math.round(s.offset*100); document.getElementById('waveOffsetVal').textContent=s.offset>0?'아래↓':s.offset<0?'위↑':'중앙';}
+  // strokeScale 복원
+  window.strokeScale = (s.strokeScale!==undefined) ? s.strokeScale : 1.0;
+  const swEl=document.getElementById('strokeWidthSlider');
+  if(swEl){swEl.value=Math.round(window.strokeScale*100); document.getElementById('strokeWidthVal').textContent=window.strokeScale.toFixed(1)+'×';}
+  // 선 굵기 슬라이더는 trace/staff에만 의미 있음
+  const strokeWrap=document.getElementById('strokeWidthWrap');
+  if(strokeWrap){
+    strokeWrap.style.display = (activeWave==='trace'||activeWave==='staff') ? 'block' : 'none';
+  }
   if(cachedResult) renderCard(cachedResult);
 }
 function toggleWaveVisible(wave,el){
@@ -697,12 +707,12 @@ let cropOffsetX=0.5;
 window.waveColor='auto';
 let waveOffsetY=0.0;
 const waveSettings={
-  mirror:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  multiline:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  dots:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  silhouette:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  trace:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
-  staff:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0},
+  mirror:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0,strokeScale:1.0},
+  multiline:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0,strokeScale:1.0},
+  dots:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0,strokeScale:1.0},
+  silhouette:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0,strokeScale:1.0},
+  trace:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0,strokeScale:1.0},
+  staff:{density:120,amp:100,textScale:1.0,color:'auto',offset:0.0,strokeScale:1.0},
 };
 let activeWave='mirror';
 let visibleWaves=new Set(['mirror']);
@@ -740,7 +750,7 @@ function setEdgeStyle(style){
   if(cachedResult && window.edgeEnabled) renderCard(cachedResult);
 }
 
-function drawStaffOverlay(ctx, pts, CW, CH, color, lineW, amp){
+function drawStaffOverlay(ctx, pts, CW, CH, color, lineW, amp, offset){
   if(!pts||!pts.length) return;
   const ec = color || '#ffffff';
   const ss = window.strokeScale || 1.0;
@@ -748,7 +758,7 @@ function drawStaffOverlay(ctx, pts, CW, CH, color, lineW, amp){
   const ar = amp || 1;
   const n = pts.length;
 
-  const baseY = (window._bgWaveY > 0 ? window._bgWaveY : CH*0.42);
+  const baseY = (window._bgWaveY > 0 ? window._bgWaveY : CH*0.42) + (offset||0)*CH;
   const spread = (window._bgWaveH > 0 ? window._bgWaveH : CH*0.28) * ar;
   const mn=Math.min(...pts), mx=Math.max(...pts), rng=mx-mn||1;
   const getY = v => baseY - ((v-mn)/rng - 0.5)*spread*2;
@@ -1080,6 +1090,7 @@ function renderCard(d){
     const _liveColor = window.waveColor;
     const _liveDensity = parseInt(document.getElementById('densitySlider').value)||80;
     const _liveAmp = (parseInt(document.getElementById('ampSlider').value)||100)/100;
+    const _liveStroke = window.strokeScale||1.0;
 
     visibleWaves.forEach(w => {
       const s = waveSettings[w];
@@ -1087,6 +1098,7 @@ function renderCard(d){
       const isActive = (w === activeWave);
       window.waveColor = isActive ? _liveColor : s.color;
       waveOffsetY = isActive ? _liveOffset : s.offset;
+      window.strokeScale = isActive ? _liveStroke : (s.strokeScale!==undefined?s.strokeScale:1.0);
       const useDensity = isActive ? _liveDensity : s.density;
       const useAmp = isActive ? _liveAmp : s.amp/100;
       const rp = d.line_points || [];
@@ -1104,6 +1116,7 @@ function renderCard(d){
     waveStyle = _savedStyle;
     window.waveColor = _savedColor;
     waveOffsetY = _savedOffset;
+    window.strokeScale = _liveStroke;
     // 엣지 오버레이 (체크된 경우)
     if(window.edgeEnabled && img){
       if(window.edgeStyle === 'score'){
@@ -2088,6 +2101,7 @@ function downloadWaveVideo(fmt){
     const amp = isActive ? ((parseInt(document.getElementById('ampSlider').value)||100)/100) : s.amp/100;
     const color = isActive ? (window.waveColor||'#ffffff') : s.color;
     const offset = isActive ? waveOffsetY : s.offset;
+    const strokeScale = isActive ? (window.strokeScale||1.0) : (s.strokeScale!==undefined?s.strokeScale:1.0);
     const rawPts = d.line_points || [];
     const pts = [];
     for(let i=0;i<density;i++){
@@ -2095,7 +2109,7 @@ function downloadWaveVideo(fmt){
       const i0=Math.floor(idx), i1=Math.min(i0+1,rawPts.length-1);
       pts.push(rawPts[i0]*(1-(idx-i0))+rawPts[i1]*(idx-i0));
     }
-    waveSnapshot.push({ style: w, pts, amp, color, offset });
+    waveSnapshot.push({ style: w, pts, amp, color, offset, strokeScale });
   });
 
   const mimeType = MediaRecorder.isTypeSupported('video/mp4')
@@ -2146,7 +2160,7 @@ function downloadWaveVideo(fmt){
 
       ctx.save();
       if(ws === 'staff'){
-        drawStaffOverlay(ctx, animPts, CW, CH, wc, Math.max(CW/400,1.5), amp);
+        drawStaffOverlay(ctx, animPts, CW, CH, wc, Math.max(CW/400,1.5), amp, offset);
       } else if(ws === 'trace'){
         // trace는 실제 drawTraceLine과 동일한 로직, waveOffsetY 반영
         const smooth = animPts.map((v,i)=>{
@@ -2253,13 +2267,16 @@ function downloadWaveVideo(fmt){
       ctx.drawImage(bgCanvas, 0, 0, CW, CH);
 
       // visibleWaves 전부 그리기
+      const _origStroke = window.strokeScale;
       waveSnapshot.forEach(ws => {
         const animPts = ws.pts.map((v,i) => {
           const wave = Math.sin(phase + i*0.18)*7 + Math.sin(phase*2 + i*0.07)*3;
           return Math.max(0, Math.min(100, v+wave));
         });
+        window.strokeScale = ws.strokeScale;
         drawOneWave(ws.style, animPts, ws.color, ws.offset, ws.amp);
       });
+      window.strokeScale = _origStroke;
 
       ctx.globalAlpha=1;
 
@@ -2368,7 +2385,8 @@ function drawWave(ctx, pts, CW, baseY, maxH, color, glowColor, ampRatio, CH){
   if(waveStyle === 'staff'){
     const sc = waveSettings['staff'] || {};
     const staffColor = (sc.color && sc.color!=='auto') ? sc.color : (window.waveColor||'#ffffff');
-    drawStaffOverlay(ctx, pts, CW, CH, staffColor, Math.max(CW/400,1.5), ampRatio||1);
+    const staffOffset = typeof waveOffsetY !== 'undefined' ? waveOffsetY : 0;
+    drawStaffOverlay(ctx, pts, CW, CH, staffColor, Math.max(CW/400,1.5), ampRatio||1, staffOffset);
     return;
   }
   if(waveStyle === 'silhouette'){
