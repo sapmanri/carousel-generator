@@ -230,7 +230,9 @@
         {
           "type": "grid",
           "images": [
-            "./images/061226-2/07_p7.jpg"
+            "./images/061226-2/07_p7.jpg",
+            "./images/061226-2/02_p2.jpg",
+            "./images/061226-2/01_p1.jpg"
           ],
           "label": "",
           "caption": "물 위에 선 하나씩 그려지는 오후"
@@ -239,6 +241,12 @@
           "type": "fullbleed",
           "image": "./images/061226-2/08_p8.jpg",
           "caption": "손끝에 흙이 남는 오후"
+        },
+        {
+          "type": "spread",
+          "image": "./images/061226-2/06_p6.jpg",
+          "captionLeft": "",
+          "captionRight": ""
         },
         {
           "type": "closing",
