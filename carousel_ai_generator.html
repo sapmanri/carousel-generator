@@ -304,7 +304,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.6.2</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.7.0</span></div>
   <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
     <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
       style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:200px"
@@ -430,6 +430,213 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 
 </div>
 <script>
+// ── SAPMANRI 공통 이미지 분석 캐시 (carousel/skyline/writing 공유) ──
+/**
+ * SAPMANRI Shared Image Analysis Cache
+ * ─────────────────────────────────────
+ * 여러 서비스(carousel generator, skyline music matcher, writing studio 등)에서
+ * 동일한 이미지에 대한 AI 분석 결과를 공유 캐시하기 위한 공통 모듈.
+ *
+ * 사용법:
+ *   <script src="shared_image_cache.js"><\/script>
+ *   ...
+ *   const hash = await SapmanriCache.hashImage(dataUrl);
+ *   const cached = SapmanriCache.get(hash, 'carousel'); // 서비스별 네임스페이스
+ *   if (cached) {
+ *     // 캐시 사용
+ *   } else {
+ *     const result = await analyzeImage(...);
+ *     SapmanriCache.set(hash, 'carousel', result);
+ *   }
+ *
+ * 저장 구조 (localStorage key: "sapmanri_image_cache"):
+ * {
+ *   "<imageHash>": {
+ *     "carousel":  { data: {...}, ts: 1718000000000 },
+ *     "skyline":   { data: {...}, ts: 1718000000000 },
+ *     "writing":   { data: {...}, ts: 1718000000000 }
+ *   },
+ *   ...
+ * }
+ *
+ * 특징:
+ * - 이미지 해시 기반 (파일 크기 + 콘텐츠 일부 샘플링 → 빠른 동기 불필요, djb2 변형)
+ * - 서비스별 네임스페이스 분리 (같은 이미지라도 분석 스키마가 다름)
+ * - LRU 방식 정리: 항목 수가 MAX_ENTRIES 초과 시 가장 오래된 것부터 제거
+ * - localStorage 용량 초과 시 자동으로 오래된 항목 정리 후 재시도
+ */
+(function (global) {
+  const STORAGE_KEY = 'sapmanri_image_cache';
+  const MAX_ENTRIES = 500; // 이미지 해시 기준 최대 보관 개수
+  const VERSION = 1;
+
+  function _loadAll() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.__v === VERSION) return parsed.entries || {};
+      return {}; // 버전 다르면 초기화
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function _saveAll(entries) {
+    const payload = JSON.stringify({ __v: VERSION, entries });
+    try {
+      localStorage.setItem(STORAGE_KEY, payload);
+      return true;
+    } catch (e) {
+      // 용량 초과 → 오래된 항목 절반 정리 후 재시도
+      const keys = Object.keys(entries);
+      if (keys.length === 0) return false;
+      const sorted = keys
+        .map(k => ({ k, ts: _latestTs(entries[k]) }))
+        .sort((a, b) => a.ts - b.ts);
+      const removeCount = Math.ceil(sorted.length / 2);
+      for (let i = 0; i < removeCount; i++) delete entries[sorted[i].k];
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ __v: VERSION, entries }));
+        return true;
+      } catch (e2) {
+        return false;
+      }
+    }
+  }
+
+  function _latestTs(serviceMap) {
+    let max = 0;
+    for (const svc in serviceMap) {
+      const ts = serviceMap[svc] && serviceMap[svc].ts;
+      if (ts && ts > max) max = ts;
+    }
+    return max;
+  }
+
+  function _enforceLimit(entries) {
+    const keys = Object.keys(entries);
+    if (keys.length <= MAX_ENTRIES) return entries;
+    const sorted = keys
+      .map(k => ({ k, ts: _latestTs(entries[k]) }))
+      .sort((a, b) => a.ts - b.ts);
+    const removeCount = keys.length - MAX_ENTRIES;
+    for (let i = 0; i < removeCount; i++) delete entries[sorted[i].k];
+    return entries;
+  }
+
+  /**
+   * dataUrl(base64) 또는 ArrayBuffer/Blob으로부터 이미지 해시를 계산.
+   * 전체 데이터를 해시하면 느릴 수 있으므로, 길이 + 샘플링된 바이트로
+   * djb2 변형 해시를 빠르게 계산한다. (완벽한 충돌방지보다 실용성 우선)
+   *
+   * @param {string} dataUrl - "data:image/...;base64,...." 형식
+   * @returns {Promise<string>} hex 해시 문자열
+   */
+  async function hashImage(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== 'string') return null;
+    const commaIdx = dataUrl.indexOf(',');
+    const b64 = commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
+    const len = b64.length;
+
+    // 샘플링: 처음/중간/끝 구간에서 일정 간격으로 문자 추출 (최대 4000자)
+    const sampleSize = Math.min(len, 4000);
+    const step = Math.max(1, Math.floor(len / sampleSize));
+
+    let h1 = 5381; // djb2
+    let h2 = 52711; // 보조 해시 (분산용)
+    for (let i = 0; i < len; i += step) {
+      const c = b64.charCodeAt(i);
+      h1 = ((h1 << 5) + h1 + c) | 0; // h1*33 + c
+      h2 = ((h2 << 5) - h2 + c) | 0; // h2*31 - c (다른 다항식)
+    }
+
+    // 길이도 해시에 포함 (서로 다른 이미지가 같은 샘플을 가질 확률 감소)
+    const combined = `${len.toString(36)}_${(h1 >>> 0).toString(16)}_${(h2 >>> 0).toString(16)}`;
+    return combined;
+  }
+
+  /**
+   * 캐시에서 분석 결과 조회
+   * @param {string} hash - hashImage()로 계산한 해시
+   * @param {string} service - 'carousel' | 'skyline' | 'writing' 등 서비스 식별자
+   * @returns {object|null} 캐시된 데이터 (data 필드) 또는 null
+   */
+  function get(hash, service) {
+    if (!hash || !service) return null;
+    const entries = _loadAll();
+    const entry = entries[hash];
+    if (!entry || !entry[service]) return null;
+    return entry[service].data;
+  }
+
+  /**
+   * 캐시에 분석 결과 저장
+   * @param {string} hash - hashImage()로 계산한 해시
+   * @param {string} service - 서비스 식별자
+   * @param {object} data - 저장할 분석 결과 (JSON 직렬화 가능해야 함)
+   * @returns {boolean} 저장 성공 여부
+   */
+  function set(hash, service, data) {
+    if (!hash || !service) return false;
+    const entries = _loadAll();
+    if (!entries[hash]) entries[hash] = {};
+    entries[hash][service] = { data, ts: Date.now() };
+    _enforceLimit(entries);
+    return _saveAll(entries);
+  }
+
+  /**
+   * 특정 이미지의 모든 서비스 캐시 조회 (디버그/표시용)
+   */
+  function getAllServices(hash) {
+    const entries = _loadAll();
+    return entries[hash] || {};
+  }
+
+  /**
+   * 캐시 전체 삭제
+   */
+  function clear() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * 캐시 통계 (디버그용): 총 이미지 수, 서비스별 항목 수, 대략적인 용량(byte)
+   */
+  function stats() {
+    const entries = _loadAll();
+    const imageCount = Object.keys(entries).length;
+    const byService = {};
+    for (const hash in entries) {
+      for (const svc in entries[hash]) {
+        byService[svc] = (byService[svc] || 0) + 1;
+      }
+    }
+    let bytes = 0;
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      bytes = raw ? raw.length : 0;
+    } catch (e) {}
+    return { imageCount, byService, approxBytes: bytes };
+  }
+
+  global.SapmanriCache = {
+    hashImage,
+    get,
+    set,
+    getAllServices,
+    clear,
+    stats,
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+
 // ── API Key ──
 function saveApiKey(val) {
   try { localStorage.setItem('anthropic_key', val); } catch(e) {}
@@ -527,9 +734,15 @@ function log(text, done=false) {
     `<div class="step" id="${id}"><span class="step-icon ${done?'done':'spin'}">${done?'✓':'◌'}</span><span>${text}</span></div>`;
   return id;
 }
-function doneStep(id) {
+function doneStep(id, suffix='') {
   const el = document.getElementById(id);
-  if (el) { const ic = el.querySelector('.step-icon'); ic.className='step-icon done'; ic.textContent='✓'; }
+  if (el) {
+    const ic = el.querySelector('.step-icon'); ic.className='step-icon done'; ic.textContent='✓';
+    if (suffix) {
+      const span = el.querySelector('span:last-child');
+      if (span) span.textContent += suffix;
+    }
+  }
 }
 
 // ── generate ──
@@ -547,18 +760,42 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   const manualText = document.getElementById('metaTextSlide').value.trim();
   const infographicMode = document.getElementById('infographicMode').checked;
 
+  // 이미지 해시 계산 (아직 없으면)
+  for (let i = 0; i < images.length; i++) {
+    if (!images[i].hash) {
+      try { images[i].hash = await SapmanriCache.hashImage(images[i].dataUrl); } catch(e) {}
+    }
+  }
+
   const needsAnalysis = images.some(img => !img.analysis);
   if (needsAnalysis) {
     const s1 = log(`이미지 ${images.length}장 분석 중...`);
+    let sharedHits = 0;
     for (let i = 0; i < images.length; i++) {
-      if (images[i].analysis) continue; // 이미 분석된 이미지는 스킵
+      if (images[i].analysis) continue; // 메모리 캐시(이미 분석됨) 스킵
+
       const thumb = document.getElementById(`thumb-${i}`);
+
+      // 공유 캐시 조회 (다른 서비스/이전 세션 결과 재사용)
+      if (images[i].hash) {
+        const cached = SapmanriCache.get(images[i].hash, 'carousel');
+        if (cached) {
+          images[i].analysis = cached;
+          sharedHits++;
+          if (thumb) { thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }
+          continue;
+        }
+      }
+
       if (thumb) thumb.classList.add('analyzing');
-      try { images[i].analysis = await analyzeImage(images[i].dataUrl, topic, style); }
+      try {
+        images[i].analysis = await analyzeImage(images[i].dataUrl, topic, style);
+        if (images[i].hash) SapmanriCache.set(images[i].hash, 'carousel', images[i].analysis);
+      }
       catch(e) { images[i].analysis = { subject_position:'center', best_text_position:'bottom_left', text_color:'white', suggested_copy:'감성의 순간', suggested_body:'오늘도 천천히.', overall_brightness:'mid', dominant_color:'#b87a6e', mood:'고요함' }; }
       if (thumb) { thumb.classList.remove('analyzing'); thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }
     }
-    doneStep(s1);
+    doneStep(s1, sharedHits > 0 ? ` (공유 캐시 ${sharedHits}장 재사용)` : '');
   } else {
     log('이미지 분석 완료 (캐시)', true);
   }
