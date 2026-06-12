@@ -188,11 +188,12 @@ function esc(s) {
 // ══════════════════════════════════════════════════════════════
 // 이미지 분석 (carousel_ai_generator.html의 analyzeImage와 동일 패턴)
 // ══════════════════════════════════════════════════════════════
-async function analyzeImage(dataUrl) {
+async function analyzeImage(dataUrl, hints) {
   const base64 = dataUrl.split(',')[1];
   const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
   const key = getApiKey();
   if (!key) throw new Error('API Key가 필요합니다.');
+  const hintText = hints ? `\n\n참고로 이 사진은 이전에 다른 도구에서 분석한 적이 있고, 그 결과는 다음과 같아 (참고만 하고 필요하면 다르게 판단해도 됨): subject_position=${hints.subject_position}, overall_brightness=${hints.overall_brightness}, dominant_color=${hints.dominant_color}, mood=${hints.mood}` : '';
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -207,7 +208,7 @@ async function analyzeImage(dataUrl) {
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
         { type: 'text', text: `이 이미지를 분석해서 웹매거진 페이지 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것."}` }
+{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것."}${hintText}` }
       ]}]
     })
   });
@@ -507,8 +508,24 @@ async function analyzeAllPhotos() {
       const hash = await SapmanriCache.hashImage(p.dataUrl);
       let result = await SapmanriCache.get(hash, 'magazine');
       if (!result) {
-        result = await analyzeImage(p.dataUrl);
+        // 캐러셀/스카이라인 캐시에 있으면 힌트로 활용 (subject_position, brightness, color, mood 일관성)
+        let hints = await SapmanriCache.get(hash, 'carousel');
+        if (!hints) hints = await SapmanriCache.get(hash, 'skyline');
+        result = await analyzeImage(p.dataUrl, hints);
         SapmanriCache.set(hash, 'magazine', result); // 비동기 — 기다리지 않음
+        // 겹치는 필드를 carousel/skyline 캐시에도 역으로 채워둠 (있을 때만, 다른 도구 재사용 대비)
+        const shared = {
+          subject_position: result.subject_position,
+          overall_brightness: result.overall_brightness,
+          dominant_color: result.dominant_color,
+          mood: result.mood,
+        };
+        if (!await SapmanriCache.get(hash, 'carousel')) {
+          SapmanriCache.set(hash, 'carousel', { ...shared, best_text_position: 'bottom_left', text_color: 'white', suggested_copy: result.suggested_caption || '', suggested_body: '' });
+        }
+        if (!await SapmanriCache.get(hash, 'skyline')) {
+          SapmanriCache.set(hash, 'skyline', shared);
+        }
       }
       p.analysis = result;
       renderPhotoGrid();
