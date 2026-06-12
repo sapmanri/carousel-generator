@@ -272,6 +272,31 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .jw-closing-content{position:relative;z-index:2}
 .jw-closing-cta{font-family:var(--sans);font-size:7px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:10px}
 .jw-closing-wordmark{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:18px;letter-spacing:0.14em;color:var(--jw-orange);margin-top:16px}
+
+/* 인덱스/목차 */
+.jw-index-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--jw-dark);padding:20px 16px;display:flex;flex-direction:column}
+.jw-index-label{font-family:var(--sans);font-size:7px;letter-spacing:0.2em;text-transform:uppercase;color:var(--jw-orange);margin-bottom:4px}
+.jw-index-title{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:16px;color:#fff;margin-bottom:18px}
+.jw-index-list{display:flex;flex-direction:column;gap:12px;flex:1}
+.jw-index-item{display:flex;align-items:baseline;gap:10px}
+.jw-index-num{font-family:var(--sans);font-size:11px;font-weight:700;color:var(--jw-orange);min-width:18px}
+.jw-index-item-title{font-family:"Gowun Batang","Noto Serif KR",serif;font-size:11px;color:rgba(255,255,255,0.85)}
+
+/* 2단 사진+텍스트 */
+.jw-split-canvas{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.jw-split-photo{flex:0 0 60%;position:relative;overflow:hidden}
+.jw-split-text{flex:1;background:var(--jw-cream);padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
+.jw-split-label{font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:var(--jw-orange);text-transform:uppercase;margin-bottom:6px}
+.jw-split-text-lines{font-family:"Gowun Batang","Noto Serif KR",serif;font-size:10px;line-height:1.85;color:var(--jw-dark)}
+
+/* 그리드 콜라주 */
+.jw-grid-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--jw-cream);padding:14px;display:flex;flex-direction:column}
+.jw-grid-title{font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:#999;text-transform:uppercase;margin-bottom:8px}
+.jw-grid-wrap{flex:1;display:grid;gap:6px}
+.jw-grid-wrap.g2x2{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.jw-grid-wrap.g1p2{grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr}
+.jw-grid-cell{position:relative;overflow:hidden;background:#ddd}
+.jw-grid-big{grid-row:1 / 3}
 </style>
 
 </head>
@@ -279,7 +304,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.5.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.6.0</span></div>
   <div style="display:flex;align-items:center;gap:8px">
     <input type="password" id="apiKeyInput" placeholder="sk-ant-..." 
       style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:200px"
@@ -736,17 +761,25 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - 모든 텍스트(headline, body, label, caption, hashtag)는 ${textLang === 'en' ? '영어로만 작성 (한국어 금지)' : '한국어로만 작성 (label은 영어 단어 허용)'}
 - caption에 해시태그 10개 포함
 ${style === 'jeonwon' ? `
-전원생활 매거진 모드 추가 규칙:
+전원생활 매거진 모드 추가 규칙 — 슬라이드 수에 따라 7개 page_type을 적절히 조합:
 - 1번 슬라이드(표지): page_type="cover", type="cover"
   - label: "이주의 이야기" 같은 특집 라벨
   - headline: 2줄로 나뉘는 메인 헤드라인 (\n으로 구분)
-  - article_list: 부가 기사 제목 2~4개 배열 (예: ["장미 울타리","산딸기","직조 전등"])
-  - issue_year: "2026"
-  - issue_sub: "6월 2주" 같은 발행 주차
+  - article_list: 부가 기사 제목 2~4개 배열
+  - issue_year: "2026", issue_sub: "6월 2주" 같은 발행 주차
+- 2번 슬라이드(이미지 6장 이상일 때): page_type="index"
+  - headline: "이번 호 이야기" 류 제목
+  - index_list: 이번 영상 소주제 3~5개 배열 (예: ["장미 울타리","산딸기 수확","직조 전등 만들기"])
 - 마지막 슬라이드(클로징): page_type="closing", type="closing"
   - headline: "오늘도 느리게, 잘 보냈습니다" 류의 클로징 문구
   - body: 짧은 마무리 문장
-- 중간 슬라이드 1개는 page_type="quote": 나레이션 중 가장 인상적인 한 문장을 headline에, label에 출처/맥락 짧게
+- 중간 슬라이드 중 1개는 page_type="quote": 가장 인상적인 한 문장을 headline에, label에 출처/맥락
+- 중간 슬라이드 중 1개(이미지 8장 이상일 때)는 page_type="split":
+  - label: 소제목 (예: "아침의 루틴")
+  - body: 나레이션 2-3문장, \n으로 줄바꿈
+- 중간 슬라이드 중 1개(이미지 8장 이상일 때)는 page_type="grid":
+  - label: "오후의 장면들" 류 소제목
+  - image_indices: 사용할 이미지 인덱스 배열 2~3개 (다른 슬라이드와 중복 가능)
 - 나머지 중간 슬라이드는 page_type="fullbleed": headline 또는 body에 짧은 명조 캡션 한 줄
 - 모든 슬라이드에 page_type 필드 필수` : ''}
 ${infographicMode ? `
@@ -790,7 +823,7 @@ function renderSlide(slide, i) {
   if (style === 'theedit') return renderTheEdit(slide, i, img, folio, accent, tag);
   if (style === 'sapmanri') return renderSapmanriStyle(slide, i, img, folio, accent, tag);
   if (style === 'applemd') return renderAppleMD(slide, i, img, folio, accent, tag);
-  if (style === 'jeonwon') return renderJeonwon(slide, i, img, folio, accent, tag);
+  if (style === 'jeonwon') return renderJeonwon(slide, i, img, folio, accent, tag, images);
   if (style === 'stayfolio') return renderStayfolio(slide, i, img, folio, accent, tag);
 
   // Magazine B / Nike
@@ -981,7 +1014,7 @@ function renderAppleMD(slide, i, img, folio, accent, tag) {
 }
 
 
-function renderJeonwon(slide, i, img, folio, accent, tag) {
+function renderJeonwon(slide, i, img, folio, accent, tag, allImages) {
   const pageType = slide.page_type || (slide.type === 'cover' ? 'cover' : slide.type === 'closing' ? 'closing' : 'fullbleed');
   const pageNum = folio || String(i+1).padStart(2,'0') + '/07';
 
@@ -1031,6 +1064,48 @@ function renderJeonwon(slide, i, img, folio, accent, tag) {
       <div class="jw-quote-rule"></div>
       <div class="jw-quote-context">${slide.label || ''}</div>
       <div class="jw-mini-page-dark" style="color:rgba(255,255,255,0.3)">${pageNum}</div>
+    </div></div>`;
+  }
+
+  // ── 인덱스/목차 ──
+  if (pageType === 'index') {
+    const items = (slide.index_list || []).slice(0,5);
+    const itemsHtml = items.map((t,j) => `<div class="jw-index-item"><span class="jw-index-num">0${j+1}</span><span class="jw-index-item-title">${t}</span></div>`).join('');
+    return `<div class="slide-card"><div class="jw-index-canvas">
+      <div class="jw-index-label">CONTENTS</div>
+      <div class="jw-index-title">${slide.headline || '이번 호 이야기'}</div>
+      <div class="jw-index-list">${itemsHtml}</div>
+      <div class="jw-mini-page-dark" style="position:static;text-align:right;color:rgba(255,255,255,0.25)">${pageNum}</div>
+    </div></div>`;
+  }
+
+  // ── 2단 사진+텍스트 ──
+  if (pageType === 'split') {
+    const lines = (slide.body || '').split('\n').filter(l=>l.trim());
+    const linesHtml = lines.map(l => `<div>${l}</div>`).join('');
+    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#ccc"></div>`;
+    return `<div class="slide-card"><div class="jw-split-canvas">
+      <div class="jw-split-photo">${bgHtml}<div class="jw-mini-mark" style="color:#fff">SAPMANRI</div><div class="jw-mini-page">${pageNum}</div></div>
+      <div class="jw-split-text">
+        <div class="jw-split-label">${slide.label || ''}</div>
+        <div class="jw-split-text-lines">${linesHtml}</div>
+      </div>
+    </div></div>`;
+  }
+
+  // ── 그리드 콜라주 ──
+  if (pageType === 'grid') {
+    const idxs = (slide.image_indices || []).filter(idx => idx != null && allImages && idx < allImages.length);
+    const layout = idxs.length >= 3 ? 'g1p2' : 'g2x2';
+    const cellsHtml = idxs.slice(0,3).map((idx,j) => {
+      const src = allImages[idx]?.dataUrl || '';
+      const bigCls = (layout === 'g1p2' && j === 0) ? ' jw-grid-big' : '';
+      return `<div class="jw-grid-cell${bigCls}">${src?`<img class="slide-bg-img" src="${src}"/>`:''}</div>`;
+    }).join('');
+    return `<div class="slide-card"><div class="jw-grid-canvas">
+      <div class="jw-grid-title">${slide.label || '오후의 장면들'}</div>
+      <div class="jw-grid-wrap ${layout}">${cellsHtml}</div>
+      <div class="jw-mini-page-dark" style="position:static;text-align:right;margin-top:6px">${pageNum}</div>
     </div></div>`;
   }
 
@@ -1091,7 +1166,7 @@ async function exportSlides() {
     const imgSrc = (slide.image_index != null && images[slide.image_index])
       ? images[slide.image_index].dataUrl : null;
     try {
-      const canvas = await renderSlideToCanvas(slide, i, imgSrc, SIZE);
+      const canvas = await renderSlideToCanvas(slide, i, imgSrc, SIZE, images);
       _iosPngs.push(canvas.toDataURL('image/png'));
     } catch(e) { _iosPngs.push(null); console.error(e); }
   }
@@ -1192,7 +1267,7 @@ function renderSlideWithImages(slide, i, imgArr) {
   return `<div class="slide-canvas" style="width:100%;height:100%;background:${bgColor}">${bgHtml}<div class="${txtClass}">${inner}</div><div class="${folioClass}">${folio}</div></div>`;
 }
 
-async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
+async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
   const canvas = document.createElement('canvas');
   canvas.width = SIZE; canvas.height = SIZE;
   const ctx = canvas.getContext('2d');
@@ -1426,6 +1501,135 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'right';
       ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+      ctx.textAlign = 'left';
+      return canvas;
+    }
+
+    // ── 인덱스/목차 ──
+    if (pageType === 'index') {
+      ctx.fillStyle = DARK; ctx.fillRect(0,0,SIZE,SIZE);
+      const pad = Math.round(16*R2);
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = ORANGE;
+      ctx.fillText('CONTENTS', pad, pad + Math.round(7*R2));
+      setFont(Math.round(16*R2), '700', serif);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(slide.headline || '이번 호 이야기', pad, pad + Math.round(28*R2));
+
+      const items = (slide.index_list || []).slice(0,5);
+      const itemY0 = pad + Math.round(50*R2);
+      const itemGap = Math.round(20*R2);
+      items.forEach((t,j) => {
+        const y = itemY0 + j*itemGap;
+        setFont(Math.round(11*R2), '700', sansFont);
+        ctx.fillStyle = ORANGE;
+        ctx.fillText('0'+(j+1), pad, y);
+        setFont(Math.round(11*R2), '400', serif);
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.fillText(t, pad + Math.round(18*R2), y);
+      });
+
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.textAlign = 'right';
+      ctx.fillText(pageNum, SIZE-pad, SIZE-pad);
+      ctx.textAlign = 'left';
+      return canvas;
+    }
+
+    // ── 2단 사진+텍스트 ──
+    if (pageType === 'split') {
+      const splitY = Math.round(SIZE*0.6);
+      ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,SIZE,SIZE);
+      if (imgDataUrl) {
+        await new Promise(res => {
+          const im = new Image();
+          im.onload = () => {
+            const scale = Math.max(SIZE/im.width, splitY/im.height);
+            const w = im.width*scale, h = im.height*scale;
+            ctx.save(); ctx.beginPath(); ctx.rect(0,0,SIZE,splitY); ctx.clip();
+            ctx.drawImage(im,(SIZE-w)/2,(splitY-h)/2,w,h);
+            ctx.restore(); res();
+          };
+          im.onerror = res; im.src = imgDataUrl;
+        });
+      }
+      setFont(Math.round(8*R2), '700', serif);
+      ctx.fillStyle = '#fff';
+      ctx.fillText('SAPMANRI', Math.round(12*R2), Math.round(16*R2));
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'right';
+      ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+      ctx.textAlign = 'left';
+
+      // 하단 텍스트 패널
+      ctx.fillStyle = CREAM; ctx.fillRect(0,splitY,SIZE,SIZE-splitY);
+      const pad = Math.round(14*R2);
+      setFont(Math.round(7*R2), '600', sansFont);
+      ctx.fillStyle = ORANGE;
+      ctx.fillText((slide.label||'').toUpperCase(), pad, splitY + Math.round(16*R2));
+
+      const lines = (slide.body || '').split('\n').filter(l=>l.trim());
+      setFont(Math.round(10*R2), '400', serif);
+      ctx.fillStyle = DARK;
+      const lineH = Math.round(16*R2);
+      const totalH = lines.length * lineH;
+      const startY = splitY + (SIZE-splitY)/2 - totalH/2 + Math.round(20*R2);
+      lines.forEach((l,j) => ctx.fillText(l, pad, startY + j*lineH));
+      return canvas;
+    }
+
+    // ── 그리드 콜라주 ──
+    if (pageType === 'grid') {
+      ctx.fillStyle = CREAM; ctx.fillRect(0,0,SIZE,SIZE);
+      const pad = Math.round(14*R2);
+      setFont(Math.round(7*R2), '600', sansFont);
+      ctx.fillStyle = '#999';
+      ctx.fillText((slide.label||'오후의 장면들').toUpperCase(), pad, pad + Math.round(7*R2));
+
+      const gridTop = pad + Math.round(20*R2);
+      const gridBottom = SIZE - pad - Math.round(14*R2);
+      const gridH = gridBottom - gridTop;
+      const gridW = SIZE - pad*2;
+      const gap = Math.round(6*R2);
+
+      const idxs = (slide.image_indices || []).filter(ix => ix != null && allImages && ix < allImages.length).slice(0,3);
+
+      async function drawCell(dataUrl, x, y, w, h) {
+        ctx.fillStyle = '#ddd'; ctx.fillRect(x,y,w,h);
+        if (!dataUrl) return;
+        await new Promise(res => {
+          const im = new Image();
+          im.onload = () => {
+            const scale = Math.max(w/im.width, h/im.height);
+            const iw = im.width*scale, ih = im.height*scale;
+            ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
+            ctx.drawImage(im, x+(w-iw)/2, y+(h-ih)/2, iw, ih);
+            ctx.restore(); res();
+          };
+          im.onerror = res; im.src = dataUrl;
+        });
+      }
+
+      if (idxs.length >= 3) {
+        // 1+2 비대칭
+        const bigW = gridW * 0.58;
+        const smallW = gridW - bigW - gap;
+        const smallH = (gridH - gap) / 2;
+        await drawCell(allImages[idxs[0]]?.dataUrl, pad, gridTop, bigW, gridH);
+        await drawCell(allImages[idxs[1]]?.dataUrl, pad+bigW+gap, gridTop, smallW, smallH);
+        await drawCell(allImages[idxs[2]]?.dataUrl, pad+bigW+gap, gridTop+smallH+gap, smallW, smallH);
+      } else {
+        // 2x2 (이미지 부족하면 빈 칸)
+        const cw = (gridW-gap)/2, ch = (gridH-gap)/2;
+        for (let r=0;r<2;r++) for (let c=0;c<2;c++) {
+          const k = r*2+c;
+          await drawCell(idxs[k]!=null ? allImages[idxs[k]]?.dataUrl : null, pad+c*(cw+gap), gridTop+r*(ch+gap), cw, ch);
+        }
+      }
+
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = '#bbb'; ctx.textAlign = 'right';
+      ctx.fillText(pageNum, SIZE-pad, SIZE-Math.round(6*R2));
       ctx.textAlign = 'left';
       return canvas;
     }
