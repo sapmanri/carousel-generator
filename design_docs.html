@@ -19,7 +19,7 @@
 body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padding:24px 16px}
 .app{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 
-.header{display:flex;justify-content:space-between;align-items:baseline}
+.header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px}
 .logo{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--canvas);letter-spacing:0.04em}
 .logo span{font-family:var(--sans);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--mute);display:block;margin-top:2px}
 .back-link{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);text-decoration:none;border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:7px 14px;transition:border-color 0.2s,color 0.2s}
@@ -78,7 +78,16 @@ footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(2
 
 <div class="header">
   <div class="logo">감성찾아삽만리<span>Design Docs v1.0.0</span></div>
-  <a class="back-link" href="/index.html">← Tools</a>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div id="ghKeyWrap" style="display:flex;align-items:center;gap:8px">
+      <input type="password" id="ghTokenInput" placeholder="github_pat_... (md 수정 권한)" autocomplete="off"
+        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:210px"
+        oninput="saveGhToken(this.value)" />
+    </div>
+    <div id="ghKeyStatus" style="display:none;cursor:pointer;font-size:10px;letter-spacing:0.1em;color:var(--mute);text-transform:uppercase;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.1);border-radius:2px"
+      onclick="document.getElementById('ghKeyWrap').style.display='flex';document.getElementById('ghKeyStatus').style.display='none';">🗂 연결됨</div>
+    <a class="back-link" href="/index.html">← Tools</a>
+  </div>
 </div>
 
 <div class="section-label">디자인 시스템 모음 · 매거진 스타일 가이드</div>
@@ -102,6 +111,30 @@ footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(2
 </div>
 
 <script>
+// ── GitHub Token (캐러셀 생성기 / Skyline과 동일한 키 공유) ──
+const GH_TOKEN_KEY = 'cg_sapmanri_gh_token';
+function getGhToken() {
+  try { return localStorage.getItem(GH_TOKEN_KEY) || ''; } catch(e) { return ''; }
+}
+function saveGhToken(val) {
+  try { localStorage.setItem(GH_TOKEN_KEY, val); } catch(e) {}
+  updateGhKeyVisibility();
+}
+function updateGhKeyVisibility() {
+  const token = getGhToken();
+  const wrap = document.getElementById('ghKeyWrap');
+  const status = document.getElementById('ghKeyStatus');
+  if (!wrap || !status) return;
+  if (token) { wrap.style.display = 'none'; status.style.display = 'block'; }
+  else { wrap.style.display = 'flex'; status.style.display = 'none'; }
+}
+window.addEventListener('load', () => {
+  const saved = getGhToken();
+  const input = document.getElementById('ghTokenInput');
+  if (saved && input) input.value = saved;
+  updateGhKeyVisibility();
+});
+
 const BASE = 'https://raw.githubusercontent.com/sapmanri/carousel-generator/main/design-docs/';
 
 function esc(s) {
