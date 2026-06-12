@@ -207,7 +207,7 @@ async function analyzeImage(dataUrl) {
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
         { type: 'text', text: `이 이미지를 분석해서 웹매거진 페이지 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","best_page_type":"fullbleed|split|grid|quote 중 이 사진에 가장 어울리는 것"}` }
+{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것."}` }
       ]}]
     })
   });
@@ -469,6 +469,8 @@ async function autoBuildPages(status) {
   // 3. 나머지 사진들을 분석 결과(best_page_type)에 따라 배치
   const middlePhotos = photos.slice(1);
   let gridBuffer = [];
+  let consecutiveFullbleed = 0;
+  const MAX_CONSECUTIVE_FULLBLEED = 1; // fullbleed가 연속으로 너무 많이 나오지 않도록 제한
 
   function flushGrid() {
     if (gridBuffer.length) {
@@ -480,12 +482,30 @@ async function autoBuildPages(status) {
   }
 
   middlePhotos.forEach((p, i) => {
-    const best = (p.analysis && p.analysis.best_page_type) || 'fullbleed';
-    if (best === 'grid') {
+    let best = (p.analysis && p.analysis.best_page_type) || 'fullbleed';
+
+    // fullbleed가 연속으로 너무 많이 나오면 split/grid로 분산
+    if (best === 'fullbleed') {
+      if (consecutiveFullbleed >= MAX_CONSECUTIVE_FULLBLEED) {
+        best = (i % 2 === 0) ? 'split' : 'grid';
+      }
+    }
+
+    if (best === 'spread') {
+      flushGrid();
+      consecutiveFullbleed = 0;
+      const pg = PAGE_DEFAULTS.spread();
+      pg.imageId = p.id;
+      pg.captionLeft = (p.analysis && p.analysis.suggested_caption_left) || '';
+      pg.captionRight = (p.analysis && p.analysis.suggested_caption_right) || '';
+      newPages.push(pg);
+    } else if (best === 'grid') {
+      consecutiveFullbleed = 0;
       gridBuffer.push(p);
       if (gridBuffer.length === 3) flushGrid();
     } else if (best === 'split') {
       flushGrid();
+      consecutiveFullbleed = 0;
       const pg = PAGE_DEFAULTS.split();
       pg.imageId = p.id;
       pg.label = (p.analysis && p.analysis.suggested_label) || '';
@@ -493,10 +513,12 @@ async function autoBuildPages(status) {
       newPages.push(pg);
     } else if (best === 'quote') {
       flushGrid();
+      consecutiveFullbleed = 0;
       newPages.push(PAGE_DEFAULTS.quote());
     } else {
-      // fullbleed (기본)
+      // fullbleed
       flushGrid();
+      consecutiveFullbleed++;
       const pg = PAGE_DEFAULTS.fullbleed();
       pg.imageId = p.id;
       newPages.push(pg);
@@ -520,10 +542,10 @@ async function autoBuildPages(status) {
   }
 
   // 6. 각 페이지 글 자동 생성
-  const textPages = pages.filter(pg => ['cover','fullbleed','split','grid','quote','closing'].includes(pg.type));
+  const textPages = pages.filter(pg => ['cover','fullbleed','split','grid','quote','spread','closing'].includes(pg.type));
   for (let i = 0; i < pages.length; i++) {
     const pg = pages[i];
-    if (!['cover','fullbleed','split','grid','quote','closing'].includes(pg.type)) continue;
+    if (!['cover','fullbleed','split','grid','quote','spread','closing'].includes(pg.type)) continue;
     status.innerHTML = `<span class="spinner"></span>페이지 글 생성 중 (${textPages.indexOf(pg)+1}/${textPages.length})…`;
     try {
       if (pg.type === 'cover') {
