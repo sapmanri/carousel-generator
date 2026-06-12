@@ -353,6 +353,121 @@
           "cta": "https://youtu.be/OKllcN_vWdQ"
         }
       ]
+    },
+    {
+      "id": "061326-02",
+      "number": "00-02",
+      "title": "머무는 자리에서",
+      "subtitle": "Lake and Shadow, Early Summer",
+      "date": "2026-06-13",
+      "youtubeUrl": "",
+      "cover": "./images/library/1atgk_8a17374d_6934f52f.jpg",
+      "pages": [
+        {
+          "type": "cover",
+          "image": "./images/library/166ac_a21e72fc_7899acc.jpg",
+          "headline": [
+            "꽃밭 앞에서 — 그 앞에 잠시 멈춘 사람",
+            "고개를 숙이면"
+          ],
+          "toc": []
+        },
+        {
+          "type": "index",
+          "label": "Contents · 이번 호 이야기",
+          "items": [
+            "정적의 풍경",
+            "호숫가 풍경",
+            "호반의 오후",
+            "호숫가 산책",
+            "호수의 산책",
+            "여름의 풍경"
+          ]
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/vuf4_c74c35b2_1a21d60c.jpg",
+          "captionLeft": "돌아보지 않는 풍경",
+          "captionRight": "멀어지는 마음"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/u8es_b948c8ed_bec7d1e7.jpg",
+          "captionLeft": "앉아 있으니 호수가 조금 멀어 보였다",
+          "captionRight": "멀어져도 괜찮은 거리였다"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/y62s_35bb548_f8ff3308.jpg",
+          "captionLeft": "물 위의 글자들",
+          "captionRight": "산 너머 누군가"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/14xo0_c09d23fa_4e9bb320.jpg",
+          "captionLeft": "손끝이 닿을 듯 닿지 않을 듯",
+          "captionRight": "물은 조용히 흔들린다"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1lkac_b609f215_2df3f7c9.jpg",
+          "captionLeft": "누군가는 걷고",
+          "captionRight": "물은 조용히 누워 있다"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1hqlw_2fc8deb_dee52401.jpg",
+          "captionLeft": "나무 아래 — 그늘이 먼저 오는 자리",
+          "captionRight": "오래된 나무 아래는"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1hjq8_55de413_dff5ee6d.jpg",
+          "captionLeft": "문이 열려 있었다",
+          "captionRight": "산은 아직 저 너머에"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1atgk_8a17374d_6934f52f.jpg",
+          "captionLeft": "멈춰 서는 날이 있다",
+          "captionRight": "물과 산 사이, 오래된 돌담 앞에서"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1hyas_6a970eb9_9f05dacb.jpg",
+          "captionLeft": "당신의 건강은 안녕하십니까?",
+          "captionRight": "그날은 조금 걸었다."
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1kptk_b9c1c832_980a58dc.jpg",
+          "captionLeft": "물가로 가는 길",
+          "captionRight": "뒤에는 아직 산이 남아 있었다"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1tjcs_a9748237_b32e9e67.jpg",
+          "captionLeft": "나무 사이로 — 갈대 끝까지",
+          "captionRight": ""
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/1u280_8eed605f_72d642cb.jpg",
+          "captionLeft": "혼자 앉은 벤치, 함께 앉은 벤치",
+          "captionRight": "같은 나무 아래서도 — 조금씩 다른 오후"
+        },
+        {
+          "type": "spread",
+          "image": "./images/library/2ae3s_d0eca596_ac05975c.jpg",
+          "captionLeft": "꽃들 사이에서 조금 천천히",
+          "captionRight": "산은 멀리서 조용히 서 있었다"
+        },
+        {
+          "type": "closing",
+          "text": "오늘도 느리게, 잘 보냈습니다.",
+          "cta": "https://youtu.be/Dm9KsCmHbEE"
+        }
+      ]
     }
   ]
 }
