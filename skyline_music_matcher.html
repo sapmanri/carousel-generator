@@ -441,7 +441,7 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.0.9';
+const VERSION = 'v2.1.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -1229,6 +1229,24 @@ async function generateInstaCaption(){
   const lang = isEn ? 'English' : '한국어';
   const d=cachedResult;
 
+  // Vase 문체 프로필 로드 (writing_studio와 동일한 데이터)
+  let styleBlock = '';
+  if(!isEn){
+    try{
+      const profRes = await fetch('./profile_data.json');
+      const prof = await profRes.json();
+      const rules = prof.rules || [];
+      const examples = (prof.examples || []).slice(-4);
+      if(rules.length){
+        styleBlock += `\n\nVASE 문체 규칙 (반드시 따를 것):\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
+      }
+      if(examples.length){
+        styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬을 참고):\n`;
+        examples.forEach((e,i)=>{ styleBlock += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,500)}\n`; });
+      }
+    }catch(e){ /* profile_data.json 없으면 기본 스타일로 진행 */ }
+  }
+
   const prompt=`You are writing an Instagram caption for 감성찾아삽만리 (SAPMANRI).
 
 WRITING STYLE:
@@ -1238,7 +1256,7 @@ Avoid phrases like: "이 선은 음악의 악보다", "이 공간은 숨결이�
 Instead: write as if an ordinary person stood in front of this photo for a while and quietly noticed something inside their own heart. The writing should not praise the scene from the outside — it should move FROM the photo INTO an inner thought.
 Use humble, slightly plain Korean. Let it feel lived-in, not composed.
 The voice sounds like: "별것 아닌 장면인데, 이상하게 오래 마음에 남았다." / "그냥 앉아 있어도 되는 오후가 있다." / "괜히 서둘러 살았구나 싶었다." / "아무 일도 일어나지 않아서 오히려 좋았다." / "오늘은 그 정도면 충분했다."
-Feel less like a poem, more like a quiet note written after coming home. Simple, restrained, warm, a little imperfect.
+Feel less like a poem, more like a quiet note written after coming home. Simple, restrained, warm, a little imperfect.${styleBlock}
 
 Context:
 - Scene: ${d.image_description||d.line_description}
