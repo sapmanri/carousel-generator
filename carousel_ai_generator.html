@@ -305,7 +305,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.0.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.0.1</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -838,6 +838,19 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     }
     generatedSlides = plan.slides;
     generatedCaption = plan.caption || '';
+
+    // 모든 이미지가 사용됐는지 검증
+    const usedIndices = new Set();
+    plan.slides.forEach(s => {
+      if (s.image_index != null) usedIndices.add(s.image_index);
+      if (Array.isArray(s.image_indices)) s.image_indices.forEach(ix => usedIndices.add(ix));
+    });
+    const missing = [];
+    for (let i = 0; i < images.length; i++) if (!usedIndices.has(i)) missing.push(i+1);
+    if (missing.length) {
+      log(`⚠️ ${missing.length}장(${missing.join(', ')}번)이 결과에 포함되지 않았어요. 재생성하면 다른 구성이 나올 수 있어요.`, true);
+    }
+
     renderCarousel(plan.slides);
     doneStep(s3);
     log('완성!', true);
@@ -1038,6 +1051,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - 마지막 슬라이드: type closing, image_index ${images.length-1}
 - image_index는 반드시 0~${images.length-1} 범위 안에서만 사용 (범위 초과 금지)
 - 이미지가 없는 슬라이드(pull_quote 제외)에도 반드시 유효한 image_index 할당
+- 중요: 0~${images.length-1}의 모든 인덱스가 전체 슬라이드의 image_index 또는 image_indices 중 최소 한 번씩은 등장해야 함. 누락된 이미지가 있으면 안 됨. 슬라이드 수보다 이미지 수가 많으면 일부 슬라이드의 image_indices(grid 등)에 나머지를 분배할 것
 - layout: overlay_bottom/overlay_top/overlay_left/overlay_right/split_bottom/dark_full 중 하나
 - text_position: bottom_left/top_left/center/left_half/split_bottom/dark_center 중 하나
 - 슬라이드마다 다른 layout 사용, 이미지 분석 반영
@@ -1069,7 +1083,7 @@ ${style === 'jeonwon' ? `
   - body: 나레이션 2-3문장, \n으로 줄바꿈
 - 중간 슬라이드 중 1개(이미지 8장 이상일 때)는 page_type="grid":
   - label: "오후의 장면들" 류 소제목
-  - image_indices: 사용할 이미지 인덱스 배열 2~3개 (다른 슬라이드와 중복 가능)
+  - image_indices: 사용할 이미지 인덱스 배열 2~3개. 다른 슬라이드에서 한 번도 쓰이지 않은 이미지를 우선 배치할 것
 - 나머지 중간 슬라이드는 page_type="fullbleed": headline 또는 body에 짧은 명조 캡션 한 줄
 - 모든 슬라이드에 page_type 필드 필수` : ''}
 ${infographicMode ? `
