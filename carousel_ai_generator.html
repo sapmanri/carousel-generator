@@ -304,7 +304,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.8.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.9.0</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -969,6 +969,25 @@ async function analyzeImage(dataUrl, topic, style) {
 async function generatePlan(images, topic, tag, closing, style, manualText, infographicMode=false, textLang='ko') {
   const total = images.length + 1;
   const imageData = images.map((img,i) => ({ index:i, analysis:img.analysis||{} }));
+
+  // Vase 문체 프로필 로드 (writing_studio / skyline과 공유, 한국어 캡션에만 적용)
+  let styleBlock = '';
+  if (textLang !== 'en') {
+    try {
+      const profRes = await fetch('./profile_data.json');
+      const prof = await profRes.json();
+      const rules = prof.rules || [];
+      const examples = (prof.examples || []).slice(-3);
+      if (rules.length) {
+        styleBlock += `\n\nVASE 문체 규칙 (인스타 캡션에 반드시 따를 것):\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
+      }
+      if (examples.length) {
+        styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬을 참고하여 caption 작성):\n`;
+        examples.forEach((e,i) => { styleBlock += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,400)}\n`; });
+      }
+    } catch(e) { /* profile_data.json 없으면 기본 스타일로 진행 */ }
+  }
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
     headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
@@ -1001,6 +1020,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - pull_quote는 image_index null, layout pull_quote, text_position pull_quote
 - 모든 텍스트(headline, body, label, caption, hashtag)는 ${textLang === 'en' ? '영어로만 작성 (한국어 금지)' : '한국어로만 작성 (label은 영어 단어 허용)'}
 - caption에 해시태그 10개 포함
+- caption은 headline/body와 달리 2-4문장의 짧은 글로, 사진 속 장면에서 시작해 조용한 일상의 감상으로 이어지는 글 (시적 비유나 과한 수사 지양)${styleBlock}
 ${style === 'jeonwon' ? `
 전원생활 매거진 모드 추가 규칙 — 슬라이드 수에 따라 7개 page_type을 적절히 조합:
 중요: JSON 문자열 안에서 줄바꿈은 반드시 \\n (백슬래시+n) 두 글자로 표기할 것. 실제 개행 문자 사용 금지. 트레일링 콤마 금지.
