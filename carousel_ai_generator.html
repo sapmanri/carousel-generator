@@ -304,7 +304,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.6.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.6.1</span></div>
   <div style="display:flex;align-items:center;gap:8px">
     <input type="password" id="apiKeyInput" placeholder="sk-ant-..." 
       style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:200px"
@@ -762,6 +762,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - caption에 해시태그 10개 포함
 ${style === 'jeonwon' ? `
 전원생활 매거진 모드 추가 규칙 — 슬라이드 수에 따라 7개 page_type을 적절히 조합:
+중요: JSON 문자열 안에서 줄바꿈은 반드시 \\n (백슬래시+n) 두 글자로 표기할 것. 실제 개행 문자 사용 금지. 트레일링 콤마 금지.
 - 1번 슬라이드(표지): page_type="cover", type="cover"
   - label: "이주의 이야기" 같은 특집 라벨
   - headline: 2줄로 나뉘는 메인 헤드라인 (\n으로 구분)
@@ -800,7 +801,20 @@ ${infographicMode ? `
   if (!raw) throw new Error('응답이 비어있어요. 상태: ' + data.stop_reason);
   const s=raw.indexOf('{'), e=raw.lastIndexOf('}');
   if(s===-1||e===-1) throw new Error('JSON 없음: '+raw.slice(0,120));
-  return JSON.parse(raw.slice(s,e+1));
+  let jsonStr = raw.slice(s,e+1);
+  try {
+    return JSON.parse(jsonStr);
+  } catch(err) {
+    // 흔한 JSON 오류 자동 보정: 트레일링 콤마, 제어문자
+    const cleaned = jsonStr
+      .replace(/,(\s*[\]}])/g, '$1')      // 트레일링 콤마 제거
+      .replace(/[\u0000-\u001F]+/g, ' '); // 제어문자(개행 등) 제거
+    try {
+      return JSON.parse(cleaned);
+    } catch(err2) {
+      throw new Error('JSON 파싱 실패: ' + err2.message + ' / 원본 일부: ' + jsonStr.slice(0,200));
+    }
+  }
 }
 
 // ── render ──
