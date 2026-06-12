@@ -71,16 +71,38 @@
   .card {
     background: var(--panel);
     border: 1px solid var(--border);
-    padding: 28px;
+    padding: 0 0 28px;
     cursor: pointer;
     transition: border-color 0.2s, transform 0.15s;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    overflow: hidden;
   }
   .card:hover {
     border-color: var(--orange);
     transform: translateY(-2px);
+  }
+  .card .thumb {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: var(--dark);
+    overflow: hidden;
+    display: block;
+    border-bottom: 1px solid var(--border);
+  }
+  .card .thumb img,
+  .card .thumb svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .card .card-body {
+    padding: 20px 28px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
   .card .id-label {
     font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -245,21 +267,103 @@
 <script>
 const BASE = 'https://raw.githubusercontent.com/sapmanri/carousel-generator/main/design-docs/';
 
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderThumb(doc) {
+  if (doc.thumbnail) {
+    return `<img src="${BASE}${doc.thumbnail}" alt="${esc(doc.title)}" loading="lazy" onerror="this.parentElement.innerHTML = svgFor(window.__docs.find(d=>d.id==='${doc.id}'))">`;
+  }
+  return svgFor(doc);
+}
+
+function svgFor(doc) {
+  const p = (doc && doc.preview) || {};
+  const pal = p.palette && p.palette.length === 4 ? p.palette : ['#E8762C', '#FAF5EE', '#B2CDA8', '#120E0C'];
+  const [orange, cream, sage, dark] = pal;
+  if (p.type === 'grid') {
+    return svgGrid(p, orange, cream, sage, dark);
+  }
+  return svgCover(p, orange, cream, sage, dark);
+}
+
+// Mini cover-layout diagram (based on jeonwon_magazine_style.md structure)
+function svgCover(p, orange, cream, sage, dark) {
+  const wordmark = esc(p.wordmark || 'SAPMANRI');
+  const sub = esc(p.sub || '');
+  const label = esc(p.label || '');
+  const headline = (p.headline && p.headline.length) ? p.headline : ['헤드라인', '두 줄'];
+  return `
+  <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="200" fill="${dark}"/>
+    <rect x="0" y="0" width="320" height="200" fill="${dark}" opacity="0.92"/>
+    <rect x="40" y="60" width="240" height="110" fill="${sage}" opacity="0.18"/>
+    <rect x="60" y="80" width="200" height="70" fill="${sage}" opacity="0.25"/>
+    <text x="160" y="32" font-family="Georgia, serif" font-size="20" font-weight="bold" fill="${orange}" text-anchor="middle" letter-spacing="3">${wordmark}</text>
+    <text x="160" y="46" font-family="Helvetica, Arial, sans-serif" font-size="7" fill="${sage}" text-anchor="middle" letter-spacing="1">${sub}</text>
+    <rect x="22" y="64" width="32" height="14" fill="${orange}"/>
+    <text x="38" y="74" font-family="Helvetica, Arial, sans-serif" font-size="7" fill="${dark}" text-anchor="middle">${label}</text>
+    <text x="22" y="98" font-family="Georgia, serif" font-size="15" fill="${cream}" font-weight="bold">${esc(headline[0])}</text>
+    <text x="22" y="116" font-family="Georgia, serif" font-size="15" fill="${cream}" font-weight="bold">${esc(headline[1] || '')}</text>
+    <text x="22" y="186" font-family="Helvetica, Arial, sans-serif" font-size="16" fill="${cream}" font-weight="bold">2026</text>
+    <text x="46" y="186" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="${sage}">| 6월 2주</text>
+    <line x1="200" y1="160" x2="298" y2="160" stroke="${orange}" stroke-width="1" opacity="0.5"/>
+    <text x="298" y="172" font-family="Helvetica, Arial, sans-serif" font-size="7" fill="${cream}" text-anchor="end">장미 울타리 · 쥘리 앙드리외</text>
+    <text x="298" y="184" font-family="Helvetica, Arial, sans-serif" font-size="7" fill="${cream}" text-anchor="end">직조 전등 만들기</text>
+  </svg>`;
+}
+
+// Mini carousel-grid diagram (based on magazine_inner_pages.md page types)
+function svgGrid(p, orange, cream, sage, dark) {
+  const n = p.pages || 7;
+  const cols = 4, rows = 2;
+  const pad = 8, gap = 6;
+  const cellW = (320 - pad * 2 - gap * (cols - 1)) / cols;
+  const cellH = (200 - pad * 2 - gap * (rows - 1)) / rows;
+  let cells = '';
+  const fills = [orange, cream, sage, dark, cream, sage, orange, dark];
+  for (let i = 0; i < cols * rows; i++) {
+    const col = i % cols, row = Math.floor(i / cols);
+    const x = pad + col * (cellW + gap);
+    const y = pad + row * (cellH + gap);
+    if (i < n) {
+      const fill = fills[i % fills.length];
+      const txtFill = (fill === cream) ? dark : cream;
+      cells += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${fill}" opacity="0.85"/>`;
+      cells += `<text x="${x + 6}" y="${y + 16}" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="${txtFill}">${String(i+1).padStart(2,'0')}</text>`;
+    } else {
+      cells += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${dark}" opacity="0.3" stroke="${orange}" stroke-width="0.5" stroke-dasharray="3 3"/>`;
+    }
+  }
+  return `
+  <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="200" fill="${dark}"/>
+    ${cells}
+    <text x="160" y="195" font-family="Helvetica, Arial, sans-serif" font-size="8" fill="${orange}" text-anchor="middle" letter-spacing="2">SAPMANRI · ${n}-PAGE CAROUSEL</text>
+  </svg>`;
+}
+
+
 async function loadGallery() {
   const grid = document.getElementById('grid');
   try {
     const res = await fetch(BASE + 'manifest.json?t=' + Date.now());
     const docs = await res.json();
+    window.__docs = docs;
     grid.innerHTML = '';
     docs.forEach(doc => {
       const card = document.createElement('div');
       card.className = 'card';
       card.onclick = () => openDoc(doc);
       card.innerHTML = `
-        <div class="id-label">${doc.id}</div>
-        <h2>${doc.title}</h2>
-        <div class="subtitle">${doc.subtitle || ''}</div>
-        <div class="tags">${(doc.tags||[]).map(t => `<span>${t}</span>`).join('')}</div>
+        <div class="thumb">${renderThumb(doc)}</div>
+        <div class="card-body">
+          <div class="id-label">${doc.id}</div>
+          <h2>${doc.title}</h2>
+          <div class="subtitle">${doc.subtitle || ''}</div>
+          <div class="tags">${(doc.tags||[]).map(t => `<span>${t}</span>`).join('')}</div>
+        </div>
       `;
       grid.appendChild(card);
     });
