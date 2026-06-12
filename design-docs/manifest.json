@@ -1,0 +1,16 @@
+[
+  {
+    "id": "jeonwon-magazine-style",
+    "title": "전원생활 매거진 표지 디자인 시스템",
+    "subtitle": "삽만리 적용용 · 표지 디자인",
+    "file": "jeonwon_magazine_style.md",
+    "tags": ["표지", "썸네일", "컬러 팔레트", "타이포그래피"]
+  },
+  {
+    "id": "magazine-inner-pages",
+    "title": "매거진 내지 디자인 시스템",
+    "subtitle": "삽만리 캐러셀 적용용 · 내지 7타입",
+    "file": "magazine_inner_pages.md",
+    "tags": ["캐러셀", "내지", "인스타그램", "레이아웃"]
+  }
+]
