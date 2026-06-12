@@ -129,7 +129,50 @@ img{max-width:100%;display:block}
 .page-closing .big-mark{font-family:var(--serif);font-weight:700;font-size:64px;color:var(--orange);letter-spacing:0.06em;margin-top:60px;margin-bottom:20px}
 @media(min-width:768px){.page-closing .closing-text{font-size:38px}.page-closing .big-mark{font-size:96px}}
 
-/* ── empty state ── */
+/* ── Type 8: Spread (사진 1장이 2페이지에 걸친 와이드 화보) ── */
+.page-spread{padding:0;align-items:stretch}
+.page-spread .spread-img-wrap{
+  width:100%;flex:1;overflow:hidden;position:relative;background:#000;
+}
+.page-spread .spread-img-wrap img{
+  width:100%;height:100%;object-fit:cover;display:block;
+}
+/* 모바일: 좌/우 절반만 보여줌 */
+.page-spread.half-left .spread-img-wrap img{ width:200%; max-width:200%; object-position:left center; }
+.page-spread.half-right .spread-img-wrap img{ width:200%; max-width:200%; object-position:right center; transform:translateX(-50%); }
+.page-spread .spread-caption{
+  position:absolute;left:20px;bottom:24px;z-index:2;
+  font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--cream);
+  text-shadow:0 1px 6px rgba(0,0,0,0.5);max-width:80%;
+}
+.page-spread.half-right .spread-caption{left:auto;right:20px;text-align:right}
+
+/* 데스크탑/패드: 한 화면에 스프레드 전체 + 양쪽 텍스트 컬럼 */
+.page.page-spread-desktop{display:none}
+@media(min-width:900px){
+  .page.page-spread{display:none}
+  .page.page-spread-desktop{
+    display:flex;padding:0;min-height:100vh;background:#000;color:var(--cream);
+    position:relative;align-items:stretch;
+  }
+  .page-spread-desktop .spread-img-wrap{width:100%;flex:1;overflow:hidden;position:relative}
+  .page-spread-desktop .spread-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+  .page-spread-desktop .spread-caption-left,
+  .page-spread-desktop .spread-caption-right{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:2;
+    font-family:var(--serif);font-size:24px;line-height:1.7;color:var(--cream);
+    text-shadow:0 1px 8px rgba(0,0,0,0.55);max-width:32%;
+  }
+  .page-spread-desktop .spread-caption-left{left:48px}
+  .page-spread-desktop .spread-caption-right{right:48px;text-align:right}
+  /* 가운데 제본선 느낌 */
+  .page-spread-desktop::after{
+    content:'';position:absolute;top:0;bottom:0;left:50%;width:1px;
+    background:rgba(255,255,255,0.12);z-index:1;
+  }
+}
+
+
 .notfound{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:40px;background:var(--dark);color:var(--cream)}
 .notfound .big{font-family:var(--serif);font-size:24px}
 .notfound a{color:var(--orange);font-size:12px;letter-spacing:0.08em}
@@ -175,24 +218,32 @@ async function load() {
   document.title = `SAPMANRI · ${issue.title || ''}`;
   const pages = issue.pages || [];
   document.getElementById('pages').innerHTML = pages.map((p, i) => renderPage(p, i, pages, issue)).join('');
-  document.getElementById('indicator').textContent = `${pages.length} pages`;
 
   // 스크롤에 따라 topbar 톤 전환 (다크 페이지 위에서는 다크바)
   const pageEls = [...document.querySelectorAll('.page')];
   const topbar = document.getElementById('topbar');
+
+  function visiblePageEls() {
+    return pageEls.filter(el => getComputedStyle(el).display !== 'none');
+  }
+
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
       if (e.isIntersecting && e.intersectionRatio > 0.5) {
         const isDark = e.target.classList.contains('dark') || e.target.classList.contains('page-cover') ||
                         e.target.classList.contains('page-index') || e.target.classList.contains('page-quote') ||
-                        e.target.classList.contains('page-closing');
+                        e.target.classList.contains('page-closing') || e.target.classList.contains('page-spread') ||
+                        e.target.classList.contains('page-spread-desktop');
         topbar.classList.toggle('on-dark', isDark);
-        const idx = pageEls.indexOf(e.target);
-        document.getElementById('indicator').textContent = `${String(idx+1).padStart(2,'0')} / ${pages.length}`;
+        const visible = visiblePageEls();
+        const idx = visible.indexOf(e.target);
+        if (idx >= 0) document.getElementById('indicator').textContent = `${String(idx+1).padStart(2,'0')} / ${visible.length}`;
       }
     });
   }, { threshold: [0.5] });
   pageEls.forEach(el => observer.observe(el));
+  const initial = visiblePageEls();
+  document.getElementById('indicator').textContent = `${initial.length} pages`;
 }
 
 function renderPage(p, i, allPages, issue) {
@@ -204,6 +255,7 @@ function renderPage(p, i, allPages, issue) {
     case 'grid': return renderGrid(p);
     case 'quote': return renderQuote(p);
     case 'closing': return renderClosing(p);
+    case 'spread': return renderSpread(p);
     default: return '';
   }
 }
@@ -287,7 +339,36 @@ function renderClosing(p) {
   </section>`;
 }
 
+function renderSpread(p) {
+  const img = esc(p.image || '');
+  const leftCaption = p.captionLeft || p.caption || '';
+  const rightCaption = p.captionRight || '';
+
+  // 모바일: 좌/우 절반을 각각 별도 페이지로
+  const mobileLeft = `
+  <section class="page page-spread half-left">
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="">` : ''}</div>
+    ${leftCaption ? `<div class="spread-caption">${nl(leftCaption)}</div>` : ''}
+  </section>`;
+  const mobileRight = `
+  <section class="page page-spread half-right">
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="">` : ''}</div>
+    ${rightCaption ? `<div class="spread-caption">${nl(rightCaption)}</div>` : ''}
+  </section>`;
+
+  // 데스크탑/패드: 한 화면에 전체 스프레드
+  const desktop = `
+  <section class="page page-spread-desktop">
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="">` : ''}</div>
+    ${leftCaption ? `<div class="spread-caption-left">${nl(leftCaption)}</div>` : ''}
+    ${rightCaption ? `<div class="spread-caption-right">${nl(rightCaption)}</div>` : ''}
+  </section>`;
+
+  return desktop + mobileLeft + mobileRight;
+}
+
 load();
+
 </script>
 </body>
 </html>

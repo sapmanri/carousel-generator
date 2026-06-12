@@ -256,6 +256,7 @@ const PAGE_TEXT_INSTRUCTION = {
   split: `2단 사진+글 페이지의 본문을 쓴다. Vase의 인간극장(observer) 톤으로 2-4문단, 한 문장씩 줄바꿈하여 호흡을 살린다. 사진 속 장면에서 시작해 감각적 디테일로 확장한다.`,
   grid: `그리드 콜라주 페이지의 짧은 캡션을 쓴다. 한 문장, 20자 내외. 여러 장면을 압축하는 느낌.`,
   quote: `인용/하이라이트 페이지의 문장을 쓴다. 가장 인상적인 한 문장, 24-40자, 여운이 남는 톤.`,
+  spread: `와이드 스프레드 화보의 캡션을 쓴다. 짧은 명조체 한 줄(10자 내외)로, 사진의 왼쪽 절반과 오른쪽 절반에 각각 어울리는 두 개의 짧은 문구를 만든다. 두 줄로 반환하며 첫 줄이 왼쪽, 둘째 줄이 오른쪽 캡션이다.`,
   closing: `클로징 페이지의 마무리 문구를 쓴다. "오늘도 느리게, 잘 보냈습니다" 같은 톤으로 1-2문장.`,
   index: `목차용 소제목들을 쓴다.`,
   cover: `표지 헤드라인을 쓴다. 2줄, 명조체, 영상/이야기의 핵심을 담는다.`,
@@ -589,6 +590,7 @@ const PAGE_DEFAULTS = {
   split: () => ({ type: 'split', imageId: null, label: '', text: '', darkText: false }),
   grid: () => ({ type: 'grid', imageIds: [], label: '', caption: '' }),
   quote: () => ({ type: 'quote', text: '', context: '' }),
+  spread: () => ({ type: 'spread', imageId: null, captionLeft: '', captionRight: '' }),
   closing: () => ({ type: 'closing', text: '', cta: '' }),
 };
 
@@ -609,7 +611,7 @@ function movePage(idx, dir) {
 }
 
 const PAGE_TYPE_LABEL = {
-  cover: '표지', fullbleed: '풀블리드', index: '목차', split: '2단 split', grid: '그리드', quote: '인용', closing: '클로징'
+  cover: '표지', fullbleed: '풀블리드', index: '목차', split: '2단 split', grid: '그리드', quote: '인용', spread: '스프레드', closing: '클로징'
 };
 
 function renderPageList() {
@@ -693,6 +695,15 @@ function renderPageCard(pg, idx) {
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 문장 생성</button></div>
       `;
       break;
+    case 'spread':
+      body = `
+        <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
+        <div class="hint">와이드 사진 1장을 2페이지에 걸쳐 보여줍니다. PC/패드는 한 화면, 모바일은 좌/우로 나눠서 순서대로 표시됩니다.</div>
+        <div class="field"><label>왼쪽 페이지 캡션</label><input value="${esc(pg.captionLeft||'')}" oninput="pages[${idx}].captionLeft=this.value"></div>
+        <div class="field"><label>오른쪽 페이지 캡션</label><input value="${esc(pg.captionRight||'')}" oninput="pages[${idx}].captionRight=this.value"></div>
+        <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
+      `;
+      break;
     case 'closing':
       body = `
         <div class="field"><label>클로징 문구</label><textarea oninput="pages[${idx}].text=this.value">${esc(pg.text||'')}</textarea></div>
@@ -716,6 +727,11 @@ async function genPageText(idx, extraContext) {
     if (pg.type === 'fullbleed' || pg.type === 'grid') pg.caption = text;
     else if (pg.type === 'split') pg.text = text;
     else if (pg.type === 'quote' || pg.type === 'closing') pg.text = text;
+    else if (pg.type === 'spread') {
+      const lines = text.split('\n').filter(Boolean);
+      pg.captionLeft = lines[0] || '';
+      pg.captionRight = lines[1] || '';
+    }
     renderPageList();
     toast('생성 완료');
   } catch (e) {
@@ -966,6 +982,11 @@ async function publish() {
         case 'quote':
           out.text = pg.text || '';
           out.context = pg.context || '';
+          break;
+        case 'spread':
+          out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.captionLeft = pg.captionLeft || '';
+          out.captionRight = pg.captionRight || '';
           break;
         case 'closing':
           out.text = pg.text || '';
