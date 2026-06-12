@@ -970,6 +970,9 @@ async function publish() {
       const repoPath = await commitPhoto(p, id, i+1);
       photoPathMap[p.id] = toRelativePath(repoPath);
       if (p.id === coverPhotoId) coverPath = photoPathMap[p.id];
+      // 업로드 완료된 사진은 기존(existing) 상태로 전환 → 다음 발행 시 재업로드 방지
+      p._existing = true;
+      p.dataUrl = photoPathMap[p.id];
     }
     if (coverPhotoId && !coverPath && photoPathMap[coverPhotoId]) coverPath = photoPathMap[coverPhotoId];
 
@@ -1056,6 +1059,7 @@ async function publish() {
     populateIssueSelect();
     document.getElementById('issueSelect').value = id;
     suppressIssueSelectChange = false;
+    renderPhotoGrid();
     toast('발행되었습니다. 매거진 보기에서 확인하세요.');
   } catch (e) {
     statusEl.textContent = '발행 실패: ' + e.message;
