@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAPMANRI · Issue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E8762C;
+  --cream:#FAF5EE;
+  --dark:#120E0C;
+  --sage:#B2CDA8;
+  --ink:#1a1a1a;
+  --hairline-light:#D8D5D0;
+  --hairline-dark:rgba(255,255,255,0.08);
+  --serif:"Gowun Batang",Georgia,serif;
+  --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+}
+html,body{font-family:var(--sans);background:var(--cream);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ── 상단 미니바 ── */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;background:rgba(250,245,238,0.9);backdrop-filter:blur(6px);
+  border-bottom:1px solid var(--hairline-light);
+  font-size:11px;letter-spacing:0.08em;
+}
+.topbar.on-dark{background:rgba(18,14,12,0.85);border-bottom:1px solid var(--hairline-dark);color:var(--cream)}
+.topbar .back{color:var(--orange);font-weight:500}
+.topbar .indicator{color:rgba(0,0,0,0.4);font-family:var(--sans)}
+.topbar.on-dark .indicator{color:rgba(255,255,255,0.45)}
+
+/* ── 페이지 컨테이너 ── */
+.pages{display:flex;flex-direction:column}
+.page{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  position:relative;padding:48px 20px;
+}
+.page.dark{background:var(--dark);color:var(--cream)}
+.page.cream{background:var(--cream);color:var(--ink)}
+
+/* ── Type 1: Cover ── */
+.page-cover{justify-content:space-between;background:var(--dark);color:var(--cream)}
+.page-cover .bg-photo{
+  position:absolute;inset:0;background-size:cover;background-position:center;
+  opacity:0.5;
+}
+.page-cover .bg-photo::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(18,14,12,0.3) 0%,rgba(18,14,12,0.85) 75%,rgba(18,14,12,0.97) 100%);
+}
+.page-cover .content{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;flex:1;gap:40px}
+.page-cover .top-mark{font-family:var(--serif);font-weight:700;font-size:20px;color:var(--orange);letter-spacing:0.08em}
+.page-cover .top-mark .sub{display:block;font-family:var(--sans);font-weight:300;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-top:4px}
+.page-cover .headline{font-family:var(--serif);font-weight:700;font-size:38px;line-height:1.25;letter-spacing:0.01em}
+.page-cover .headline span{display:block}
+.page-cover .info-row{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.page-cover .issue-no{font-size:11px;letter-spacing:0.12em;color:var(--sage)}
+.page-cover .toc{display:flex;flex-direction:column;gap:6px;text-align:right}
+.page-cover .toc-item{font-size:12px;color:rgba(255,255,255,0.7)}
+.page-cover .toc-item .n{color:var(--orange);margin-right:6px;font-family:var(--serif)}
+@media(min-width:768px){.page-cover .headline{font-size:64px}}
+
+/* ── Type 2: Full Bleed Photo ── */
+.page-fullbleed{align-items:center;gap:24px}
+.page-fullbleed .photo-frame{
+  width:100%;max-width:1100px;background:#fff;padding:14px;box-shadow:0 2px 24px rgba(0,0,0,0.06);
+}
+.page-fullbleed .photo-frame img{width:100%;height:auto}
+.page-fullbleed .caption{
+  width:100%;max-width:1100px;font-family:var(--serif);font-size:18px;line-height:1.6;
+  color:var(--ink);padding:0 4px;
+}
+@media(min-width:768px){.page-fullbleed .caption{font-size:24px}}
+
+/* ── Type 3: Index/Contents ── */
+.page-index{background:var(--dark);color:var(--cream)}
+.page-index .label{font-size:10px;letter-spacing:0.24em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:28px}
+.page-index .list{display:flex;flex-direction:column;gap:18px}
+.index-item{display:flex;align-items:baseline;gap:16px;padding-bottom:14px;border-bottom:1px solid var(--hairline-dark);cursor:pointer;transition:opacity .15s}
+.index-item:hover{opacity:0.6}
+.index-item .n{font-family:var(--serif);font-size:20px;color:var(--orange);min-width:32px}
+.index-item .t{font-family:var(--serif);font-size:18px;color:var(--cream)}
+@media(min-width:768px){.index-item .t{font-size:24px}}
+
+/* ── Type 4: Split (Photo + Story) ── */
+.page-split{padding:0;flex-direction:column}
+.page-split .split-photo{width:100%;aspect-ratio:4/3;overflow:hidden}
+.page-split .split-photo img{width:100%;height:100%;object-fit:cover}
+.page-split .split-text{padding:36px 24px 56px;background:var(--cream);color:var(--ink)}
+.page-split.dark-text .split-text{background:var(--dark);color:var(--cream)}
+.page-split .split-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:14px}
+.page-split .split-body{font-family:var(--serif);font-size:17px;line-height:2;white-space:pre-line}
+@media(min-width:900px){
+  .page-split{flex-direction:row;align-items:stretch;min-height:100vh}
+  .page-split .split-photo{width:60%;aspect-ratio:auto}
+  .page-split .split-text{width:40%;display:flex;flex-direction:column;justify-content:center;padding:60px}
+  .page-split .split-body{font-size:19px}
+}
+
+/* ── Type 5: Grid Collage ── */
+.page-grid{gap:18px}
+.page-grid .grid-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:6px}
+.page-grid .grid-photos{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:900px}
+.page-grid .grid-photos img{width:100%;height:100%;object-fit:cover;aspect-ratio:1}
+.page-grid .grid-photos.layout-1plus2 .g0{grid-column:1/-1;aspect-ratio:16/10}
+.page-grid .grid-caption{font-size:12px;color:rgba(0,0,0,0.45);margin-top:12px;max-width:900px}
+@media(min-width:768px){.page-grid .grid-photos{grid-template-columns:repeat(3,1fr)}.page-grid .grid-photos.layout-1plus2 .g0{grid-column:span 1;aspect-ratio:1}}
+
+/* ── Type 6: Quote ── */
+.page-quote{background:var(--dark);color:var(--cream);align-items:center;text-align:center}
+.page-quote .line{width:60px;height:1px;background:var(--orange);margin:0 auto}
+.page-quote .quote-text{font-family:var(--serif);font-size:30px;line-height:1.6;margin:28px 0;max-width:640px}
+@media(min-width:768px){.page-quote .quote-text{font-size:42px}}
+.page-quote .quote-context{font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.4)}
+
+/* ── Type 7: Closing ── */
+.page-closing{background:var(--dark);color:var(--cream);align-items:center;text-align:center;justify-content:space-between}
+.page-closing .closing-text{font-family:var(--serif);font-size:26px;line-height:1.7;margin-top:auto}
+.page-closing .closing-cta{font-size:12px;letter-spacing:0.08em;color:rgba(255,255,255,0.5);margin-top:24px}
+.page-closing .closing-cta a{color:var(--orange)}
+.page-closing .big-mark{font-family:var(--serif);font-weight:700;font-size:64px;color:var(--orange);letter-spacing:0.06em;margin-top:60px;margin-bottom:20px}
+@media(min-width:768px){.page-closing .closing-text{font-size:38px}.page-closing .big-mark{font-size:96px}}
+
+/* ── empty state ── */
+.notfound{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:40px;background:var(--dark);color:var(--cream)}
+.notfound .big{font-family:var(--serif);font-size:24px}
+.notfound a{color:var(--orange);font-size:12px;letter-spacing:0.08em}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topbar">
+  <a class="back" href="./index.html">← SAPMANRI</a>
+  <div class="indicator" id="indicator"></div>
+</div>
+
+<div class="pages" id="pages">
+  <div class="notfound"><div class="big">불러오는 중…</div></div>
+</div>
+
+<script>
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function nl(s) { return esc(s).replace(/\n/g, '<br>'); }
+
+const params = new URLSearchParams(location.search);
+const issueId = params.get('id');
+
+async function load() {
+  let issue = null;
+  try {
+    const res = await fetch('./issues.json', { cache: 'no-store' });
+    const data = await res.json();
+    issue = (data.issues || []).find(x => x.id === issueId) || (data.issues || [])[0];
+  } catch (e) {}
+
+  if (!issue) {
+    document.getElementById('pages').innerHTML = `
+      <div class="notfound">
+        <div class="big">호를 찾을 수 없어요</div>
+        <a href="./index.html">← 전체 목록으로</a>
+      </div>`;
+    return;
+  }
+
+  document.title = `SAPMANRI · ${issue.title || ''}`;
+  const pages = issue.pages || [];
+  document.getElementById('pages').innerHTML = pages.map((p, i) => renderPage(p, i, pages, issue)).join('');
+  document.getElementById('indicator').textContent = `${pages.length} pages`;
+
+  // 스크롤에 따라 topbar 톤 전환 (다크 페이지 위에서는 다크바)
+  const pageEls = [...document.querySelectorAll('.page')];
+  const topbar = document.getElementById('topbar');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio > 0.5) {
+        const isDark = e.target.classList.contains('dark') || e.target.classList.contains('page-cover') ||
+                        e.target.classList.contains('page-index') || e.target.classList.contains('page-quote') ||
+                        e.target.classList.contains('page-closing');
+        topbar.classList.toggle('on-dark', isDark);
+        const idx = pageEls.indexOf(e.target);
+        document.getElementById('indicator').textContent = `${String(idx+1).padStart(2,'0')} / ${pages.length}`;
+      }
+    });
+  }, { threshold: [0.5] });
+  pageEls.forEach(el => observer.observe(el));
+}
+
+function renderPage(p, i, allPages, issue) {
+  switch (p.type) {
+    case 'cover': return renderCover(p, issue);
+    case 'fullbleed': return renderFullbleed(p);
+    case 'index': return renderIndex(p);
+    case 'split': return renderSplit(p);
+    case 'grid': return renderGrid(p);
+    case 'quote': return renderQuote(p);
+    case 'closing': return renderClosing(p);
+    default: return '';
+  }
+}
+
+function renderCover(p, issue) {
+  const headline = (p.headline || []).map(l => `<span>${esc(l)}</span>`).join('');
+  const toc = (p.toc || []).map((t, i) => `<div class="toc-item"><span class="n">${String(i+1).padStart(2,'0')}</span>${esc(t)}</div>`).join('');
+  return `
+  <section class="page page-cover">
+    ${p.image ? `<div class="bg-photo" style="background-image:url('${esc(p.image)}')"></div>` : ''}
+    <div class="content">
+      <div class="top-mark">SAPMANRI<span class="sub">오늘도 느리게 · slow days</span></div>
+      <div class="headline">${headline}</div>
+      <div class="info-row">
+        <div class="issue-no">${esc(issue.number || '')}<br>${esc(issue.date || '')}</div>
+        <div class="toc">${toc}</div>
+      </div>
+    </div>
+  </section>`;
+}
+
+function renderFullbleed(p) {
+  return `
+  <section class="page cream page-fullbleed">
+    ${p.image ? `<div class="photo-frame"><img src="${esc(p.image)}" alt=""></div>` : ''}
+    ${p.caption ? `<div class="caption">${nl(p.caption)}</div>` : ''}
+  </section>`;
+}
+
+function renderIndex(p) {
+  const items = (p.items || []).map((t, i) => `<div class="index-item"><div class="n">${String(i+1).padStart(2,'0')}</div><div class="t">${esc(t)}</div></div>`).join('');
+  return `
+  <section class="page page-index">
+    <div class="label">${esc(p.label || 'Contents · 이번 호 이야기')}</div>
+    <div class="list">${items}</div>
+  </section>`;
+}
+
+function renderSplit(p) {
+  const darkCls = p.darkText ? ' dark-text' : '';
+  return `
+  <section class="page page-split${darkCls}">
+    <div class="split-photo">${p.image ? `<img src="${esc(p.image)}" alt="">` : ''}</div>
+    <div class="split-text">
+      ${p.label ? `<div class="split-label">${esc(p.label)}</div>` : ''}
+      <div class="split-body">${nl(p.text || '')}</div>
+    </div>
+  </section>`;
+}
+
+function renderGrid(p) {
+  const imgs = p.images || [];
+  const layoutCls = imgs.length === 3 ? ' layout-1plus2' : '';
+  const imgsHtml = imgs.map((src, i) => `<img class="g${i}" src="${esc(src)}" alt="">`).join('');
+  return `
+  <section class="page cream page-grid">
+    ${p.label ? `<div class="grid-label">${esc(p.label)}</div>` : ''}
+    <div class="grid-photos${layoutCls}">${imgsHtml}</div>
+    ${p.caption ? `<div class="grid-caption">${esc(p.caption)}</div>` : ''}
+  </section>`;
+}
+
+function renderQuote(p) {
+  return `
+  <section class="page page-quote">
+    <div class="line"></div>
+    <div class="quote-text">${nl(p.text || '')}</div>
+    ${p.context ? `<div class="quote-context">${esc(p.context)}</div>` : ''}
+    <div class="line"></div>
+  </section>`;
+}
+
+function renderClosing(p) {
+  return `
+  <section class="page page-closing">
+    <div class="closing-text">${nl(p.text || '')}</div>
+    <div>
+      <div class="closing-cta">${p.cta || '유튜브에서 전체 영상 보기 · <a href="https://www.youtube.com/@sapmanri" target="_blank">@sapmanri</a>'}</div>
+      <div class="big-mark">SAPMANRI</div>
+    </div>
+  </section>`;
+}
+
+load();
+</script>
+</body>
+</html>

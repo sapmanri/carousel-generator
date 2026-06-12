@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAPMANRI · 감성찾아삽만리 매거진</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E8762C;
+  --cream:#FAF5EE;
+  --dark:#120E0C;
+  --sage:#B2CDA8;
+  --hairline:rgba(255,255,255,0.08);
+  --serif:"Gowun Batang",Georgia,serif;
+  --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+}
+html,body{background:var(--dark);color:var(--cream);font-family:var(--sans);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* ── 상단 바 ── */
+header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:28px 24px 18px;flex-wrap:wrap;gap:12px;
+}
+.wordmark{font-family:var(--serif);font-weight:700;font-size:28px;color:var(--orange);letter-spacing:0.06em}
+.wordmark .sub{display:block;font-family:var(--sans);font-weight:300;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:4px}
+.meta{text-align:right;font-size:11px;letter-spacing:0.08em;color:rgba(255,255,255,0.45);line-height:1.8}
+.meta .vol{color:var(--sage)}
+
+/* ── 정렬 토글 ── */
+.toolbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 24px 18px;border-bottom:1px solid var(--hairline);
+}
+.sort-toggle{display:flex;gap:14px;font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.35)}
+.sort-toggle button{background:none;border:none;color:inherit;font-family:var(--sans);font-size:11px;letter-spacing:0.1em;cursor:pointer;padding:0;transition:color .15s}
+.sort-toggle button.active{color:var(--orange)}
+.count{font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.35)}
+
+/* ── 그리드 ── */
+.grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:16px 14px;
+  padding:24px;
+}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);gap:20px}}
+@media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr);gap:24px;padding:32px}}
+@media(min-width:1280px){.grid{grid-template-columns:repeat(5,1fr)}}
+
+.card{display:flex;flex-direction:column;gap:8px;cursor:pointer}
+.card .thumb-wrap{
+  position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;
+  background:#1d1815;border-radius:1px;
+}
+.card .thumb-wrap img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .5s cubic-bezier(.2,.7,.2,1);
+}
+.card:hover .thumb-wrap img{transform:scale(1.03)}
+.card .num{
+  position:absolute;top:8px;left:10px;font-family:var(--serif);font-weight:700;
+  font-size:13px;color:var(--orange);text-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+.card .title{font-family:var(--serif);font-size:14px;line-height:1.35;color:var(--cream)}
+.card .sub{font-size:10px;letter-spacing:0.05em;color:rgba(255,255,255,0.4)}
+
+@media(min-width:980px){
+  .card .title{font-size:16px}
+}
+
+/* ── 빈 상태 ── */
+.empty{
+  grid-column:1/-1;text-align:center;padding:80px 20px;color:rgba(255,255,255,0.3);
+  font-size:12px;letter-spacing:0.08em;line-height:2;
+}
+.empty .big{font-family:var(--serif);font-size:20px;color:rgba(255,255,255,0.5);display:block;margin-bottom:10px}
+
+/* ── 하단 워터마크 ── */
+footer{
+  padding:60px 24px 40px;text-align:right;overflow:hidden;
+}
+footer .water{
+  font-family:var(--serif);font-style:italic;font-size:54px;
+  color:rgba(255,255,255,0.06);letter-spacing:0.02em;white-space:nowrap;
+}
+@media(min-width:980px){footer .water{font-size:96px}}
+footer .tag{font-size:10px;letter-spacing:0.18em;color:rgba(255,255,255,0.25);text-transform:uppercase;margin-top:-8px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">SAPMANRI<span class="sub">오늘도 느리게 · slow days</span></div>
+  <div class="meta" id="metaInfo">불러오는 중…</div>
+</header>
+
+<div class="toolbar">
+  <div class="sort-toggle">
+    <button class="active" onclick="setSort('latest')" id="sortLatest">최신순</button>
+    <button onclick="setSort('alpha')" id="sortAlpha">가나다순</button>
+  </div>
+  <div class="count" id="countLabel"></div>
+</div>
+
+<div class="grid" id="grid">
+  <div class="empty">불러오는 중…</div>
+</div>
+
+<footer>
+  <div class="water">Projects</div>
+  <div class="tag">감성찾아삽만리 · slow living, rural korea</div>
+</footer>
+
+<script>
+let issues = [];
+let sortMode = 'latest';
+
+async function load() {
+  try {
+    const res = await fetch('./issues.json', { cache: 'no-store' });
+    const data = await res.json();
+    issues = data.issues || [];
+  } catch (e) {
+    issues = [];
+  }
+  render();
+}
+
+function setSort(mode) {
+  sortMode = mode;
+  document.getElementById('sortLatest').classList.toggle('active', mode === 'latest');
+  document.getElementById('sortAlpha').classList.toggle('active', mode === 'alpha');
+  render();
+}
+
+function render() {
+  const grid = document.getElementById('grid');
+  const meta = document.getElementById('metaInfo');
+  const count = document.getElementById('countLabel');
+
+  if (!issues.length) {
+    grid.innerHTML = `<div class="empty"><span class="big">아직 발행된 호가 없어요</span>editor.html에서 첫 호를 만들어보세요</div>`;
+    meta.textContent = '';
+    count.textContent = '';
+    return;
+  }
+
+  const sorted = [...issues].sort((a, b) => {
+    if (sortMode === 'alpha') return (a.title || '').localeCompare(b.title || '', 'ko');
+    return (b.date || '').localeCompare(a.date || '');
+  });
+
+  const latest = [...issues].sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
+  meta.innerHTML = `<span class="vol">${esc(latest.number || '')}</span><br>${esc(latest.date || '')}`;
+  count.textContent = `총 ${issues.length}개의 이야기`;
+
+  grid.innerHTML = sorted.map((issue, i) => {
+    const num = String(issues.length - issues.findIndex(x => x.id === issue.id)).padStart(2, '0');
+    return `
+    <a class="card" href="./issue.html?id=${encodeURIComponent(issue.id)}">
+      <div class="thumb-wrap">
+        <img src="${esc(issue.cover || '')}" alt="${esc(issue.title || '')}" loading="lazy" onerror="this.style.opacity=0">
+        <div class="num">${num}.</div>
+      </div>
+      <div class="title">${esc(issue.title || '제목 없음')}</div>
+      <div class="sub">${esc(issue.subtitle || '')}</div>
+    </a>`;
+  }).join('');
+}
+
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+load();
+</script>
+</body>
+</html>
