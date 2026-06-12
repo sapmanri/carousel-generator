@@ -398,21 +398,52 @@ function setupUploadZone() {
 
 function onFilesSelected(files) {
   [...files].forEach(file => {
-    if (!file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const photo = {
-        id: 'p' + (++photoIdSeq),
-        dataUrl: reader.result,
-        mediaType: file.type,
-        name: file.name,
-        analysis: null,
-      };
-      photos.push(photo);
-      renderPhotoGrid();
-    };
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/') && !/\.(heic|heif)$/i.test(file.name || '')) return;
+
+    const isHeic = /image\/hei[cf]/i.test(file.type) || /\.(heic|heif)$/i.test(file.name || '');
+
+    if (isHeic && typeof createImageBitmap === 'function') {
+      // HEIC/HEIF는 <img>에서 렌더링 안 되는 브라우저가 많음 → 캔버스로 JPEG 변환
+      createImageBitmap(file).then(bitmap => {
+        const canvas = document.createElement('canvas');
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(bitmap, 0, 0);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        photos.push({
+          id: 'p' + (++photoIdSeq),
+          dataUrl,
+          mediaType: 'image/jpeg',
+          name: file.name,
+          analysis: null,
+        });
+        renderPhotoGrid();
+      }).catch(() => {
+        // 변환 실패 시 원본 그대로 시도 (최후 수단)
+        readAsDataUrl(file);
+      });
+      return;
+    }
+
+    readAsDataUrl(file);
   });
+}
+
+function readAsDataUrl(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const photo = {
+      id: 'p' + (++photoIdSeq),
+      dataUrl: reader.result,
+      mediaType: file.type || 'image/jpeg',
+      name: file.name,
+      analysis: null,
+    };
+    photos.push(photo);
+    renderPhotoGrid();
+  };
+  reader.readAsDataURL(file);
 }
 
 function renderPhotoGrid() {
