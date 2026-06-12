@@ -120,7 +120,7 @@ let sortMode = 'latest';
 
 async function load() {
   try {
-    const res = await fetch('./issues.json', { cache: 'no-store' });
+    const res = await fetch('./issues.json?t=' + Date.now(), { cache: 'no-store' });
     const data = await res.json();
     issues = data.issues || [];
   } catch (e) {
@@ -154,7 +154,7 @@ function render() {
   });
 
   const latest = [...issues].sort((a, b) => (b.date || '').localeCompare(a.date || ''))[0];
-  meta.innerHTML = `<span class="vol">${esc(latest.number || '')}</span><br>${esc(latest.date || '')}`;
+  meta.innerHTML = `<span class="vol">${esc(latest.number || latest.id || '')}</span><br>${esc(latest.date || '')}`;
   count.textContent = `총 ${issues.length}개의 이야기`;
 
   grid.innerHTML = sorted.map((issue, i) => {
@@ -165,8 +165,8 @@ function render() {
         <img src="${esc(issue.cover || '')}" alt="${esc(issue.title || '')}" loading="lazy" onerror="this.style.opacity=0">
         <div class="num">${num}.</div>
       </div>
-      <div class="title">${esc(issue.title || '제목 없음')}</div>
-      <div class="sub">${esc(issue.subtitle || '')}</div>
+      <div class="title">${esc(issue.title || issue.id || '제목 없음')}</div>
+      <div class="sub">${esc(issue.subtitle || issue.date || '')}</div>
     </a>`;
   }).join('');
 }

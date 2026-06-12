@@ -158,7 +158,7 @@ const issueId = params.get('id');
 async function load() {
   let issue = null;
   try {
-    const res = await fetch('./issues.json', { cache: 'no-store' });
+    const res = await fetch('./issues.json?t=' + Date.now(), { cache: 'no-store' });
     const data = await res.json();
     issue = (data.issues || []).find(x => x.id === issueId) || (data.issues || [])[0];
   } catch (e) {}
