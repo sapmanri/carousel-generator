@@ -230,6 +230,48 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .amd-body2{font-size:7px;font-weight:300;color:rgba(255,255,255,0.2);text-align:center;letter-spacing:0.02em;margin-top:4px}
 .amd-folio{position:absolute;bottom:8px;right:10px;font-size:7px;font-weight:300;letter-spacing:0.1em;color:rgba(255,255,255,0.12);z-index:3}
 .amd-closing{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;justify-content:center;padding:18px;z-index:2}
+
+/* ── 전원생활 매거진 스타일 ── */
+:root{--jw-orange:#E8762C;--jw-cream:#FAF5EE;--jw-dark:#120E0C;--jw-sage:#B2CDA8;--jw-terracotta:#C8633A}
+.jw-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:var(--serif);background:var(--jw-cream)}
+.jw-wordmark{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;letter-spacing:0.12em;color:var(--jw-orange);text-align:center}
+.jw-wordmark-sub{font-family:var(--sans);font-size:6px;font-weight:300;letter-spacing:0.18em;color:#999;text-align:center;margin-top:3px}
+.jw-mini-mark{position:absolute;top:10px;left:12px;font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:8px;letter-spacing:0.1em;color:var(--jw-orange);z-index:3}
+.jw-mini-page{position:absolute;top:10px;right:12px;font-family:var(--sans);font-size:7px;letter-spacing:0.08em;color:rgba(255,255,255,0.6);z-index:3}
+.jw-mini-page-dark{position:absolute;top:10px;right:12px;font-family:var(--sans);font-size:7px;letter-spacing:0.08em;color:#999;z-index:3}
+.jw-label{display:inline-block;font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:#fff;background:var(--jw-orange);padding:2px 7px;margin-bottom:6px}
+.jw-label-ink{display:inline-block;font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:var(--jw-orange);margin-bottom:6px}
+.jw-headline{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:20px;line-height:1.25;letter-spacing:0.01em;color:var(--jw-dark)}
+.jw-headline-white{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:20px;line-height:1.25;letter-spacing:0.01em;color:#fff}
+.jw-headline-lg{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:15px;line-height:1.35;letter-spacing:0.02em;color:#fff}
+.jw-body{font-family:var(--sans);font-size:8px;font-weight:300;line-height:1.7;color:#666}
+.jw-body-white{font-family:var(--sans);font-size:8px;font-weight:300;line-height:1.7;color:rgba(255,255,255,0.75)}
+.jw-caption{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:400;font-size:14px;line-height:1.5;color:#fff}
+
+/* 표지 */
+.jw-cover-top{position:absolute;top:0;left:0;right:0;padding:12px 0;z-index:2;background:linear-gradient(to bottom,rgba(250,245,238,0.95) 0%,rgba(250,245,238,0.7) 70%,transparent 100%)}
+.jw-cover-feature{position:absolute;top:18%;left:14px;right:14px;z-index:2}
+.jw-cover-bottom{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;z-index:2;display:flex;justify-content:space-between;align-items:flex-end;background:linear-gradient(to top,rgba(250,245,238,0.97) 0%,rgba(250,245,238,0.75) 60%,transparent 100%)}
+.jw-issue-num{font-family:var(--sans);font-weight:700;font-size:16px;color:var(--jw-dark);line-height:1}
+.jw-issue-sub{font-family:var(--sans);font-size:7px;color:#999;letter-spacing:0.05em;margin-top:2px}
+.jw-article-list{font-family:"Gowun Batang","Noto Serif KR",serif;font-size:8px;line-height:1.9;color:#444;text-align:right}
+
+/* 풀블리드 화보 */
+.jw-fullbleed-overlay{position:absolute;bottom:0;left:0;right:0;height:38%;background:linear-gradient(to top,rgba(18,14,12,0.85) 0%,transparent 100%);z-index:1}
+.jw-fullbleed-caption{position:absolute;bottom:16px;left:14px;right:14px;z-index:2}
+
+/* 인용/하이라이트 */
+.jw-quote-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--jw-dark);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center}
+.jw-quote-rule{width:24px;height:2px;background:var(--jw-orange)}
+.jw-quote-text{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:20px;line-height:1.5;color:#fff;margin:14px 0}
+.jw-quote-context{font-family:var(--sans);font-size:7px;color:rgba(255,255,255,0.35);letter-spacing:0.05em}
+
+/* 클로징 */
+.jw-closing-canvas{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 16px;background:var(--jw-dark)}
+.jw-closing-overlay{position:absolute;inset:0;background:rgba(18,14,12,0.55);z-index:1}
+.jw-closing-content{position:relative;z-index:2}
+.jw-closing-cta{font-family:var(--sans);font-size:7px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:10px}
+.jw-closing-wordmark{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:18px;letter-spacing:0.14em;color:var(--jw-orange);margin-top:16px}
 </style>
 
 </head>
@@ -237,7 +279,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.5.0</span></div>
   <div style="display:flex;align-items:center;gap:8px">
     <input type="password" id="apiKeyInput" placeholder="sk-ant-..." 
       style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:200px"
@@ -282,6 +324,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
       <option value="ohouse">오늘의집 (따뜻한 라이프스타일)</option>
       <option value="sapmanri">감성찾아삽만리 (다크 · 감성)</option>
       <option value="applemd">Apple (미니멀 · 여백)</option>
+      <option value="jeonwon">전원생활 (매거진 표지·내지)</option>
     </select>
   </div>
   <div class="field">
@@ -692,6 +735,20 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - pull_quote는 image_index null, layout pull_quote, text_position pull_quote
 - 모든 텍스트(headline, body, label, caption, hashtag)는 ${textLang === 'en' ? '영어로만 작성 (한국어 금지)' : '한국어로만 작성 (label은 영어 단어 허용)'}
 - caption에 해시태그 10개 포함
+${style === 'jeonwon' ? `
+전원생활 매거진 모드 추가 규칙:
+- 1번 슬라이드(표지): page_type="cover", type="cover"
+  - label: "이주의 이야기" 같은 특집 라벨
+  - headline: 2줄로 나뉘는 메인 헤드라인 (\n으로 구분)
+  - article_list: 부가 기사 제목 2~4개 배열 (예: ["장미 울타리","산딸기","직조 전등"])
+  - issue_year: "2026"
+  - issue_sub: "6월 2주" 같은 발행 주차
+- 마지막 슬라이드(클로징): page_type="closing", type="closing"
+  - headline: "오늘도 느리게, 잘 보냈습니다" 류의 클로징 문구
+  - body: 짧은 마무리 문장
+- 중간 슬라이드 1개는 page_type="quote": 나레이션 중 가장 인상적인 한 문장을 headline에, label에 출처/맥락 짧게
+- 나머지 중간 슬라이드는 page_type="fullbleed": headline 또는 body에 짧은 명조 캡션 한 줄
+- 모든 슬라이드에 page_type 필드 필수` : ''}
 ${infographicMode ? `
 인포그래픽 모드 추가 규칙:
 - 이미지들 중 사물·공간·제품이 여러 개 있는 이미지 1~2개를 골라 type을 "infographic"으로 설정
@@ -733,6 +790,7 @@ function renderSlide(slide, i) {
   if (style === 'theedit') return renderTheEdit(slide, i, img, folio, accent, tag);
   if (style === 'sapmanri') return renderSapmanriStyle(slide, i, img, folio, accent, tag);
   if (style === 'applemd') return renderAppleMD(slide, i, img, folio, accent, tag);
+  if (style === 'jeonwon') return renderJeonwon(slide, i, img, folio, accent, tag);
   if (style === 'stayfolio') return renderStayfolio(slide, i, img, folio, accent, tag);
 
   // Magazine B / Nike
@@ -920,6 +978,72 @@ function renderAppleMD(slide, i, img, folio, accent, tag) {
   // cover / feature — 상단 이미지 + 하단 패널
   const isCover = slide.type === 'cover';
   return `<div class="slide-card"><div class="amd-canvas"><div style="position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden"><img style="width:100%;height:100%;object-fit:cover" src="${img}"/><div class="amd-vignette"></div></div><div class="amd-panel"><div class="amd-label">${isCover?'SAPMANRI':(slide.label||'')}</div><div class="amd-title">${slide.headline||''}</div><div class="amd-sub">${slide.body?.slice(0,40)||''}</div><div class="amd-rule"></div><div class="amd-body">${!isCover?(slide.body||''):''}</div></div><div class="amd-folio">${folio}</div></div></div>`;
+}
+
+
+function renderJeonwon(slide, i, img, folio, accent, tag) {
+  const pageType = slide.page_type || (slide.type === 'cover' ? 'cover' : slide.type === 'closing' ? 'closing' : 'fullbleed');
+  const pageNum = folio || String(i+1).padStart(2,'0') + '/07';
+
+  // ── 표지 ──
+  if (pageType === 'cover') {
+    const articles = (slide.article_list || []).slice(0,4);
+    const articlesHtml = articles.map(a => `<div>${a}</div>`).join('');
+    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#ddd"></div>`;
+    return `<div class="slide-card"><div class="jw-canvas">${bgHtml}
+      <div class="jw-cover-top">
+        <div class="jw-wordmark" style="font-size:22px">SAPMANRI</div>
+        <div class="jw-wordmark-sub">오늘도 느리게 · slow days</div>
+      </div>
+      <div class="jw-cover-feature">
+        <span class="jw-label">${slide.label || '이주의 이야기'}</span>
+        <div class="jw-headline-lg" style="color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.4)">${(slide.headline||'').replace(/\\n/g,'<br>')}</div>
+      </div>
+      <div class="jw-cover-bottom">
+        <div>
+          <div class="jw-issue-num">${slide.issue_year || '2026'}</div>
+          <div class="jw-issue-sub">${slide.issue_sub || ''}</div>
+        </div>
+        <div class="jw-article-list">${articlesHtml}</div>
+      </div>
+    </div></div>`;
+  }
+
+  // ── 클로징 ──
+  if (pageType === 'closing') {
+    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : '';
+    return `<div class="slide-card"><div class="jw-closing-canvas">${bgHtml}<div class="jw-closing-overlay"></div>
+      <div class="jw-closing-content">
+        <div class="jw-headline-white">${slide.headline||''}</div>
+        <div class="jw-body-white" style="margin-top:6px">${slide.body||''}</div>
+        <div class="jw-closing-cta">${tag || '@sapmanri · 유튜브에서 전체 영상 보기'}</div>
+        <div class="jw-closing-wordmark">SAPMANRI</div>
+      </div>
+      <div class="jw-mini-page">${pageNum}</div>
+    </div></div>`;
+  }
+
+  // ── 인용/하이라이트 ──
+  if (pageType === 'quote') {
+    return `<div class="slide-card"><div class="jw-quote-canvas">
+      <div class="jw-quote-rule"></div>
+      <div class="jw-quote-text">${slide.headline || slide.body || ''}</div>
+      <div class="jw-quote-rule"></div>
+      <div class="jw-quote-context">${slide.label || ''}</div>
+      <div class="jw-mini-page-dark" style="color:rgba(255,255,255,0.3)">${pageNum}</div>
+    </div></div>`;
+  }
+
+  // ── 풀블리드 화보 (기본/fallback) ──
+  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#ccc"></div>`;
+  return `<div class="slide-card"><div class="jw-canvas">${bgHtml}
+    <div class="jw-fullbleed-overlay"></div>
+    <div class="jw-mini-mark" style="color:#fff">SAPMANRI</div>
+    <div class="jw-mini-page">${pageNum}</div>
+    <div class="jw-fullbleed-caption">
+      <div class="jw-caption">${slide.headline || slide.body || ''}</div>
+    </div>
+  </div></div>`;
 }
 
 
@@ -1156,6 +1280,179 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE) {
     }
     if (cur) lines.push(cur);
     return lines;
+  }
+
+  // ── 전원생활 매거진 슬라이드 ──
+  if (style === 'jeonwon') {
+    const pageType = slide.page_type || (slide.type === 'cover' ? 'cover' : slide.type === 'closing' ? 'closing' : 'fullbleed');
+    const pageNum = slide.folio || String(idx+1).padStart(2,'0') + '/07';
+    const ORANGE = '#E8762C', CREAM = '#FAF5EE', DARK = '#120E0C';
+    const serif = '"Gowun Batang","Noto Serif KR",Georgia,serif';
+    const R2 = SIZE / 220;
+
+    if (pageType === 'cover') {
+      ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,SIZE,SIZE);
+      if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
+      // 상단 그라디언트
+      let g = ctx.createLinearGradient(0,0,0,SIZE*0.22);
+      g.addColorStop(0,'rgba(250,245,238,0.95)'); g.addColorStop(0.7,'rgba(250,245,238,0.7)'); g.addColorStop(1,'rgba(250,245,238,0)');
+      ctx.fillStyle = g; ctx.fillRect(0,0,SIZE,SIZE*0.22);
+      // 워드마크
+      setFont(Math.round(22*R2), '700', serif);
+      ctx.fillStyle = ORANGE; ctx.textAlign = 'center';
+      ctx.fillText('SAPMANRI', SIZE/2, Math.round(16*R2));
+      setFont(Math.round(6*R2), '300', sansFont);
+      ctx.fillStyle = '#999';
+      ctx.fillText('오늘도 느리게 · slow days', SIZE/2, Math.round(24*R2));
+      ctx.textAlign = 'left';
+
+      // 특집 라벨
+      const labelY = Math.round(SIZE*0.18) + Math.round(7*R2);
+      setFont(Math.round(7*R2), '600', sansFont);
+      const labelText = slide.label || '이주의 이야기';
+      const labelW = ctx.measureText(labelText).width + Math.round(14*R2);
+      ctx.fillStyle = ORANGE; ctx.fillRect(Math.round(14*R2), labelY - Math.round(7*R2), labelW, Math.round(11*R2));
+      ctx.fillStyle = '#fff';
+      ctx.fillText(labelText, Math.round(14*R2)+Math.round(7*R2), labelY+Math.round(1*R2));
+
+      // 헤드라인 (최대 2줄)
+      setFont(Math.round(15*R2), '700', serif);
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = Math.round(12*R2);
+      const hlLines = (slide.headline || '').split('\n').slice(0,2);
+      const hlY0 = labelY + Math.round(20*R2);
+      hlLines.forEach((l,j) => ctx.fillText(l, Math.round(14*R2), hlY0 + j*Math.round(19*R2)));
+      ctx.shadowBlur = 0;
+
+      // 하단 그라디언트
+      g = ctx.createLinearGradient(0,SIZE*0.78,0,SIZE);
+      g.addColorStop(0,'rgba(250,245,238,0)'); g.addColorStop(0.4,'rgba(250,245,238,0.75)'); g.addColorStop(1,'rgba(250,245,238,0.97)');
+      ctx.fillStyle = g; ctx.fillRect(0,SIZE*0.78,SIZE,SIZE*0.22);
+
+      // 발행 정보
+      const botY = SIZE - Math.round(14*R2);
+      setFont(Math.round(16*R2), '700', sansFont);
+      ctx.fillStyle = DARK;
+      ctx.fillText(slide.issue_year || '2026', Math.round(14*R2), botY - Math.round(6*R2));
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = '#999';
+      ctx.fillText(slide.issue_sub || '', Math.round(14*R2), botY + Math.round(4*R2));
+
+      // 기사 목록 (우측)
+      const articles = (slide.article_list || []).slice(0,4);
+      setFont(Math.round(8*R2), '400', serif);
+      ctx.fillStyle = '#444'; ctx.textAlign = 'right';
+      const lineH2 = Math.round(15*R2);
+      const startY = botY - (articles.length-1)*lineH2 - Math.round(4*R2);
+      articles.forEach((a,j) => ctx.fillText(a, SIZE-Math.round(14*R2), startY + j*lineH2));
+      ctx.textAlign = 'left';
+      return canvas;
+    }
+
+    if (pageType === 'closing') {
+      ctx.fillStyle = DARK; ctx.fillRect(0,0,SIZE,SIZE);
+      if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
+      ctx.fillStyle = 'rgba(18,14,12,0.55)'; ctx.fillRect(0,0,SIZE,SIZE);
+
+      const pad = Math.round(16*R2);
+      let y = SIZE - Math.round(14*R2);
+
+      // 워드마크 (맨 아래)
+      setFont(Math.round(18*R2), '700', serif);
+      ctx.fillStyle = ORANGE;
+      ctx.fillText('SAPMANRI', pad, y);
+      y -= Math.round(28*R2);
+
+      // CTA
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillText(tag || '@sapmanri · 유튜브에서 전체 영상 보기', pad, y);
+      y -= Math.round(18*R2);
+
+      // body
+      setFont(Math.round(8*R2), '300', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      const blines = wrapText(slide.body||'', SIZE-pad*2);
+      const bodyY0 = y - (blines.length-1)*Math.round(13*R2);
+      blines.forEach((l,j) => ctx.fillText(l, pad, bodyY0 + j*Math.round(13*R2)));
+      y = bodyY0 - Math.round(14*R2);
+
+      // headline
+      setFont(Math.round(20*R2), '700', serif);
+      ctx.fillStyle = '#fff';
+      const hlines = wrapText(slide.headline||'', SIZE-pad*2);
+      const hlY0 = y - (hlines.length-1)*Math.round(26*R2);
+      hlines.forEach((l,j) => ctx.fillText(l, pad, hlY0 + j*Math.round(26*R2)));
+
+      // page num
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'right';
+      ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+      ctx.textAlign = 'left';
+      return canvas;
+    }
+
+    if (pageType === 'quote') {
+      ctx.fillStyle = DARK; ctx.fillRect(0,0,SIZE,SIZE);
+      const pad = Math.round(24*R2);
+      // rule top
+      const ruleW = Math.round(24*R2);
+      const cy = SIZE/2;
+      setFont(Math.round(20*R2), '700', serif);
+      const qtext = slide.headline || slide.body || '';
+      const qlines = wrapText(qtext, SIZE-pad*2);
+      const lineH3 = Math.round(30*R2);
+      const totalH = qlines.length*lineH3;
+      const startY = cy - totalH/2 + Math.round(20*R2);
+
+      // 위 rule
+      ctx.fillStyle = ORANGE;
+      ctx.fillRect(SIZE/2 - ruleW/2, startY - Math.round(28*R2), ruleW, Math.round(2*R2));
+
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+      qlines.forEach((l,j) => ctx.fillText(l, SIZE/2, startY + j*lineH3));
+
+      // 아래 rule
+      ctx.fillStyle = ORANGE;
+      ctx.fillRect(SIZE/2 - ruleW/2, startY + qlines.length*lineH3 + Math.round(8*R2), ruleW, Math.round(2*R2));
+
+      // context
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fillText(slide.label || '', SIZE/2, startY + qlines.length*lineH3 + Math.round(26*R2));
+      ctx.textAlign = 'left';
+
+      // page num
+      setFont(Math.round(7*R2), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'right';
+      ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+      ctx.textAlign = 'left';
+      return canvas;
+    }
+
+    // fullbleed (기본)
+    ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,SIZE,SIZE);
+    if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
+    let g2 = ctx.createLinearGradient(0,SIZE*0.62,0,SIZE);
+    g2.addColorStop(0,'rgba(18,14,12,0)'); g2.addColorStop(1,'rgba(18,14,12,0.85)');
+    ctx.fillStyle = g2; ctx.fillRect(0,SIZE*0.62,SIZE,SIZE*0.38);
+
+    setFont(Math.round(8*R2), '700', serif);
+    ctx.fillStyle = '#fff';
+    ctx.fillText('SAPMANRI', Math.round(12*R2), Math.round(16*R2));
+
+    setFont(Math.round(7*R2), '400', sansFont);
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'right';
+    ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+    ctx.textAlign = 'left';
+
+    setFont(Math.round(14*R2), '400', serif);
+    ctx.fillStyle = '#fff';
+    const captionText = slide.headline || slide.body || '';
+    const clines = wrapText(captionText, SIZE-Math.round(28*R2));
+    const capY0 = SIZE - Math.round(16*R2) - (clines.length-1)*Math.round(20*R2);
+    clines.forEach((l,j) => ctx.fillText(l, Math.round(14*R2), capY0 + j*Math.round(20*R2)));
+    return canvas;
   }
 
   // ── 인포그래픽 슬라이드 ──
