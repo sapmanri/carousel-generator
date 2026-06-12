@@ -432,8 +432,115 @@ async function analyzeAllPhotos() {
     }
   }
   status.textContent = '분석 완료 ✓';
-  setTimeout(() => status.textContent = '', 2000);
+
+  // 분석 끝난 사진들로 페이지 구성 + 글까지 자동 생성
+  if (pages.length > 0) {
+    const ok = confirm('이미 구성된 페이지가 있어요. 자동 구성으로 덮어쓸까요?');
+    if (!ok) { setTimeout(() => status.textContent = '', 2000); return; }
+  }
+  await autoBuildPages(status);
 }
+
+// ══════════════════════════════════════════════════════════════
+// 분석 결과 기반 자동 페이지 구성 + 글 자동 생성
+// ══════════════════════════════════════════════════════════════
+async function autoBuildPages(status) {
+  status = status || document.getElementById('analyzeStatus');
+  if (!photos.length) return;
+
+  const n = photos.length;
+  const newPages = [];
+
+  // 1. 표지 — 첫 사진
+  const coverPg = PAGE_DEFAULTS.cover();
+  coverPg.imageId = photos[0].id;
+  newPages.push(coverPg);
+
+  // 표지 사진을 기본 표지 이미지로도 지정 (아직 선택 안 된 경우)
+  if (!coverPhotoId) coverPhotoId = photos[0].id;
+
+  // 2. 목차 — 사진이 2장 이상이면 추가
+  if (n >= 3) {
+    const tocPg = PAGE_DEFAULTS.index();
+    newPages.push(tocPg);
+  }
+
+  // 3. 나머지 사진들을 분석 결과(best_page_type)에 따라 배치
+  const middlePhotos = photos.slice(1);
+  let gridBuffer = [];
+
+  function flushGrid() {
+    if (gridBuffer.length) {
+      const g = PAGE_DEFAULTS.grid();
+      g.imageIds = gridBuffer.map(p => p.id);
+      newPages.push(g);
+      gridBuffer = [];
+    }
+  }
+
+  middlePhotos.forEach((p, i) => {
+    const best = (p.analysis && p.analysis.best_page_type) || 'fullbleed';
+    if (best === 'grid') {
+      gridBuffer.push(p);
+      if (gridBuffer.length === 3) flushGrid();
+    } else if (best === 'split') {
+      flushGrid();
+      const pg = PAGE_DEFAULTS.split();
+      pg.imageId = p.id;
+      pg.label = (p.analysis && p.analysis.suggested_label) || '';
+      pg.darkText = (p.analysis && p.analysis.overall_brightness === 'dark');
+      newPages.push(pg);
+    } else if (best === 'quote') {
+      flushGrid();
+      newPages.push(PAGE_DEFAULTS.quote());
+    } else {
+      // fullbleed (기본)
+      flushGrid();
+      const pg = PAGE_DEFAULTS.fullbleed();
+      pg.imageId = p.id;
+      newPages.push(pg);
+    }
+  });
+  flushGrid();
+
+  // 4. 클로징
+  newPages.push(PAGE_DEFAULTS.closing());
+
+  pages = newPages;
+  renderPageList();
+
+  // 5. 목차 항목 채우기 (각 split/fullbleed 사진의 suggested_label/caption으로)
+  const tocPage = pages.find(pg => pg.type === 'index');
+  if (tocPage) {
+    tocPage.items = middlePhotos
+      .map(p => (p.analysis && (p.analysis.suggested_label || p.analysis.suggested_caption)) || '')
+      .filter(Boolean)
+      .slice(0, 6);
+  }
+
+  // 6. 각 페이지 글 자동 생성
+  const textPages = pages.filter(pg => ['cover','fullbleed','split','grid','quote','closing'].includes(pg.type));
+  for (let i = 0; i < pages.length; i++) {
+    const pg = pages[i];
+    if (!['cover','fullbleed','split','grid','quote','closing'].includes(pg.type)) continue;
+    status.innerHTML = `<span class="spinner"></span>페이지 글 생성 중 (${textPages.indexOf(pg)+1}/${textPages.length})…`;
+    try {
+      if (pg.type === 'cover') {
+        await genCoverHeadline(i);
+      } else {
+        await genPageText(i);
+      }
+    } catch (e) {
+      // 글 생성 실패해도 구성은 유지, 계속 진행
+    }
+  }
+
+  renderPageList();
+  status.textContent = '자동 구성 완료 ✓';
+  setTimeout(() => status.textContent = '', 2500);
+  toast('사진 분석과 페이지 구성, 글까지 자동으로 채웠어요. 확인하고 수정해주세요.');
+}
+
 
 // ══════════════════════════════════════════════════════════════
 // 표지 선택
