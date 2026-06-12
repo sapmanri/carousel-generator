@@ -122,8 +122,43 @@ function svgFor(doc) {
   if (p.type === 'grid') {
     return svgGrid(p, orange, cream, sage, dark);
   }
+  if (p.type === 'swatch') {
+    return svgSwatch(p, pal);
+  }
   return svgCover(p, orange, cream, sage, dark);
 }
+
+// Mini palette + type sample diagram (for carousel style guides)
+function svgSwatch(p, pal) {
+  const [c1, c2, c3, c4] = pal;
+  const name = esc(p.name || 'STYLE');
+  const sample = esc(p.sample || '디자인 시스템');
+  const fonts = (p.fonts || []).join(' / ');
+  // text color chosen for contrast against c2 (the "canvas" color of the style)
+  const isLightCanvas = (() => {
+    const hex = c2.replace('#','');
+    const r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+    return (r*299 + g*587 + b*114) / 1000 > 140;
+  })();
+  const textColor = isLightCanvas ? '#1a1a1a' : '#ffffff';
+  const muteColor = isLightCanvas ? '#888580' : 'rgba(255,255,255,0.5)';
+  return `
+  <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="200" fill="${c2}"/>
+    <text x="24" y="36" font-family="Georgia, serif" font-size="22" font-weight="300" fill="${textColor}" letter-spacing="2">${name}</text>
+    <text x="24" y="54" font-family="Helvetica, Arial, sans-serif" font-size="7" fill="${muteColor}" letter-spacing="1">${esc(fonts)}</text>
+    <text x="24" y="120" font-family="Georgia, serif" font-size="17" font-weight="300" fill="${textColor}">${sample}</text>
+    <text x="24" y="142" font-family="Helvetica, Arial, sans-serif" font-style="italic" font-size="8" fill="${muteColor}">Aa Bb Cc · 가나다라</text>
+    <g transform="translate(24,164)">
+      <rect x="0" y="0" width="28" height="20" fill="${c1}"/>
+      <rect x="32" y="0" width="28" height="20" fill="${c2}" stroke="${muteColor}" stroke-width="0.5"/>
+      <rect x="64" y="0" width="28" height="20" fill="${c3}"/>
+      <rect x="96" y="0" width="28" height="20" fill="${c4}"/>
+    </g>
+    <text x="296" y="190" font-family="Helvetica, Arial, sans-serif" font-size="7" fill="${muteColor}" text-anchor="end" letter-spacing="2">SAPMANRI CAROUSEL</text>
+  </svg>`;
+}
+
 
 // Mini cover-layout diagram (based on jeonwon_magazine_style.md structure)
 function svgCover(p, orange, cream, sage, dark) {
