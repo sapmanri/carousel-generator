@@ -172,8 +172,8 @@
     {
       "id": "061226-2",
       "number": "00-0",
-      "title": "",
-      "subtitle": "",
+      "title": "손끝에 남은 것들",
+      "subtitle": "A slow June afternoon",
       "date": "2026-06-13",
       "cover": "./images/library/yuqc_2373e1ae_647b22ac.jpg",
       "pages": [
@@ -251,7 +251,7 @@
         {
           "type": "closing",
           "text": "오늘도 느리게, 잘 보냈습니다.",
-          "cta": ""
+          "cta": "https://youtu.be/OKllcN_vWdQ"
         }
       ]
     },
