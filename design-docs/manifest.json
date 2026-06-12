@@ -4,15 +4,28 @@
     "title": "전원생활 매거진 표지 디자인 시스템",
     "subtitle": "삽만리 적용용 · 표지 디자인 v1.0",
     "file": "jeonwon_magazine_style.md",
-    "tags": ["표지", "썸네일", "컬러 팔레트", "타이포그래피"],
+    "tags": [
+      "표지",
+      "썸네일",
+      "컬러 팔레트",
+      "타이포그래피"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "cover",
-      "palette": ["#E8762C", "#FAF5EE", "#B2CDA8", "#120E0C"],
+      "palette": [
+        "#E8762C",
+        "#FAF5EE",
+        "#B2CDA8",
+        "#120E0C"
+      ],
       "wordmark": "SAPMANRI",
       "sub": "오늘도 느리게 · slow days",
       "label": "이주의 이야기",
-      "headline": ["내 손으로 만든", "작은 불빛 하나"]
+      "headline": [
+        "내 손으로 만든",
+        "작은 불빛 하나"
+      ]
     }
   },
   {
@@ -20,11 +33,21 @@
     "title": "매거진 내지 디자인 시스템",
     "subtitle": "삽만리 캐러셀 적용용 · 내지 7타입 v1.0",
     "file": "magazine_inner_pages.md",
-    "tags": ["캐러셀", "내지", "인스타그램", "레이아웃"],
+    "tags": [
+      "캐러셀",
+      "내지",
+      "인스타그램",
+      "레이아웃"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "grid",
-      "palette": ["#E8762C", "#FAF5EE", "#B2CDA8", "#120E0C"],
+      "palette": [
+        "#E8762C",
+        "#FAF5EE",
+        "#B2CDA8",
+        "#120E0C"
+      ],
       "wordmark": "SAPMANRI",
       "pages": 7
     }
@@ -34,13 +57,26 @@
     "title": "Magazine B 스타일",
     "subtitle": "캐러셀 생성기 style: magazine-b · v1.0",
     "file": "magazine_b_style.md",
-    "tags": ["캐러셀", "에디토리얼", "세리프", "여백"],
+    "tags": [
+      "캐러셀",
+      "에디토리얼",
+      "세리프",
+      "여백"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "swatch",
-      "palette": ["#b87a6e", "#faf9f7", "#f2f0ec", "#1a1a1a"],
+      "palette": [
+        "#b87a6e",
+        "#faf9f7",
+        "#f2f0ec",
+        "#1a1a1a"
+      ],
       "name": "Magazine B",
-      "fonts": ["Cormorant Garamond", "Noto Sans KR"],
+      "fonts": [
+        "Cormorant Garamond",
+        "Noto Sans KR"
+      ],
       "sample": "내 손으로 만든 작은 불빛"
     }
   },
@@ -49,13 +85,25 @@
     "title": "Nike 스타일",
     "subtitle": "캐러셀 생성기 style: nike · v1.0",
     "file": "nike_style.md",
-    "tags": ["캐러셀", "강렬", "대문자", "흑백"],
+    "tags": [
+      "캐러셀",
+      "강렬",
+      "대문자",
+      "흑백"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "swatch",
-      "palette": ["#ffffff", "#111111", "#888888", "#000000"],
+      "palette": [
+        "#ffffff",
+        "#111111",
+        "#888888",
+        "#000000"
+      ],
       "name": "NIKE",
-      "fonts": ["Helvetica Neue"],
+      "fonts": [
+        "Helvetica Neue"
+      ],
       "sample": "SLOW DAYS"
     }
   },
@@ -64,13 +112,25 @@
     "title": "오늘의집(Ohouse) 스타일",
     "subtitle": "캐러셀 생성기 style: ohouse · v1.0",
     "file": "ohouse_style.md",
-    "tags": ["캐러셀", "라이프스타일", "Pill", "틸그린"],
+    "tags": [
+      "캐러셀",
+      "라이프스타일",
+      "Pill",
+      "틸그린"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "swatch",
-      "palette": ["#00C896", "#FAFAF8", "#E6FAF4", "#F5F3EF"],
+      "palette": [
+        "#00C896",
+        "#FAFAF8",
+        "#E6FAF4",
+        "#F5F3EF"
+      ],
       "name": "오늘의집",
-      "fonts": ["Noto Sans KR"],
+      "fonts": [
+        "Noto Sans KR"
+      ],
       "sample": "내 손으로 만든 작은 불빛"
     }
   },
@@ -79,13 +139,25 @@
     "title": "디에디트(The Edit) 스타일",
     "subtitle": "캐러셀 생성기 style: theedit · v1.0",
     "file": "theedit_style.md",
-    "tags": ["캐러셀", "큐레이션", "정보형", "화이트"],
+    "tags": [
+      "캐러셀",
+      "큐레이션",
+      "정보형",
+      "화이트"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "swatch",
-      "palette": ["#ff3c00", "#ffffff", "#f5f5f5", "#111111"],
+      "palette": [
+        "#ff3c00",
+        "#ffffff",
+        "#f5f5f5",
+        "#111111"
+      ],
       "name": "THE EDIT",
-      "fonts": ["Helvetica Neue"],
+      "fonts": [
+        "Helvetica Neue"
+      ],
       "sample": "내 손으로 만든 작은 불빛"
     }
   },
@@ -94,13 +166,26 @@
     "title": "스테이폴리오(Stayfolio) 스타일",
     "subtitle": "캐러셀 생성기 style: stayfolio · v1.0",
     "file": "stayfolio_style.md",
-    "tags": ["캐러셀", "파인스테이", "세리프", "여백"],
+    "tags": [
+      "캐러셀",
+      "파인스테이",
+      "세리프",
+      "여백"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "swatch",
-      "palette": ["#8c7355", "#f7f4ef", "#d4cfc8", "#1c1917"],
+      "palette": [
+        "#8c7355",
+        "#f7f4ef",
+        "#d4cfc8",
+        "#1c1917"
+      ],
       "name": "STAYFOLIO",
-      "fonts": ["Cormorant Garamond", "Noto Serif KR"],
+      "fonts": [
+        "Cormorant Garamond",
+        "Noto Serif KR"
+      ],
       "sample": "내 손으로 만든 작은 불빛"
     }
   },
@@ -109,13 +194,26 @@
     "title": "감성찾아삽만리 (다크·감성) 스타일",
     "subtitle": "캐러셀 생성기 style: sapmanri · v1.0",
     "file": "sapmanri_dark_style.md",
-    "tags": ["캐러셀", "다크", "채널 시그니처", "산세리프"],
+    "tags": [
+      "캐러셀",
+      "다크",
+      "채널 시그니처",
+      "산세리프"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "swatch",
-      "palette": ["#b87a6e", "#0e0e0e", "#1a1a1a", "#ffffff"],
+      "palette": [
+        "#b87a6e",
+        "#0e0e0e",
+        "#1a1a1a",
+        "#ffffff"
+      ],
       "name": "SAPMANRI",
-      "fonts": ["Helvetica Neue", "Noto Sans KR"],
+      "fonts": [
+        "Helvetica Neue",
+        "Noto Sans KR"
+      ],
       "sample": "내 손으로 만든 작은 불빛"
     }
   },
@@ -124,13 +222,133 @@
     "title": "Apple (미니멀·여백) 스타일",
     "subtitle": "캐러셀 생성기 style: applemd · v1.0",
     "file": "applemd_style.md",
-    "tags": ["캐러셀", "미니멀", "블랙", "여백"],
+    "tags": [
+      "캐러셀",
+      "미니멀",
+      "블랙",
+      "여백"
+    ],
     "thumbnail": "",
     "preview": {
       "type": "swatch",
-      "palette": ["#ffffff", "#000000", "#333333", "#666666"],
+      "palette": [
+        "#ffffff",
+        "#000000",
+        "#333333",
+        "#666666"
+      ],
       "name": "Apple",
-      "fonts": ["Helvetica Neue"],
+      "fonts": [
+        "Helvetica Neue"
+      ],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "girok-style",
+    "title": "기록(Girok) 스타일",
+    "subtitle": "Skyline Music Matcher cardDesign: girok · v1.0",
+    "file": "girok_style.md",
+    "tags": [
+      "Skyline",
+      "라이프로그",
+      "파스텔",
+      "Pill"
+    ],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": [
+        "#7C6FD4",
+        "#FFFFFF",
+        "#EEF0FF",
+        "#1A1A1A"
+      ],
+      "name": "기록",
+      "fonts": [
+        "Noto Sans KR"
+      ],
+      "sample": "오늘의 기록"
+    }
+  },
+  {
+    "id": "polaroid-style",
+    "title": "폴라로이드(Polaroid) 스타일",
+    "subtitle": "Skyline Music Matcher cardDesign: polaroid · v1.0",
+    "file": "polaroid_style.md",
+    "tags": [
+      "Skyline",
+      "필름",
+      "아날로그",
+      "세리프"
+    ],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": [
+        "#1a1a1a",
+        "#F7F5F0",
+        "#aaaaaa",
+        "#888888"
+      ],
+      "name": "Polaroid",
+      "fonts": [
+        "Cormorant Garamond"
+      ],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "grain-style",
+    "title": "필름그레인(Grain) 스타일",
+    "subtitle": "Skyline Music Matcher cardDesign: grain · v1.0",
+    "file": "grain_style.md",
+    "tags": [
+      "Skyline",
+      "빈티지",
+      "필름",
+      "오버레이"
+    ],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": [
+        "#FFC850",
+        "#1E1208",
+        "#3A2208",
+        "#FFFFFF"
+      ],
+      "name": "Grain",
+      "fonts": [
+        "Cormorant Garamond"
+      ],
+      "sample": "내 손으로 만든 작은 불빛"
+    }
+  },
+  {
+    "id": "cinema-style",
+    "title": "시네마(Cinema) 스타일",
+    "subtitle": "Skyline Music Matcher cardDesign: cinema · v1.0",
+    "file": "cinema_style.md",
+    "tags": [
+      "Skyline",
+      "레터박스",
+      "영화",
+      "미니멀"
+    ],
+    "thumbnail": "",
+    "preview": {
+      "type": "swatch",
+      "palette": [
+        "#ffffff",
+        "#000000",
+        "#333333",
+        "#666666"
+      ],
+      "name": "CINEMA",
+      "fonts": [
+        "Cormorant Garamond"
+      ],
       "sample": "내 손으로 만든 작은 불빛"
     }
   }
