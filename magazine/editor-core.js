@@ -893,31 +893,33 @@ function mapExistingPageToEditable(pg) {
   return pg;
 }
 
-// 새 사진(base64)을 GitHub에 커밋, 기존 사진(_existing)은 그대로 경로 재사용
+// 사진을 공유 이미지 라이브러리(magazine/images/library/<hash>.<ext>)에 커밋.
+// 같은 사진(같은 해시)이 이미 라이브러리에 있으면 업로드 없이 그 경로를 재사용한다.
 async function commitPhoto(photo, issueId, index) {
-  if (photo._existing) {
-    // 기존 이미지: dataUrl이 이미 경로(magazine/images/...)인 경우 그대로 반환
-    if (typeof photo.dataUrl === 'string' && !photo.dataUrl.startsWith('data:')) {
-      return photo.dataUrl;
-    }
-  }
   const token = getGhToken();
-  const ext = (photo.mediaType.split('/')[1] || 'jpg').replace('jpeg','jpg');
-  const filename = `${String(index).padStart(2,'0')}_${photo.id}.${ext}`;
-  const path = `magazine/images/${issueId}/${filename}`;
+
+  // 기존(_existing) 사진이고 이미 경로(데이터URL 아님)면 그대로 사용
+  if (photo._existing && typeof photo.dataUrl === 'string' && !photo.dataUrl.startsWith('data:')) {
+    return photo.dataUrl;
+  }
+
+  const ext = (photo.mediaType.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+  const hash = await SapmanriCache.hashImage(photo.dataUrl);
+  const filename = `${hash}.${ext}`;
+  const path = `magazine/images/library/${filename}`;
   const base64 = photo.dataUrl.split(',')[1];
 
-  // 기존 파일 sha 확인 (덮어쓰기 대비)
-  let sha = null;
+  // 라이브러리에 동일 해시 파일이 이미 있는지 확인 → 있으면 업로드 스킵
   try {
     const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
       headers: { Authorization: `token ${token}` }
     });
-    if (checkRes.ok) { const j = await checkRes.json(); sha = j.sha; }
-  } catch(e) {}
+    if (checkRes.ok) {
+      return path; // 이미 존재 — 재사용
+    }
+  } catch (e) {}
 
-  const body = { message: `Add magazine image: ${path}`, content: base64 };
-  if (sha) body.sha = sha;
+  const body = { message: `Add to image library: ${filename}`, content: base64 };
   const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
     method: 'PUT',
     headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
@@ -925,7 +927,7 @@ async function commitPhoto(photo, issueId, index) {
   });
   const json = await res.json();
   if (!json.content) throw new Error(json.message || `이미지 업로드 실패: ${filename}`);
-  return path; // issue.html에서 상대경로로 참조 (magazine/ 안에서는 ./images/... 가 맞음 → 보정)
+  return path;
 }
 
 // magazine/images/... → ./images/... (issue.html은 magazine/ 폴더 안에서 동작)
