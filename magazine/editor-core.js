@@ -995,6 +995,7 @@ function clearForm() {
   document.getElementById('fTitle').value = '';
   document.getElementById('fSubtitle').value = '';
   document.getElementById('fDate').value = '';
+  document.getElementById('fYoutubeUrl').value = '';
   photos = [];
   pages = [];
   coverPhotoId = null;
@@ -1010,6 +1011,7 @@ function loadIssueIntoForm(issue) {
   document.getElementById('fTitle').value = issue.title || '';
   document.getElementById('fSubtitle').value = issue.subtitle || '';
   document.getElementById('fDate').value = issue.date || '';
+  document.getElementById('fYoutubeUrl').value = issue.youtubeUrl || '';
 
   // 기존 이미지들을 photos 배열에 참조 형태로 등록 (path만, dataUrl 없음 → 재업로드 전까지 그대로 사용)
   photos = [];
@@ -1227,6 +1229,7 @@ async function publish() {
       title: document.getElementById('fTitle').value.trim(),
       subtitle: document.getElementById('fSubtitle').value.trim(),
       date: document.getElementById('fDate').value,
+      youtubeUrl: document.getElementById('fYoutubeUrl').value.trim(),
       cover: coverPath || '',
       pages: exportedPages,
     };

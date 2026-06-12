@@ -136,8 +136,21 @@ img{max-width:100%;display:block}
 /* ── Type 7: Closing ── */
 .page-closing{background:var(--dark);color:var(--cream);align-items:center;text-align:center;justify-content:space-between}
 .page-closing .closing-text{font-family:var(--serif);font-size:26px;line-height:1.7;margin-top:auto}
-.page-closing .closing-cta{font-size:12px;letter-spacing:0.08em;color:rgba(255,255,255,0.5);margin-top:24px}
+.page-closing .closing-cta{font-size:12px;letter-spacing:0.08em;color:rgba(255,255,255,0.5);margin-top:16px}
+.page-closing > div{display:flex;flex-direction:column;align-items:center;gap:0;margin-top:32px}
 .page-closing .closing-cta a{color:var(--orange)}
+.page-closing .youtube-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  border:1px solid var(--orange);color:var(--orange);
+  font-size:12px;letter-spacing:0.08em;padding:12px 22px;border-radius:999px;
+  text-decoration:none;transition:all .2s;margin-bottom:4px;
+}
+.page-closing .youtube-btn .yt-icon{
+  display:flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;background:var(--orange);color:var(--dark);
+}
+.page-closing .youtube-btn:hover{background:var(--orange);color:var(--dark)}
+.page-closing .youtube-btn:hover .yt-icon{background:var(--dark);color:var(--orange)}
 .page-closing .big-mark{font-family:var(--serif);font-weight:700;font-size:64px;color:var(--orange);letter-spacing:0.06em;margin-top:60px;margin-bottom:20px}
 @media(min-width:768px){.page-closing .closing-text{font-size:38px}.page-closing .big-mark{font-size:96px}}
 
@@ -333,7 +346,7 @@ function renderPage(p, i, allPages, issue) {
     case 'split': return renderSplit(p);
     case 'grid': return renderGrid(p);
     case 'quote': return renderQuote(p);
-    case 'closing': return renderClosing(p);
+    case 'closing': return renderClosing(p, issue);
     case 'spread': return renderSpread(p);
     case 'essay': return renderEssay(p);
     case 'dialogue': return renderDialogue(p);
@@ -412,12 +425,21 @@ function renderQuote(p) {
   </section>`;
 }
 
-function renderClosing(p) {
+function renderClosing(p, issue) {
+  const youtubeUrl = issue && issue.youtubeUrl;
+  const youtubeBtn = youtubeUrl ? `
+    <a class="youtube-btn" href="${esc(youtubeUrl)}" target="_blank" rel="noopener">
+      <span class="yt-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+      <span>이번 호 영상으로 보기</span>
+    </a>` : '';
   return `
   <section class="page page-closing">
     <div class="closing-text">${nl(p.text || '')}</div>
     <div>
-      <div class="closing-cta">${p.cta || '유튜브에서 전체 영상 보기 · <a href="https://www.youtube.com/@sapmanri" target="_blank">@sapmanri</a>'}</div>
+      ${youtubeBtn}
+      <div class="closing-cta">${p.cta || '유튜브에서 더 보기 · <a href="https://www.youtube.com/@sapmanri" target="_blank">@sapmanri</a>'}</div>
       <div class="big-mark">SAPMANRI</div>
     </div>
   </section>`;
