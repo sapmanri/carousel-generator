@@ -69,21 +69,28 @@ img{max-width:100%;display:block}
 @media(min-width:768px){.page-cover .headline{font-size:64px}}
 
 /* ── Type 2: Full Bleed Photo ── */
-.page-fullbleed{padding:0;align-items:stretch;position:relative;background:#000}
-.page-fullbleed .fb-img-wrap{width:100%;height:100vh;overflow:hidden}
+.page-fullbleed{padding:0;align-items:stretch;position:relative;background:#000;min-height:100vh;height:auto}
+.page-fullbleed .fb-img-wrap{width:100%;height:100vh;overflow:hidden;flex-shrink:0}
 .page-fullbleed .fb-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
 .page-fullbleed .caption{
-  position:absolute;left:24px;bottom:32px;right:24px;z-index:2;
-  font-family:var(--serif);font-size:20px;line-height:1.6;
-  color:var(--cream);text-shadow:0 2px 12px rgba(0,0,0,0.5);
-  max-width:640px;
+  position:relative;z-index:2;width:100%;box-sizing:border-box;
+  padding:32px 24px 40px;
+  font-family:var(--serif);font-size:18px;line-height:1.8;white-space:pre-line;
+  color:var(--cream);background:var(--dark);
+}
+.page-fullbleed .caption.short{
+  position:absolute;left:24px;right:24px;bottom:32px;background:none;
+  padding:0;font-size:20px;text-shadow:0 2px 12px rgba(0,0,0,0.5);max-width:640px;
 }
 .page-fullbleed::after{
-  content:'';position:absolute;left:0;right:0;bottom:0;height:40%;z-index:1;
+  content:'';position:absolute;left:0;right:0;top:0;height:100vh;z-index:1;
   background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.55) 100%);
   pointer-events:none;
 }
-@media(min-width:768px){.page-fullbleed .caption{font-size:28px;left:48px;bottom:48px}}
+@media(min-width:768px){
+  .page-fullbleed .caption{font-size:20px;padding:48px}
+  .page-fullbleed .caption.short{font-size:28px;left:48px;bottom:48px}
+}
 
 /* ── Type 3: Index/Contents ── */
 .page-index{background:var(--dark);color:var(--cream)}
@@ -375,10 +382,13 @@ function renderCover(p, issue) {
 }
 
 function renderFullbleed(p) {
+  const caption = p.caption || '';
+  const isShort = caption.length <= 30 && !caption.includes('\n\n');
+  const captionCls = isShort ? 'caption short' : 'caption';
   return `
   <section class="page page-fullbleed">
     ${p.image ? `<div class="fb-img-wrap"><img src="${esc(p.image)}" alt=""></div>` : ''}
-    ${p.caption ? `<div class="caption">${nl(p.caption)}</div>` : ''}
+    ${caption ? `<div class="${captionCls}">${nl(caption)}</div>` : ''}
   </section>`;
 }
 
@@ -426,7 +436,13 @@ function renderQuote(p) {
 }
 
 function renderClosing(p, issue) {
-  const youtubeUrl = issue && issue.youtubeUrl;
+  const isYoutubeLink = (s) => typeof s === 'string' && /(youtube\.com|youtu\.be)/.test(s);
+  let youtubeUrl = issue && issue.youtubeUrl;
+  let cta = p.cta;
+  if (!youtubeUrl && isYoutubeLink(cta)) {
+    youtubeUrl = cta;
+    cta = ''; // cta가 링크 자체였던 경우 — 버튼으로 대체하고 cta 텍스트는 비움
+  }
   const youtubeBtn = youtubeUrl ? `
     <a class="youtube-btn" href="${esc(youtubeUrl)}" target="_blank" rel="noopener">
       <span class="yt-icon">
@@ -439,7 +455,7 @@ function renderClosing(p, issue) {
     <div class="closing-text">${nl(p.text || '')}</div>
     <div>
       ${youtubeBtn}
-      <div class="closing-cta">${p.cta || '유튜브에서 더 보기 · <a href="https://www.youtube.com/@sapmanri" target="_blank">@sapmanri</a>'}</div>
+      ${cta || !youtubeUrl ? `<div class="closing-cta">${cta || '유튜브에서 더 보기 · <a href="https://www.youtube.com/@sapmanri" target="_blank">@sapmanri</a>'}</div>` : ''}
       <div class="big-mark">SAPMANRI</div>
     </div>
   </section>`;
