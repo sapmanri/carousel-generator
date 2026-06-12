@@ -778,7 +778,9 @@ function populateIssueSelect() {
     allIssues.map(iss => `<option value="${esc(iss.id)}">${esc(iss.number || iss.id)} · ${esc(iss.title || '')}</option>`).join('');
 }
 
+let suppressIssueSelectChange = false;
 function onIssueSelect() {
+  if (suppressIssueSelectChange) return;
   const id = document.getElementById('issueSelect').value;
   if (id === '__new__') {
     currentIssueId = null;
@@ -1007,8 +1009,10 @@ async function publish() {
     statusEl.textContent = '발행 완료 ✓';
     statusEl.className = 'publish-status ok';
     currentIssueId = id;
+    suppressIssueSelectChange = true;
     populateIssueSelect();
     document.getElementById('issueSelect').value = id;
+    suppressIssueSelectChange = false;
     toast('발행되었습니다. 매거진 보기에서 확인하세요.');
   } catch (e) {
     statusEl.textContent = '발행 실패: ' + e.message;
