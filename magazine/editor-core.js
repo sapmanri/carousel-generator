@@ -524,16 +524,25 @@ async function autoBuildPages(status) {
   // 3. 나머지 사진들을 분석 결과(best_page_type)에 따라 배치
   const middlePhotos = photos.slice(1);
   let gridBuffer = [];
+  let gridTarget = 3 + Math.floor(Math.random() * 4); // 3~6장 랜덤 목표
   let consecutiveFullbleed = 0;
   const MAX_CONSECUTIVE_FULLBLEED = 1; // fullbleed가 연속으로 너무 많이 나오지 않도록 제한
 
-  function flushGrid() {
-    if (gridBuffer.length) {
+  function flushGrid(force) {
+    if (!gridBuffer.length) return;
+    if (gridBuffer.length < 2 && !force) return; // 1장짜리는 보류 (다음 그리드에 합치거나 마지막에 처리)
+    if (gridBuffer.length === 1) {
+      // 1장만 남으면 그리드 대신 풀블리드로
+      const pg = PAGE_DEFAULTS.fullbleed();
+      pg.imageId = gridBuffer[0].id;
+      newPages.push(pg);
+    } else {
       const g = PAGE_DEFAULTS.grid();
       g.imageIds = gridBuffer.map(p => p.id);
       newPages.push(g);
-      gridBuffer = [];
     }
+    gridBuffer = [];
+    gridTarget = 3 + Math.floor(Math.random() * 4);
   }
 
   middlePhotos.forEach((p, i) => {
@@ -547,7 +556,7 @@ async function autoBuildPages(status) {
     }
 
     if (best === 'spread') {
-      flushGrid();
+      flushGrid(true);
       consecutiveFullbleed = 0;
       const pg = PAGE_DEFAULTS.spread();
       pg.imageId = p.id;
@@ -557,9 +566,9 @@ async function autoBuildPages(status) {
     } else if (best === 'grid') {
       consecutiveFullbleed = 0;
       gridBuffer.push(p);
-      if (gridBuffer.length === 3) flushGrid();
+      if (gridBuffer.length >= gridTarget) flushGrid(true);
     } else if (best === 'split') {
-      flushGrid();
+      flushGrid(true);
       consecutiveFullbleed = 0;
       const pg = PAGE_DEFAULTS.split();
       pg.imageId = p.id;
@@ -567,19 +576,19 @@ async function autoBuildPages(status) {
       pg.darkText = (p.analysis && p.analysis.overall_brightness === 'dark');
       newPages.push(pg);
     } else if (best === 'quote') {
-      flushGrid();
+      flushGrid(true);
       consecutiveFullbleed = 0;
       newPages.push(PAGE_DEFAULTS.quote());
     } else {
       // fullbleed
-      flushGrid();
+      flushGrid(true);
       consecutiveFullbleed++;
       const pg = PAGE_DEFAULTS.fullbleed();
       pg.imageId = p.id;
       newPages.push(pg);
     }
   });
-  flushGrid();
+  flushGrid(true);
 
   // 4. 클로징
   newPages.push(PAGE_DEFAULTS.closing());
@@ -762,14 +771,21 @@ function renderPageCard(pg, idx) {
       `;
       break;
     case 'grid':
-      body = `
-        <div class="row">
-          ${[0,1,2].map(i => thumbHtml((pg.imageIds||[])[i], `openPhotoPicker(id=>{ if(!pages[${idx}].imageIds) pages[${idx}].imageIds=[]; pages[${idx}].imageIds[${i}]=id; renderPageList()}, '${(pg.imageIds||[])[i]||''}')`)).join('')}
-        </div>
-        <div class="field"><label>그리드 라벨</label><input value="${esc(pg.label||'')}" oninput="pages[${idx}].label=this.value"></div>
-        <div class="field"><label>캡션</label><input value="${esc(pg.caption||'')}" oninput="pages[${idx}].caption=this.value"></div>
-        <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
-      `;
+      {
+        const slotCount = Math.max(2, (pg.imageIds || []).length || 3);
+        body = `
+          <div class="row">
+            ${Array.from({length: slotCount}, (_,i) => thumbHtml((pg.imageIds||[])[i], `openPhotoPicker(id=>{ if(!pages[${idx}].imageIds) pages[${idx}].imageIds=[]; pages[${idx}].imageIds[${i}]=id; renderPageList()}, '${(pg.imageIds||[])[i]||''}')`)).join('')}
+          </div>
+          <div class="row" style="gap:6px">
+            ${slotCount < 6 ? `<button class="btn-ghost" onclick="if(!pages[${idx}].imageIds) pages[${idx}].imageIds=[]; pages[${idx}].imageIds.length=${slotCount+1}; renderPageList()">+ 칸 추가</button>` : ''}
+            ${slotCount > 2 ? `<button class="btn-ghost" onclick="pages[${idx}].imageIds = (pages[${idx}].imageIds||[]).slice(0,${slotCount-1}); renderPageList()">- 칸 삭제</button>` : ''}
+          </div>
+          <div class="field"><label>그리드 라벨</label><input value="${esc(pg.label||'')}" oninput="pages[${idx}].label=this.value"></div>
+          <div class="field"><label>캡션</label><input value="${esc(pg.caption||'')}" oninput="pages[${idx}].caption=this.value"></div>
+          <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
+        `;
+      }
       break;
     case 'quote':
       body = `

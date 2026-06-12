@@ -117,7 +117,14 @@ img{max-width:100%;display:block}
 .page-grid .grid-photos img{width:100%;height:auto;object-fit:cover;aspect-ratio:1;display:block}
 .page-grid .grid-photos.layout-1plus2 .g0{grid-column:1/-1;aspect-ratio:16/10}
 .page-grid .grid-caption{font-size:12px;color:rgba(0,0,0,0.45);margin-top:12px;max-width:900px}
-@media(min-width:768px){.page-grid .grid-photos{grid-template-columns:repeat(3,1fr)}.page-grid .grid-photos.layout-1plus2 .g0{grid-column:span 3;aspect-ratio:16/8}}
+@media(min-width:768px){
+  .page-grid .grid-photos{grid-template-columns:repeat(3,1fr)}
+  .page-grid .grid-photos.layout-1plus2 .g0{grid-column:span 3;aspect-ratio:16/8}
+  .page-grid .grid-photos.count-2{grid-template-columns:repeat(2,1fr);max-width:700px}
+  .page-grid .grid-photos.count-4{grid-template-columns:repeat(2,1fr);max-width:700px}
+  .page-grid .grid-photos.count-5 .g0,
+  .page-grid .grid-photos.count-5 .g1{grid-column:span 1}
+}
 
 /* ── Type 6: Quote ── */
 .page-quote{background:var(--dark);color:var(--cream);align-items:center;text-align:center}
@@ -385,7 +392,7 @@ function renderSplit(p) {
 
 function renderGrid(p) {
   const imgs = p.images || [];
-  const layoutCls = imgs.length === 3 ? ' layout-1plus2' : '';
+  const layoutCls = imgs.length === 3 ? ' layout-1plus2' : ` count-${imgs.length}`;
   const imgsHtml = imgs.map((src, i) => `<img class="g${i}" src="${esc(src)}" alt="">`).join('');
   return `
   <section class="page cream page-grid">
