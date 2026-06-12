@@ -77,6 +77,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .slides-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 
 .slide-card{aspect-ratio:1/1;border-radius:2px;overflow:hidden;position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:border-color 0.2s}
+.slide-card.tall{aspect-ratio:9/16}
 .slide-card:hover{border-color:rgba(255,255,255,0.25)}
 
 /* slide canvas base */
@@ -304,7 +305,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.9.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.0.0</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -382,6 +383,14 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   <div style="display:flex;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">
     <button id="langKo" onclick="setLang('ko')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:rgba(255,255,255,0.15);color:#fff">한국어</button>
     <button id="langEn" onclick="setLang('en')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:transparent;color:rgba(255,255,255,0.35)">English</button>
+  </div>
+</div>
+
+<div style="display:flex;align-items:center;gap:10px;padding:4px 0 6px">
+  <span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mute)">화면 비율</span>
+  <div style="display:flex;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">
+    <button id="ratioSquare" onclick="setRatio('square')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:rgba(255,255,255,0.15);color:#fff">1:1 정사각형</button>
+    <button id="ratioTall" onclick="setRatio('tall')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:transparent;color:rgba(255,255,255,0.35)">9:16 릴스</button>
   </div>
 </div>
 
@@ -669,6 +678,11 @@ window.addEventListener('load', () => {
       if (label) label.textContent = textScale.toFixed(2) + '×';
     }
   } catch(e) {}
+  // 화면 비율 복원
+  try {
+    const savedRatio = localStorage.getItem('cg_aspect_ratio');
+    if (savedRatio === 'tall') setRatio('tall');
+  } catch(e) {}
 });
 
 function updateTextScale(val) {
@@ -682,6 +696,7 @@ let generatedSlides = [];
 let generatedCaption = '';
 let textScale = 1.0;
 let textLang = 'ko';
+let aspectRatio = 'square'; // 'square' | 'tall'
 function setLang(lang) {
   textLang = lang;
   const ko = document.getElementById('langKo');
@@ -691,6 +706,18 @@ function setLang(lang) {
   ko.style.color       = lang === 'ko' ? '#fff' : 'rgba(255,255,255,0.35)';
   en.style.background  = lang === 'en' ? 'rgba(255,255,255,0.15)' : 'transparent';
   en.style.color       = lang === 'en' ? '#fff' : 'rgba(255,255,255,0.35)';
+}
+function setRatio(ratio) {
+  aspectRatio = ratio;
+  const sq = document.getElementById('ratioSquare');
+  const tall = document.getElementById('ratioTall');
+  if (!sq || !tall) return;
+  sq.style.background   = ratio === 'square' ? 'rgba(255,255,255,0.15)' : 'transparent';
+  sq.style.color        = ratio === 'square' ? '#fff' : 'rgba(255,255,255,0.35)';
+  tall.style.background = ratio === 'tall' ? 'rgba(255,255,255,0.15)' : 'transparent';
+  tall.style.color      = ratio === 'tall' ? '#fff' : 'rgba(255,255,255,0.35)';
+  try { localStorage.setItem('cg_aspect_ratio', ratio); } catch(e) {}
+  if (generatedSlides.length) renderCarousel(generatedSlides);
 }
 
 // ── upload ──
@@ -999,7 +1026,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 
 스타일: ${style} / 주제: ${topic||'(이미지 분석 기반)'} / 채널태그: ${tag} / 마무리: ${closing}
 스타일 특성: ${{'magazine-b':'에디토리얼 감성, 세리프 중심, 여백','theedit':'큐레이션 매거진, 산세리프 굵게, 흰배경, 텍스트박스 오버레이','stayfolio':'파인스테이, 세리프 우아함, 크림배경, 여백 넉넉','nike':'강렬 대문자 스포츠','ohouse':'따뜻한 라이프스타일'}[style]||''}
-이미지수: ${images.length} / manualText: "${manualText}"
+이미지수: ${images.length} / 화면비율: ${aspectRatio === 'tall' ? "9:16 (세로형, 릴스/스토리)" : "1:1 (정사각형)"} / manualText: "${manualText}"
 
 분석결과: ${JSON.stringify(imageData, (k,v) => (v instanceof File ? undefined : v))}
 
@@ -1015,6 +1042,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - text_position: bottom_left/top_left/center/left_half/split_bottom/dark_center 중 하나
 - 슬라이드마다 다른 layout 사용, 이미지 분석 반영
 - 헤드라인 2~4단어 감성적 한국어
+${aspectRatio === 'tall' ? '- 9:16 세로형이므로 사진의 세로 영역이 넓어짐. body 텍스트는 1~2문장으로 짧게 유지' : ''}
 - manualText가 있으면 중간에 pull_quote 타입으로 삽입 (image_index: null)
 - manualText 없어도 주제가 감성적이거나 이미지 흐름에 호흡 필요하면 AI가 pull_quote 1장 자동 삽입 판단
 - pull_quote는 image_index null, layout pull_quote, text_position pull_quote
@@ -1087,6 +1115,15 @@ function renderCarousel(slides) {
 }
 
 function renderSlide(slide, i) {
+  const html = renderSlideInner(slide, i);
+  if (aspectRatio === 'tall') {
+    // <div class="slide-card"> → <div class="slide-card tall">
+    return html.replace('class="slide-card"', 'class="slide-card tall"');
+  }
+  return html;
+}
+
+function renderSlideInner(slide, i) {
   const style = document.getElementById('metaStyle').value;
   // image_index 범위 초과 방어
   const imgObj = (slide.image_index != null && slide.image_index < images.length) ? images[slide.image_index] : null;
@@ -1444,7 +1481,7 @@ async function exportSlides() {
     const imgSrc = (slide.image_index != null && images[slide.image_index])
       ? images[slide.image_index].dataUrl : null;
     try {
-      const canvas = await renderSlideToCanvas(slide, i, imgSrc, SIZE, images);
+      const canvas = await renderSlideToCanvas(slide, i, imgSrc, SIZE, images, aspectRatio);
       _iosPngs.push(canvas.toDataURL('image/png'));
     } catch(e) { _iosPngs.push(null); console.error(e); }
   }
@@ -1481,6 +1518,7 @@ function updateIosModal() {
   const prevBtn = document.getElementById('iosPrevBtn');
   const nextBtn = document.getElementById('iosNextBtn');
   img.src = _iosPngs[_iosIdx] || '';
+  img.style.aspectRatio = aspectRatio === 'tall' ? '9/16' : '1/1';
   count.textContent = (_iosIdx+1) + ' / ' + _iosPngs.length;
   prevBtn.style.opacity = _iosIdx === 0 ? '0.3' : '1';
   prevBtn.disabled = _iosIdx === 0;
@@ -1545,30 +1583,32 @@ function renderSlideWithImages(slide, i, imgArr) {
   return `<div class="slide-canvas" style="width:100%;height:100%;background:${bgColor}">${bgHtml}<div class="${txtClass}">${inner}</div><div class="${folioClass}">${folio}</div></div>`;
 }
 
-async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
+async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages, ratio='square') {
+  const W = SIZE;
+  const H = ratio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
   const canvas = document.createElement('canvas');
-  canvas.width = SIZE; canvas.height = SIZE;
+  canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext('2d');
   const style = document.getElementById('metaStyle').value;
   const accent = slide.accent_color || '#b87a6e';
   const tag = document.getElementById('metaTag').value;
 
-  // 배경 이미지 — cover 방식으로 정확히 그리기
+  // 배경 이미지 — cover 방식으로 정확히 그리기 (W×H 전체)
   async function drawBgImage(dataUrl, overlayType) {
     if (!dataUrl) return;
     return new Promise((res) => {
       const img = new Image();
       img.onload = () => {
         // cover: 이미지 비율 유지하며 canvas 꽉 채우기
-        const scale = Math.max(SIZE / img.width, SIZE / img.height);
+        const scale = Math.max(W / img.width, H / img.height);
         const w = img.width * scale;
         const h = img.height * scale;
-        const x = (SIZE - w) / 2;
-        const y = (SIZE - h) / 2;
+        const x = (W - w) / 2;
+        const y = (H - h) / 2;
         ctx.drawImage(img, x, y, w, h);
 
         // overlay gradient
-        const grad = ctx.createLinearGradient(0, 0, 0, SIZE);
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
         if (overlayType === 'overlay_bottom') {
           grad.addColorStop(0, 'rgba(0,0,0,0)');
           grad.addColorStop(0.45, 'rgba(0,0,0,0)');
@@ -1578,15 +1618,15 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
           grad.addColorStop(0.5, 'rgba(0,0,0,0)');
           grad.addColorStop(1, 'rgba(0,0,0,0)');
         } else if (overlayType === 'overlay_left') {
-          const gl = ctx.createLinearGradient(0,0,SIZE,0);
+          const gl = ctx.createLinearGradient(0,0,W,0);
           gl.addColorStop(0, 'rgba(10,8,6,0.75)');
           gl.addColorStop(0.6, 'rgba(0,0,0,0)');
-          ctx.fillStyle = gl; ctx.fillRect(0,0,SIZE,SIZE);
+          ctx.fillStyle = gl; ctx.fillRect(0,0,W,H);
         } else if (overlayType === 'dark_full') {
-          ctx.fillStyle = 'rgba(10,8,6,0.45)'; ctx.fillRect(0,0,SIZE,SIZE);
+          ctx.fillStyle = 'rgba(10,8,6,0.45)'; ctx.fillRect(0,0,W,H);
         }
         if (overlayType !== 'overlay_left') {
-          ctx.fillStyle = grad; ctx.fillRect(0,0,SIZE,SIZE);
+          ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
         }
         res();
       };
@@ -1644,23 +1684,23 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
     const R2 = (SIZE / 220) * textScale;
 
     if (pageType === 'cover') {
-      ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,SIZE,SIZE);
+      ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,W,H);
       if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
       // 상단 그라디언트
-      let g = ctx.createLinearGradient(0,0,0,SIZE*0.22);
+      let g = ctx.createLinearGradient(0,0,0,H*0.22);
       g.addColorStop(0,'rgba(250,245,238,0.95)'); g.addColorStop(0.7,'rgba(250,245,238,0.7)'); g.addColorStop(1,'rgba(250,245,238,0)');
-      ctx.fillStyle = g; ctx.fillRect(0,0,SIZE,SIZE*0.22);
+      ctx.fillStyle = g; ctx.fillRect(0,0,W,H*0.22);
       // 워드마크
       setFont(Math.round(22*R2), '700', serif);
       ctx.fillStyle = ORANGE; ctx.textAlign = 'center';
-      ctx.fillText('SAPMANRI', SIZE/2, Math.round(16*R2));
+      ctx.fillText('SAPMANRI', W/2, Math.round(16*R2));
       setFont(Math.round(6*R2), '300', sansFont);
       ctx.fillStyle = '#999';
-      ctx.fillText('오늘도 느리게 · slow days', SIZE/2, Math.round(24*R2));
+      ctx.fillText('오늘도 느리게 · slow days', W/2, Math.round(24*R2));
       ctx.textAlign = 'left';
 
       // 특집 라벨
-      const labelY = Math.round(SIZE*0.18) + Math.round(7*R2);
+      const labelY = Math.round(H*0.16) + Math.round(7*R2);
       setFont(Math.round(7*R2), '600', sansFont);
       const labelText = slide.label || '이주의 이야기';
       const labelW = ctx.measureText(labelText).width + Math.round(14*R2);
@@ -1678,12 +1718,12 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       ctx.shadowBlur = 0;
 
       // 하단 그라디언트
-      g = ctx.createLinearGradient(0,SIZE*0.78,0,SIZE);
+      g = ctx.createLinearGradient(0,H*0.78,0,H);
       g.addColorStop(0,'rgba(250,245,238,0)'); g.addColorStop(0.4,'rgba(250,245,238,0.75)'); g.addColorStop(1,'rgba(250,245,238,0.97)');
-      ctx.fillStyle = g; ctx.fillRect(0,SIZE*0.78,SIZE,SIZE*0.22);
+      ctx.fillStyle = g; ctx.fillRect(0,H*0.78,W,H*0.22);
 
       // 발행 정보
-      const botY = SIZE - Math.round(14*R2);
+      const botY = H - Math.round(14*R2);
       setFont(Math.round(16*R2), '700', sansFont);
       ctx.fillStyle = DARK;
       ctx.fillText(slide.issue_year || '2026', Math.round(14*R2), botY - Math.round(6*R2));
@@ -1697,18 +1737,18 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       ctx.fillStyle = '#444'; ctx.textAlign = 'right';
       const lineH2 = Math.round(15*R2);
       const startY = botY - (articles.length-1)*lineH2 - Math.round(4*R2);
-      articles.forEach((a,j) => ctx.fillText(a, SIZE-Math.round(14*R2), startY + j*lineH2));
+      articles.forEach((a,j) => ctx.fillText(a, W-Math.round(14*R2), startY + j*lineH2));
       ctx.textAlign = 'left';
       return canvas;
     }
 
     if (pageType === 'closing') {
-      ctx.fillStyle = DARK; ctx.fillRect(0,0,SIZE,SIZE);
+      ctx.fillStyle = DARK; ctx.fillRect(0,0,W,H);
       if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
-      ctx.fillStyle = 'rgba(18,14,12,0.55)'; ctx.fillRect(0,0,SIZE,SIZE);
+      ctx.fillStyle = 'rgba(18,14,12,0.55)'; ctx.fillRect(0,0,W,H);
 
       const pad = Math.round(16*R2);
-      let y = SIZE - Math.round(14*R2);
+      let y = H - Math.round(14*R2);
 
       // 워드마크 (맨 아래)
       setFont(Math.round(18*R2), '700', serif);
@@ -1725,7 +1765,7 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       // body
       setFont(Math.round(8*R2), '300', sansFont);
       ctx.fillStyle = 'rgba(255,255,255,0.75)';
-      const blines = wrapText(slide.body||'', SIZE-pad*2);
+      const blines = wrapText(slide.body||'', W-pad*2);
       const bodyY0 = y - (blines.length-1)*Math.round(13*R2);
       blines.forEach((l,j) => ctx.fillText(l, pad, bodyY0 + j*Math.round(13*R2)));
       y = bodyY0 - Math.round(14*R2);
@@ -1733,59 +1773,59 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       // headline
       setFont(Math.round(20*R2), '700', serif);
       ctx.fillStyle = '#fff';
-      const hlines = wrapText(slide.headline||'', SIZE-pad*2);
+      const hlines = wrapText(slide.headline||'', W-pad*2);
       const hlY0 = y - (hlines.length-1)*Math.round(26*R2);
       hlines.forEach((l,j) => ctx.fillText(l, pad, hlY0 + j*Math.round(26*R2)));
 
       // page num
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+      ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
       ctx.textAlign = 'left';
       return canvas;
     }
 
     if (pageType === 'quote') {
-      ctx.fillStyle = DARK; ctx.fillRect(0,0,SIZE,SIZE);
+      ctx.fillStyle = DARK; ctx.fillRect(0,0,W,H);
       const pad = Math.round(24*R2);
       // rule top
       const ruleW = Math.round(24*R2);
-      const cy = SIZE/2;
+      const cy = H/2;
       setFont(Math.round(20*R2), '700', serif);
       const qtext = slide.headline || slide.body || '';
-      const qlines = wrapText(qtext, SIZE-pad*2);
+      const qlines = wrapText(qtext, W-pad*2);
       const lineH3 = Math.round(30*R2);
       const totalH = qlines.length*lineH3;
       const startY = cy - totalH/2 + Math.round(20*R2);
 
       // 위 rule
       ctx.fillStyle = ORANGE;
-      ctx.fillRect(SIZE/2 - ruleW/2, startY - Math.round(28*R2), ruleW, Math.round(2*R2));
+      ctx.fillRect(W/2 - ruleW/2, startY - Math.round(28*R2), ruleW, Math.round(2*R2));
 
       ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-      qlines.forEach((l,j) => ctx.fillText(l, SIZE/2, startY + j*lineH3));
+      qlines.forEach((l,j) => ctx.fillText(l, W/2, startY + j*lineH3));
 
       // 아래 rule
       ctx.fillStyle = ORANGE;
-      ctx.fillRect(SIZE/2 - ruleW/2, startY + qlines.length*lineH3 + Math.round(8*R2), ruleW, Math.round(2*R2));
+      ctx.fillRect(W/2 - ruleW/2, startY + qlines.length*lineH3 + Math.round(8*R2), ruleW, Math.round(2*R2));
 
       // context
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.fillText(slide.label || '', SIZE/2, startY + qlines.length*lineH3 + Math.round(26*R2));
+      ctx.fillText(slide.label || '', W/2, startY + qlines.length*lineH3 + Math.round(26*R2));
       ctx.textAlign = 'left';
 
       // page num
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+      ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
       ctx.textAlign = 'left';
       return canvas;
     }
 
     // ── 인덱스/목차 ──
     if (pageType === 'index') {
-      ctx.fillStyle = DARK; ctx.fillRect(0,0,SIZE,SIZE);
+      ctx.fillStyle = DARK; ctx.fillRect(0,0,W,H);
       const pad = Math.round(16*R2);
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = ORANGE;
@@ -1809,23 +1849,23 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
 
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, SIZE-pad, SIZE-pad);
+      ctx.fillText(pageNum, W-pad, H-pad);
       ctx.textAlign = 'left';
       return canvas;
     }
 
     // ── 2단 사진+텍스트 ──
     if (pageType === 'split') {
-      const splitY = Math.round(SIZE*0.6);
-      ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,SIZE,SIZE);
+      const splitY = Math.round(H*0.55);
+      ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,W,H);
       if (imgDataUrl) {
         await new Promise(res => {
           const im = new Image();
           im.onload = () => {
-            const scale = Math.max(SIZE/im.width, splitY/im.height);
+            const scale = Math.max(W/im.width, splitY/im.height);
             const w = im.width*scale, h = im.height*scale;
-            ctx.save(); ctx.beginPath(); ctx.rect(0,0,SIZE,splitY); ctx.clip();
-            ctx.drawImage(im,(SIZE-w)/2,(splitY-h)/2,w,h);
+            ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,splitY); ctx.clip();
+            ctx.drawImage(im,(W-w)/2,(splitY-h)/2,w,h);
             ctx.restore(); res();
           };
           im.onerror = res; im.src = imgDataUrl;
@@ -1836,11 +1876,11 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       ctx.fillText('SAPMANRI', Math.round(12*R2), Math.round(16*R2));
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+      ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
       ctx.textAlign = 'left';
 
       // 하단 텍스트 패널
-      ctx.fillStyle = CREAM; ctx.fillRect(0,splitY,SIZE,SIZE-splitY);
+      ctx.fillStyle = CREAM; ctx.fillRect(0,splitY,W,H-splitY);
       const pad = Math.round(14*R2);
       setFont(Math.round(7*R2), '600', sansFont);
       ctx.fillStyle = ORANGE;
@@ -1851,23 +1891,23 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       ctx.fillStyle = DARK;
       const lineH = Math.round(16*R2);
       const totalH = lines.length * lineH;
-      const startY = splitY + (SIZE-splitY)/2 - totalH/2 + Math.round(20*R2);
+      const startY = splitY + (H-splitY)/2 - totalH/2 + Math.round(20*R2);
       lines.forEach((l,j) => ctx.fillText(l, pad, startY + j*lineH));
       return canvas;
     }
 
     // ── 그리드 콜라주 ──
     if (pageType === 'grid') {
-      ctx.fillStyle = CREAM; ctx.fillRect(0,0,SIZE,SIZE);
+      ctx.fillStyle = CREAM; ctx.fillRect(0,0,W,H);
       const pad = Math.round(14*R2);
       setFont(Math.round(7*R2), '600', sansFont);
       ctx.fillStyle = '#999';
       ctx.fillText((slide.label||'오후의 장면들').toUpperCase(), pad, pad + Math.round(7*R2));
 
       const gridTop = pad + Math.round(20*R2);
-      const gridBottom = SIZE - pad - Math.round(14*R2);
+      const gridBottom = H - pad - Math.round(14*R2);
       const gridH = gridBottom - gridTop;
-      const gridW = SIZE - pad*2;
+      const gridW = W - pad*2;
       const gap = Math.round(6*R2);
 
       const idxs = (slide.image_indices || []).filter(ix => ix != null && allImages && ix < allImages.length).slice(0,3);
@@ -1888,7 +1928,15 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
         });
       }
 
-      if (idxs.length >= 3) {
+      if (ratio === 'tall') {
+        // 9:16: 세로 스택 (큰 1장 + 작은 2장 가로 배치)
+        const bigH = gridH * 0.6;
+        const smallH2 = gridH - bigH - gap;
+        const smallW2 = (gridW - gap) / 2;
+        await drawCell(idxs[0]!=null ? allImages[idxs[0]]?.dataUrl : null, pad, gridTop, gridW, bigH);
+        await drawCell(idxs[1]!=null ? allImages[idxs[1]]?.dataUrl : null, pad, gridTop+bigH+gap, smallW2, smallH2);
+        await drawCell(idxs[2]!=null ? allImages[idxs[2]]?.dataUrl : null, pad+smallW2+gap, gridTop+bigH+gap, smallW2, smallH2);
+      } else if (idxs.length >= 3) {
         // 1+2 비대칭
         const bigW = gridW * 0.58;
         const smallW = gridW - bigW - gap;
@@ -1907,17 +1955,17 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
 
       setFont(Math.round(7*R2), '400', sansFont);
       ctx.fillStyle = '#bbb'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, SIZE-pad, SIZE-Math.round(6*R2));
+      ctx.fillText(pageNum, W-pad, H-Math.round(6*R2));
       ctx.textAlign = 'left';
       return canvas;
     }
 
     // fullbleed (기본)
-    ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,W,H);
     if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
-    let g2 = ctx.createLinearGradient(0,SIZE*0.62,0,SIZE);
+    let g2 = ctx.createLinearGradient(0,H*0.62,0,H);
     g2.addColorStop(0,'rgba(18,14,12,0)'); g2.addColorStop(1,'rgba(18,14,12,0.85)');
-    ctx.fillStyle = g2; ctx.fillRect(0,SIZE*0.62,SIZE,SIZE*0.38);
+    ctx.fillStyle = g2; ctx.fillRect(0,H*0.62,W,H*0.38);
 
     setFont(Math.round(8*R2), '700', serif);
     ctx.fillStyle = '#fff';
@@ -1925,33 +1973,33 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
 
     setFont(Math.round(7*R2), '400', sansFont);
     ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'right';
-    ctx.fillText(pageNum, SIZE-Math.round(12*R2), Math.round(16*R2));
+    ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
     ctx.textAlign = 'left';
 
     setFont(Math.round(14*R2), '400', serif);
     ctx.fillStyle = '#fff';
     const captionText = slide.headline || slide.body || '';
-    const clines = wrapText(captionText, SIZE-Math.round(28*R2));
-    const capY0 = SIZE - Math.round(16*R2) - (clines.length-1)*Math.round(20*R2);
+    const clines = wrapText(captionText, W-Math.round(28*R2));
+    const capY0 = H - Math.round(16*R2) - (clines.length-1)*Math.round(20*R2);
     clines.forEach((l,j) => ctx.fillText(l, Math.round(14*R2), capY0 + j*Math.round(20*R2)));
     return canvas;
   }
 
   // ── 인포그래픽 슬라이드 ──
   if (slide.type === 'infographic') {
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,W,H);
     if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
     // 살짝 어두운 오버레이
-    ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(0,0,W,H);
 
     const labels = slide.labels || [];
     const accentRgb = accent || '#b87a6e';
     for (const lb of labels) {
-      const cx = Math.round(lb.x * SIZE);
-      const cy = Math.round(lb.y * SIZE);
+      const cx = Math.round(lb.x * W);
+      const cy = Math.round(lb.y * H);
       const dir = lb.direction || 'right';
-      const lineLen = Math.round(SIZE * 0.09);
-      const dotR = Math.round(SIZE * 0.007);
+      const lineLen = Math.round(W * 0.09);
+      const dotR = Math.round(W * 0.007);
 
       // 점
       ctx.beginPath();
@@ -1961,7 +2009,7 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       ctx.beginPath();
       ctx.arc(cx, cy, dotR+2, 0, Math.PI*2);
       ctx.strokeStyle = '#fff';
-      ctx.lineWidth = Math.round(SIZE*0.002);
+      ctx.lineWidth = Math.round(W*0.002);
       ctx.stroke();
 
       // 선
@@ -1974,16 +2022,16 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
       ctx.moveTo(cx, cy);
       ctx.lineTo(lx2, ly2);
       ctx.strokeStyle = accentRgb;
-      ctx.lineWidth = Math.round(SIZE*0.0015);
+      ctx.lineWidth = Math.round(W*0.0015);
       ctx.stroke();
 
       // 레이블 텍스트
-      const fontSize = Math.round(SIZE * 0.022);
+      const fontSize = Math.round(W * 0.022);
       setFont(fontSize, '500', sansFont);
       ctx.fillStyle = '#fff';
       ctx.shadowColor = 'rgba(0,0,0,0.85)';
       ctx.shadowBlur = 6;
-      const textGap = Math.round(SIZE*0.012);
+      const textGap = Math.round(W*0.012);
       let tx = lx2, ty = ly2;
       if (dir === 'right') { ctx.textAlign = 'left'; tx = lx2 + textGap; ty = ly2 + fontSize/3; }
       else if (dir === 'left') { ctx.textAlign = 'right'; tx = lx2 - textGap; ty = ly2 + fontSize/3; }
@@ -1995,10 +2043,10 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
     }
 
     // 폴리오
-    setFont(Math.round(SIZE*0.022), '400', sansFont);
+    setFont(Math.round(W*0.022), '400', sansFont);
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     ctx.textAlign = 'right';
-    ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), SIZE - Math.round(SIZE*0.03), SIZE - Math.round(SIZE*0.025));
+    ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), W - Math.round(W*0.03), H - Math.round(W*0.025));
     ctx.textAlign = 'left';
     return canvas;
   }
@@ -2012,20 +2060,20 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
   const pad = Math.round(14 * R);  // CSS padding 14px
 
   if (isPull) {
-    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,W,H);
     ctx.fillStyle = accent; ctx.fillRect(pad, pad+Math.round(40*R), Math.round(2*R), Math.round(28*R));
     setFont(Math.round(19*R), '300', serifFont);
     ctx.fillStyle = '#1a1a1a';
-    const lines = wrapText(slide.headline || '', SIZE - pad*2 - 10);
+    const lines = wrapText(slide.headline || '', W - pad*2 - 10);
     lines.forEach((l, i) => ctx.fillText(l, pad+Math.round(10*R), pad+Math.round(80*R)+i*Math.round(26*R*1.5)));
     ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
     ctx.fillStyle = '#888580';
-    const blines = wrapText(slide.body || '', SIZE - pad*2 - 10);
+    const blines = wrapText(slide.body || '', W - pad*2 - 10);
     const startY = pad + Math.round(80*R) + lines.length * Math.round(26*R*1.5) + Math.round(10*R);
     blines.forEach((l,i) => ctx.fillText(l, pad+Math.round(10*R), startY+i*Math.round(9*R*1.9)));
 
   } else if (isDark) {
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,W,H);
     // closing 슬라이드도 이미지 있으면 어둡게 깔기
     if (imgDataUrl) await drawBgImage(imgDataUrl, 'dark_full');
     setFont(Math.round(7*R), '400', sansFont);
@@ -2036,29 +2084,29 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
     setFont(hlSize, headWeight, headFont);
     ctx.fillStyle = '#fff';
     const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
-    const lines = wrapText(hl, SIZE - pad*2 - 10);
+    const lines = wrapText(hl, W - pad*2 - 10);
     const hlY = pad + Math.round(65*R);
     lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.25)));
     ctx.font = (style==='theedit'?'400 ':'italic 300 ') + Math.round(9*R) + 'px ' + (style==='theedit'?sansFont:serifFont);
     ctx.fillStyle = 'rgba(255,255,255,0.5)';
     const startY = hlY + lines.length * Math.round(hlSize*1.25) + Math.round(8*R);
-    const blines = wrapText(slide.body||'', SIZE-pad*2);
+    const blines = wrapText(slide.body||'', W-pad*2);
     blines.forEach((l,i) => ctx.fillText(l, pad, startY+i*Math.round(9*R*1.9)));
     setFont(Math.round(7*R), '400', sansFont);
     ctx.fillStyle = accent;
-    ctx.fillText(tag, pad, SIZE-pad);
+    ctx.fillText(tag, pad, H-pad);
 
   } else if (isSplit) {
-    const splitY = Math.round(SIZE * 0.56);
-    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,SIZE,SIZE);
+    const splitY = ratio === 'tall' ? Math.round(H * 0.62) : Math.round(SIZE * 0.56);
+    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,W,H);
     if (imgDataUrl) {
       await new Promise(res => {
         const img = new Image();
         img.onload = () => {
-          const scale = Math.max(SIZE/img.width, splitY/img.height);
+          const scale = Math.max(W/img.width, splitY/img.height);
           const w = img.width*scale, h = img.height*scale;
-          ctx.save(); ctx.beginPath(); ctx.rect(0,0,SIZE,splitY); ctx.clip();
-          ctx.drawImage(img,(SIZE-w)/2,(splitY-h)/2,w,h);
+          ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,splitY); ctx.clip();
+          ctx.drawImage(img,(W-w)/2,(splitY-h)/2,w,h);
           ctx.restore(); res();
         };
         img.onerror = res; img.src = imgDataUrl;
@@ -2072,16 +2120,16 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
     setFont(hlSize, headWeight, headFont);
     ctx.fillStyle = '#1a1a1a';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
-    const lines = wrapText(hl, SIZE-pad*2);
+    const lines = wrapText(hl, W-pad*2);
     const hlY = labelBaseline + Math.round(10*R) + hlSize;  // 레이블 베이스라인 + 여백 + 헤드라인 cap-height
     lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.3)));
     ctx.font = (style==='theedit'?'400 ':'italic 300 ') + Math.round(9*R) + 'px ' + (style==='theedit'?sansFont:serifFont); ctx.fillStyle = '#888';
-    const blines = wrapText(slide.body||'', SIZE-pad*2);
+    const blines = wrapText(slide.body||'', W-pad*2);
     const by = hlY + Math.min(lines.length,2)*Math.round(hlSize*1.3) + Math.round(6*R);
     blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
 
   } else {
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,SIZE,SIZE);
+    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,W,H);
     await drawBgImage(imgDataUrl, slide.layout);
 
     const isTop = slide.text_position === 'top_left';
@@ -2093,7 +2141,7 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
     const bottomPad = Math.round(16*R);
     // 아래 정렬: 바디2줄 + 헤드라인2줄 + 레이블 + 여백들을 합산해서 레이블 시작점 계산
     const blockH = labelFontH + labelGap + hlLineH*2 + Math.round(6*R) + bodyLineH*2;
-    const textY = isTop ? pad + Math.round(16*R) : SIZE - bottomPad - blockH;
+    const textY = isTop ? pad + Math.round(16*R) : H - bottomPad - blockH;
 
     // fillText Y = 베이스라인 기준
     // 레이블 베이스라인 = textY + labelFontH (top에서 폰트 높이만큼 내려야 베이스라인)
@@ -2107,16 +2155,16 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
     }
 
     const hlY = slide.type === 'cover'
-      ? SIZE - hlLineH*2 - bodyLineH*2 - Math.round(10*R) - bottomPad
+      ? H - hlLineH*2 - bodyLineH*2 - Math.round(10*R) - bottomPad
       : labelBase + labelGap + hlSize;  // 레이블 베이스라인 + 여백 + 헤드라인 cap-height
     setFont(hlSize, headWeight, headFont);
     ctx.fillStyle = '#fff';
     const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
-    const lines = wrapText(hl, SIZE-pad*2);
+    const lines = wrapText(hl, W-pad*2);
     lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.2)));
     ctx.font = (style==='theedit'?'400 ':'italic 300 ') + Math.round(9*R) + 'px ' + (style==='theedit'?sansFont:serifFont);
     ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    const blines = wrapText(slide.body||'', SIZE-pad*2);
+    const blines = wrapText(slide.body||'', W-pad*2);
     const by = hlY + Math.min(lines.length,2)*Math.round(hlSize*1.2) + Math.round(6*R);
     blines.slice(0,3).forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
   }
@@ -2125,7 +2173,7 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages) {
   setFont(Math.round(7*R), '400', sansFont);
   ctx.fillStyle = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.3)';
   ctx.textAlign = 'right';
-  ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), SIZE-Math.round(10*R), SIZE-Math.round(8*R));
+  ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), W-Math.round(10*R), H-Math.round(8*R));
   ctx.textAlign = 'left';
 
   return canvas;
