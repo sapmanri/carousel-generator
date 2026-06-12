@@ -137,6 +137,13 @@ input[type=range]::-moz-range-thumb{
     <input type="password" id="googleKey" placeholder="Google KEY" autocomplete="off" style="width:160px"/>
   </div>
   <div id="keyStatus" style="display:none;cursor:pointer;font-size:10px;letter-spacing:0.1em;color:#444;text-transform:uppercase;padding:6px 10px;border:0.5px solid #222;border-radius:4px;" onclick="document.getElementById('keyWrap').style.display='flex';document.getElementById('keyStatus').style.display='none';">🔑 KEY 설정됨</div>
+  <div id="ghKeyWrap" style="display:flex;align-items:center;gap:8px">
+    <input type="password" id="ghTokenInput" placeholder="github_pat_... (이미지 캐시 공유)" autocomplete="off"
+      style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:230px"
+      oninput="saveGhToken(this.value)" />
+  </div>
+  <div id="ghKeyStatus" style="display:none;cursor:pointer;font-size:10px;letter-spacing:0.1em;color:#444;text-transform:uppercase;padding:6px 10px;border:0.5px solid #222;border-radius:4px;"
+    onclick="document.getElementById('ghKeyWrap').style.display='flex';document.getElementById('ghKeyStatus').style.display='none';">🗂 CACHE 연결됨</div>
 </header>
 <main>
   <div id="uploadSection">
@@ -441,7 +448,184 @@ input[type=range]::-moz-range-thumb{
 </main>
 
 <script>
-const VERSION = 'v2.1.0';
+// ── SAPMANRI 공통 이미지 분석 캐시 (GitHub 파일 기반, carousel/skyline/writing 공유) ──
+/**
+ * GitHub Contents API의 image_cache.json 파일을 통해
+ * 여러 서비스/기기 간 이미지 분석 결과를 공유한다.
+ *
+ * 구조:
+ * {
+ *   "<imageHash>": {
+ *     "carousel": {...},
+ *     "skyline": {...}
+ *   }
+ * }
+ *
+ * 토큰: localStorage 'cg_sapmanri_gh_token' (캐러셀 생성기와 공유)
+ */
+(function (global) {
+  const REPO = 'sapmanri/carousel-generator';
+  const FILE = 'image_cache.json';
+  const TOKEN_KEY = 'cg_sapmanri_gh_token';
+  const MAX_ENTRIES = 800;
+
+  let _cache = null;
+  let _loadPromise = null;
+
+  function getToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch(e) { return ''; }
+  }
+  function setToken(val) {
+    try { localStorage.setItem(TOKEN_KEY, val); } catch(e) {}
+  }
+
+  async function _load() {
+    const token = getToken();
+    if (!token) { _cache = { entries: {}, sha: null }; return _cache; }
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+        headers: { Authorization: `token ${token}` }
+      });
+      if (res.status === 404) { _cache = { entries: {}, sha: null }; return _cache; }
+      const json = await res.json();
+      if (!json.sha) { _cache = { entries: {}, sha: null }; return _cache; }
+      const b64 = json.content.replace(/\n/g, '');
+      const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const data = JSON.parse(new TextDecoder().decode(bytes));
+      _cache = { entries: data.entries || {}, sha: json.sha };
+    } catch (e) {
+      _cache = { entries: {}, sha: null };
+    }
+    return _cache;
+  }
+
+  async function _ensureLoaded() {
+    if (_cache) return _cache;
+    if (!_loadPromise) _loadPromise = _load();
+    return _loadPromise;
+  }
+
+  function _latestTs(serviceMap) {
+    let max = 0;
+    for (const svc in serviceMap) {
+      const ts = serviceMap[svc] && serviceMap[svc].ts;
+      if (ts && ts > max) max = ts;
+    }
+    return max;
+  }
+
+  function _enforceLimit(entries) {
+    const keys = Object.keys(entries);
+    if (keys.length <= MAX_ENTRIES) return entries;
+    const sorted = keys.map(k => ({ k, ts: _latestTs(entries[k]) })).sort((a,b)=>a.ts-b.ts);
+    const removeCount = keys.length - MAX_ENTRIES;
+    for (let i = 0; i < removeCount; i++) delete entries[sorted[i].k];
+    return entries;
+  }
+
+  let _saveQueue = Promise.resolve();
+  async function _save() {
+    const token = getToken();
+    if (!token || !_cache) return false;
+    _enforceLimit(_cache.entries);
+    const jsonStr = JSON.stringify({ entries: _cache.entries }, null, 0);
+    const bytes = new TextEncoder().encode(jsonStr);
+    const binStr = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+    const body = { message: 'Update image_cache', content: btoa(binStr) };
+    if (_cache.sha) body.sha = _cache.sha;
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (json.content?.sha) { _cache.sha = json.content.sha; return true; }
+      if (json.message && /sha/i.test(json.message)) {
+        await _load();
+        return false;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function _queueSave() {
+    _saveQueue = _saveQueue.then(() => _save());
+    return _saveQueue;
+  }
+
+  async function hashImage(dataUrl) {
+    if (!dataUrl || typeof dataUrl !== 'string') return null;
+    const commaIdx = dataUrl.indexOf(',');
+    const b64 = commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
+    const len = b64.length;
+    const sampleSize = Math.min(len, 4000);
+    const step = Math.max(1, Math.floor(len / sampleSize));
+    let h1 = 5381, h2 = 52711;
+    for (let i = 0; i < len; i += step) {
+      const c = b64.charCodeAt(i);
+      h1 = ((h1 << 5) + h1 + c) | 0;
+      h2 = ((h2 << 5) - h2 + c) | 0;
+    }
+    return `${len.toString(36)}_${(h1 >>> 0).toString(16)}_${(h2 >>> 0).toString(16)}`;
+  }
+
+  async function get(hash, service) {
+    if (!hash || !service) return null;
+    await _ensureLoaded();
+    const entry = _cache.entries[hash];
+    if (!entry || !entry[service]) return null;
+    return entry[service].data;
+  }
+
+  async function set(hash, service, data) {
+    if (!hash || !service) return false;
+    await _ensureLoaded();
+    if (!_cache.entries[hash]) _cache.entries[hash] = {};
+    _cache.entries[hash][service] = { data, ts: Date.now() };
+    return _queueSave();
+  }
+
+  function isEnabled() {
+    return !!getToken();
+  }
+
+  function clear() {
+    _cache = { entries: {}, sha: _cache?.sha || null };
+    return _queueSave();
+  }
+
+  async function stats() {
+    await _ensureLoaded();
+    const entries = _cache.entries;
+    const imageCount = Object.keys(entries).length;
+    const byService = {};
+    for (const hash in entries) {
+      for (const svc in entries[hash]) byService[svc] = (byService[svc]||0)+1;
+    }
+    return { imageCount, byService };
+  }
+
+  global.SapmanriCache = { hashImage, get, set, isEnabled, getToken, setToken, clear, stats };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+// ── GitHub Token (이미지 분석 캐시 공유용) ──
+function saveGhToken(val) {
+  SapmanriCache.setToken(val);
+  updateGhKeyVisibility();
+}
+function updateGhKeyVisibility() {
+  const token = SapmanriCache.getToken();
+  const wrap = document.getElementById('ghKeyWrap');
+  const status = document.getElementById('ghKeyStatus');
+  if (!wrap || !status) return;
+  if (token) { wrap.style.display = 'none'; status.style.display = 'block'; }
+  else { wrap.style.display = 'flex'; status.style.display = 'none'; }
+}
+
+const VERSION = 'v2.2.0';
 document.addEventListener('DOMContentLoaded',()=>{
   const el=document.getElementById('versionTag');
   if(el) el.textContent=VERSION;
@@ -479,6 +663,12 @@ window.addEventListener('load', ()=>{
     updateKeyVisibility();
   });
   updateKeyVisibility();
+
+  // GitHub 캐시 토큰 복원
+  const ghInput=document.getElementById('ghTokenInput');
+  const savedGhToken=SapmanriCache.getToken();
+  if(savedGhToken && ghInput) ghInput.value=savedGhToken;
+  updateGhKeyVisibility();
 
   // File handling
   document.getElementById('fileInput').addEventListener('change',e=>loadFile(e.target.files[0]));
@@ -929,14 +1119,32 @@ Respond ONLY as valid JSON:
 
   try{
     document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">라인을 읽는 중...</p></div>';
-    const res1=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1600,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}]}]})
-    });
-    const data1=await res1.json();
-    if(data1.error)throw new Error(data1.error.message);
-    const step1=JSON.parse(data1.content[0].text.replace(/```json|```/g,'').trim());
+
+    // ── 이미지 캐시 조회 (수동 보정 시에는 스킵) ──
+    let step1 = null;
+    let _imgHash = null;
+    if(!window.manualPath){
+      try{
+        _imgHash = await SapmanriCache.hashImage(imgSrc);
+        if(_imgHash) step1 = await SapmanriCache.get(_imgHash, 'skyline');
+      }catch(e){ /* 캐시 조회 실패 시 정상 분석으로 진행 */ }
+    }
+
+    if(!step1){
+      const res1=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1600,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}]}]})
+      });
+      const data1=await res1.json();
+      if(data1.error)throw new Error(data1.error.message);
+      step1=JSON.parse(data1.content[0].text.replace(/```json|```/g,'').trim());
+
+      // 캐시에 저장 (fire-and-forget, 수동 보정 결과는 저장하지 않음)
+      if(_imgHash && !window.manualPath){
+        SapmanriCache.set(_imgHash, 'skyline', step1);
+      }
+    }
 
     // ── STEP 2: 곡 선택 — 이미지 없이 파형 수치 기반 ──
     document.getElementById('cardPreview').innerHTML='<div class="placeholder"><div class="spinner"></div><p style="margin-top:16px;font-size:12px;color:#444">음악을 찾는 중...</p></div>';
