@@ -3,81 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>sapmanri tools</title>
+<title>감성찾아삽만리 · Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #0a0a0a;
-    color: #e8e8e8;
-    font-family: 'Georgia', serif;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .container {
-    text-align: center;
-    padding: 40px 20px;
-  }
-  .brand {
-    font-size: 13px;
-    letter-spacing: 0.2em;
-    color: #666;
-    margin-bottom: 48px;
-    text-transform: lowercase;
-  }
-  .tools {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    align-items: center;
-  }
-  a {
-    display: block;
-    width: 300px;
-    padding: 20px 32px;
-    border: 1px solid #2a2a2a;
-    color: #e8e8e8;
-    text-decoration: none;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-    transition: border-color 0.2s, color 0.2s;
-  }
-  a:hover {
-    border-color: #666;
-    color: #fff;
-  }
-  a .sub {
-    display: block;
-    font-size: 11px;
-    color: #555;
-    margin-top: 4px;
-    letter-spacing: 0.08em;
-  }
-  a:hover .sub { color: #888; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a1a1a;--canvas:#faf9f7;--paper:#f2f0ec;--paper-warm:#ede9e3;
+  --mid:#888580;--mute:#b5b2ad;--hairline:#d8d5d0;
+  --accent:#b87a6e;
+  --serif:"Cormorant Garamond","Noto Serif KR",Georgia,serif;
+  --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+}
+body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padding:24px 16px}
+.app{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+
+.header{display:flex;justify-content:space-between;align-items:baseline}
+.logo{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--canvas);letter-spacing:0.04em}
+.logo span{font-family:var(--sans);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--mute);display:block;margin-top:2px}
+
+.section-label{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mute);margin:8px 0 -4px}
+
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.tool-card{
+  display:flex;flex-direction:column;gap:6px;padding:18px 18px 16px;
+  border:1px solid rgba(255,255,255,0.08);border-radius:2px;
+  background:rgba(255,255,255,0.02);text-decoration:none;
+  transition:border-color 0.2s,background 0.2s;
+}
+.tool-card:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04)}
+.tool-card .name{font-family:var(--serif);font-size:17px;font-weight:300;color:var(--canvas);letter-spacing:0.02em}
+.tool-card .desc{font-size:11px;color:var(--mute);letter-spacing:0.04em}
+.tool-card .ver{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-top:8px}
+
+footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.18);text-align:center;padding:24px 0 8px}
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="brand">@sapmanri</div>
-  <div class="tools">
-    <a href="/skyline_music_matcher.html">
-      Skyline Music Matcher
-      <span class="sub">능선 × 음악</span>
-    </a>
-    <a href="/carousel_ai_generator.html">
-      Carousel Generator
-      <span class="sub">카드 슬라이드 생성기</span>
-    </a>
-    <a href="/writing_studio.html">
-      Writing Studio
-      <span class="sub">글쓰기 도구</span>
-    </a>
-    <a href="/design_docs.html">
-      Design Docs
-      <span class="sub">디자인 시스템 모음</span>
-    </a>
-  </div>
+<div class="app">
+
+<div class="header">
+  <div class="logo">감성찾아삽만리<span>Tools &amp; Workspace</span></div>
+</div>
+
+<div class="section-label">Production Tools</div>
+<div class="tools-grid">
+  <a class="tool-card" href="/carousel_ai_generator.html">
+    <div class="name">Carousel Generator</div>
+    <div class="desc">카드 슬라이드 생성기 · AI 기반 인스타그램 캐러셀</div>
+    <div class="ver">v2.0.0</div>
+  </a>
+  <a class="tool-card" href="/skyline_music_matcher.html">
+    <div class="name">Skyline Music Matcher</div>
+    <div class="desc">능선 × 음악 · 파형 매칭 도구</div>
+    <div class="ver">v1.7.8</div>
+  </a>
+  <a class="tool-card" href="/writing_studio.html">
+    <div class="name">Writing Studio</div>
+    <div class="desc">글쓰기 도구 · 원고 작성 및 정리</div>
+    <div class="ver">v1.0.0</div>
+  </a>
+  <a class="tool-card" href="/design_docs.html">
+    <div class="name">Design Docs</div>
+    <div class="desc">디자인 시스템 모음 · 매거진 스타일 가이드</div>
+    <div class="ver">v1.0.0</div>
+  </a>
+</div>
+
+<footer>@sapmanri · carousel-generator</footer>
+
 </div>
 </body>
 </html>
