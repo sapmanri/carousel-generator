@@ -50,25 +50,70 @@ header{
 @media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr);gap:24px;padding:32px}}
 @media(min-width:1280px){.grid{grid-template-columns:repeat(5,1fr)}}
 
-.card{display:flex;flex-direction:column;gap:8px;cursor:pointer}
+.card{display:block;cursor:pointer;position:relative}
 .card .thumb-wrap{
   position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;
   background:#1d1815;border-radius:1px;
 }
 .card .thumb-wrap img{
   width:100%;height:100%;object-fit:cover;display:block;
-  transition:transform .5s cubic-bezier(.2,.7,.2,1);
+  transition:transform .6s cubic-bezier(.2,.7,.2,1);
 }
-.card:hover .thumb-wrap img{transform:scale(1.03)}
+.card:hover .thumb-wrap img{transform:scale(1.04)}
+.card .thumb-wrap::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.75) 100%);
+  pointer-events:none;
+}
 .card .num{
-  position:absolute;top:8px;left:10px;font-family:var(--serif);font-weight:700;
-  font-size:13px;color:var(--orange);text-shadow:0 1px 4px rgba(0,0,0,.5);
+  position:absolute;top:10px;left:12px;font-family:var(--serif);font-weight:700;
+  font-size:14px;color:var(--orange);text-shadow:0 1px 4px rgba(0,0,0,.5);z-index:2;
+}
+.card .overlay-text{
+  position:absolute;left:12px;right:12px;bottom:10px;z-index:2;
 }
 .card .title{font-family:var(--serif);font-size:14px;line-height:1.35;color:var(--cream)}
-.card .sub{font-size:10px;letter-spacing:0.05em;color:rgba(255,255,255,0.4)}
+.card .sub{font-size:10px;letter-spacing:0.05em;color:rgba(255,255,255,0.55);margin-top:3px}
 
 @media(min-width:980px){
   .card .title{font-size:16px}
+}
+
+/* ── 피처드(최신호) 카드 — Feldman 큰 타일 ── */
+.featured{
+  grid-column:1/-1;position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;
+  border-radius:1px;cursor:pointer;background:#1d1815;margin-bottom:4px;
+}
+@media(min-width:640px){.featured{aspect-ratio:21/9}}
+.featured img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  transition:transform .8s cubic-bezier(.2,.7,.2,1);
+}
+.featured:hover img{transform:scale(1.02)}
+.featured::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,0.8) 100%);
+  pointer-events:none;
+}
+.featured .featured-inner{
+  position:absolute;left:16px;right:16px;bottom:16px;z-index:2;
+  display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
+}
+.featured .featured-tag{
+  font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--orange);margin-bottom:8px;
+}
+.featured .featured-title{
+  font-family:var(--serif);font-size:24px;line-height:1.3;color:var(--cream);
+}
+.featured .featured-sub{font-size:11px;letter-spacing:0.05em;color:rgba(255,255,255,0.55);margin-top:6px}
+.featured .featured-num{
+  font-family:var(--serif);font-weight:700;font-size:36px;color:var(--orange);
+  text-shadow:0 1px 6px rgba(0,0,0,.5);flex-shrink:0;
+}
+@media(min-width:640px){
+  .featured .featured-inner{left:32px;right:32px;bottom:32px}
+  .featured .featured-title{font-size:42px}
+  .featured .featured-num{font-size:64px}
 }
 
 /* ── 빈 상태 ── */
@@ -157,18 +202,42 @@ function render() {
   meta.innerHTML = `<span class="vol">${esc(latest.number || latest.id || '')}</span><br>${esc(latest.date || '')}`;
   count.textContent = `총 ${issues.length}개의 이야기`;
 
-  grid.innerHTML = sorted.map((issue, i) => {
-    const num = String(issues.length - issues.findIndex(x => x.id === issue.id)).padStart(2, '0');
+  const totalNum = (issue) => String(issues.length - issues.findIndex(x => x.id === issue.id)).padStart(2, '0');
+
+  let html = '';
+  // 최신순 정렬일 때만 첫 항목을 큰 피처드 타일로
+  if (sortMode === 'latest' && sorted.length > 0) {
+    const featured = sorted[0];
+    html += `
+    <a class="featured" href="./issue.html?id=${encodeURIComponent(featured.id)}">
+      <img src="${esc(featured.cover || '')}" alt="${esc(featured.title || '')}" loading="lazy" onerror="this.style.opacity=0">
+      <div class="featured-inner">
+        <div>
+          <div class="featured-tag">Latest · ${esc(featured.date || featured.number || '')}</div>
+          <div class="featured-title">${esc(featured.title || featured.id || '제목 없음')}</div>
+          <div class="featured-sub">${esc(featured.subtitle || '')}</div>
+        </div>
+        <div class="featured-num">${totalNum(featured)}.</div>
+      </div>
+    </a>`;
+  }
+
+  const rest = (sortMode === 'latest') ? sorted.slice(1) : sorted;
+  html += rest.map((issue) => {
     return `
     <a class="card" href="./issue.html?id=${encodeURIComponent(issue.id)}">
       <div class="thumb-wrap">
         <img src="${esc(issue.cover || '')}" alt="${esc(issue.title || '')}" loading="lazy" onerror="this.style.opacity=0">
-        <div class="num">${num}.</div>
+        <div class="num">${totalNum(issue)}.</div>
+        <div class="overlay-text">
+          <div class="title">${esc(issue.title || issue.id || '제목 없음')}</div>
+          <div class="sub">${esc(issue.subtitle || issue.date || '')}</div>
+        </div>
       </div>
-      <div class="title">${esc(issue.title || issue.id || '제목 없음')}</div>
-      <div class="sub">${esc(issue.subtitle || issue.date || '')}</div>
     </a>`;
   }).join('');
+
+  grid.innerHTML = html;
 }
 
 function esc(s) {

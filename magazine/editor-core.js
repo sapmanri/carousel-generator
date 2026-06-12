@@ -250,13 +250,68 @@ async function loadProfile() {
   return profileCache;
 }
 
-// pageType별 글 작성 지시 (writing_studio TYPE_INSTRUCTION과 같은 역할)
+// 호의 제목/부제를 페이지 글들을 바탕으로 자동 생성
+async function generateIssueTitleSubtitle() {
+  const key = getApiKey();
+  if (!key) throw new Error('API Key가 필요합니다.');
+  const profile = await loadProfile();
+
+  // 페이지에서 텍스트 단서 모으기
+  const snippets = [];
+  pages.forEach(pg => {
+    if (pg.type === 'cover' && pg.headline) snippets.push(pg.headline.join(' '));
+    if (pg.caption) snippets.push(pg.caption);
+    if (pg.text) snippets.push(pg.text.split('\n').filter(Boolean)[0] || '');
+    if (pg.captionLeft) snippets.push(pg.captionLeft);
+  });
+  const context = snippets.filter(Boolean).slice(0, 8).join(' / ');
+
+  const system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 웹매거진 글쓰기 도구입니다.
+Vase의 문체 규칙:
+${profile.rules.slice(0, 5).map((r,i)=>`${i+1}. ${r}`).join('\n')}
+
+이번 호의 내용 단서: ${context}
+
+이 호의 "제목"과 "부제"를 만들어주세요.
+- 제목: 명조체로 어울리는 한국어 제목, 8-16자, Vase 문체의 시적인 느낌
+- 부제: 장소나 계절감, 영어 또는 한국어 짧은 문구, 6-20자 (예: "Wigong-ri, Gapyeong" 또는 "6월의 느린 오후")
+
+결과는 정확히 이 형식의 JSON만 반환하세요. 다른 텍스트 없이:
+{"title":"...","subtitle":"..."}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 300,
+      system,
+      messages: [{ role: 'user', content: '제목과 부제를 만들어주세요.' }],
+    }),
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  const text = data.content?.[0]?.text || '{}';
+  const s = text.indexOf('{'), e = text.lastIndexOf('}');
+  return JSON.parse(text.slice(s, e + 1));
+}
+
 const PAGE_TEXT_INSTRUCTION = {
   fullbleed: `풀블리드 화보 페이지의 캡션을 쓴다. 명조체로 한 줄, 12자 내외, 장면의 핵심을 담는다. 설명하지 말고 보여준다.`,
   split: `2단 사진+글 페이지의 본문을 쓴다. Vase의 인간극장(observer) 톤으로 2-4문단, 한 문장씩 줄바꿈하여 호흡을 살린다. 사진 속 장면에서 시작해 감각적 디테일로 확장한다.`,
   grid: `그리드 콜라주 페이지의 짧은 캡션을 쓴다. 한 문장, 20자 내외. 여러 장면을 압축하는 느낌.`,
   quote: `인용/하이라이트 페이지의 문장을 쓴다. 가장 인상적인 한 문장, 24-40자, 여운이 남는 톤.`,
   spread: `와이드 스프레드 화보의 캡션을 쓴다. 짧은 명조체 한 줄(10자 내외)로, 사진의 왼쪽 절반과 오른쪽 절반에 각각 어울리는 두 개의 짧은 문구를 만든다. 두 줄로 반환하며 첫 줄이 왼쪽, 둘째 줄이 오른쪽 캡션이다.`,
+  essay: `사진 없이 글로만 채우는 에세이 페이지를 쓴다. Vase의 인간극장 톤으로 3-5문단, 한 문장씩 줄바꿈하여 호흡을 살린다. 주어진 주제/컨텍스트가 있으면 그것을 중심으로, 없으면 이번 호 전체의 정서를 정리하는 글을 쓴다.`,
+  dialogue: `짧은 대화나 코멘트 형식의 캡션 3-5개를 만든다. 결과는 한 줄에 하나씩, "화자|내용" 형식으로 반환한다 (화자가 없으면 "|내용"). 예: "빼빼|또 거기 앉아있네" / "|오늘은 유난히 조용한 오후였다"`,
+  list: `짧은 리스트형 정보를 만든다 (레시피 재료, 오늘의 할 일, 추천 목록 등). 결과는 한 줄에 하나씩, "이름|설명" 형식으로 3-6개 반환한다 (설명이 없으면 "이름|"). 주어진 주제가 있으면 그것을 따른다.`,
+  milestone: `마일스톤/숫자 강조 페이지의 설명 문구를 쓴다. 1-2문장, Vase 문체로 그 숫자/단어가 의미하는 감정적 맥락을 짧게 담는다.`,
+  botanical: `보태니컬(식물/소품) 사진에 어울리는 이탤릭체 캡션 한 줄을 쓴다. 10-16자, 관찰자적이고 담담한 톤.`,
   closing: `클로징 페이지의 마무리 문구를 쓴다. "오늘도 느리게, 잘 보냈습니다" 같은 톤으로 1-2문장.`,
   index: `목차용 소제목들을 쓴다.`,
   cover: `표지 헤드라인을 쓴다. 2줄, 명조체, 영상/이야기의 핵심을 담는다.`,
@@ -613,6 +668,11 @@ const PAGE_DEFAULTS = {
   grid: () => ({ type: 'grid', imageIds: [], label: '', caption: '' }),
   quote: () => ({ type: 'quote', text: '', context: '' }),
   spread: () => ({ type: 'spread', imageId: null, captionLeft: '', captionRight: '' }),
+  essay: () => ({ type: 'essay', label: '', title: '', text: '', dark: false }),
+  dialogue: () => ({ type: 'dialogue', label: '', lines: [{ speaker: '', text: '', side: 'left' }] }),
+  list: () => ({ type: 'list', label: '', title: '', items: [{ name: '', desc: '' }] }),
+  milestone: () => ({ type: 'milestone', number: '', label: '', text: '' }),
+  botanical: () => ({ type: 'botanical', imageId: null, tag: 'Botanical Notes', caption: '' }),
   closing: () => ({ type: 'closing', text: '', cta: '' }),
 };
 
@@ -633,7 +693,8 @@ function movePage(idx, dir) {
 }
 
 const PAGE_TYPE_LABEL = {
-  cover: '표지', fullbleed: '풀블리드', index: '목차', split: '2단 split', grid: '그리드', quote: '인용', spread: '스프레드', closing: '클로징'
+  cover: '표지', fullbleed: '풀블리드', index: '목차', split: '2단 split', grid: '그리드', quote: '인용', spread: '스프레드',
+  essay: '에세이(글만)', dialogue: '대화형 캡션', list: '리스트', milestone: '마일스톤', botanical: '보태니컬', closing: '클로징'
 };
 
 function renderPageList() {
@@ -726,6 +787,72 @@ function renderPageCard(pg, idx) {
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
       `;
       break;
+    case 'essay':
+      body = `
+        <div class="field"><label>라벨 (소제목)</label><input value="${esc(pg.label||'')}" oninput="pages[${idx}].label=this.value"></div>
+        <div class="field"><label>제목</label><input value="${esc(pg.title||'')}" oninput="pages[${idx}].title=this.value"></div>
+        <div class="field"><label>본문</label><textarea style="min-height:160px" oninput="pages[${idx}].text=this.value">${esc(pg.text||'')}</textarea></div>
+        <label style="font-size:11px;color:var(--dim);display:flex;gap:6px;align-items:center"><input type="checkbox" ${pg.dark?'checked':''} onchange="pages[${idx}].dark=this.checked"> 다크 배경</label>
+        <div class="gen-row">
+          <input style="flex:1" placeholder="주제/컨텍스트 (선택)" id="ctx-${idx}">
+          <button class="btn-gen" onclick="genPageText(${idx}, document.getElementById('ctx-${idx}').value)">✨ 에세이 생성</button>
+        </div>
+      `;
+      break;
+    case 'dialogue':
+      body = `
+        <div class="field"><label>라벨</label><input value="${esc(pg.label||'')}" oninput="pages[${idx}].label=this.value"></div>
+        <div class="hint">짧은 대화/코멘트를 좌우로 번갈아 배치합니다.</div>
+        ${(pg.lines||[]).map((l,li) => `
+          <div class="row" style="align-items:center">
+            <select style="width:90px" onchange="pages[${idx}].lines[${li}].side=this.value; renderPageList()">
+              <option value="left" ${l.side!=='right'?'selected':''}>왼쪽</option>
+              <option value="right" ${l.side==='right'?'selected':''}>오른쪽</option>
+            </select>
+            <input style="width:90px" placeholder="화자(선택)" value="${esc(l.speaker||'')}" oninput="pages[${idx}].lines[${li}].speaker=this.value">
+            <input style="flex:1" placeholder="대화/코멘트" value="${esc(l.text||'')}" oninput="pages[${idx}].lines[${li}].text=this.value">
+            <button class="icon-btn" onclick="pages[${idx}].lines.splice(${li},1); renderPageList()">×</button>
+          </div>
+        `).join('')}
+        <button class="btn-ghost" onclick="pages[${idx}].lines.push({speaker:'',text:'',side: (pages[${idx}].lines.length%2===0?'left':'right')}); renderPageList()">+ 대화 추가</button>
+        <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 대화 생성</button></div>
+      `;
+      break;
+    case 'list':
+      body = `
+        <div class="field"><label>라벨</label><input value="${esc(pg.label||'')}" oninput="pages[${idx}].label=this.value"></div>
+        <div class="field"><label>제목</label><input value="${esc(pg.title||'')}" oninput="pages[${idx}].title=this.value"></div>
+        ${(pg.items||[]).map((it,li) => `
+          <div class="row" style="align-items:flex-start">
+            <input style="flex:1" placeholder="항목 이름" value="${esc(it.name||'')}" oninput="pages[${idx}].items[${li}].name=this.value">
+            <input style="flex:2" placeholder="설명 (선택)" value="${esc(it.desc||'')}" oninput="pages[${idx}].items[${li}].desc=this.value">
+            <button class="icon-btn" onclick="pages[${idx}].items.splice(${li},1); renderPageList()">×</button>
+          </div>
+        `).join('')}
+        <button class="btn-ghost" onclick="pages[${idx}].items.push({name:'',desc:''}); renderPageList()">+ 항목 추가</button>
+        <div class="gen-row">
+          <input style="flex:1" placeholder="주제 (예: 6월의 텃밭 작물)" id="ctx-${idx}">
+          <button class="btn-gen" onclick="genPageText(${idx}, document.getElementById('ctx-${idx}').value)">✨ 리스트 생성</button>
+        </div>
+      `;
+      break;
+    case 'milestone':
+      body = `
+        <div class="field"><label>숫자/단어 (크게 표시)</label><input value="${esc(pg.number||'')}" oninput="pages[${idx}].number=this.value" placeholder="예: 3, D-7, 50,000"></div>
+        <div class="field"><label>라벨 (작게, 위에 위치)</label><input value="${esc(pg.label||'')}" oninput="pages[${idx}].label=this.value" placeholder="예: SUBSCRIBERS"></div>
+        <div class="field"><label>설명 문구</label><textarea oninput="pages[${idx}].text=this.value">${esc(pg.text||'')}</textarea></div>
+        <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 문구 생성</button></div>
+      `;
+      break;
+    case 'botanical':
+      body = `
+        <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
+        <div class="hint">세이지색 배경의 "잡지 속 잡지" 페이지입니다. 식물/소품 일러스트나 클로즈업 사진에 어울립니다.</div>
+        <div class="field"><label>상단 태그</label><input value="${esc(pg.tag||'')}" oninput="pages[${idx}].tag=this.value"></div>
+        <div class="field"><label>캡션 (이탤릭, 작게)</label><input value="${esc(pg.caption||'')}" oninput="pages[${idx}].caption=this.value"></div>
+        <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
+      `;
+      break;
     case 'closing':
       body = `
         <div class="field"><label>클로징 문구</label><textarea oninput="pages[${idx}].text=this.value">${esc(pg.text||'')}</textarea></div>
@@ -748,11 +875,26 @@ async function genPageText(idx, extraContext) {
     const text = await generateMagazineText(pg.type, photo, extraContext);
     if (pg.type === 'fullbleed' || pg.type === 'grid') pg.caption = text;
     else if (pg.type === 'split') pg.text = text;
-    else if (pg.type === 'quote' || pg.type === 'closing') pg.text = text;
+    else if (pg.type === 'quote' || pg.type === 'closing' || pg.type === 'essay' || pg.type === 'milestone') pg.text = text;
+    else if (pg.type === 'botanical') pg.caption = text;
     else if (pg.type === 'spread') {
       const lines = text.split('\n').filter(Boolean);
       pg.captionLeft = lines[0] || '';
       pg.captionRight = lines[1] || '';
+    } else if (pg.type === 'dialogue') {
+      const lines = text.split('\n').filter(Boolean);
+      pg.lines = lines.map((l, i) => {
+        const [speaker, ...rest] = l.split('|');
+        const content = rest.length ? rest.join('|') : speaker;
+        const hasSpeaker = rest.length > 0 && speaker.trim();
+        return { speaker: hasSpeaker ? speaker.trim() : '', text: content.trim(), side: i % 2 === 0 ? 'left' : 'right' };
+      }).filter(l => l.text);
+    } else if (pg.type === 'list') {
+      const lines = text.split('\n').filter(Boolean);
+      pg.items = lines.map(l => {
+        const [name, ...rest] = l.split('|');
+        return { name: (name||'').trim(), desc: rest.join('|').trim() };
+      }).filter(it => it.name);
     }
     renderPageList();
     toast('생성 완료');
@@ -950,6 +1092,21 @@ async function publish() {
   btn.disabled = true;
 
   try {
+    // 0. 제목/부제가 비어있으면 자동 생성
+    const titleField = document.getElementById('fTitle');
+    const subtitleField = document.getElementById('fSubtitle');
+    if (!titleField.value.trim() || !subtitleField.value.trim()) {
+      statusEl.innerHTML = '<span class="spinner"></span>제목/부제 생성 중…';
+      statusEl.className = 'publish-status';
+      try {
+        const generated = await generateIssueTitleSubtitle();
+        if (!titleField.value.trim() && generated.title) titleField.value = generated.title;
+        if (!subtitleField.value.trim() && generated.subtitle) subtitleField.value = generated.subtitle;
+      } catch (e) {
+        // 생성 실패해도 발행은 계속 진행
+      }
+    }
+
     // 1. issues.json 최신화 (sha 충돌 방지)
     statusEl.textContent = '기존 데이터 확인 중…';
     statusEl.className = 'publish-status';
@@ -1014,6 +1171,31 @@ async function publish() {
           out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
           out.captionLeft = pg.captionLeft || '';
           out.captionRight = pg.captionRight || '';
+          break;
+        case 'essay':
+          out.label = pg.label || '';
+          out.title = pg.title || '';
+          out.text = pg.text || '';
+          out.dark = !!pg.dark;
+          break;
+        case 'dialogue':
+          out.label = pg.label || '';
+          out.lines = (pg.lines || []).filter(l => l.text);
+          break;
+        case 'list':
+          out.label = pg.label || '';
+          out.title = pg.title || '';
+          out.items = (pg.items || []).filter(it => it.name);
+          break;
+        case 'milestone':
+          out.number = pg.number || '';
+          out.label = pg.label || '';
+          out.text = pg.text || '';
+          break;
+        case 'botanical':
+          out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.tag = pg.tag || '';
+          out.caption = pg.caption || '';
           break;
         case 'closing':
           out.text = pg.text || '';
