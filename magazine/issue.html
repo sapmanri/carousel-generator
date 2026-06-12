@@ -33,7 +33,10 @@ img{max-width:100%;display:block}
   font-size:11px;letter-spacing:0.08em;
 }
 .topbar.on-dark{background:rgba(18,14,12,0.85);border-bottom:1px solid var(--hairline-dark);color:var(--cream)}
-.topbar .back{color:var(--orange);font-weight:500}
+.topbar .back{color:var(--orange);font-weight:500;display:flex;flex-direction:column;gap:2px}
+.topbar .back .build-tag{font-family:var(--mono,monospace);font-weight:300;font-size:8px;letter-spacing:0.05em;color:rgba(255,255,255,0.22)}
+.topbar.on-dark .back .build-tag{color:rgba(255,255,255,0.22)}
+.topbar:not(.on-dark) .back .build-tag{color:rgba(0,0,0,0.25)}
 .topbar .indicator{color:rgba(0,0,0,0.4);font-family:var(--sans)}
 .topbar.on-dark .indicator{color:rgba(255,255,255,0.45)}
 
@@ -280,7 +283,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI</a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 16:06 KST</span></a>
   <div class="indicator" id="indicator"></div>
 </div>
 
