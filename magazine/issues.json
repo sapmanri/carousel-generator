@@ -258,8 +258,8 @@
     {
       "id": "061326-0",
       "number": "00-01",
-      "title": "",
-      "subtitle": "",
+      "title": "손끝에 남은 것들",
+      "subtitle": "봄과 여름 사이, 빛의 온도",
       "date": "2026-06-13",
       "cover": "./images/library/17keo_5232b0a9_d29fed3b.jpg",
       "pages": [
@@ -350,7 +350,7 @@
         {
           "type": "closing",
           "text": "오늘도 느리게, 잘 보냈습니다.\n\n조금 늦게 돌아온 하루였지만\n그 정도면 괜찮았습니다.",
-          "cta": ""
+          "cta": "https://youtu.be/OKllcN_vWdQ"
         }
       ]
     }
