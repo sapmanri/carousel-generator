@@ -304,7 +304,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.7.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v1.7.1</span></div>
   <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
     <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
       style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:200px"
@@ -975,7 +975,7 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
     headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
     body: JSON.stringify({
       model:'claude-sonnet-4-5',
-      max_tokens:2000,
+      max_tokens: style === 'jeonwon' ? 4000 : 2000,
       messages:[{ role:'user', content:
 `이미지 분석 결과를 바탕으로 Instagram 캐러셀 계획을 순수 JSON으로만 반환해줘. 마크다운 없이 JSON만.
 
@@ -1041,6 +1041,9 @@ ${infographicMode ? `
   if (data.error) throw new Error('API 오류: ' + data.error.message);
   const raw = data.content?.find(b=>b.type==='text')?.text || '';
   if (!raw) throw new Error('응답이 비어있어요. 상태: ' + data.stop_reason);
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error('응답이 max_tokens 한도로 잘렸어요. 슬라이드 수를 줄이거나 다시 시도해주세요.');
+  }
   const s=raw.indexOf('{'), e=raw.lastIndexOf('}');
   if(s===-1||e===-1) throw new Error('JSON 없음: '+raw.slice(0,120));
   let jsonStr = raw.slice(s,e+1);
@@ -1054,7 +1057,7 @@ ${infographicMode ? `
     try {
       return JSON.parse(cleaned);
     } catch(err2) {
-      throw new Error('JSON 파싱 실패: ' + err2.message + ' / 원본 일부: ' + jsonStr.slice(0,200));
+      throw new Error('JSON 파싱 실패: ' + err2.message + ' / 마지막 200자: ' + jsonStr.slice(-200));
     }
   }
 }
