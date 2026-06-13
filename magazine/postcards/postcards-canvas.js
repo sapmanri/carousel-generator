@@ -10,15 +10,17 @@ const PC_CANVAS_H = 1800;
 
 // 템플릿별 캔버스 렌더러 — postcards-templates.js의 HTML 레이아웃과 동일한 비율/배치를 사용한다.
 const CANVAS_RENDERERS = {
-  'expo-01': drawExpo01,
+  'expo-01': { front: drawExpo01, back: drawExpo01Back },
 };
 
-async function downloadPostcard(idx) {
+async function downloadPostcard(idx, side) {
+  side = side || 'front';
   const pc = window.__postcards[idx];
-  const label = document.getElementById('dlLabel' + idx);
+  const label = document.getElementById(side === 'back' ? 'dlBack' + idx : 'dlFront' + idx);
   const issue = (window.__issues || []).find(x => x.id === pc.issueId);
   const youtubeUrl = issue && issue.youtubeUrl;
 
+  const original = label.textContent;
   label.innerHTML = '<span class="spinner"></span>준비 중…';
   try {
     const canvas = document.createElement('canvas');
@@ -26,22 +28,23 @@ async function downloadPostcard(idx) {
     canvas.height = PC_CANVAS_H;
     const ctx = canvas.getContext('2d');
 
-    const renderer = CANVAS_RENDERERS[pc.template] || CANVAS_RENDERERS['expo-01'];
+    const renderers = CANVAS_RENDERERS[pc.template] || CANVAS_RENDERERS['expo-01'];
+    const renderer = side === 'back' ? renderers.back : renderers.front;
     await renderer(ctx, pc, youtubeUrl);
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `sapmanri-postcard-${pc.number || idx + 1}.png`;
+    a.download = `sapmanri-postcard-${pc.number || idx + 1}-${side}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 5000);
-    label.textContent = '↓ 다운로드';
+    label.textContent = original;
   } catch (e) {
-    label.textContent = '오류: ' + (e.message || '다운로드 실패');
-    setTimeout(() => { label.textContent = '↓ 다운로드'; }, 2500);
+    label.textContent = '오류';
+    setTimeout(() => { label.textContent = original; }, 2500);
   }
 }
 
@@ -128,11 +131,11 @@ async function drawExpo01(ctx, pc, youtubeUrl) {
   ctx.fillText('오늘도 느리게 · slow days', bottomX, metaY);
   ctx.fillText('@sapmanri', bottomX, metaY + W * 0.011 * 1.7);
 
-  // QR 코드 (우하단)
-  const qrSize = W * 0.13;
-  const qrX = W - padX - qrSize;
-  const qrY = H * 0.945 - qrSize;
+  // QR 코드 (우하단) — 연결된 호의 유튜브 링크가 있을 때만 표시
   if (youtubeUrl && window.QRCode) {
+    const qrSize = W * 0.13;
+    const qrX = W - padX - qrSize;
+    const qrY = H * 0.945 - qrSize;
     const qrCanvas = document.createElement('canvas');
     await new Promise((resolve) => {
       QRCode.toCanvas(qrCanvas, youtubeUrl, { width: qrSize, margin: 0, color: { dark: '#1A1A1A', light: '#FFFFFF' } }, () => resolve());
@@ -140,12 +143,6 @@ async function drawExpo01(ctx, pc, youtubeUrl) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(qrX, qrY, qrSize, qrSize);
     ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
-    ctx.strokeStyle = 'rgba(0,0,0,0.08)';
-    ctx.strokeRect(qrX, qrY, qrSize, qrSize);
-  } else {
-    // 연결된 호가 없으면 빈 칸으로 표시
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(qrX, qrY, qrSize, qrSize);
     ctx.strokeStyle = 'rgba(0,0,0,0.08)';
     ctx.strokeRect(qrX, qrY, qrSize, qrSize);
   }
@@ -173,4 +170,92 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
     curY += lineHeight;
   }
   return curY;
+}
+
+// Expo 01 뒷면 — 클래식 우편엽서 레이아웃 (renderExpo01Back의 HTML과 동일 배치)
+async function drawExpo01Back(ctx, pc) {
+  const W = PC_CANVAS_W, H = PC_CANVAS_H;
+  const padX = W * 0.06;
+  const padY = H * 0.06;
+
+  // 배경
+  ctx.fillStyle = '#FAF5EE';
+  ctx.fillRect(0, 0, W, H);
+
+  // 상단 "POST CARD"
+  ctx.fillStyle = '#1A1A1A';
+  ctx.font = `700 ${Math.round(W * 0.028)}px "Gowun Batang", serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  // 자간을 살짝 벌려서 표시 (letter-spacing 근사)
+  drawSpacedText(ctx, 'POST CARD', W / 2, padY, W * 0.012);
+  ctx.textAlign = 'left';
+
+  const bodyTop = padY + H * 0.08;
+  const bodyBottom = H - padY;
+  const dividerX = W * 0.52;
+
+  // 좌측: 브랜드 + 캡션 + 서브텍스트 (하단 정렬)
+  ctx.font = `700 ${Math.round(W * 0.014)}px "Gowun Batang", serif`;
+  ctx.fillStyle = '#E8762C';
+  let subY = bodyBottom - H * 0.07;
+  ctx.fillText('SAPMANRI', padX, subY - H * 0.16);
+
+  ctx.fillStyle = '#1A1A1A';
+  ctx.font = `400 ${Math.round(W * 0.018)}px "Gowun Batang", serif`;
+  wrapText(ctx, pc.title || '', padX, subY - H * 0.13, dividerX - padX * 2, W * 0.026);
+
+  ctx.fillStyle = 'rgba(26,26,26,0.4)';
+  ctx.font = `300 ${Math.round(W * 0.0085)}px "Noto Sans KR", sans-serif`;
+  ctx.fillText('오늘도 느리게 · slow days', padX, subY);
+  ctx.fillText(`@sapmanri · No.${pc.number || ''}`, padX, subY + W * 0.0085 * 1.8);
+
+  // 구분선
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(dividerX, bodyTop);
+  ctx.lineTo(dividerX, bodyBottom);
+  ctx.stroke();
+
+  // 우측: 우표 박스 + 주소란
+  const rightX = dividerX + W * 0.04;
+  const rightW = W - padX - rightX;
+  const stampSize = rightW * 0.22;
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+  ctx.strokeRect(W - padX - stampSize, bodyTop, stampSize, stampSize * 5 / 4);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.font = `300 ${Math.round(W * 0.01)}px "Noto Sans KR", sans-serif`;
+  drawSpacedText(ctx, 'TO', rightX, bodyBottom - H * 0.16, W * 0.006);
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  for (let i = 0; i < 3; i++) {
+    const y = bodyBottom - H * 0.12 + i * (H * 0.045);
+    ctx.beginPath();
+    ctx.moveTo(rightX, y);
+    ctx.lineTo(W - padX, y);
+    ctx.stroke();
+  }
+}
+
+// 자간(letter-spacing)을 적용해 텍스트를 그린다 (ctx.textAlign='center'일 때는 중앙 기준으로 보정)
+function drawSpacedText(ctx, text, x, y, spacing) {
+  const chars = text.split('');
+  let totalWidth = 0;
+  for (const c of chars) totalWidth += ctx.measureText(c).width + spacing;
+  totalWidth -= spacing;
+
+  let startX = x;
+  if (ctx.textAlign === 'center') startX = x - totalWidth / 2;
+  else if (ctx.textAlign === 'right') startX = x - totalWidth;
+
+  const prevAlign = ctx.textAlign;
+  ctx.textAlign = 'left';
+  let cx = startX;
+  for (const c of chars) {
+    ctx.fillText(c, cx, y);
+    cx += ctx.measureText(c).width + spacing;
+  }
+  ctx.textAlign = prevAlign;
 }

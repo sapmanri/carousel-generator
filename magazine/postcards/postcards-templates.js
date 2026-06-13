@@ -11,17 +11,46 @@ function esc(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-function renderTemplateHtml(pc) {
+function renderTemplateHtml(pc, hasQr, side) {
+  side = side || 'front';
   switch (pc.template) {
     case 'expo-01':
     default:
-      return renderExpo01(pc);
+      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderExpo01(pc, hasQr);
   }
 }
 
-// Expo 01 — 전시 포스터 스타일: 상단 라벨+번호, 큰 사진, 하단 제목 + QR
-function renderExpo01(pc) {
+// Expo 01 뒷면 — 클래식 우편엽서 레이아웃: 좌측 메시지 영역(+SAPMANRI/제목), 우측 주소란+우표
+function renderExpo01Back(pc, hasQr) {
+  return `
+    <div class="pc-back">
+      <div class="pc-back-header">POST CARD</div>
+      <div class="pc-back-body">
+        <div class="pc-back-left">
+          <div class="pc-back-brand">SAPMANRI</div>
+          <div class="pc-back-caption">${esc(pc.title || '')}</div>
+          <div class="pc-back-sub">오늘도 느리게 · slow days<br>@sapmanri · No.${esc(pc.number || '')}</div>
+        </div>
+        <div class="pc-back-divider"></div>
+        <div class="pc-back-right">
+          <div class="pc-back-stamp"></div>
+          <div class="pc-back-addrlines">
+            <div class="pc-back-addr-label">TO</div>
+            <div class="pc-back-line"></div>
+            <div class="pc-back-line"></div>
+            <div class="pc-back-line"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Expo 01 — 전시 포스터 스타일: 상단 라벨+번호, 큰 사진, 하단 제목 + (연결된 호가 있을 때만) QR
+function renderExpo01(pc, hasQr) {
   const label = pc.label || '';
+  const qrHtml = hasQr ? `<div class="pc-qr" data-qr-target="1"></div>` : '';
+  const metaCls = hasQr ? 'pc-meta' : 'pc-meta pc-meta-full';
   return `
     <div class="pc-top">
       <div class="pc-label"><div class="l1">SAPMANRI</div><div>${esc(label)}</div></div>
@@ -30,9 +59,9 @@ function renderExpo01(pc) {
     <div class="pc-photo"><img src="${esc(pc.image)}" alt="" loading="lazy"></div>
     <div class="pc-bottom">
       <div class="pc-title">${esc(pc.title || '')}</div>
-      <div class="pc-meta">
+      <div class="${metaCls}">
         <div class="pc-meta-text">오늘도 느리게 · slow days<br>@sapmanri</div>
-        <div class="pc-qr" data-qr-target="1"></div>
+        ${qrHtml}
       </div>
     </div>
   `;

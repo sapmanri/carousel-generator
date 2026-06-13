@@ -27,6 +27,7 @@ header{
 }
 .wordmark{font-family:var(--serif);font-weight:700;font-size:28px;color:var(--orange);letter-spacing:0.06em}
 .wordmark .sub{display:block;font-family:var(--sans);font-weight:300;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(0,0,0,0.4);margin-top:4px}
+.wordmark .build-tag{display:block;font-family:monospace;font-weight:300;font-size:9px;letter-spacing:0.08em;color:rgba(0,0,0,0.25);margin-top:6px;text-transform:none}
 .back{font-size:11px;letter-spacing:0.08em;color:var(--orange)}
 
 .grid{
@@ -52,8 +53,38 @@ header{
 .card .pc-title{font-family:var(--serif);font-weight:700;font-size:13px;line-height:1.35;margin-bottom:10px;word-break:keep-all}
 .card .pc-meta{display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--sans);gap:8px}
 .card .pc-meta-text{font-size:5px;line-height:1.7;color:rgba(0,0,0,0.4);min-width:0}
+.card .pc-meta-full .pc-meta-text{width:100%}
 .card .pc-qr{width:13%;aspect-ratio:1;background:#fff;border:1px solid rgba(0,0,0,0.08)}
 .card .pc-qr canvas{width:100%;height:100%;display:block}
+
+/* ── 뒷면 (우편엽서 레이아웃) ── */
+.card .pc-back{position:absolute;inset:0;padding:6% 6%;display:flex;flex-direction:column;font-family:var(--sans)}
+.card .pc-back-header{font-family:var(--serif);font-weight:700;font-size:11px;letter-spacing:0.3em;text-align:center;color:#1A1A1A;margin-bottom:6%}
+.card .pc-back-body{flex:1;display:flex;gap:4%}
+.card .pc-back-left{flex:1.1;display:flex;flex-direction:column;justify-content:flex-end;padding-right:4%}
+.card .pc-back-brand{font-family:var(--serif);font-weight:700;font-size:9px;letter-spacing:0.15em;color:var(--orange);margin-bottom:6%}
+.card .pc-back-caption{font-family:var(--serif);font-size:11px;line-height:1.6;color:#1A1A1A;margin-bottom:8%;word-break:keep-all}
+.card .pc-back-sub{font-size:5px;line-height:1.8;color:rgba(0,0,0,0.35)}
+.card .pc-back-divider{width:1px;background:rgba(0,0,0,0.12)}
+.card .pc-back-right{flex:1;display:flex;flex-direction:column}
+.card .pc-back-stamp{width:22%;aspect-ratio:4/5;border:1px solid rgba(0,0,0,0.2);align-self:flex-end;margin-bottom:8%}
+.card .pc-back-addrlines{display:flex;flex-direction:column;gap:10%;margin-top:auto}
+.card .pc-back-addr-label{font-size:6px;letter-spacing:0.15em;color:rgba(0,0,0,0.35);margin-bottom:4%}
+.card .pc-back-line{height:1px;background:rgba(0,0,0,0.15)}
+
+/* ── 플립 ── */
+/* ── 앞/뒤 전환 (3D flip 대신 단순 show/hide — 크로스 브라우저 안정성) ── */
+.flip-wrap{cursor:pointer;position:relative}
+.flip-inner{position:relative;width:100%;padding-bottom:150%}
+.card .flip-face{position:absolute;inset:0;border-radius:2px;overflow:hidden;aspect-ratio:auto}
+.flip-face.back{display:none}
+.flip-wrap.flipped .flip-face.front{display:none}
+.flip-wrap.flipped .flip-face.back{display:block}
+.dl-links{display:flex;gap:10px;justify-content:center;font-size:11px}
+.dl-links a, .dl-links button{
+  background:none;border:none;color:rgba(0,0,0,0.5);font-family:var(--sans);font-size:11px;
+  letter-spacing:0.05em;cursor:pointer;padding:0;text-decoration:underline;
+}
 
 .dl-label{font-size:11px;letter-spacing:0.05em;color:rgba(0,0,0,0.5);text-align:center}
 .dl-label .spinner{
@@ -76,7 +107,7 @@ footer{padding:40px 24px;text-align:center;font-size:10px;letter-spacing:0.1em;c
 
 <header>
   <div>
-    <div class="wordmark">SAPMANRI<span class="sub">postcards</span></div>
+    <div class="wordmark">SAPMANRI<span class="sub">postcards</span><span class="build-tag">Last update: 2026-06-13 15:20 KST</span></div>
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
     <a class="back" href="./editor.html">+ 에디터 ↗</a>
@@ -91,8 +122,8 @@ footer{padding:40px 24px;text-align:center;font-size:10px;letter-spacing:0.1em;c
 <footer>오늘도 느리게 · slow days — 사진을 클릭하면 인쇄용 이미지로 다운로드됩니다</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
-<script src="./postcards-templates.js?v=20260613a"></script>
-<script src="./postcards-canvas.js?v=20260613a"></script>
+<script src="./postcards-templates.js?v=20260613g"></script>
+<script src="./postcards-canvas.js?v=20260613g"></script>
 <script>
 async function load() {
   const grid = document.getElementById('grid');
@@ -111,18 +142,30 @@ async function load() {
       issues = (await r2.json()).issues || [];
     } catch (e) {}
 
-    grid.innerHTML = postcards.map((pc, idx) => `
-      <div class="card" onclick="downloadPostcard(${idx})">
-        <div class="pc-canvas" id="pcCard${idx}">${renderTemplateHtml(pc)}</div>
-        <div class="dl-label" id="dlLabel${idx}">↓ 다운로드</div>
+    grid.innerHTML = postcards.map((pc, idx) => {
+      const issue = issues.find(x => x.id === pc.issueId);
+      const hasQr = !!(issue && issue.youtubeUrl);
+      return `
+      <div class="card">
+        <div class="flip-wrap" id="flipWrap${idx}" onclick="document.getElementById('flipWrap${idx}').classList.toggle('flipped')">
+          <div class="flip-inner">
+            <div class="flip-face front pc-canvas" id="pcCardFront${idx}">${renderTemplateHtml(pc, hasQr, 'front')}</div>
+            <div class="flip-face back pc-canvas" id="pcCardBack${idx}">${renderTemplateHtml(pc, hasQr, 'back')}</div>
+          </div>
+        </div>
+        <div class="dl-links">
+          <button id="dlFront${idx}" onclick="event.stopPropagation(); downloadPostcard(${idx}, 'front')">↓ 앞면</button>
+          <button id="dlBack${idx}" onclick="event.stopPropagation(); downloadPostcard(${idx}, 'back')">↓ 뒷면</button>
+        </div>
       </div>
-    `).join('');
+    `;
+    }).join('');
 
-    // QR 미리보기 (화면 표시용, 작게)
+    // QR 미리보기 (화면 표시용, 작게) — 앞면에만
     postcards.forEach((pc, idx) => {
       const issue = issues.find(x => x.id === pc.issueId);
       const url = issue && issue.youtubeUrl;
-      const qrEl = document.querySelector(`#pcCard${idx} .pc-qr`);
+      const qrEl = document.querySelector(`#pcCardFront${idx} .pc-qr`);
       if (url && qrEl && window.QRCode) {
         const canvas = document.createElement('canvas');
         qrEl.appendChild(canvas);

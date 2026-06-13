@@ -80,6 +80,10 @@ const PostcardCache = (function () {
 let libraryItems = [];
 const selectedPaths = new Set();
 
+const LIB_PAGE_SIZE = 60;
+let libVisibleCount = LIB_PAGE_SIZE;
+let libHideUsed = false;
+
 async function loadLibrary() {
   const grid = document.getElementById('libGrid');
   grid.innerHTML = '<div class="hint" style="grid-column:1/-1"><span class="spinner"></span>불러오는 중…</div>';
@@ -88,16 +92,38 @@ async function loadLibrary() {
   } catch (e) {
     libraryItems = [];
   }
+  libVisibleCount = LIB_PAGE_SIZE;
+  renderLibraryGrid();
+}
+
+function renderLibraryGrid() {
+  const grid = document.getElementById('libGrid');
   if (!libraryItems.length) {
     grid.innerHTML = '<div class="hint" style="grid-column:1/-1">라이브러리에 이미지가 없습니다. (GitHub 토큰을 입력했는지 확인하세요)</div>';
+    document.getElementById('libMoreRow').innerHTML = '';
     return;
   }
-  grid.innerHTML = libraryItems.map(item => `
-    <div class="lib-item ${selectedPaths.has(item.path) ? 'selected' : ''}" data-path="${item.path}" onclick="toggleLibSelect('${item.path}')">
+  const usedHashes = new Set(postcards.map(pc => pc.imageHash));
+  let items = libraryItems;
+  if (libHideUsed) items = items.filter(it => !usedHashes.has(it.hash));
+
+  const visible = items.slice(0, libVisibleCount);
+  grid.innerHTML = visible.map(item => `
+    <div class="lib-item ${selectedPaths.has(item.path) ? 'selected' : ''} ${usedHashes.has(item.hash) ? 'used' : ''}" data-path="${item.path}" onclick="toggleLibSelect('${item.path}')">
       <img src="${item.download_url}" loading="lazy" alt="">
+      ${usedHashes.has(item.hash) ? '<div class="lib-used-badge">사용됨</div>' : ''}
     </div>
   `).join('');
   updateSelCount();
+
+  const moreRow = document.getElementById('libMoreRow');
+  const remaining = items.length - visible.length;
+  let html = `<span class="hint">${items.length}장 중 ${visible.length}장 표시</span>`;
+  if (remaining > 0) {
+    html += ` <button class="btn-ghost" onclick="libVisibleCount += ${LIB_PAGE_SIZE}; renderLibraryGrid()">더 보기 (+${Math.min(LIB_PAGE_SIZE, remaining)})</button>`;
+  }
+  html += ` <button class="btn-ghost" onclick="libHideUsed = !libHideUsed; libVisibleCount = ${LIB_PAGE_SIZE}; renderLibraryGrid()">${libHideUsed ? '사용된 사진도 보기' : '사용된 사진 숨기기'}</button>`;
+  moreRow.innerHTML = html;
 }
 
 function toggleLibSelect(path) {
@@ -190,6 +216,7 @@ async function addSelectedAsPostcards() {
     document.querySelectorAll('.lib-item.selected').forEach(el => el.classList.remove('selected'));
     updateSelCount();
     renderPostcardList();
+    renderLibraryGrid();
   } finally {
     btn.disabled = false;
     btn.textContent = '선택한 사진으로 포스트카드 만들기';
@@ -251,14 +278,23 @@ async function analyzeImageForPostcard(dataUrl) {
 // ══════════════════════════════════════════════════════════════
 // 포스트카드 카드 렌더링 (에디터 + 미리보기)
 // ══════════════════════════════════════════════════════════════
+const PC_PAGE_SIZE = 12;
+let pcVisibleCount = PC_PAGE_SIZE;
+
 function renderPostcardList() {
   const list = document.getElementById('pcList');
   document.getElementById('pcCount').textContent = postcards.length ? `${postcards.length}장` : '';
   if (!postcards.length) {
     list.innerHTML = '<div class="hint">위에서 라이브러리 사진을 선택해 포스트카드를 추가하세요.</div>';
+    document.getElementById('pcMoreRow').innerHTML = '';
     return;
   }
-  list.innerHTML = postcards.map((pc, idx) => `
+  // 최근 추가한 순(배열 뒤쪽)부터 보여주되, idx는 실제 postcards 배열 인덱스를 유지해야 onclick 핸들러가 맞게 동작함
+  const order = postcards.map((_, i) => i).reverse();
+  const visibleOrder = order.slice(0, pcVisibleCount);
+  list.innerHTML = visibleOrder.map(idx => {
+    const pc = postcards[idx];
+    return `
     <div class="pc-card">
       <div class="pc-preview-wrap">
         ${renderPreview(pc, idx)}
@@ -279,12 +315,23 @@ function renderPostcardList() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
+
+  const moreRow = document.getElementById('pcMoreRow');
+  const remaining = postcards.length - visibleOrder.length;
+  moreRow.innerHTML = remaining > 0
+    ? `<button class="btn-ghost" onclick="pcVisibleCount += ${PC_PAGE_SIZE}; renderPostcardList()">더 보기 (+${Math.min(PC_PAGE_SIZE, remaining)}, 남은 ${remaining}장)</button>`
+    : '';
 }
 
-function removePostcard(idx) {
+async function removePostcard(idx) {
   postcards.splice(idx, 1);
   renderPostcardList();
+  renderLibraryGrid();
+  const statusEl = document.getElementById('publishStatus');
+  statusEl.innerHTML = '<span class="spinner"></span>삭제 반영 중…';
+  await publishPostcards(); // 삭제는 즉시 저장 — 새로고침해도 사라진 상태가 유지되어야 함
 }
 
 async function reAnalyze(idx) {
@@ -309,11 +356,24 @@ function issueYoutubeUrl(issueId) {
 
 // 템플릿별 미리보기 HTML (postcards-templates.js의 renderTemplateHtml에 위임)
 function renderPreview(pc, idx) {
-  return `<div class="pc-canvas" id="pcPreview${idx}">${renderTemplateHtml(pc)}</div>`;
+  const hasQr = !!issueYoutubeUrl(pc.issueId);
+  return `
+    <div class="flip-wrap" id="pcFlip${idx}" onclick="document.getElementById('pcFlip${idx}').classList.toggle('flipped')">
+      <div class="flip-inner">
+        <div class="flip-face front pc-canvas" id="pcPreviewFront${idx}">${renderTemplateHtml(pc, hasQr, 'front')}</div>
+        <div class="flip-face back pc-canvas" id="pcPreviewBack${idx}">${renderTemplateHtml(pc, hasQr, 'back')}</div>
+      </div>
+    </div>
+    <div class="hint" style="text-align:center;margin-top:4px">클릭해서 뒷면 보기</div>
+  `;
 }
 function refreshPreview(idx) {
-  const el = document.getElementById('pcPreview' + idx);
-  if (el) el.innerHTML = renderTemplateHtml(postcards[idx]);
+  const pc = postcards[idx];
+  const hasQr = !!issueYoutubeUrl(pc.issueId);
+  const front = document.getElementById('pcPreviewFront' + idx);
+  const back = document.getElementById('pcPreviewBack' + idx);
+  if (front) front.innerHTML = renderTemplateHtml(pc, hasQr, 'front');
+  if (back) back.innerHTML = renderTemplateHtml(pc, hasQr, 'back');
 }
 
 // ══════════════════════════════════════════════════════════════

@@ -24,7 +24,8 @@ header{
   height:48px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;padding:0 20px;
 }
-.logo{font-family:var(--serif);font-size:14px;letter-spacing:0.08em;color:var(--muted)}
+.logo{font-family:var(--serif);font-size:14px;letter-spacing:0.08em;color:var(--muted);display:flex;align-items:center;gap:10px}
+.logo .build-tag{font-family:var(--mono);font-size:9px;letter-spacing:0.05em;color:var(--dim)}
 .logo em{color:var(--orange);font-style:normal}
 .header-right{display:flex;align-items:center;gap:8px}
 .btn-ghost{
@@ -66,6 +67,11 @@ header{
   content:'✓';position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;
   background:var(--orange);color:#1a1a1a;font-size:11px;font-weight:700;
   display:flex;align-items:center;justify-content:center;
+}
+.lib-item.used{opacity:0.45}
+.lib-used-badge{
+  position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,0.6);color:#fff;
+  font-size:9px;letter-spacing:0.05em;padding:2px 5px;border-radius:3px;
 }
 
 /* ── 포스트카드 카드 ── */
@@ -121,8 +127,32 @@ header{
 .pc-canvas .pc-title{font-family:var(--serif);font-weight:700;font-size:13px;line-height:1.35;margin-bottom:10px;word-break:keep-all}
 .pc-canvas .pc-meta{display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--sans);gap:8px}
 .pc-canvas .pc-meta-text{font-size:5px;line-height:1.7;color:rgba(0,0,0,0.4);min-width:0}
+.pc-canvas .pc-meta-full .pc-meta-text{width:100%}
 .pc-canvas .pc-qr{width:13%;aspect-ratio:1;background:#fff;border:1px solid rgba(0,0,0,0.08)}
 .pc-canvas .pc-qr canvas{width:100%;height:100%;display:block}
+
+/* ── 뒷면 (우편엽서 레이아웃) ── */
+.pc-canvas .pc-back{position:absolute;inset:0;padding:6% 6%;display:flex;flex-direction:column;font-family:var(--sans)}
+.pc-canvas .pc-back-header{font-family:var(--serif);font-weight:700;font-size:11px;letter-spacing:0.3em;text-align:center;color:#1A1A1A;margin-bottom:6%}
+.pc-canvas .pc-back-body{flex:1;display:flex;gap:4%}
+.pc-canvas .pc-back-left{flex:1.1;display:flex;flex-direction:column;justify-content:flex-end;padding-right:4%}
+.pc-canvas .pc-back-brand{font-family:var(--serif);font-weight:700;font-size:9px;letter-spacing:0.15em;color:var(--orange);margin-bottom:6%}
+.pc-canvas .pc-back-caption{font-family:var(--serif);font-size:11px;line-height:1.6;color:#1A1A1A;margin-bottom:8%;word-break:keep-all}
+.pc-canvas .pc-back-sub{font-size:5px;line-height:1.8;color:rgba(0,0,0,0.35)}
+.pc-canvas .pc-back-divider{width:1px;background:rgba(0,0,0,0.12)}
+.pc-canvas .pc-back-right{flex:1;display:flex;flex-direction:column}
+.pc-canvas .pc-back-stamp{width:22%;aspect-ratio:4/5;border:1px solid rgba(0,0,0,0.2);align-self:flex-end;margin-bottom:8%}
+.pc-canvas .pc-back-addrlines{display:flex;flex-direction:column;gap:10%;margin-top:auto}
+.pc-canvas .pc-back-addr-label{font-size:6px;letter-spacing:0.15em;color:rgba(0,0,0,0.35);margin-bottom:4%}
+.pc-canvas .pc-back-line{height:1px;background:rgba(0,0,0,0.15)}
+
+/* ── 앞/뒤 전환 (3D flip 대신 단순 show/hide — 크로스 브라우저 안정성) ── */
+.flip-wrap{cursor:pointer;position:relative}
+.flip-inner{position:relative;width:100%;padding-bottom:150%}
+.flip-face{position:absolute;inset:0;border-radius:2px;overflow:hidden;aspect-ratio:auto}
+.flip-face.back{display:none}
+.flip-wrap.flipped .flip-face.front{display:none}
+.flip-wrap.flipped .flip-face.back{display:block}
 
 .add-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 </style>
@@ -130,7 +160,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Postcard Editor</div>
+  <div class="logo"><em>SAPMANRI</em> · Postcard Editor<span class="build-tag">v2026-06-13 15:20 KST</span></div>
   <div class="header-right">
     <input type="password" class="key-field" id="apiKeyField" placeholder="Anthropic API Key">
     <button class="btn-ghost" id="apiKeyBtn" onclick="toggleField('apiKeyField','apiKeyBtn',API_KEY_STORAGE)">API Key</button>
@@ -152,6 +182,7 @@ header{
     <div class="lib-grid" id="libGrid">
       <div class="hint" style="grid-column:1/-1">새로고침을 눌러 라이브러리를 불러오세요.</div>
     </div>
+    <div class="hint" id="libMoreRow" style="margin-top:8px"></div>
     <div class="add-row" style="margin-top:12px">
       <button class="btn-primary" id="addBtn" onclick="addSelectedAsPostcards()" disabled>선택한 사진으로 포스트카드 만들기</button>
       <span class="hint" id="selCount"></span>
@@ -165,6 +196,7 @@ header{
       <span class="hint" id="pcCount"></span>
     </div>
     <div class="pc-list" id="pcList"></div>
+    <div class="hint" id="pcMoreRow" style="margin-top:8px"></div>
   </div>
 
   <!-- 발행 -->
@@ -178,7 +210,7 @@ header{
 </div>
 
 <script src="../image-library.js?v=20260613f"></script>
-<script src="./postcards-templates.js?v=20260613a"></script>
-<script src="./postcards-core.js?v=20260613a"></script>
+<script src="./postcards-templates.js?v=20260613g"></script>
+<script src="./postcards-core.js?v=20260613g"></script>
 </body>
 </html>
