@@ -26,7 +26,7 @@ img{max-width:100%;display:block}
 
 /* ── 상단 미니바 ── */
 .topbar{
-  position:sticky;top:0;z-index:50;
+  position:fixed;top:0;left:0;right:0;z-index:50;
   display:flex;justify-content:space-between;align-items:center;
   padding:14px 20px;background:rgba(250,245,238,0.9);backdrop-filter:blur(6px);
   border-bottom:1px solid var(--hairline-light);
@@ -41,9 +41,10 @@ img{max-width:100%;display:block}
 .topbar.on-dark .indicator{color:rgba(255,255,255,0.45)}
 
 /* ── 페이지 컨테이너 ── */
-.pages{display:flex;flex-direction:column}
+:root{--topbar-h:0px}
+.pages{display:flex;flex-direction:column;padding-top:var(--topbar-h)}
 .page{
-  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  min-height:calc(100vh - var(--topbar-h));display:flex;flex-direction:column;justify-content:center;
   position:relative;padding:48px 20px;
 }
 .page.dark{background:var(--dark);color:var(--cream)}
@@ -61,7 +62,7 @@ img{max-width:100%;display:block}
 @media(min-width:900px){
   .spread-pair{display:flex;align-items:flex-start;position:relative}
   .spread-pair .page{
-    flex:1 1 50%;width:50%;min-height:100vh;
+    flex:1 1 50%;width:50%;min-height:calc(100vh - var(--topbar-h));
     position:sticky;top:0;align-self:flex-start;
   }
   /* 가운데 제본선 */
@@ -100,8 +101,8 @@ img{max-width:100%;display:block}
 @media(min-width:768px){.page-cover .headline{font-size:64px}}
 
 /* ── Type 2: Full Bleed Photo ── */
-.page-fullbleed{padding:0;align-items:stretch;position:relative;background:#000;min-height:100vh;height:auto}
-.page-fullbleed .fb-img-wrap{width:100%;height:100vh;overflow:hidden;flex-shrink:0}
+.page-fullbleed{padding:0;align-items:stretch;position:relative;background:#000;min-height:calc(100vh - var(--topbar-h));height:auto}
+.page-fullbleed .fb-img-wrap{width:100%;height:calc(100vh - var(--topbar-h));overflow:hidden;flex-shrink:0}
 .page-fullbleed .fb-img-wrap img{
   width:100%;height:100%;object-fit:cover;display:block;
   filter:blur(14px) grayscale(0.55);transform:scale(1.04);
@@ -119,7 +120,7 @@ img{max-width:100%;display:block}
   padding:0;font-size:20px;text-shadow:0 2px 12px rgba(0,0,0,0.5);max-width:640px;
 }
 .page-fullbleed::after{
-  content:'';position:absolute;left:0;right:0;top:0;height:100vh;z-index:1;
+  content:'';position:absolute;left:0;right:0;top:0;height:calc(100vh - var(--topbar-h));z-index:1;
   background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,0.55) 100%);
   pointer-events:none;
 }
@@ -151,7 +152,7 @@ img{max-width:100%;display:block}
 .page-split .split-label{font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--orange);margin-bottom:14px}
 .page-split .split-body{font-family:var(--serif);font-size:17px;line-height:2;white-space:pre-line}
 @media(min-width:900px){
-  .page-split{flex-direction:row;align-items:stretch;min-height:100vh}
+  .page-split{flex-direction:row;align-items:stretch;min-height:calc(100vh - var(--topbar-h))}
   .page-split .split-photo{width:60%;aspect-ratio:auto}
   .page-split .split-text{width:40%;display:flex;flex-direction:column;justify-content:center;padding:60px}
   .page-split .split-body{font-size:19px}
@@ -236,7 +237,7 @@ img{max-width:100%;display:block}
 @media(min-width:900px){
   .page.page-spread{display:none}
   .page.page-spread-desktop{
-    display:flex;padding:0;min-height:100vh;background:#000;color:var(--cream);
+    display:flex;padding:0;min-height:calc(100vh - var(--topbar-h));background:#000;color:var(--cream);
     position:relative;align-items:stretch;
   }
   .page-spread-desktop .spread-img-wrap{width:100%;flex:1 1 0%;min-height:0;overflow:hidden;position:relative}
@@ -307,7 +308,7 @@ img{max-width:100%;display:block}
 /* ── Type 13: Botanical (보태니컬 연속 일러스트, 잡지 속 잡지) ── */
 .page-botanical{background:var(--sage);color:var(--ink);padding:0}
 .page-botanical .bot-wrap{
-  width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;height:calc(100vh - var(--topbar-h));display:flex;flex-direction:column;align-items:center;justify-content:center;
   position:relative;padding:48px 20px;
 }
 .page-botanical .bot-frame{
@@ -345,6 +346,16 @@ function esc(s) {
   return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function nl(s) { return esc(s).replace(/\n/g, '<br>'); }
+
+// 토픽바(고정 오버레이) 실제 높이를 측정해 CSS 변수로 반영 — 페이지가 토픽바에 가려 잘리지 않도록
+function syncTopbarHeight() {
+  const topbar = document.getElementById('topbar');
+  if (!topbar) return;
+  document.documentElement.style.setProperty('--topbar-h', topbar.offsetHeight + 'px');
+}
+syncTopbarHeight();
+window.addEventListener('resize', syncTopbarHeight);
+window.addEventListener('orientationchange', syncTopbarHeight);
 
 const params = new URLSearchParams(location.search);
 const issueId = params.get('id');
@@ -395,6 +406,8 @@ async function load() {
   });
   flushPair();
   document.getElementById('pages').innerHTML = html;
+  syncTopbarHeight();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(syncTopbarHeight);
 
   // 스크롤에 따라 topbar 톤 전환 (다크 페이지 위에서는 다크바)
   const pageEls = [...document.querySelectorAll('.page')];
