@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v2.7.1</title>
+<title>감성찾아삽만리 · Writing Studio v2.8.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -480,13 +480,87 @@ header {
   border-radius: 50%; animation: spin 0.8s linear infinite;
   margin-right: 6px;
 }
+
+/* ══════════════════════════════
+   모바일 반응형 (max-width: 768px)
+══════════════════════════════ */
+.mobile-subnav { display: none; }
+
+@media (max-width: 768px) {
+  header { padding: 0 12px; height: 44px; }
+  .logo { font-size: 11px; }
+  .logo span:not(.accent-tag) { display: none; }
+  .header-nav { gap: 0; }
+  .nav-tab { padding: 6px 10px; font-size: 10px; }
+  .header-right { gap: 4px; }
+  .btn-ghost { padding: 5px 8px; font-size: 9px; }
+  .api-key-field.open { width: 130px; }
+
+  /* 쓰기 탭: 3컬럼 -> 서브탭 전환 */
+  .write-layout { flex-direction: column; position: relative; overflow: hidden; }
+  .write-left, .write-center, .write-right {
+    width: 100% !important; border: none; flex: none;
+  }
+  .write-left, .write-right { display: none; height: 100%; overflow-y: auto; }
+  .write-center { flex: 1; min-height: 0; }
+  .write-layout.show-left .write-left { display: flex; }
+  .write-layout.show-left .write-center,
+  .write-layout.show-left .write-right { display: none; }
+  .write-layout.show-right .write-right { display: flex; }
+  .write-layout.show-right .write-center,
+  .write-layout.show-right .write-left { display: none; }
+  .write-layout.show-center .write-center { display: flex; }
+
+  .mobile-subnav {
+    display: flex; gap: 6px; padding: 8px 12px;
+    border-bottom: 1px solid var(--border); flex-shrink: 0;
+    overflow-x: auto;
+  }
+  .mobile-subnav-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-family: var(--mono); font-size: 10px; padding: 6px 12px;
+    border-radius: 4px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .mobile-subnav-btn.active { color: var(--accent); border-color: var(--accent); }
+
+  .main-editor { padding: 16px 18px; font-size: 14px; }
+  .editor-bar { padding: 0 12px; flex-wrap: wrap; height: auto; min-height: 38px; }
+
+  /* 예시 글 탭: 좌측 필터 -> 가로 스크롤 칩 */
+  .examples-layout { flex-direction: column; }
+  .examples-left {
+    width: 100%; flex-direction: row; overflow-x: auto;
+    border-right: none; border-bottom: 1px solid var(--border);
+    padding: 10px 12px; gap: 6px;
+  }
+  .examples-left .section-label { display: none; }
+  .ex-filter-btn { flex-shrink: 0; padding: 6px 12px; }
+  .examples-toolbar { padding: 0 12px; flex-wrap: wrap; height: auto; min-height: 44px; }
+  .examples-toolbar input { min-width: 120px; }
+  .examples-grid { padding: 12px; }
+
+  /* 문체 프로필 탭 */
+  .profile-layout { padding: 16px; }
+  .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat-box { padding: 10px; }
+  .stat-num { font-size: 18px; }
+
+  /* 모달 */
+  .modal { width: 94vw !important; max-width: 94vw; }
+  .modal-body { padding: 14px; }
+  .refine-mode-btn span { display: none; }
+
+  /* 다듬기 제안모드 split뷰 -> 세로 스택 */
+  #refineResultSplit > div { flex-direction: column !important; }
+}
 </style>
 </head>
 <body>
 
 <!-- 헤더 -->
 <header>
-  <div class="logo"><span style="font-family:var(--serif);font-size:15px;letter-spacing:0.05em">감성찾아삽만리</span> <span style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-left:8px;letter-spacing:0.12em">WRITING STUDIO</span> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.7.1</span></div>
+  <div class="logo"><span style="font-family:var(--serif);font-size:15px;letter-spacing:0.05em">감성찾아삽만리</span> <span style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-left:8px;letter-spacing:0.12em">WRITING STUDIO</span> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.8.0</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -511,7 +585,12 @@ header {
 
 <!-- ══ TAB 1: 쓰기 ══ -->
 <div class="tab-panel active" id="tab-write">
-  <div class="write-layout">
+  <div class="mobile-subnav">
+    <button class="mobile-subnav-btn" data-panel="left" onclick="setMobilePanel('left')">설정</button>
+    <button class="mobile-subnav-btn active" data-panel="center" onclick="setMobilePanel('center')">에디터</button>
+    <button class="mobile-subnav-btn" data-panel="right" onclick="setMobilePanel('right')">비교</button>
+  </div>
+  <div class="write-layout show-center">
 
     <!-- 왼쪽 -->
     <aside class="write-left">
@@ -898,6 +977,17 @@ function switchTab(name) {
   });
   if (name === 'examples') renderExamples();
   if (name === 'profile') renderProfile();
+}
+
+// 모바일: 쓰기 탭의 좌/중/우 패널 전환
+function setMobilePanel(panel) {
+  const layout = document.querySelector('.write-layout');
+  if (!layout) return;
+  layout.classList.remove('show-left', 'show-center', 'show-right');
+  layout.classList.add('show-' + panel);
+  document.querySelectorAll('.mobile-subnav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.panel === panel);
+  });
 }
 
 // ══════════════════════════════════════════
