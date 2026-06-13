@@ -515,7 +515,9 @@
         {
           "type": "fullbleed",
           "image": "./images/library/rbks_e2412097_461f4605.jpg",
-          "caption": "손바닥 위, 세 개의 빨간 점"
+          "caption": "손바닥 위, 세 개의 빨간 점",
+          "focalX": 73,
+          "focalY": 50
         },
         {
           "type": "spread",
@@ -788,7 +790,9 @@
         {
           "type": "fullbleed",
           "image": "./images/library/ncx8_5c27febc_64477d74.jpg",
-          "caption": "손 위에 올려둔 빨간 것들"
+          "caption": "손 위에 올려둔 빨간 것들",
+          "focalX": 77,
+          "focalY": 50
         },
         {
           "type": "split",
@@ -812,12 +816,16 @@
         {
           "type": "fullbleed",
           "image": "./images/library/qwls_5db2db13_768fc8c5.jpg",
-          "caption": "손끝이 천천히 움직였다"
+          "caption": "손끝이 천천히 움직였다",
+          "focalX": 49,
+          "focalY": 38
         },
         {
           "type": "fullbleed",
           "image": "./images/library/o4vk_d44fad0d_649b7b73.jpg",
-          "caption": "바닥에 앉은 발"
+          "caption": "바닥에 앉은 발",
+          "focalX": 30,
+          "focalY": 51
         },
         {
           "type": "fullbleed",
@@ -834,12 +842,16 @@
         {
           "type": "fullbleed",
           "image": "./images/library/17xog_808cdf27_b3b2bd53.jpg",
-          "caption": "문 앞에 한참 서 있었다\n\n들어가도 되는 곳인데\n손잡이를 잡기까지\n조금 시간이 걸렸다.\n\n초록 스웨터와\n줄무늬 치마가\n발목 위에서 흔들렸다.\n\n등 너머로\n빈 의자들이\n아무 말 없이 놓여 있었다.\n\n벽에 걸린 전등들은\n낮인데도\n켜져 있었다.\n\n누가 켜둔 건지,\n아침부터 그랬던 건지\n알 수 없었지만,\n\n그 작은 빛들이\n오히려 낮을\n조금 더 천천히 만드는 것 같았다.\n\n나무 문틀 너머로\n'GRATEFUL GROUND'라는\n글자가 보였다.\n\n고마운 땅.\n\n이름이\n괜히 마음에 남았다.\n\n문 앞에서\n조금 더 머뭇거렸다.\n\n들어가도 되는 곳 앞에서\n늘 조금 늦게 들어서게 된다.\n\n반겨주는 이름이 있어도\n환대를 받아도 된다는 마음은\n언제나 조금 더 늦게 온다.\n\n그날은\n그런 오후였다."
+          "caption": "문 앞에 한참 서 있었다\n\n들어가도 되는 곳인데\n손잡이를 잡기까지\n조금 시간이 걸렸다.\n\n초록 스웨터와\n줄무늬 치마가\n발목 위에서 흔들렸다.\n\n등 너머로\n빈 의자들이\n아무 말 없이 놓여 있었다.\n\n벽에 걸린 전등들은\n낮인데도\n켜져 있었다.\n\n누가 켜둔 건지,\n아침부터 그랬던 건지\n알 수 없었지만,\n\n그 작은 빛들이\n오히려 낮을\n조금 더 천천히 만드는 것 같았다.\n\n나무 문틀 너머로\n'GRATEFUL GROUND'라는\n글자가 보였다.\n\n고마운 땅.\n\n이름이\n괜히 마음에 남았다.\n\n문 앞에서\n조금 더 머뭇거렸다.\n\n들어가도 되는 곳 앞에서\n늘 조금 늦게 들어서게 된다.\n\n반겨주는 이름이 있어도\n환대를 받아도 된다는 마음은\n언제나 조금 더 늦게 온다.\n\n그날은\n그런 오후였다.",
+          "focalX": 76,
+          "focalY": 51
         },
         {
           "type": "fullbleed",
           "image": "./images/library/17keo_5232b0a9_d29fed3b.jpg",
-          "caption": "빛과 그림자 — 오래 머물러도 되는 오후"
+          "caption": "빛과 그림자 — 오래 머물러도 되는 오후",
+          "focalX": 75,
+          "focalY": 50
         },
         {
           "type": "fullbleed",
