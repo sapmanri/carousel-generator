@@ -971,7 +971,7 @@ function renderPageCard(pg, idx) {
         <div class="field"><label>본문</label><textarea style="min-height:120px" oninput="pages[${idx}].text=this.value">${esc(pg.text||'')}</textarea></div>
         <label style="font-size:11px;color:var(--dim);display:flex;gap:6px;align-items:center"><input type="checkbox" ${pg.darkText?'checked':''} onchange="pages[${idx}].darkText=this.checked"> 다크 배경 텍스트</label>
         <div class="gen-row">
-          <input style="flex:1" placeholder="추가 컨텍스트 (선택)" id="ctx-${idx}">
+          <input placeholder="추가 컨텍스트 (선택)" id="ctx-${idx}">
           <button class="btn-gen" onclick="genPageText(${idx}, document.getElementById('ctx-${idx}').value)">✨ 본문 생성</button>
         </div>
       `;
@@ -1016,7 +1016,7 @@ function renderPageCard(pg, idx) {
         <div class="field"><label>본문</label><textarea style="min-height:160px" oninput="pages[${idx}].text=this.value">${esc(pg.text||'')}</textarea></div>
         <label style="font-size:11px;color:var(--dim);display:flex;gap:6px;align-items:center"><input type="checkbox" ${pg.dark?'checked':''} onchange="pages[${idx}].dark=this.checked"> 다크 배경</label>
         <div class="gen-row">
-          <input style="flex:1" placeholder="주제/컨텍스트 (선택)" id="ctx-${idx}">
+          <input placeholder="주제/컨텍스트 (선택)" id="ctx-${idx}">
           <button class="btn-gen" onclick="genPageText(${idx}, document.getElementById('ctx-${idx}').value)">✨ 에세이 생성</button>
         </div>
       `;
@@ -1032,7 +1032,7 @@ function renderPageCard(pg, idx) {
               <option value="right" ${l.side==='right'?'selected':''}>오른쪽</option>
             </select>
             <input style="width:90px" placeholder="화자(선택)" value="${esc(l.speaker||'')}" oninput="pages[${idx}].lines[${li}].speaker=this.value">
-            <input style="flex:1" placeholder="대화/코멘트" value="${esc(l.text||'')}" oninput="pages[${idx}].lines[${li}].text=this.value">
+            <input placeholder="대화/코멘트" value="${esc(l.text||'')}" oninput="pages[${idx}].lines[${li}].text=this.value">
             <button class="icon-btn" onclick="pages[${idx}].lines.splice(${li},1); renderPageList()">×</button>
           </div>
         `).join('')}
@@ -1046,14 +1046,14 @@ function renderPageCard(pg, idx) {
         <div class="field"><label>제목</label><input value="${esc(pg.title||'')}" oninput="pages[${idx}].title=this.value"></div>
         ${(pg.items||[]).map((it,li) => `
           <div class="row" style="align-items:flex-start">
-            <input style="flex:1" placeholder="항목 이름" value="${esc(it.name||'')}" oninput="pages[${idx}].items[${li}].name=this.value">
+            <input placeholder="항목 이름" value="${esc(it.name||'')}" oninput="pages[${idx}].items[${li}].name=this.value">
             <input style="flex:2" placeholder="설명 (선택)" value="${esc(it.desc||'')}" oninput="pages[${idx}].items[${li}].desc=this.value">
             <button class="icon-btn" onclick="pages[${idx}].items.splice(${li},1); renderPageList()">×</button>
           </div>
         `).join('')}
         <button class="btn-ghost" onclick="pages[${idx}].items.push({name:'',desc:''}); renderPageList()">+ 항목 추가</button>
         <div class="gen-row">
-          <input style="flex:1" placeholder="주제 (예: 6월의 텃밭 작물)" id="ctx-${idx}">
+          <input placeholder="주제 (예: 6월의 텃밭 작물)" id="ctx-${idx}">
           <button class="btn-gen" onclick="genPageText(${idx}, document.getElementById('ctx-${idx}').value)">✨ 리스트 생성</button>
         </div>
       `;

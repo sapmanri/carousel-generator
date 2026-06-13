@@ -126,6 +126,12 @@ header{
 
 .gen-row{display:flex;gap:6px;align-items:flex-start}
 .gen-row textarea{flex:1}
+.gen-row input{
+  flex:1;background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--sans);font-weight:300;font-size:13px;padding:8px 10px;border-radius:4px;outline:none;
+}
+.gen-row input:focus{border-color:var(--accent)}
+.gen-row input::placeholder{color:var(--dim)}
 .btn-gen{
   background:var(--s3);border:1px solid var(--border);color:var(--text);
   font-family:var(--mono);font-size:10px;padding:8px 10px;border-radius:4px;cursor:pointer;
