@@ -305,7 +305,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.0.2</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.1.0</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -331,11 +331,6 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   <div class="upload-label">이미지를 끌어다 놓거나 클릭해서 업로드</div>
   <div class="upload-sub">JPG · PNG · 최대 10장</div>
 </div>
-
-<button id="libraryPickerBtn" onclick="openLibraryPicker()" type="button"
-  style="width:100%;margin-top:8px;padding:10px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);border-radius:4px;color:rgba(255,255,255,0.5);font-size:11px;letter-spacing:0.06em;cursor:pointer;font-family:inherit">
-  📁 라이브러리에서 선택
-</button>
 
 <div class="image-grid" id="imageGrid"></div>
 
@@ -453,7 +448,6 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 </div>
 
 </div>
-<script src="./magazine/image-library.js?v=20260613b"></script>
 <script>
 // ── SAPMANRI 공통 이미지 분석 캐시 (GitHub 파일 기반, carousel/skyline/writing 공유) ──
 /**
@@ -741,27 +735,9 @@ function handleFiles(files) {
     reader.onload = ev => {
       images.push({ file, dataUrl: ev.target.result, objectUrl, analysis: null });
       renderThumbs(); updateBtn();
-      // 라이브러리에 비동기 등록 (hash 기반 dedup, 실패해도 진행에 영향 없음)
-      if (window.ImageLibrary && window.ImageLibrary.uploadIfNeeded) {
-        window.ImageLibrary.uploadIfNeeded(ev.target.result, file.type || 'image/jpeg').catch(() => {});
-      }
     };
     reader.readAsDataURL(file);
   });
-}
-
-// 라이브러리에서 사진 선택 → images[]에 추가
-function openLibraryPicker() {
-  if (!window.ImageLibrary) { alert('이미지 라이브러리 모듈을 불러오지 못했습니다.'); return; }
-  const remaining = 10 - images.length;
-  if (remaining <= 0) { alert('이미지는 최대 10장까지 추가할 수 있습니다.'); return; }
-  window.ImageLibrary.openPicker((items) => {
-    const list = Array.isArray(items) ? items : [items];
-    list.slice(0, remaining).forEach(item => {
-      images.push({ dataUrl: item.dataUrl, hash: item.hash, _libraryPath: item.path, analysis: null });
-    });
-    renderThumbs(); updateBtn();
-  }, { multiple: true, theme: 'dark' });
 }
 function removeImg(i) {
   if (images[i]?.objectUrl) URL.revokeObjectURL(images[i].objectUrl);
@@ -1080,13 +1056,17 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
 - text_position: bottom_left/top_left/center/left_half/split_bottom/dark_center 중 하나
 - 슬라이드마다 다른 layout 사용, 이미지 분석 반영
 - 헤드라인 2~4단어 감성적 한국어
+- 1번 슬라이드(표지) 헤드라인: 첫 인상에서 멈춰서 보고 싶게 만드는 가장 강한 한 줄. "오늘", "어느 날" 같은 흔한 시작 대신 구체적 장면이나 의외의 단어로 시작
+- 마지막 슬라이드(클로징) headline/body: 단순 인사가 아니라, 이 시리즈를 계속 보고 싶게 만드는 한 줄(여운, 다음 이야기에 대한 궁금증, 또는 소박한 다짐)
+- "오늘도 평범한 하루" "소소한 행복" "느린 일상" 같은 표현이 이미 다른 슬라이드에 쓰였다면 반복하지 말고 매번 다른 구체적 장면/감각 단어로 변주
 ${aspectRatio === 'tall' ? '- 9:16 세로형이므로 사진의 세로 영역이 넓어짐. body 텍스트는 1~2문장으로 짧게 유지' : ''}
 - manualText가 있으면 중간에 pull_quote 타입으로 삽입 (image_index: null)
 - manualText 없어도 주제가 감성적이거나 이미지 흐름에 호흡 필요하면 AI가 pull_quote 1장 자동 삽입 판단
 - pull_quote는 image_index null, layout pull_quote, text_position pull_quote
 - 모든 텍스트(headline, body, label, caption, hashtag)는 ${textLang === 'en' ? '영어로만 작성 (한국어 금지)' : '한국어로만 작성 (label은 영어 단어 허용)'}
 - caption에 해시태그 10개 포함
-- caption은 headline/body와 달리 2-4문장의 짧은 글로, 사진 속 장면에서 시작해 조용한 일상의 감상으로 이어지는 글 (시적 비유나 과한 수사 지양)${styleBlock}
+- caption은 headline/body와 달리 2-4문장의 짧은 글로, 사진 속 장면에서 시작해 조용한 일상의 감상으로 이어지는 글 (시적 비유나 과한 수사 지양)
+- caption 첫 문장은 "오늘은", "오늘도" 같은 뻔한 시작 대신, 그 순간의 구체적 디테일(소리, 냄새, 손의 감각, 빛의 변화 등)로 시작${styleBlock}
 ${style === 'jeonwon' ? `
 전원생활 매거진 모드 추가 규칙 — 슬라이드 수에 따라 7개 page_type을 적절히 조합:
 중요: JSON 문자열 안에서 줄바꿈은 반드시 \\n (백슬래시+n) 두 글자로 표기할 것. 실제 개행 문자 사용 금지. 트레일링 콤마 금지.
