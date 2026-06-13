@@ -233,13 +233,13 @@
     items.forEach(item => {
       const thumb = document.createElement('div');
       thumb.style.cssText = `
-        position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden;
+        position:relative; width:100%; padding-bottom:100%; border-radius:8px; overflow:hidden;
         cursor:pointer; border:2px solid transparent; background:${isDark ? '#2c2c2e' : '#f0f0f0'};
       `;
       const img = document.createElement('img');
       img.src = item.download_url;
       img.loading = 'lazy';
-      img.style.cssText = 'width:100%; height:100%; object-fit:cover; display:block;';
+      img.style.cssText = 'position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;';
       thumb.appendChild(img);
 
       thumb.addEventListener('click', async () => {
