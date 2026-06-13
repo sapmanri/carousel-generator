@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v2.7.0</title>
+<title>감성찾아삽만리 · Writing Studio v2.7.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -486,7 +486,7 @@ header {
 
 <!-- 헤더 -->
 <header>
-  <div class="logo"><span style="font-family:var(--serif);font-size:15px;letter-spacing:0.05em">감성찾아삽만리</span> <span style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-left:8px;letter-spacing:0.12em">WRITING STUDIO</span> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.7.0</span></div>
+  <div class="logo"><span style="font-family:var(--serif);font-size:15px;letter-spacing:0.05em">감성찾아삽만리</span> <span style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-left:8px;letter-spacing:0.12em">WRITING STUDIO</span> <span style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:6px">v2.7.1</span></div>
   <nav class="header-nav">
     <button class="nav-tab active" onclick="switchTab('write')">쓰기</button>
     <button class="nav-tab" onclick="switchTab('examples')">예시 글</button>
@@ -523,6 +523,9 @@ header {
           </button>
           <button class="type-btn" data-type="youtube" onclick="setType(this)">
             <span class="type-dot"></span>유튜브 설명란
+          </button>
+          <button class="type-btn" data-type="poem" onclick="setType(this)">
+            <span class="type-dot"></span>시 · 산문
           </button>
           <button class="type-btn" data-type="blog" onclick="setType(this)">
             <span class="type-dot"></span>블로그 글
@@ -608,6 +611,9 @@ header {
       </button>
       <button class="ex-filter-btn" data-filter="youtube" onclick="setExFilter(this)">
         유튜브 <span class="ex-count" id="fc-youtube">0</span>
+      </button>
+      <button class="ex-filter-btn" data-filter="poem" onclick="setExFilter(this)">
+        시 · 산문 <span class="ex-count" id="fc-poem">0</span>
       </button>
       <button class="ex-filter-btn" data-filter="blog" onclick="setExFilter(this)">
         블로그 <span class="ex-count" id="fc-blog">0</span>
@@ -910,7 +916,7 @@ function setType(btn) {
   currentType = btn.dataset.type;
 }
 
-const TYPE_LABEL = { instagram: '인스타 캡션', youtube: '유튜브', blog: '블로그', ui: 'UI 문구' };
+const TYPE_LABEL = { instagram: '인스타 캡션', youtube: '유튜브', poem: '시·산문', blog: '블로그', ui: 'UI 문구' };
 
 const TYPE_INSTRUCTION = {
   instagram: `인스타그램 캡션을 작성한다.
@@ -924,6 +930,12 @@ const TYPE_INSTRUCTION = {
 - 본문: 3-5문장 영상 소개
 - 해시태그: 5-8개
 - 한국어 기본, 필요시 영어 병기`,
+
+  poem: `짧은 시 또는 산문시를 작성한다.
+- 한 호흡 단위로 행을 끊어 쓴다 (문장 단위가 아닌 호흡 단위)
+- 장면과 사물로 감정을 드러내고, 감정을 직접 설명하지 않는다
+- 결론을 단정하지 않고 여운을 남기는 문장으로 마무리한다
+- 해시태그나 SEO 키워드는 포함하지 않는다`,
 
   blog: `네이버 블로그 포스트를 작성한다.
 - 핵심 키워드 자연스럽게 10회 이상 포함
@@ -1365,7 +1377,7 @@ function renderExamples() {
 
 function updateFilterCounts() {
   document.getElementById('fc-all').textContent = db.examples.length;
-  ['instagram','youtube','blog','ui'].forEach(t => {
+  ['instagram','youtube','poem','blog','ui'].forEach(t => {
     const el = document.getElementById('fc-' + t);
     if (el) el.textContent = db.examples.filter(e => e.type === t).length;
   });
