@@ -251,7 +251,83 @@ async function loadProfile() {
   return profileCache;
 }
 
-// 호의 제목/부제를 페이지 글들을 바탕으로 자동 생성
+// ══════════════════════════════════════════════════════════════
+// 유튜브 영상 정보(제목+자막 일부) 가져오기 — carousel_ai_generator.html과 동일 패턴
+// 자동 구성 시 글/캡션/제목/부제 생성에 컨텍스트로 사용한다.
+// ══════════════════════════════════════════════════════════════
+let videoContext = null; // { title, transcript } | null
+
+function extractVideoId(url) {
+  const match = (url || '').match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/);
+  return match ? match[1] : null;
+}
+
+async function fetchVideoContext(status) {
+  videoContext = null;
+  const url = (document.getElementById('fYoutubeUrl')?.value || '').trim();
+  if (!url) return null;
+  const videoId = extractVideoId(url);
+  if (!videoId) return null;
+
+  try {
+    if (status) status.textContent = '영상 정보 가져오는 중...';
+
+    // 1단계: oEmbed로 영상 제목 취득
+    let videoTitle = '';
+    try {
+      const oembedRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      if (oembedRes.ok) { const d = await oembedRes.json(); videoTitle = d.title || ''; }
+    } catch (e) {}
+    if (!videoTitle) return null;
+
+    if (status) status.textContent = `"${videoTitle}" — 자막 가져오는 중...`;
+
+    // 2단계: YouTube 자막 가져오기 (CORS 프록시 경유)
+    let transcript = '';
+    try {
+      const proxyBase = 'https://corsproxy.io/?url=';
+      const ytPageRes = await fetch(proxyBase + encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`));
+      if (ytPageRes.ok) {
+        const html = await ytPageRes.text();
+        let captionUrl = '';
+        const koMatch = html.match(/"baseUrl":"(https:[^"]+timedtext[^"]+)"[^}]{0,200}"languageCode":"ko"/);
+        if (koMatch) {
+          captionUrl = koMatch[1].replace(/\u0026/g, '&');
+        } else {
+          const anyMatch = html.match(/"captionTracks":\[{"baseUrl":"([^"]+)"/);
+          if (anyMatch) captionUrl = anyMatch[1].replace(/\u0026/g, '&');
+        }
+        if (captionUrl) {
+          const captionRes = await fetch(proxyBase + encodeURIComponent(captionUrl + '&fmt=json3'));
+          if (captionRes.ok) {
+            const captionData = await captionRes.json();
+            transcript = (captionData.events || [])
+              .slice(0, 180)
+              .map(e => (e.segs || []).map(s => s.utf8 || '').join(''))
+              .filter(t => t.trim() && t !== '\n')
+              .join(' ')
+              .slice(0, 1200);
+          }
+        }
+      }
+    } catch (e) {}
+
+    videoContext = { title: videoTitle, transcript };
+    return videoContext;
+  } catch (e) {
+    return null;
+  }
+}
+
+// 글 생성용 영상 컨텍스트 문자열 (없으면 빈 문자열)
+function videoContextText() {
+  if (!videoContext) return '';
+  let t = `이번 호와 연결된 영상 제목: "${videoContext.title}"`;
+  if (videoContext.transcript) t += `\n영상 자막 내용(일부): ${videoContext.transcript}`;
+  return t;
+}
+
+
 async function generateIssueTitleSubtitle() {
   const key = getApiKey();
   if (!key) throw new Error('API Key가 필요합니다.');
@@ -266,13 +342,14 @@ async function generateIssueTitleSubtitle() {
     if (pg.captionLeft) snippets.push(pg.captionLeft);
   });
   const context = snippets.filter(Boolean).slice(0, 8).join(' / ');
+  const videoCtx = videoContextText();
 
   const system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 웹매거진 글쓰기 도구입니다.
 Vase의 문체 규칙:
 ${profile.rules.slice(0, 5).map((r,i)=>`${i+1}. ${r}`).join('\n')}
 
 이번 호의 내용 단서: ${context}
-
+${videoCtx ? `\n${videoCtx}\n` : ''}
 이 호의 "제목"과 "부제"를 만들어주세요.
 - 제목: 명조체로 어울리는 한국어 제목, 8-16자, Vase 문체의 시적인 느낌
 - 부제: 장소나 계절감, 영어 또는 한국어 짧은 문구, 6-20자 (예: "Wigong-ri, Gapyeong" 또는 "6월의 느린 오후")
@@ -338,6 +415,11 @@ ${PAGE_TEXT_INSTRUCTION[pageType] || ''}
   if (typeExamples.length > 0) {
     system += `\n\n## Vase가 직접 쓴 예시 글 (문체와 어조를 그대로 따르세요)\n`;
     typeExamples.forEach((e, i) => { system += `\n--- 예시 ${i+1} ---\n${e.text}\n`; });
+  }
+
+  const videoCtx = videoContextText();
+  if (videoCtx) {
+    system += `\n\n## 이번 호와 연결된 영상 정보 (분위기/주제 참고용, 직접 인용하지 말고 자연스럽게 녹여낼 것)\n${videoCtx}`;
   }
 
   let userContent;
@@ -576,6 +658,12 @@ async function analyzeAllPhotos() {
 async function autoBuildPages(status) {
   status = status || document.getElementById('analyzeStatus');
   if (!photos.length) return;
+
+  // 유튜브 영상 링크가 입력되어 있으면 영상 정보(제목+자막)를 먼저 가져와
+  // 이후 글/캡션/제목/부제 생성 시 컨텍스트로 활용한다.
+  try {
+    await fetchVideoContext(status);
+  } catch (e) {}
 
   const n = photos.length;
   const newPages = [];
@@ -1216,6 +1304,7 @@ async function publish() {
       statusEl.innerHTML = '<span class="spinner"></span>제목/부제 생성 중…';
       statusEl.className = 'publish-status';
       try {
+        if (!videoContext) { try { await fetchVideoContext(); } catch (e) {} }
         const generated = await generateIssueTitleSubtitle();
         if (!titleField.value.trim() && generated.title) titleField.value = generated.title;
         if (!subtitleField.value.trim() && generated.subtitle) subtitleField.value = generated.subtitle;
