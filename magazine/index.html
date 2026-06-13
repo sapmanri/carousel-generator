@@ -176,7 +176,7 @@ footer .tag{font-size:10px;letter-spacing:0.18em;color:rgba(255,255,255,0.25);te
 <body>
 
 <header>
-  <div class="wordmark">SAPMANRI<span class="sub">오늘도 느리게 · slow days</span><span class="build-tag">Last update: 2026-06-13 13:40 KST</span></div>
+  <div class="wordmark">SAPMANRI<span class="sub">오늘도 느리게 · slow days</span><span class="build-tag">Last update: 2026-06-13 14:55 KST</span></div>
   <div class="meta" id="metaInfo">불러오는 중…</div>
 </header>
 
@@ -185,7 +185,10 @@ footer .tag{font-size:10px;letter-spacing:0.18em;color:rgba(255,255,255,0.25);te
     <button class="active" onclick="setSort('latest')" id="sortLatest">최신순</button>
     <button onclick="setSort('alpha')" id="sortAlpha">가나다순</button>
   </div>
-  <div class="count" id="countLabel"></div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <a href="./postcards/index.html" class="count" style="color:var(--orange)">postcards ↗</a>
+    <div class="count" id="countLabel"></div>
+  </div>
 </div>
 
 <div class="grid" id="grid">
