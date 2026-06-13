@@ -156,6 +156,12 @@ input[type=range]::-moz-range-thumb{
       <p>이미지를 끌어다 놓거나 클릭해서 업로드</p>
       <span>JPG · PNG · 스카이라인, 능선, 건물, 지평선</span>
     </div>
+    <button id="libraryPickerBtn" onclick="openLibraryPicker()" type="button"
+      style="width:100%;margin-top:10px;padding:12px;background:#111;border:1px dashed #2a2a2a;border-radius:8px;color:#666;font-size:12px;letter-spacing:0.05em;cursor:pointer;font-family:inherit;transition:all 0.2s"
+      onmouseover="this.style.borderColor='#444';this.style.background='#151515'"
+      onmouseout="this.style.borderColor='#2a2a2a';this.style.background='#111'">
+      📁 라이브러리에서 선택
+    </button>
   </div>
 
   <div class="workspace" id="workspaceSection">
@@ -447,6 +453,7 @@ input[type=range]::-moz-range-thumb{
   </div><!-- /workspace -->
 </main>
 
+<script src="./magazine/image-library.js?v=20260613a"></script>
 <script>
 // ── SAPMANRI 공통 이미지 분석 캐시 (GitHub 파일 기반, carousel/skyline/writing 공유) ──
 /**
@@ -690,7 +697,28 @@ function loadFile(f){
     document.getElementById('downloadBtn').style.display='none';
     window.manualPath = null;
     showAnalysisChoice();
+    // 라이브러리에 비동기 등록 (hash 기반 dedup, 실패해도 진행에 영향 없음)
+    if (window.ImageLibrary && window.ImageLibrary.uploadIfNeeded) {
+      window.ImageLibrary.uploadIfNeeded(imgSrc, mtype).catch(() => {});
+    }
   };r.readAsDataURL(f);
+}
+
+// 라이브러리에서 사진 선택 → 단일 이미지 워크플로우로 로드
+function openLibraryPicker(){
+  if (!window.ImageLibrary) { alert('이미지 라이브러리 모듈을 불러오지 못했습니다.'); return; }
+  window.ImageLibrary.openPicker((item) => {
+    imgSrc = item.dataUrl;
+    b64 = item.dataUrl.split(',')[1];
+    const ext = (item.path.split('.').pop() || 'jpg').toLowerCase();
+    mtype = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+    cachedResult = null;
+    document.getElementById('uploadSection').style.display = 'none';
+    document.getElementById('workspaceSection').classList.add('visible');
+    document.getElementById('downloadBtn').style.display = 'none';
+    window.manualPath = null;
+    showAnalysisChoice();
+  }, { multiple: false, theme: 'dark' });
 }
 
 function showAnalysisChoice(){

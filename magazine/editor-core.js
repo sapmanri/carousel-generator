@@ -443,8 +443,33 @@ function readAsDataUrl(file) {
     };
     photos.push(photo);
     renderPhotoGrid();
+    // 공유 이미지 라이브러리에 비동기 등록 (hash 기반 dedup, 실패해도 진행에 영향 없음)
+    if (window.ImageLibrary && window.ImageLibrary.uploadIfNeeded) {
+      window.ImageLibrary.uploadIfNeeded(photo.dataUrl, photo.mediaType).catch(() => {});
+    }
   };
   reader.readAsDataURL(file);
+}
+
+// 공유 이미지 라이브러리에서 사진을 선택해 photos[]에 추가
+// 라이브러리 사진은 이미 magazine/images/library/에 존재하므로 발행 시 재업로드 없이 그 경로를 사용한다.
+function openMagazineLibraryPicker() {
+  if (!window.ImageLibrary) { toast('이미지 라이브러리 모듈을 불러오지 못했습니다.'); return; }
+  window.ImageLibrary.openPicker((items) => {
+    const list = Array.isArray(items) ? items : [items];
+    list.forEach(item => {
+      photos.push({
+        id: 'p' + (++photoIdSeq),
+        dataUrl: item.dataUrl,
+        mediaType: item.path.endsWith('.png') ? 'image/png' : 'image/jpeg',
+        name: item.hash,
+        analysis: null,
+        _existing: true,
+        _libraryPath: item.path,
+      });
+    });
+    renderPhotoGrid();
+  }, { multiple: true, theme: 'dark' });
 }
 
 function renderPhotoGrid() {
@@ -1103,39 +1128,20 @@ function mapExistingPageToEditable(pg) {
 
 // 사진을 공유 이미지 라이브러리(magazine/images/library/<hash>.<ext>)에 커밋.
 // 같은 사진(같은 해시)이 이미 라이브러리에 있으면 업로드 없이 그 경로를 재사용한다.
+// ImageLibrary.uploadIfNeeded에 위임 (carousel/skyline과 로직 통일).
 async function commitPhoto(photo, issueId, index) {
-  const token = getGhToken();
+  // 라이브러리 피커로 선택된 사진은 이미 라이브러리 경로를 알고 있으므로 그대로 사용
+  if (photo._libraryPath) {
+    return photo._libraryPath;
+  }
 
   // 기존(_existing) 사진이고 이미 경로(데이터URL 아님)면 그대로 사용
   if (photo._existing && typeof photo.dataUrl === 'string' && !photo.dataUrl.startsWith('data:')) {
     return photo.dataUrl;
   }
 
-  const ext = (photo.mediaType.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
-  const hash = await SapmanriCache.hashImage(photo.dataUrl);
-  const filename = `${hash}.${ext}`;
-  const path = `magazine/images/library/${filename}`;
-  const base64 = photo.dataUrl.split(',')[1];
-
-  // 라이브러리에 동일 해시 파일이 이미 있는지 확인 → 있으면 업로드 스킵
-  try {
-    const checkRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
-      headers: { Authorization: `token ${token}` }
-    });
-    if (checkRes.ok) {
-      return path; // 이미 존재 — 재사용
-    }
-  } catch (e) {}
-
-  const body = { message: `Add to image library: ${filename}`, content: base64 };
-  const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${path}`, {
-    method: 'PUT',
-    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  const json = await res.json();
-  if (!json.content) throw new Error(json.message || `이미지 업로드 실패: ${filename}`);
-  return path;
+  const result = await window.ImageLibrary.uploadIfNeeded(photo.dataUrl, photo.mediaType);
+  return result.path;
 }
 
 // magazine/images/... → ./images/... (issue.html은 magazine/ 폴더 안에서 동작)
