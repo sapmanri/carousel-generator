@@ -601,6 +601,10 @@ async function autoBuildPages(status) {
   let consecutiveFullbleed = 0; // fullbleed/spread 연속 카운트 (둘 다 풀스크린 단일 사진 페이지)
   const MAX_CONSECUTIVE_FULLBLEED = 1; // fullbleed/spread가 연속으로 너무 많이 나오지 않도록 제한
 
+  // 사진 없이 글로만 채우는 페이지(essay/dialogue)를 5~7페이지마다 한 번씩 자연스럽게 끼워넣는다.
+  let pagesSinceTextBreak = 0;
+  let nextTextBreak = 5 + Math.floor(Math.random() * 3); // 5~7
+
   function flushGrid(force) {
     if (!gridBuffer.length) return;
     if (gridBuffer.length < 2 && !force) return; // 1장짜리는 보류 (다음 그리드에 합치거나 마지막에 처리)
@@ -617,6 +621,21 @@ async function autoBuildPages(status) {
     gridBuffer = [];
     gridTarget = 3 + Math.floor(Math.random() * 4);
   }
+
+  function maybeInsertTextBreak() {
+    if (newPages.length === lastPageCountAtBreakCheck) return; // 그리드 버퍼링 중이라 새 페이지가 안 생겼으면 스킵
+    lastPageCountAtBreakCheck = newPages.length;
+    pagesSinceTextBreak++;
+    if (pagesSinceTextBreak < nextTextBreak) return;
+    flushGrid(true);
+    consecutiveFullbleed = 0;
+    const type = Math.random() < 0.5 ? 'essay' : 'dialogue';
+    newPages.push(PAGE_DEFAULTS[type]());
+    lastPageCountAtBreakCheck = newPages.length;
+    pagesSinceTextBreak = 0;
+    nextTextBreak = 5 + Math.floor(Math.random() * 3);
+  }
+  let lastPageCountAtBreakCheck = newPages.length;
 
   middlePhotos.forEach((p, i) => {
     let best = (p.analysis && p.analysis.best_page_type) || 'fullbleed';
@@ -667,6 +686,8 @@ async function autoBuildPages(status) {
       pg.imageId = p.id;
       newPages.push(pg);
     }
+
+    maybeInsertTextBreak();
   });
   flushGrid(true);
 
@@ -686,14 +707,30 @@ async function autoBuildPages(status) {
   }
 
   // 6. 각 페이지 글 자동 생성
-  const textPages = pages.filter(pg => ['cover','fullbleed','split','grid','quote','spread','closing'].includes(pg.type));
+  const textPages = pages.filter(pg => ['cover','fullbleed','split','grid','quote','spread','essay','dialogue','closing'].includes(pg.type));
   for (let i = 0; i < pages.length; i++) {
     const pg = pages[i];
-    if (!['cover','fullbleed','split','grid','quote','spread','closing'].includes(pg.type)) continue;
+    if (!['cover','fullbleed','split','grid','quote','spread','essay','dialogue','closing'].includes(pg.type)) continue;
     status.innerHTML = `<span class="spinner"></span>페이지 글 생성 중 (${textPages.indexOf(pg)+1}/${textPages.length})…`;
     try {
       if (pg.type === 'cover') {
         await genCoverHeadline(i);
+      } else if (pg.type === 'essay' || pg.type === 'dialogue') {
+        // 사진 없는 텍스트 페이지 — 주변 페이지들의 분위기를 컨텍스트로 전달
+        const nearbyMoods = [];
+        for (let off = -2; off <= 2; off++) {
+          const nb = pages[i + off];
+          if (!nb) continue;
+          const nbPhoto = photos.find(p => p.id === (nb.imageId || (nb.imageIds && nb.imageIds[0])));
+          if (nbPhoto && nbPhoto.analysis) {
+            const m = nbPhoto.analysis.mood;
+            const c = nbPhoto.analysis.suggested_caption;
+            if (m) nearbyMoods.push(m);
+            if (c) nearbyMoods.push(c);
+          }
+        }
+        const ctx = nearbyMoods.filter(Boolean).slice(0, 6).join(', ');
+        await genPageText(i, ctx ? `주변 페이지들의 분위기: ${ctx}` : undefined);
       } else {
         await genPageText(i);
       }
