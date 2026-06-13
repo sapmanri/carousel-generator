@@ -310,7 +310,7 @@ const PAGE_TEXT_INSTRUCTION = {
   spread: `와이드 스프레드 화보의 캡션을 쓴다. 짧은 명조체 한 줄(10자 내외)로, 사진의 왼쪽 절반과 오른쪽 절반에 각각 어울리는 두 개의 짧은 문구를 만든다. 두 줄로 반환하며 첫 줄이 왼쪽, 둘째 줄이 오른쪽 캡션이다.`,
   essay: `사진 없이 글로만 채우는 에세이 페이지를 쓴다. Vase의 인간극장 톤으로 3-5문단, 한 문장씩 줄바꿈하여 호흡을 살린다. 주어진 주제/컨텍스트가 있으면 그것을 중심으로, 없으면 이번 호 전체의 정서를 정리하는 글을 쓴다.`,
   dialogue: `짧은 대화나 코멘트 형식의 캡션 3-5개를 만든다. 결과는 한 줄에 하나씩, "화자|내용" 형식으로 반환한다 (화자가 없으면 "|내용"). 예: "빼빼|또 거기 앉아있네" / "|오늘은 유난히 조용한 오후였다"`,
-  list: `짧은 리스트형 정보를 만든다 (레시피 재료, 오늘의 할 일, 추천 목록 등). 결과는 한 줄에 하나씩, "이름|설명" 형식으로 3-6개 반환한다 (설명이 없으면 "이름|"). 주어진 주제가 있으면 그것을 따른다.`,
+  list: `짧은 리스트형 정보를 만든다 (레시피 재료, 오늘의 할 일, 추천 목록, 이번 호에서 다녀온 곳/만난 것들 등). 결과는 한 줄에 하나씩, "이름|설명" 형식으로 3-6개 반환한다 (설명이 없으면 "이름|"). 주어진 주제/컨텍스트가 있으면 그것에서 자연스럽게 리스트 항목을 떠올려 쓴다. 없으면 이번 호의 정서에 맞는 소소한 목록을 만든다.`,
   milestone: `마일스톤/숫자 강조 페이지의 설명 문구를 쓴다. 1-2문장, Vase 문체로 그 숫자/단어가 의미하는 감정적 맥락을 짧게 담는다.`,
   botanical: `보태니컬(식물/소품) 사진에 어울리는 이탤릭체 캡션 한 줄을 쓴다. 10-16자, 관찰자적이고 담담한 톤.`,
   closing: `클로징 페이지의 마무리 문구를 쓴다. "오늘도 느리게, 잘 보냈습니다" 같은 톤으로 1-2문장.`,
@@ -629,7 +629,8 @@ async function autoBuildPages(status) {
     if (pagesSinceTextBreak < nextTextBreak) return;
     flushGrid(true);
     consecutiveFullbleed = 0;
-    const type = Math.random() < 0.5 ? 'essay' : 'dialogue';
+    const types = ['essay', 'dialogue', 'quote', 'list'];
+    const type = types[Math.floor(Math.random() * types.length)];
     newPages.push(PAGE_DEFAULTS[type]());
     lastPageCountAtBreakCheck = newPages.length;
     pagesSinceTextBreak = 0;
@@ -707,15 +708,15 @@ async function autoBuildPages(status) {
   }
 
   // 6. 각 페이지 글 자동 생성
-  const textPages = pages.filter(pg => ['cover','fullbleed','split','grid','quote','spread','essay','dialogue','closing'].includes(pg.type));
+  const textPages = pages.filter(pg => ['cover','fullbleed','split','grid','quote','spread','essay','dialogue','list','closing'].includes(pg.type));
   for (let i = 0; i < pages.length; i++) {
     const pg = pages[i];
-    if (!['cover','fullbleed','split','grid','quote','spread','essay','dialogue','closing'].includes(pg.type)) continue;
+    if (!['cover','fullbleed','split','grid','quote','spread','essay','dialogue','list','closing'].includes(pg.type)) continue;
     status.innerHTML = `<span class="spinner"></span>페이지 글 생성 중 (${textPages.indexOf(pg)+1}/${textPages.length})…`;
     try {
       if (pg.type === 'cover') {
         await genCoverHeadline(i);
-      } else if (pg.type === 'essay' || pg.type === 'dialogue') {
+      } else if (pg.type === 'essay' || pg.type === 'dialogue' || pg.type === 'quote' || pg.type === 'list') {
         // 사진 없는 텍스트 페이지 — 주변 페이지들의 분위기를 컨텍스트로 전달
         const nearbyMoods = [];
         for (let off = -2; off <= 2; off++) {
