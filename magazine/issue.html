@@ -53,8 +53,9 @@ img{max-width:100%;display:block}
 @media(max-width:899px){
   html{scroll-snap-type:y mandatory}
   .page{scroll-snap-align:start;scroll-snap-stop:always}
-  /* 100vh를 넘을 수 있는 텍스트 페이지는 스냅에서 제외 (내부 스크롤과 충돌 방지) */
-  .page-essay,.page-dialogue,.page-list-type{scroll-snap-align:none;scroll-snap-stop:normal}
+  /* 100vh를 넘을 수 있는 텍스트 페이지: 시작 지점은 스냅 대상으로 유지하되,
+     내부 스크롤이 페이지를 통과해 다음 페이지로 넘어갈 수 있도록 stop은 normal */
+  .page-essay,.page-dialogue,.page-list-type{scroll-snap-align:start;scroll-snap-stop:normal}
 }
 
 /* ── 데스크탑/패드: 본문 페이지를 2장씩 묶어 한 화면(스프레드)에 펼침 ── */
@@ -332,7 +333,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 13:20 KST</span></a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 13:28 KST</span></a>
   <div class="indicator" id="indicator"></div>
 </div>
 
