@@ -1065,11 +1065,11 @@ function renderPageCard(pg, idx) {
         <div class="hint">짧은 대화/코멘트를 좌우로 번갈아 배치합니다.</div>
         ${(pg.lines||[]).map((l,li) => `
           <div class="row" style="align-items:center">
-            <select style="width:90px" onchange="pages[${idx}].lines[${li}].side=this.value; renderPageList()">
+            <select class="w-fixed" onchange="pages[${idx}].lines[${li}].side=this.value; renderPageList()">
               <option value="left" ${l.side!=='right'?'selected':''}>왼쪽</option>
               <option value="right" ${l.side==='right'?'selected':''}>오른쪽</option>
             </select>
-            <input style="width:90px" placeholder="화자(선택)" value="${esc(l.speaker||'')}" oninput="pages[${idx}].lines[${li}].speaker=this.value">
+            <input class="w-fixed" placeholder="화자(선택)" value="${esc(l.speaker||'')}" oninput="pages[${idx}].lines[${li}].speaker=this.value">
             <input placeholder="대화/코멘트" value="${esc(l.text||'')}" oninput="pages[${idx}].lines[${li}].text=this.value">
             <button class="icon-btn" onclick="pages[${idx}].lines.splice(${li},1); renderPageList()">×</button>
           </div>

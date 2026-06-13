@@ -117,6 +117,21 @@ header{
 .page-card-head .icon-btn:hover{color:var(--text);border-color:var(--border2)}
 .page-card-body{display:flex;flex-direction:column;gap:8px}
 .page-card-body .row{display:flex;gap:8px;flex-wrap:wrap}
+.page-card-body .row input,
+.page-card-body .row select,
+.page-card-body .row textarea{
+  background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--sans);font-weight:300;font-size:13px;padding:8px 10px;border-radius:4px;outline:none;
+}
+.page-card-body .row input:focus,
+.page-card-body .row select:focus,
+.page-card-body .row textarea:focus{border-color:var(--accent)}
+.page-card-body .row input::placeholder,
+.page-card-body .row textarea::placeholder{color:var(--dim)}
+.page-card-body .row input{flex:1;min-width:0}
+.page-card-body .row .w-fixed{flex:0 0 90px}
+.page-card-body .row select{flex:none;cursor:pointer}
+.page-card-body .row textarea{flex:1;font-family:var(--serif);line-height:1.7;resize:vertical;min-height:60px}
 .thumb-pick{
   width:60px;height:60px;border:1px solid var(--border);border-radius:4px;object-fit:cover;
   cursor:pointer;background:var(--s1);flex-shrink:0;
@@ -288,6 +303,6 @@ header{
 <div class="toast" id="toast"></div>
 
 <script src="./image-library.js?v=20260613b"></script>
-<script src="./editor-core.js?v=20260613d"></script>
+<script src="./editor-core.js?v=20260613e"></script>
 </body>
 </html>
