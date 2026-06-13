@@ -42,16 +42,15 @@ header{
 .sort-toggle button.active{color:var(--orange)}
 .count{font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.35)}
 
-/* ── 그리드 ── */
+/* ── 그리드: 불규칙한 벤토 레이아웃 ── */
 .grid{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:16px 14px;
-  padding:24px;
+  display:grid;grid-template-columns:repeat(6,1fr);grid-auto-flow:dense;
+  gap:10px;padding:24px;
 }
-@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);gap:20px}}
-@media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr);gap:24px;padding:32px}}
-@media(min-width:1280px){.grid{grid-template-columns:repeat(5,1fr)}}
+@media(min-width:640px){.grid{gap:14px}}
+@media(min-width:980px){.grid{gap:18px;padding:32px}}
 
-.card{display:block;cursor:pointer;position:relative}
+.card{display:block;cursor:pointer;position:relative;grid-column:span 3;grid-row:span 1}
 .card .thumb-wrap{
   position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;
   background:#1d1815;border-radius:1px;
@@ -76,8 +75,46 @@ header{
 .card .title{font-family:var(--serif);font-size:14px;line-height:1.35;color:var(--cream)}
 .card .sub{font-size:10px;letter-spacing:0.05em;color:rgba(255,255,255,0.55);margin-top:3px}
 
+/* 불규칙 크기 패턴 — 6칸 그리드 기준으로 너비와 비율을 다양하게 섞음 */
+.card.size-big{grid-column:span 4}
+.card.size-big .thumb-wrap{aspect-ratio:16/10}
+.card.size-big .title{font-size:20px;font-weight:700}
+.card.size-big .num{font-size:20px}
+
+.card.size-wide{grid-column:span 2}
+.card.size-wide .thumb-wrap{aspect-ratio:4/5}
+.card.size-wide .title{font-size:13px;font-weight:300}
+
+.card.size-tall{grid-column:span 2}
+.card.size-tall .thumb-wrap{aspect-ratio:16/10}
+.card.size-tall .title{font-size:18px;font-weight:500}
+.card.size-tall .num{font-size:18px}
+
+.card.size-square{grid-column:span 3}
+.card.size-square .thumb-wrap{aspect-ratio:1/1}
+.card.size-square .title{font-size:15px;font-weight:400}
+
+.card.size-small{grid-column:span 2}
+.card.size-small .thumb-wrap{aspect-ratio:1/1}
+.card.size-small .title{font-size:12px;font-weight:300}
+.card.size-small .num{font-size:11px}
+
+@media(max-width:639px){
+  /* 모바일: 6칸 기준 span 절반으로 압축, 너무 잘게 쪼개지지 않도록 */
+  .card.size-big{grid-column:span 6}
+  .card.size-big .thumb-wrap{aspect-ratio:16/10}
+  .card.size-wide{grid-column:span 4}
+  .card.size-wide .thumb-wrap{aspect-ratio:3/2}
+  .card.size-tall{grid-column:span 3}
+  .card.size-tall .thumb-wrap{aspect-ratio:4/5}
+  .card.size-square{grid-column:span 3}
+  .card.size-small{grid-column:span 3}
+}
+
 @media(min-width:980px){
   .card .title{font-size:16px}
+  .card.size-big .title{font-size:26px}
+  .card.size-tall .title{font-size:20px}
 }
 
 /* ── 피처드(최신호) 카드 — Feldman 큰 타일 ── */
@@ -139,7 +176,7 @@ footer .tag{font-size:10px;letter-spacing:0.18em;color:rgba(255,255,255,0.25);te
 <body>
 
 <header>
-  <div class="wordmark">SAPMANRI<span class="sub">오늘도 느리게 · slow days</span><span class="build-tag">Last update: 2026-06-13 13:28 KST</span></div>
+  <div class="wordmark">SAPMANRI<span class="sub">오늘도 느리게 · slow days</span><span class="build-tag">Last update: 2026-06-13 13:40 KST</span></div>
   <div class="meta" id="metaInfo">불러오는 중…</div>
 </header>
 
@@ -224,9 +261,12 @@ function render() {
   }
 
   const rest = (sortMode === 'latest') ? sorted.slice(1) : sorted;
-  html += rest.map((issue) => {
+  // 6칸 그리드 기준, 합이 6이 되도록 묶은 사이즈 패턴을 반복 — 큰/작은/넓은/좁은 타일이 불규칙하게 섞임
+  const sizePattern = ['size-big', 'size-small', 'size-square', 'size-square', 'size-tall', 'size-tall', 'size-wide', 'size-wide', 'size-small', 'size-big'];
+  html += rest.map((issue, i) => {
+    const sizeCls = sizePattern[i % sizePattern.length];
     return `
-    <a class="card" href="./issue.html?id=${encodeURIComponent(issue.id)}">
+    <a class="card ${sizeCls}" href="./issue.html?id=${encodeURIComponent(issue.id)}">
       <div class="thumb-wrap">
         <img src="${esc(issue.cover || '')}" alt="${esc(issue.title || '')}" loading="lazy" onerror="this.style.opacity=0">
         <div class="num">${totalNum(issue)}.</div>
