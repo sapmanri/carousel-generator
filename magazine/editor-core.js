@@ -598,8 +598,8 @@ async function autoBuildPages(status) {
   const middlePhotos = photos.slice(1);
   let gridBuffer = [];
   let gridTarget = 3 + Math.floor(Math.random() * 4); // 3~6장 랜덤 목표
-  let consecutiveFullbleed = 0;
-  const MAX_CONSECUTIVE_FULLBLEED = 1; // fullbleed가 연속으로 너무 많이 나오지 않도록 제한
+  let consecutiveFullbleed = 0; // fullbleed/spread 연속 카운트 (둘 다 풀스크린 단일 사진 페이지)
+  const MAX_CONSECUTIVE_FULLBLEED = 1; // fullbleed/spread가 연속으로 너무 많이 나오지 않도록 제한
 
   function flushGrid(force) {
     if (!gridBuffer.length) return;
@@ -621,8 +621,8 @@ async function autoBuildPages(status) {
   middlePhotos.forEach((p, i) => {
     let best = (p.analysis && p.analysis.best_page_type) || 'fullbleed';
 
-    // fullbleed가 연속으로 너무 많이 나오면 split/grid로 분산
-    if (best === 'fullbleed') {
+    // fullbleed/spread(둘 다 사진 1장이 화면을 가득 채우는 형태)가 연속으로 너무 많이 나오면 split/grid로 분산
+    if (best === 'fullbleed' || best === 'spread') {
       if (consecutiveFullbleed >= MAX_CONSECUTIVE_FULLBLEED) {
         best = (i % 2 === 0) ? 'split' : 'grid';
       }
@@ -630,7 +630,7 @@ async function autoBuildPages(status) {
 
     if (best === 'spread') {
       flushGrid(true);
-      consecutiveFullbleed = 0;
+      consecutiveFullbleed++;
       const pg = PAGE_DEFAULTS.spread();
       pg.imageId = p.id;
       pg.captionLeft = (p.analysis && p.analysis.suggested_caption_left) || '';
