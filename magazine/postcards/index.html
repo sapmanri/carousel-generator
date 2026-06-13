@@ -78,7 +78,10 @@ footer{padding:40px 24px;text-align:center;font-size:10px;letter-spacing:0.1em;c
   <div>
     <div class="wordmark">SAPMANRI<span class="sub">postcards</span></div>
   </div>
-  <a class="back" href="../index.html">← 매거진으로</a>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+    <a class="back" href="./editor.html">+ 에디터 ↗</a>
+    <a class="back" href="../index.html">← 매거진으로</a>
+  </div>
 </header>
 
 <div class="grid" id="grid">
@@ -98,7 +101,7 @@ async function load() {
     const data = await res.json();
     const postcards = (data.postcards || []);
     if (!postcards.length) {
-      grid.innerHTML = '<div class="empty"><span class="big">아직 등록된 포스트카드가 없어요</span>postcards/editor.html에서 만들어보세요</div>';
+      grid.innerHTML = '<div class="empty"><span class="big">아직 등록된 포스트카드가 없어요</span><a href="./editor.html" style="color:var(--orange)">editor.html에서 만들어보세요 →</a></div>';
       return;
     }
     // 호 목록 (QR용 유튜브 링크)
