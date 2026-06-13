@@ -216,10 +216,10 @@ img{max-width:100%;display:block}
 /* ── Type 8: Spread (사진 1장이 2페이지에 걸친 와이드 화보) ── */
 .page-spread{padding:0;align-items:stretch}
 .page-spread .spread-img-wrap{
-  width:100%;flex:1;overflow:hidden;position:relative;background:#000;
+  width:100%;flex:1 1 0%;min-height:0;overflow:hidden;position:relative;background:#000;
 }
 .page-spread .spread-img-wrap img{
-  width:100%;height:100%;object-fit:cover;display:block;
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
 }
 /* 모바일: 좌/우 절반만 보여줌 */
 .page-spread.half-left .spread-img-wrap img{ width:200%; max-width:200%; object-position:left center; }
@@ -239,8 +239,8 @@ img{max-width:100%;display:block}
     display:flex;padding:0;min-height:100vh;background:#000;color:var(--cream);
     position:relative;align-items:stretch;
   }
-  .page-spread-desktop .spread-img-wrap{width:100%;flex:1;overflow:hidden;position:relative}
-  .page-spread-desktop .spread-img-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+  .page-spread-desktop .spread-img-wrap{width:100%;flex:1 1 0%;min-height:0;overflow:hidden;position:relative}
+  .page-spread-desktop .spread-img-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
   .page-spread-desktop .spread-caption-left,
   .page-spread-desktop .spread-caption-right{
     position:absolute;top:50%;transform:translateY(-50%);z-index:2;
