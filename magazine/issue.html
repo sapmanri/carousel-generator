@@ -51,7 +51,7 @@ img{max-width:100%;display:block}
 
 /* ── 모바일: 스크롤 스냅으로 한 장씩 넘기는 느낌 ── */
 @media(max-width:899px){
-  .pages{scroll-snap-type:y mandatory}
+  html{scroll-snap-type:y mandatory}
   .page{scroll-snap-align:start;scroll-snap-stop:always}
   /* 100vh를 넘을 수 있는 텍스트 페이지는 스냅에서 제외 (내부 스크롤과 충돌 방지) */
   .page-essay,.page-dialogue,.page-list-type{scroll-snap-align:none;scroll-snap-stop:normal}
