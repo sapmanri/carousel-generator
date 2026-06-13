@@ -560,9 +560,9 @@ function renderClosing(p, issue) {
   const isYoutubeLink = (s) => typeof s === 'string' && /(youtube\.com|youtu\.be)/.test(s);
   let youtubeUrl = issue && issue.youtubeUrl;
   let cta = p.cta;
-  if (!youtubeUrl && isYoutubeLink(cta)) {
-    youtubeUrl = cta;
-    cta = ''; // cta가 링크 자체였던 경우 — 버튼으로 대체하고 cta 텍스트는 비움
+  if (isYoutubeLink(cta)) {
+    if (!youtubeUrl) youtubeUrl = cta;
+    cta = ''; // cta가 유튜브 링크 자체면 버튼으로 대체하고 텍스트는 비움 (issue.youtubeUrl과 중복 표시 방지)
   }
   const youtubeBtn = youtubeUrl ? `
     <a class="youtube-btn" href="${esc(youtubeUrl)}" target="_blank" rel="noopener">
