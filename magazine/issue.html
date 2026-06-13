@@ -272,6 +272,7 @@ img{max-width:100%;display:block}
 .page-dialogue{background:var(--cream);color:var(--ink);align-items:center}
 .page-dialogue .dlg-inner{width:100%;max-width:560px;display:flex;flex-direction:column;gap:18px}
 .page-dialogue .dlg-label{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--orange);margin-bottom:8px}
+.page-dialogue .dlg-title{font-family:var(--serif);font-size:26px;line-height:1.4;margin-bottom:28px}
 .dlg-line{display:flex;flex-direction:column;gap:4px;max-width:80%}
 .dlg-line.right{align-self:flex-end;align-items:flex-end;text-align:right}
 .dlg-line .dlg-speaker{font-size:10px;letter-spacing:0.1em;color:rgba(0,0,0,0.35);text-transform:uppercase}
@@ -280,7 +281,7 @@ img{max-width:100%;display:block}
   background:rgba(0,0,0,0.04);border-radius:14px;display:inline-block;
 }
 .dlg-line.right .dlg-text{background:var(--orange);color:#fff}
-@media(min-width:768px){.dlg-line .dlg-text{font-size:18px}}
+@media(min-width:768px){.dlg-line .dlg-text{font-size:18px}.page-dialogue .dlg-title{font-size:32px}}
 
 /* ── Type 11: List (레시피/리스트형 정보) ── */
 .page-list-type{background:var(--cream);color:var(--ink);align-items:center}
@@ -333,7 +334,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 13:55 KST</span></a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 14:10 KST</span></a>
   <div class="indicator" id="indicator"></div>
 </div>
 
@@ -622,7 +623,14 @@ function renderEssay(p) {
 }
 
 function renderDialogue(p) {
-  const lines = (p.lines || []).map(l => {
+  let lines = (p.lines || []);
+  let title = '';
+  // 첫 줄이 "# 제목" 형식의 헤더면 대화 버블이 아닌 페이지 제목으로 분리
+  if (lines.length && /^#\s+/.test((lines[0].text || '').trim())) {
+    title = lines[0].text.trim().replace(/^#\s+/, '');
+    lines = lines.slice(1);
+  }
+  const lineHtml = lines.map(l => {
     const sideCls = l.side === 'right' ? ' right' : '';
     return `
     <div class="dlg-line${sideCls}">
@@ -634,13 +642,21 @@ function renderDialogue(p) {
   <section class="page page-dialogue">
     <div class="dlg-inner">
       ${p.label ? `<div class="dlg-label">${esc(p.label)}</div>` : ''}
-      ${lines}
+      ${title ? `<div class="dlg-title">${esc(title)}</div>` : ''}
+      ${lineHtml}
     </div>
   </section>`;
 }
 
 function renderListPage(p) {
-  const items = (p.items || []).map((it, i) => `
+  let listItems = (p.items || []);
+  let title = p.title || '';
+  // 첫 항목이 설명 없이 제목 역할을 하는 경우, 리스트 항목이 아닌 페이지 제목으로 분리
+  if (!title && listItems.length > 1 && !(listItems[0].desc || '').trim()) {
+    title = listItems[0].name || '';
+    listItems = listItems.slice(1);
+  }
+  const items = listItems.map((it, i) => `
     <div class="list-row">
       <div class="list-n">${String(i+1).padStart(2,'0')}</div>
       <div class="list-body">
@@ -652,7 +668,7 @@ function renderListPage(p) {
   <section class="page page-list-type">
     <div class="list-inner">
       ${p.label ? `<div class="list-label">${esc(p.label)}</div>` : ''}
-      ${p.title ? `<div class="list-title">${esc(p.title)}</div>` : ''}
+      ${title ? `<div class="list-title">${esc(title)}</div>` : ''}
       <div class="list-items">${items}</div>
     </div>
   </section>`;

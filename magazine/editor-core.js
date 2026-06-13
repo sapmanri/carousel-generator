@@ -1162,7 +1162,12 @@ async function genPageText(idx, extraContext) {
       pg.captionLeft = lines[0] || '';
       pg.captionRight = lines[1] || '';
     } else if (pg.type === 'dialogue') {
-      const lines = text.split('\n').filter(Boolean);
+      let lines = text.split('\n').filter(Boolean);
+      // 첫 줄이 "# 제목" 형식이면 대화 항목이 아닌 라벨로 분리
+      if (lines.length && /^#\s+/.test(lines[0].trim())) {
+        if (!pg.label) pg.label = lines[0].trim().replace(/^#\s+/, '');
+        lines = lines.slice(1);
+      }
       pg.lines = lines.map((l, i) => {
         const [speaker, ...rest] = l.split('|');
         const content = rest.length ? rest.join('|') : speaker;
@@ -1170,11 +1175,18 @@ async function genPageText(idx, extraContext) {
         return { speaker: hasSpeaker ? speaker.trim() : '', text: content.trim(), side: i % 2 === 0 ? 'left' : 'right' };
       }).filter(l => l.text);
     } else if (pg.type === 'list') {
-      const lines = text.split('\n').filter(Boolean);
-      pg.items = lines.map(l => {
+      let lines = text.split('\n').filter(Boolean);
+      const parsed = lines.map(l => {
         const [name, ...rest] = l.split('|');
         return { name: (name||'').trim(), desc: rest.join('|').trim() };
       }).filter(it => it.name);
+      // 첫 항목이 설명 없이 제목 역할이면 items가 아닌 title로 분리
+      if (parsed.length > 1 && !parsed[0].desc) {
+        if (!pg.title) pg.title = parsed[0].name;
+        pg.items = parsed.slice(1);
+      } else {
+        pg.items = parsed;
+      }
     }
     renderPageList();
     toast('생성 완료');
