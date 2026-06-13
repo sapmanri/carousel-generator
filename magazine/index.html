@@ -168,7 +168,7 @@ async function load() {
   try {
     const res = await fetch('./issues.json?t=' + Date.now(), { cache: 'no-store' });
     const data = await res.json();
-    issues = data.issues || [];
+    issues = (data.issues || []).filter(iss => !iss.hidden);
   } catch (e) {
     issues = [];
   }

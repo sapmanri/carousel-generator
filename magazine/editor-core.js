@@ -1177,7 +1177,23 @@ async function loadIssuesFromGithub() {
 function populateIssueSelect() {
   const sel = document.getElementById('issueSelect');
   sel.innerHTML = `<option value="__new__">+ 새 호 만들기</option>` +
-    allIssues.map(iss => `<option value="${esc(iss.id)}">${esc(iss.number || iss.id)} · ${esc(iss.title || '')}</option>`).join('');
+    allIssues.map(iss => `<option value="${esc(iss.id)}">${iss.hidden ? '🙈 ' : ''}${esc(iss.number || iss.id)} · ${esc(iss.title || '')}</option>`).join('');
+  updateIssueActionButtons();
+}
+
+function updateIssueActionButtons() {
+  const id = document.getElementById('issueSelect').value;
+  const issue = allIssues.find(x => x.id === id);
+  const hideBtn = document.getElementById('hideIssueBtn');
+  const delBtn = document.getElementById('deleteIssueBtn');
+  if (!issue) {
+    hideBtn.style.display = 'none';
+    delBtn.style.display = 'none';
+    return;
+  }
+  hideBtn.style.display = '';
+  delBtn.style.display = '';
+  hideBtn.textContent = issue.hidden ? '숨김 해제' : '숨김';
 }
 
 let suppressIssueSelectChange = false;
@@ -1187,12 +1203,14 @@ function onIssueSelect() {
   if (id === '__new__') {
     currentIssueId = null;
     clearForm();
+    updateIssueActionButtons();
     return;
   }
   const issue = allIssues.find(x => x.id === id);
   if (!issue) return;
   currentIssueId = id;
   loadIssueIntoForm(issue);
+  updateIssueActionButtons();
 }
 
 function clearForm() {
@@ -1411,6 +1429,7 @@ async function publish() {
       return out;
     });
 
+    const existingIssue = allIssues.find(x => x.id === id);
     const issueData = {
       id,
       number: document.getElementById('fNumber').value.trim(),
@@ -1421,6 +1440,7 @@ async function publish() {
       cover: coverPath || '',
       pages: exportedPages,
     };
+    if (existingIssue && existingIssue.hidden) issueData.hidden = true;
 
     // 4. issues 배열 갱신 (같은 id면 교체, 아니면 추가)
     const existingIdx = allIssues.findIndex(x => x.id === id);
@@ -1462,6 +1482,105 @@ async function publish() {
 }
 
 // publish() 내부에서 sha 충돌 방지를 위해 재로드 (UI status 갱신 없이)
+// allIssues를 issues.json으로 커밋한다. sha 충돌 시 1회 재로드 후 재시도.
+async function saveIssuesJson(message) {
+  const token = getGhToken();
+  if (!token) throw new Error('GitHub 토큰을 입력해주세요.');
+  const jsonStr = JSON.stringify({ issues: allIssues }, null, 2);
+  const bytes = new TextEncoder().encode(jsonStr);
+  const binStr = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+  const body = { message, content: btoa(binStr) };
+  if (issuesSha) body.sha = issuesSha;
+  let res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${ISSUES_FILE}`, {
+    method: 'PUT',
+    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  let json = await res.json();
+  if (!json.content && json.message && /sha/i.test(json.message)) {
+    // sha 충돌 — 최신 sha로 재시도
+    const reload = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${ISSUES_FILE}`, {
+      headers: { Authorization: `token ${token}` }
+    });
+    const reloadJson = await reload.json();
+    if (reloadJson.sha) {
+      body.sha = reloadJson.sha;
+      res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${ISSUES_FILE}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      json = await res.json();
+    }
+  }
+  if (!json.content) throw new Error(json.message || 'issues.json 저장 실패');
+  issuesSha = json.content.sha;
+}
+
+// 선택된 호의 숨김 상태를 토글한다. 숨김 처리된 호는 magazine/index.html 목록에서 제외되지만
+// issue.html 직접 링크로는 계속 접근 가능하다(비공개 보관용).
+async function toggleHideIssue() {
+  const id = document.getElementById('issueSelect').value;
+  const issue = allIssues.find(x => x.id === id);
+  if (!issue) return;
+  const nextHidden = !issue.hidden;
+  const label = nextHidden ? '숨김 처리' : '숨김 해제';
+  if (!confirm(`"${issue.title || issue.id}" 호를 ${label}하시겠어요?`)) return;
+
+  issue.hidden = nextHidden;
+  const statusEl = document.getElementById('ghLoadStatus');
+  statusEl.textContent = `${label} 중…`;
+  try {
+    await saveIssuesJson(`${nextHidden ? 'Hide' : 'Unhide'} magazine issue: ${id}`);
+    statusEl.textContent = `${label} 완료 ✓`;
+    populateIssueSelect();
+    suppressIssueSelectChange = true;
+    document.getElementById('issueSelect').value = id;
+    suppressIssueSelectChange = false;
+    updateIssueActionButtons();
+    toast(`${label}되었습니다.`);
+  } catch (e) {
+    issue.hidden = !nextHidden; // 롤백
+    statusEl.textContent = '실패: ' + e.message;
+    toast('실패: ' + e.message);
+  }
+}
+
+// 선택된 호를 issues.json에서 완전히 삭제한다. (라이브러리 이미지는 공유 자원이므로 삭제하지 않음)
+async function deleteIssue() {
+  const id = document.getElementById('issueSelect').value;
+  const issue = allIssues.find(x => x.id === id);
+  if (!issue) return;
+  const confirmText = `"${issue.title || issue.id}" (${issue.id}) 호를 영구적으로 삭제합니다.\n이 작업은 되돌릴 수 없습니다. 계속하시겠어요?`;
+  if (!confirm(confirmText)) return;
+  // 2차 확인
+  if (!confirm('정말로 삭제할까요? issues.json에서 완전히 제거됩니다.')) return;
+
+  const statusEl = document.getElementById('ghLoadStatus');
+  statusEl.textContent = '삭제 중…';
+  const backup = allIssues.slice();
+  allIssues = allIssues.filter(x => x.id !== id);
+  try {
+    await saveIssuesJson(`Delete magazine issue: ${id}`);
+    statusEl.textContent = '삭제 완료 ✓';
+    if (currentIssueId === id) {
+      currentIssueId = null;
+      clearForm();
+    }
+    suppressIssueSelectChange = true;
+    populateIssueSelect();
+    document.getElementById('issueSelect').value = '__new__';
+    suppressIssueSelectChange = false;
+    updateIssueActionButtons();
+    toast('삭제되었습니다.');
+  } catch (e) {
+    allIssues = backup; // 롤백
+    statusEl.textContent = '실패: ' + e.message;
+    toast('실패: ' + e.message);
+  }
+}
+
+
 async function loadIssuesFromGithubSilent() {
   const token = getGhToken();
   try {

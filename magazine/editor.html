@@ -203,6 +203,8 @@ header{
         <option value="__new__">+ 새 호 만들기</option>
       </select>
       <button class="btn-ghost" onclick="loadIssuesFromGithub()">새로고침</button>
+      <button class="btn-ghost" id="hideIssueBtn" onclick="toggleHideIssue()" style="display:none">숨김</button>
+      <button class="btn-ghost" id="deleteIssueBtn" onclick="deleteIssue()" style="display:none;color:var(--red,#e07070);border-color:var(--red,#e07070)">삭제</button>
     </div>
     <div class="hint" id="ghLoadStatus"></div>
   </div>
