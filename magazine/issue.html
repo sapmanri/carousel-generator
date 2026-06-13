@@ -586,16 +586,20 @@ function renderSpread(p) {
   const img = esc(p.image || '');
   const leftCaption = p.captionLeft || p.caption || '';
   const rightCaption = p.captionRight || '';
+  // 모바일에서 절반씩 자를 때 어느 지점을 중심으로 자를지 (0~100, object-position-x 값)
+  // 기본값: 왼쪽 절반=0(이미지 좌측 끝), 오른쪽 절반=100(이미지 우측 끝) — 기존 동작과 동일
+  const focalXLeft = (typeof p.focalXLeft === 'number') ? p.focalXLeft : 0;
+  const focalXRight = (typeof p.focalXRight === 'number') ? p.focalXRight : 100;
 
   // 모바일: 좌/우 절반을 각각 별도 페이지로
   const mobileLeft = `
   <section class="page page-spread half-left">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="object-position:${focalXLeft}% center">` : ''}</div>
     ${leftCaption ? `<div class="spread-caption">${nl(leftCaption)}</div>` : ''}
   </section>`;
   const mobileRight = `
   <section class="page page-spread half-right">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="object-position:${focalXRight}% center">` : ''}</div>
     ${rightCaption ? `<div class="spread-caption">${nl(rightCaption)}</div>` : ''}
   </section>`;
 
