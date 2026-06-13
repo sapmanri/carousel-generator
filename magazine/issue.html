@@ -333,7 +333,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 13:28 KST</span></a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 13:55 KST</span></a>
   <div class="indicator" id="indicator"></div>
 </div>
 
@@ -438,20 +438,20 @@ async function load() {
   // 풀블리드/스프레드 사진에 미세한 패럴랙스 효과 (스크롤에 따라 사진이 살짝 다른 속도로 이동)
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     const parallaxImgs = [...document.querySelectorAll('.page-fullbleed .fb-img-wrap img, .page-spread .spread-img-wrap img')]
-      .map(img => ({
-        img,
-        baseX: getComputedStyle(img).objectPosition.split(' ')[0]
-      }));
+      .map(img => {
+        const parts = getComputedStyle(img).objectPosition.split(' ');
+        return { img, baseX: parts[0], baseY: parseFloat(parts[1]) || 50 };
+      });
     const PARALLAX_RANGE = 6; // object-position % 이동 범위 (양쪽 합 12%)
     let ticking = false;
     function updateParallax() {
       const vh = window.innerHeight;
-      parallaxImgs.forEach(({ img, baseX }) => {
+      parallaxImgs.forEach(({ img, baseX, baseY }) => {
         const rect = img.getBoundingClientRect();
         if (rect.bottom < -vh || rect.top > vh * 2) return; // 화면에서 먼 요소는 스킵
         const center = rect.top + rect.height / 2;
         const ratio = (center - vh / 2) / vh; // 화면 중앙 기준 -1~1 근처
-        const y = 50 + Math.max(-1, Math.min(1, ratio)) * PARALLAX_RANGE;
+        const y = baseY + Math.max(-1, Math.min(1, ratio)) * PARALLAX_RANGE;
         img.style.objectPosition = `${baseX} ${y}%`;
       });
       ticking = false;
@@ -503,9 +503,11 @@ function renderFullbleed(p) {
   const caption = p.caption || '';
   const isShort = caption.length <= 30 && !caption.includes('\n\n');
   const captionCls = isShort ? 'caption short' : 'caption';
+  const hasFocal = typeof p.focalX === 'number' && typeof p.focalY === 'number';
+  const focalStyle = hasFocal ? ` style="object-position:${p.focalX}% ${p.focalY}%"` : '';
   return `
   <section class="page page-fullbleed">
-    ${p.image ? `<div class="fb-img-wrap"><img src="${esc(p.image)}" alt="" loading="lazy"></div>` : ''}
+    ${p.image ? `<div class="fb-img-wrap"><img src="${esc(p.image)}" alt="" loading="lazy"${focalStyle}></div>` : ''}
     ${caption ? `<div class="${captionCls}">${nl(caption)}</div>` : ''}
   </section>`;
 }

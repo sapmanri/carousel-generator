@@ -208,7 +208,7 @@ async function analyzeImage(dataUrl, hints) {
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
         { type: 'text', text: `이 이미지를 분석해서 웹매거진 페이지 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread|botanical 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것. 식물, 꽃, 작은 정물, 디테일 클로즈업처럼 여백 있는 카드형 프레임에 단아하게 어울리는 사진은 botanical을 선택할 것."}${hintText}` }
+{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread|botanical 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것. 식물, 꽃, 작은 정물, 디테일 클로즈업처럼 여백 있는 카드형 프레임에 단아하게 어울리는 사진은 botanical을 선택할 것.","focal_x":"이 사진에서 가장 중요한 피사체(인물, 얼굴, 핵심 사물 등)의 가로 위치를 0~100 사이 숫자로 (좌측=0, 중앙=50, 우측=100). 풀블리드로 세로 화면에 꽉 채울 때 이 지점이 잘리지 않도록 기준점이 됨.","focal_y":"같은 피사체의 세로 위치를 0~100 사이 숫자로 (상단=0, 중앙=50, 하단=100)."}${hintText}` }
       ]}]
     })
   });
@@ -710,6 +710,9 @@ async function autoBuildPages(status) {
       // 1장만 남으면 그리드 대신 풀블리드로
       const pg = PAGE_DEFAULTS.fullbleed();
       pg.imageId = gridBuffer[0].id;
+      const a = gridBuffer[0].analysis;
+      if (a && typeof a.focal_x === 'number') pg.focalX = a.focal_x;
+      if (a && typeof a.focal_y === 'number') pg.focalY = a.focal_y;
       newPages.push(pg);
     } else {
       const g = PAGE_DEFAULTS.grid();
@@ -783,6 +786,8 @@ async function autoBuildPages(status) {
       consecutiveFullbleed++;
       const pg = PAGE_DEFAULTS.fullbleed();
       pg.imageId = p.id;
+      if (p.analysis && typeof p.analysis.focal_x === 'number') pg.focalX = p.analysis.focal_x;
+      if (p.analysis && typeof p.analysis.focal_y === 'number') pg.focalY = p.analysis.focal_y;
       newPages.push(pg);
     }
 
@@ -887,7 +892,7 @@ function openPhotoPicker(callback, currentId) {
 // ══════════════════════════════════════════════════════════════
 const PAGE_DEFAULTS = {
   cover: () => ({ type: 'cover', imageId: null, headline: ['', ''], toc: [] }),
-  fullbleed: () => ({ type: 'fullbleed', imageId: null, caption: '' }),
+  fullbleed: () => ({ type: 'fullbleed', imageId: null, caption: '', focalX: 50, focalY: 50 }),
   index: () => ({ type: 'index', label: 'Contents · 이번 호 이야기', items: [] }),
   split: () => ({ type: 'split', imageId: null, label: '', text: '', darkText: false }),
   grid: () => ({ type: 'grid', imageIds: [], label: '', caption: '' }),
@@ -939,6 +944,21 @@ function thumbHtml(photoId, onclick, extraClass) {
   return `<div class="thumb-pick empty ${extraClass||''}" onclick="${onclick}">사진<br>선택</div>`;
 }
 
+function photoSrc(photoId) {
+  const photo = photos.find(p => p.id === photoId);
+  return photo ? photo.dataUrl : '';
+}
+
+// 풀블리드 초점 위치 미리보기에서 클릭한 좌표를 focalX/focalY(%)로 저장
+function setFocalPoint(evt, idx) {
+  const rect = evt.currentTarget.getBoundingClientRect();
+  const x = Math.max(0, Math.min(100, ((evt.clientX - rect.left) / rect.width) * 100));
+  const y = Math.max(0, Math.min(100, ((evt.clientY - rect.top) / rect.height) * 100));
+  pages[idx].focalX = Math.round(x);
+  pages[idx].focalY = Math.round(y);
+  renderPageList();
+}
+
 function renderPageCard(pg, idx) {
   const head = `
     <div class="page-card-head">
@@ -964,6 +984,14 @@ function renderPageCard(pg, idx) {
     case 'fullbleed':
       body = `
         <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
+        <div class="field"><label>초점 위치 (모바일 풀블리드 크롭 기준점 — 클릭해서 지정)</label>
+          <div class="focal-picker" style="position:relative;width:160px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#000;cursor:crosshair;"
+               onclick="setFocalPoint(event, ${idx})">
+            ${pg.imageId ? `<img src="${photoSrc(pg.imageId)}" style="width:100%;height:100%;object-fit:cover;object-position:${pg.focalX ?? 50}% ${pg.focalY ?? 50}%;display:block;pointer-events:none;">` : ''}
+            <div style="position:absolute;left:${pg.focalX ?? 50}%;top:${pg.focalY ?? 50}%;width:14px;height:14px;margin:-7px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,0.4);pointer-events:none;"></div>
+          </div>
+          <div style="font-size:11px;opacity:0.6;margin-top:4px">현재: ${Math.round(pg.focalX ?? 50)}%, ${Math.round(pg.focalY ?? 50)}% — 미리보기는 9:16 비율로 모바일 크롭을 근사함</div>
+        </div>
         <div class="field"><label>캡션</label><textarea oninput="pages[${idx}].caption=this.value">${esc(pg.caption||'')}</textarea></div>
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
       `;
@@ -1401,6 +1429,8 @@ async function publish() {
         case 'fullbleed':
           out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
           out.caption = pg.caption || '';
+          if (typeof pg.focalX === 'number') out.focalX = pg.focalX;
+          if (typeof pg.focalY === 'number') out.focalY = pg.focalY;
           break;
         case 'index':
           out.label = pg.label || '';
