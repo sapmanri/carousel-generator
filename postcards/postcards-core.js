@@ -382,13 +382,16 @@ function issueYoutubeUrl(issueId) {
 function renderPreview(pc, idx) {
   const hasQr = !!issueYoutubeUrl(pc.issueId);
   return `
-    <div class="flip-wrap" id="pcFlip${idx}" onclick="document.getElementById('pcFlip${idx}').classList.toggle('flipped')">
-      <div class="flip-inner">
-        <div class="flip-face front pc-canvas" id="pcPreviewFront${idx}">${renderTemplateHtml(pc, hasQr, 'front')}</div>
-        <div class="flip-face back pc-canvas" id="pcPreviewBack${idx}">${renderTemplateHtml(pc, hasQr, 'back')}</div>
+    <div class="pc-preview-pair">
+      <div class="pc-preview-side">
+        <div class="pc-canvas" id="pcPreviewFront${idx}">${renderTemplateHtml(pc, hasQr, 'front')}</div>
+        <div class="hint">앞면</div>
+      </div>
+      <div class="pc-preview-side">
+        <div class="pc-canvas" id="pcPreviewBack${idx}">${renderTemplateHtml(pc, hasQr, 'back')}</div>
+        <div class="hint">뒷면</div>
       </div>
     </div>
-    <div class="hint" style="text-align:center;margin-top:4px">클릭해서 뒷면 보기</div>
   `;
 }
 function refreshPreview(idx) {
