@@ -13,18 +13,26 @@ function esc(s) {
 
 function renderTemplateHtml(pc, hasQr, side) {
   side = side || 'front';
+  if (side === 'back') {
+    return renderBackTemplate(pc, hasQr);
+  }
   switch (pc.template) {
-    case 'mag-01':
-      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderMag01(pc);
-    case 'typo-01':
-      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderTypo01(pc);
-    case 'story-01':
-      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderStory01(pc);
-    case 'edit-01':
-      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderEdit01(pc);
+    case 'mag-01':    return renderMag01(pc);
+    case 'typo-01':   return renderTypo01(pc);
+    case 'story-01':  return renderStory01(pc);
+    case 'edit-01':   return renderEdit01(pc);
     case 'expo-01':
-    default:
-      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderExpo01(pc, hasQr);
+    default:          return renderExpo01(pc, hasQr);
+  }
+}
+
+function renderBackTemplate(pc, hasQr) {
+  switch (pc.backTemplate || 'back-classic') {
+    case 'back-modern':  return renderBackModern(pc, hasQr);
+    case 'back-centre':  return renderBackCentre(pc, hasQr);
+    case 'back-seal':    return renderBackSeal(pc, hasQr);
+    case 'back-classic':
+    default:             return renderExpo01Back(pc, hasQr);
   }
 }
 
@@ -167,6 +175,93 @@ function renderEdit01(pc) {
           <div class="pc-edit01-num">No.${esc(pc.number || '')}</div>
         </div>
       </div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// Back Modern — "P O / S T" 세로, TO + 주소선(마지막 오렌지), 웹사이트
+// ──────────────────────────────────────────────
+function renderBackModern(pc, hasQr) {
+  return `
+    <div class="pc-back-modern">
+      <div class="pc-bm-header">
+        <div class="pc-bm-brand">SAPMANRI</div>
+        <div class="pc-bm-post">P O<br>S T</div>
+      </div>
+      <div class="pc-bm-divider"></div>
+      <div class="pc-bm-body">
+        <div class="pc-bm-left"></div>
+        <div class="pc-bm-right">
+          <div class="pc-bm-to">T O</div>
+          <div class="pc-bm-lines">
+            <div class="pc-bm-line"></div>
+            <div class="pc-bm-line"></div>
+            <div class="pc-bm-line accent"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pc-bm-footer">carousel-generator-roan.vercel.app</div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// Back Centre — 상단 브랜드 중앙, 좌측 사진 섬네일, 우측 TO+주소선, 하단 서명
+// ──────────────────────────────────────────────
+function renderBackCentre(pc, hasQr) {
+  return `
+    <div class="pc-back-centre">
+      <div class="pc-bc-brand">SAPMANRI</div>
+      <div class="pc-bc-body">
+        <div class="pc-bc-photo"><img src="${esc(pc.image)}" alt="" loading="lazy"></div>
+        <div class="pc-bc-right">
+          <div class="pc-bc-label">${esc(pc.label || '')}</div>
+          <div class="pc-bc-to">TO</div>
+          <div class="pc-bc-lines">
+            <div class="pc-bc-line"></div>
+            <div class="pc-bc-line"></div>
+            <div class="pc-bc-line"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pc-bc-footer">@sapmanri · No.${esc(pc.number || '')}</div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// Back Seal — 발신자정보(좌상단), 우표박스(우상단), TO(중앙우), 원형씰(우하단)
+// ──────────────────────────────────────────────
+function renderBackSeal(pc, hasQr) {
+  return `
+    <div class="pc-back-seal">
+      <div class="pc-bs-header">
+        <div class="pc-bs-from">
+          <div class="pc-bs-brand">SAPMANRI</div>
+          <div class="pc-bs-addr">Wigong-ri, Seorak-myeon, Gapyeong-gun · Korea</div>
+          <div class="pc-bs-web">carousel-generator-roan.vercel.app</div>
+        </div>
+        <div class="pc-bs-stamp"></div>
+      </div>
+      <div class="pc-bs-divider"></div>
+      <div class="pc-bs-body">
+        <div class="pc-bs-left"></div>
+        <div class="pc-bs-right">
+          <div class="pc-bs-to">TO:</div>
+          <div class="pc-bs-lines">
+            <div class="pc-bs-line"></div>
+            <div class="pc-bs-line"></div>
+          </div>
+          <div class="pc-bs-seal">
+            <div class="pc-bs-seal-inner">
+              <div class="pc-bs-seal-text">SAPMANRI</div>
+              <div class="pc-bs-seal-sub">slow days</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="pc-bs-footer">No.${esc(pc.number || '')} · @sapmanri</div>
     </div>
   `;
 }
