@@ -261,6 +261,89 @@
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
   }
+
+  /* ── MOCKUP SECTION ── */
+  .tools-intro { margin-bottom: 4rem; }
+  .tools-intro h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 400; line-height: 1.6; margin-bottom: 1.2rem; word-break: keep-all; }
+  .tools-intro p { font-size: 0.87rem; color: var(--dust); line-height: 2.2; max-width: 540px; word-break: keep-all; }
+
+  .mockup-grid { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 3rem; align-items: end; margin-bottom: 3rem; }
+  .mockup-block { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+  .mockup-center { align-items: center; }
+  .mockup-tag { font-size: 0.62rem; letter-spacing: 0.22em; color: var(--warm); text-transform: uppercase; }
+  .mockup-label { font-size: 0.78rem; color: var(--dust); text-align: center; line-height: 1.9; word-break: keep-all; }
+
+  /* 폰 */
+  .phone-mockup { width: 180px; }
+  .phone-frame { background: #1a1a1a; border-radius: 32px; padding: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.08); position: relative; }
+  .phone-notch { width: 60px; height: 18px; background: #1a1a1a; border-radius: 0 0 12px 12px; margin: 0 auto 6px; position: relative; z-index: 2; }
+  .phone-screen { background: #000; border-radius: 22px; overflow: hidden; }
+  .phone-home { width: 40px; height: 4px; background: #444; border-radius: 2px; margin: 8px auto 2px; }
+
+  /* 인스타 UI */
+  .insta-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px 6px; background: #fff; }
+  .insta-avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--warm), #8B6A4A); flex-shrink: 0; }
+  .insta-name { font-size: 8px; font-weight: 600; color: #1a1a1a; flex: 1; }
+  .insta-dots { font-size: 10px; color: #888; }
+  .insta-carousel { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; }
+  .insta-slide { width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; filter: saturate(0.88); }
+  .slide-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 10px 10px; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%); }
+  .slide-label { font-size: 7px; letter-spacing: 0.15em; color: var(--warm); text-transform: uppercase; margin-bottom: 3px; }
+  .slide-copy { font-size: 10px; color: #fff; font-family: 'Nanum Myeongjo', serif; line-height: 1.3; }
+  .insta-dots-nav { display: flex; gap: 3px; justify-content: center; padding: 6px 0 4px; background: #fff; }
+  .dot { width: 4px; height: 4px; border-radius: 50%; background: #ddd; }
+  .dot.active { background: #3897f0; width: 12px; border-radius: 2px; }
+  .insta-actions { display: flex; gap: 10px; padding: 6px 10px 10px; background: #fff; font-size: 13px; }
+
+  /* 태블릿 */
+  .tablet-mockup { width: 100%; max-width: 340px; }
+  .tablet-frame { background: #1c1c1e; border-radius: 20px; padding: 12px; box-shadow: 0 24px 70px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.06); }
+  .tablet-camera { width: 8px; height: 8px; border-radius: 50%; background: #2a2a2a; margin: 0 auto 8px; }
+  .tablet-screen { background: #fff; border-radius: 12px; overflow: hidden; }
+  .tablet-home-bar { width: 60px; height: 3px; background: #333; border-radius: 2px; margin: 8px auto 2px; }
+
+  /* 매거진 UI */
+  .mag-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #faf9f7; border-bottom: 1px solid #eee; }
+  .mag-logo { font-size: 8px; letter-spacing: 0.2em; font-weight: 600; color: #1a1a1a; }
+  .mag-nav { display: flex; gap: 8px; }
+  .mag-nav span { font-size: 7px; color: #888; }
+  .mag-hero { height: 110px; background-size: cover; background-position: center; position: relative; filter: brightness(0.75) saturate(0.85); }
+  .mag-hero-text { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px 8px; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%); }
+  .mag-issue { font-size: 7px; letter-spacing: 0.2em; color: var(--warm); margin-bottom: 3px; }
+  .mag-title { font-size: 10px; color: #fff; font-family: 'Nanum Myeongjo', serif; line-height: 1.4; }
+  .mag-body { display: grid; grid-template-columns: 80px 1fr; gap: 8px; padding: 8px 10px; background: #faf9f7; }
+  .mag-body-img { height: 70px; background-size: cover; background-position: center; border-radius: 4px; filter: saturate(0.85); }
+  .mag-section-label { font-size: 6px; letter-spacing: 0.18em; color: var(--warm); text-transform: uppercase; margin-bottom: 5px; }
+  .mag-text-lines { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+  .line { height: 5px; background: #ddd; border-radius: 2px; width: 100%; }
+  .line.short { width: 70%; }
+  .line.shorter { width: 50%; }
+
+  /* 포스트카드 스택 */
+  .postcard-mockup { width: 200px; height: 240px; position: relative; }
+  .postcard-stack { position: relative; width: 160px; height: 220px; margin: 0 auto; }
+  .postcard { position: absolute; width: 155px; height: 200px; border-radius: 6px; background-size: cover; background-position: center; box-shadow: 0 8px 30px rgba(0,0,0,0.2); overflow: hidden; filter: saturate(0.85) brightness(0.92); transition: transform 0.3s; }
+  .postcard:hover { filter: saturate(1) brightness(1); }
+  .postcard-1 { top: 0; left: 0; z-index: 3; transform: rotate(-1deg); }
+  .postcard-2 { top: 10px; left: 12px; z-index: 2; transform: rotate(3deg); filter: saturate(0.7) brightness(0.75); }
+  .postcard-3 { top: 18px; left: 22px; z-index: 1; transform: rotate(6deg); filter: saturate(0.6) brightness(0.6); }
+  .postcard-inner { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%); }
+  .postcard-badge { font-size: 6px; letter-spacing: 0.2em; color: var(--warm); text-transform: uppercase; margin-bottom: 4px; }
+  .postcard-title { font-family: 'Nanum Myeongjo', serif; font-size: 11px; color: #fff; line-height: 1.4; margin-bottom: 3px; }
+  .postcard-sub { font-size: 7px; color: rgba(255,255,255,0.6); letter-spacing: 0.08em; }
+  .postcard-num { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 0.15em; position: absolute; top: 10px; right: 10px; }
+
+  /* 하단 링크 */
+  .tools-links { display: flex; gap: 2rem; justify-content: center; padding-top: 1rem; border-top: 1px solid var(--pale); }
+  .tool-link { font-size: 0.78rem; color: var(--dust); text-decoration: none; letter-spacing: 0.05em; transition: color 0.3s; }
+  .tool-link:hover { color: var(--ink); }
+
+  @media (max-width: 900px) {
+    .mockup-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .mockup-block { max-width: 340px; margin: 0 auto; }
+    .tools-links { flex-direction: column; align-items: center; gap: 1rem; }
+  }
+
 </style>
 </head>
 <body>
@@ -436,7 +519,7 @@
   </div>
 </section>
 
-<!-- TOOLS -->
+<!-- TOOLS — 목업 -->
 <section id="tools" class="tools-section">
   <div class="section-inner reveal">
     <div class="label">Our Tools</div>
@@ -444,31 +527,103 @@
       <h2>채널 하나를 넘어<br>브랜드 전체를 운영합니다</h2>
       <p>영상 제작에서 끝나지 않아요. 인스타그램 캐러샐, 웹 매거진, 감성 포스트카드까지 — 브랜드의 콘텐츠가 모든 채널에서 일관된 목소리를 낼 수 있도록 자체 도구로 함께 운영합니다.</p>
     </div>
-    <div class="tools-grid">
-      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/carousel_ai_generator.html" target="_blank">
-        <div class="tool-icon">🎴</div>
-        <div class="tool-name">캐러샐 생성기</div>
-        <div class="tool-desc">AI 기반 인스타그램 캐러샐 슬라이드를 채널 사진으로 즉시 제작합니다.</div>
-        <div class="tool-tag">Instagram · AI</div>
-      </a>
-      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/magazine/index.html" target="_blank">
-        <div class="tool-icon">📖</div>
-        <div class="tool-name">웹 매거진</div>
-        <div class="tool-desc">채널의 이야기를 감성 웹 매거진으로 발행해 브랜드 아카이브를 만듭니다.</div>
-        <div class="tool-tag">Web · Archive</div>
-      </a>
-      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/postcards/index.html" target="_blank">
-        <div class="tool-icon">✉️</div>
-        <div class="tool-name">포스트카드</div>
-        <div class="tool-desc">브랜드 사진으로 감성 디지털 포스트카드를 만들어 팬들과 소통합니다.</div>
-        <div class="tool-tag">SNS · Branding</div>
-      </a>
-      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/skyline_music_matcher.html" target="_blank">
-        <div class="tool-icon">🎵</div>
-        <div class="tool-name">스카이라인 매처</div>
-        <div class="tool-desc">영상의 음악과 장면을 시각적으로 분석해 최적의 편집 리듬을 찾습니다.</div>
-        <div class="tool-tag">Video · Music</div>
-      </a>
+
+    <div class="mockup-grid">
+
+      <!-- 폰 목업 — 인스타 캐러샐 -->
+      <div class="mockup-block">
+        <div class="mockup-tag">Instagram Carousel</div>
+        <div class="phone-mockup">
+          <div class="phone-frame">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="insta-header">
+                <div class="insta-avatar"></div>
+                <div class="insta-name">sapmanri</div>
+                <div class="insta-dots">···</div>
+              </div>
+              <div class="insta-carousel">
+                <div class="insta-slide" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/166ac_a21e72fc_7899acc.jpg')">
+                  <div class="slide-overlay">
+                    <div class="slide-label">봄날의 산책</div>
+                    <div class="slide-copy">오후, 데이지밭에서</div>
+                  </div>
+                </div>
+              </div>
+              <div class="insta-dots-nav">
+                <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
+              </div>
+              <div class="insta-actions"><span>♡</span><span>💬</span><span>✈</span></div>
+            </div>
+            <div class="phone-home"></div>
+          </div>
+        </div>
+        <div class="mockup-label">AI가 사진을 분석해<br>캐러샐 카드를 자동 생성</div>
+      </div>
+
+      <!-- 태블릿 목업 — 매거진 -->
+      <div class="mockup-block mockup-center">
+        <div class="mockup-tag">Web Magazine</div>
+        <div class="tablet-mockup">
+          <div class="tablet-frame">
+            <div class="tablet-camera"></div>
+            <div class="tablet-screen">
+              <div class="mag-header">
+                <div class="mag-logo">SAPMANRI</div>
+                <div class="mag-nav"><span>Issue</span><span>About</span></div>
+              </div>
+              <div class="mag-hero" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ydgw_3fee1146_99b15c58.jpg')">
+                <div class="mag-hero-text">
+                  <div class="mag-issue">No. 00</div>
+                  <div class="mag-title">내 손으로 만드는<br>작은 불빛 하나</div>
+                </div>
+              </div>
+              <div class="mag-body">
+                <div class="mag-body-img" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/yuqc_2373e1ae_647b22ac.jpg')"></div>
+                <div class="mag-body-text">
+                  <div class="mag-section-label">직조의 순간</div>
+                  <div class="mag-text-lines">
+                    <div class="line"></div><div class="line short"></div>
+                    <div class="line"></div><div class="line shorter"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="tablet-home-bar"></div>
+          </div>
+        </div>
+        <div class="mockup-label">채널 콘텐츠를 감성<br>웹 매거진으로 발행</div>
+      </div>
+
+      <!-- 포스트카드 스택 -->
+      <div class="mockup-block">
+        <div class="mockup-tag">Digital Postcard</div>
+        <div class="postcard-mockup">
+          <div class="postcard-stack">
+            <div class="postcard postcard-3" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/rbks_e2412097_461f4605.jpg')">
+              <div class="postcard-inner"><div class="postcard-num">03</div></div>
+            </div>
+            <div class="postcard postcard-2" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/17keo_5232b0a9_d29fed3b.jpg')">
+              <div class="postcard-inner"><div class="postcard-num">01</div></div>
+            </div>
+            <div class="postcard postcard-1" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/166ac_a21e72fc_7899acc.jpg')">
+              <div class="postcard-inner">
+                <div class="postcard-badge">SAPMANRI</div>
+                <div class="postcard-title">오후, 데이지밭에서</div>
+                <div class="postcard-sub">봄날의 산책 · 02</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mockup-label">브랜드 감성을 담은<br>포스트카드로 팬과 소통</div>
+      </div>
+
+    </div>
+
+    <div class="tools-links">
+      <a href="https://carousel-generator-roan.vercel.app/carousel_ai_generator.html" target="_blank" class="tool-link">캐러샐 생성기 →</a>
+      <a href="https://carousel-generator-roan.vercel.app/magazine/index.html" target="_blank" class="tool-link">웹 매거진 →</a>
+      <a href="https://carousel-generator-roan.vercel.app/postcards/index.html" target="_blank" class="tool-link">포스트카드 →</a>
     </div>
   </div>
 </section>
