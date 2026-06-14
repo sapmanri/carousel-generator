@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAPMANRI · Postcard Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Black+Han+Sans&family=Bebas+Neue&family=Nanum+Myeongjo:wght@400;700&family=DM+Serif+Display:ital@0;1&family=Lato:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -16,6 +16,11 @@
   --serif:"Gowun Batang","Cormorant Garamond",Georgia,serif;
   --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
   --mono:'JetBrains Mono',monospace;
+  --f-mag-title:"Playfair Display",Georgia,serif;
+  --f-typo-word:"Black Han Sans","Bebas Neue",Impact,sans-serif;
+  --f-story-title:"Nanum Myeongjo","Gowun Batang",serif;
+  --f-story-body:"Lato","Noto Sans KR",sans-serif;
+  --f-edit-title:"DM Serif Display",Georgia,serif;
 }
 html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh}
 a{color:inherit}
@@ -98,6 +103,10 @@ header{
 .pc-preview-side .hint{font-size:9px;text-align:center;color:var(--dim);letter-spacing:0.08em}
 .pc-fields{flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px}
 .field label{display:block;font-size:10px;letter-spacing:0.1em;color:var(--dim);margin-bottom:4px;text-transform:uppercase}
+.field-lang label{display:flex;justify-content:space-between;align-items:center}
+.lang-toggle{display:flex;gap:3px}
+.lang-toggle button{background:none;border:1px solid var(--border);color:var(--dim);font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;cursor:pointer;line-height:1.4}
+.lang-toggle button.active{border-color:var(--orange);color:var(--orange);background:rgba(232,118,44,0.08)}
 .field input,.field select,.field textarea{
   width:100%;background:var(--s1);border:1px solid var(--border);color:var(--text);
   font-family:var(--sans);font-weight:300;font-size:13px;padding:8px 10px;border-radius:4px;outline:none;
@@ -167,8 +176,8 @@ header{
 .pc-canvas .pc-mag01-meta{display:flex;flex-direction:column;gap:2px}
 .pc-canvas .pc-mag01-brand{font-family:var(--sans);font-size:5px;letter-spacing:0.15em;text-transform:uppercase;color:rgba(26,26,26,0.45)}
 .pc-canvas .pc-mag01-label{font-family:var(--sans);font-size:6px;font-weight:500;letter-spacing:0.08em}
-.pc-canvas .pc-mag01-num{font-family:var(--serif);font-weight:700;font-size:26px;line-height:1;color:#1A1A1A}
-.pc-canvas .pc-mag01-title-over{font-family:var(--serif);font-weight:700;font-size:28px;line-height:1.1;color:#1A1A1A;margin-bottom:2%;word-break:keep-all}
+.pc-canvas .pc-mag01-num{font-family:var(--f-mag-title);font-weight:700;font-size:26px;line-height:1;color:#1A1A1A}
+.pc-canvas .pc-mag01-title-over{font-family:var(--f-mag-title);font-weight:900;font-size:28px;line-height:1.1;color:#1A1A1A;margin-bottom:2%;word-break:keep-all}
 .pc-canvas .pc-mag01-photo{flex:1;overflow:hidden;background:#1d1815}
 .pc-canvas .pc-mag01-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .pc-canvas .pc-mag01-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:2%;border-top:1px solid rgba(26,26,26,0.12);padding-top:1.5%}
@@ -179,10 +188,10 @@ header{
 .pc-canvas .pc-typo01{position:absolute;inset:0;background:#FAFAFA;display:flex}
 .pc-canvas .pc-typo01-side{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--sans);font-size:5px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,26,26,0.28);padding:5% 0 5% 4.5%;white-space:nowrap;align-self:flex-end}
 .pc-canvas .pc-typo01-main{flex:1;padding:4% 6% 4% 2%;display:flex;flex-direction:column;justify-content:space-between}
-.pc-canvas .pc-typo01-word{font-family:var(--serif);font-weight:900;font-size:52px;line-height:0.92;color:#1A1A1A;letter-spacing:-0.02em;word-break:break-all}
+.pc-canvas .pc-typo01-word{font-family:var(--f-typo-word);font-weight:900;font-size:52px;line-height:0.92;color:#1A1A1A;letter-spacing:-0.02em;word-break:break-all}
 .pc-canvas .pc-typo01-quote{padding:4% 0}
 .pc-canvas .pc-typo01-qq{font-family:Georgia,serif;font-size:32px;color:#1A1A1A;line-height:1}
-.pc-canvas .pc-typo01-qtext{font-family:var(--sans);font-size:10px;font-weight:300;line-height:1.7;color:#1A1A1A;margin-top:1%;word-break:keep-all}
+.pc-canvas .pc-typo01-qtext{font-family:var(--f-story-body);font-size:10px;font-weight:300;line-height:1.7;color:#1A1A1A;margin-top:1%;word-break:keep-all}
 .pc-canvas .pc-typo01-attr{font-family:var(--sans);font-size:6px;color:rgba(26,26,26,0.4);margin-top:4%}
 .pc-canvas .pc-typo01-photo{flex:1;overflow:hidden;background:#1d1815;max-height:37%}
 .pc-canvas .pc-typo01-photo img{width:100%;height:100%;object-fit:cover;display:block}
@@ -193,10 +202,10 @@ header{
 .pc-canvas .pc-story01-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8%;margin-bottom:2%;padding-bottom:2%;border-bottom:1px solid rgba(26,26,26,0.12)}
 .pc-canvas .pc-story01-titlewrap{flex:1;min-width:0}
 .pc-canvas .pc-story01-label{font-family:var(--sans);font-size:5.5px;color:rgba(26,26,26,0.4);letter-spacing:0.12em;margin-bottom:2%}
-.pc-canvas .pc-story01-title{font-family:var(--serif);font-weight:700;font-size:22px;line-height:1.2;color:#1A1A1A;word-break:keep-all}
+.pc-canvas .pc-story01-title{font-family:var(--f-story-title);font-weight:700;font-size:22px;line-height:1.2;color:#1A1A1A;word-break:keep-all}
 .pc-canvas .pc-story01-datetag{text-align:right;flex-shrink:0}
 .pc-canvas .pc-story01-brand{font-family:var(--sans);font-size:5px;font-weight:700;letter-spacing:0.15em;color:var(--orange);margin-bottom:3%}
-.pc-canvas .pc-story01-date{font-family:var(--serif);font-weight:700;font-size:16px;line-height:1.1;color:#1A1A1A}
+.pc-canvas .pc-story01-date{font-family:var(--f-story-body);font-weight:700;font-size:16px;line-height:1.1;color:#1A1A1A}
 .pc-canvas .pc-story01-dow{font-family:var(--sans);font-size:5.5px;color:rgba(26,26,26,0.4);margin-top:2%}
 .pc-canvas .pc-story01-photo{flex:1;overflow:hidden;background:#1d1815}
 .pc-canvas .pc-story01-photo img{width:100%;height:100%;object-fit:cover;display:block}
@@ -206,7 +215,7 @@ header{
 
 /* ── Edit 01 ── */
 .pc-canvas .pc-edit01{position:absolute;inset:0;background:#FAFAFA;padding:4% 7%;display:flex;flex-direction:column}
-.pc-canvas .pc-edit01-title{font-family:var(--serif);font-weight:700;font-size:32px;line-height:1;color:#1A1A1A;word-break:keep-all}
+.pc-canvas .pc-edit01-title{font-family:var(--f-edit-title);font-weight:700;font-size:32px;line-height:1;color:#1A1A1A;word-break:keep-all}
 .pc-canvas .pc-edit01-sub{font-family:var(--sans);font-size:6px;color:rgba(26,26,26,0.4);margin-top:1.5%;letter-spacing:0.08em;border-bottom:1px solid rgba(26,26,26,0.1);padding-bottom:2%;margin-bottom:2%}
 .pc-canvas .pc-edit01-grid{display:flex;gap:2%;height:46%}
 .pc-canvas .pc-edit01-photoa{flex:1.4;overflow:hidden;background:#1d1815}
@@ -276,7 +285,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Postcard Editor<span class="build-tag">v2026-06-14 02:20 KST</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Postcard Editor<span class="build-tag">v2026-06-14 02:50 KST</span></div>
   <div class="header-right">
     <input type="password" class="key-field" id="apiKeyField" placeholder="Anthropic API Key">
     <button class="btn-ghost" id="apiKeyBtn" onclick="toggleField('apiKeyField','apiKeyBtn',API_KEY_STORAGE)">API Key</button>
@@ -342,9 +351,9 @@ header{
 
 </div>
 
-<script src="../magazine/image-library.js?v=20260614e"></script>
-<script src="./postcards-templates.js?v=20260614e"></script>
-<script src="./postcards-core.js?v=20260614e"></script>
+<script src="../magazine/image-library.js?v=20260614f"></script>
+<script src="./postcards-templates.js?v=20260614f"></script>
+<script src="./postcards-core.js?v=20260614f"></script>
 <script>
 // ── 업로드존: 파일 선택/드래그앤드롭 → ImageLibrary에 등록 → 라이브러리 그리드 새로고침 ──
 (function(){
