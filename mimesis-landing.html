@@ -7,481 +7,159 @@
 <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
     --fog: #F0EEE9;
     --ink: #1E1C1A;
     --dust: #9A9590;
     --warm: #C4A882;
     --pale: #E8E4DC;
-    --gap: clamp(4rem, 10vw, 9rem);
+    --gap: clamp(4rem, 10vw, 8rem);
   }
-
   html { scroll-behavior: smooth; }
+  body { background: var(--fog); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; font-weight: 300; line-height: 1.8; -webkit-font-smoothing: antialiased; }
 
-  body {
-    background: var(--fog);
-    color: var(--ink);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 300;
-    line-height: 1.8;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* ── NAV ── */
-  nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.6rem 3rem;
-    background: var(--fog);
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.4s;
-  }
+  /* NAV */
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 1.6rem 3rem; background: rgba(240,238,233,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid transparent; transition: border-color 0.4s; }
   nav.scrolled { border-color: var(--pale); }
-
-  .logo {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 1rem;
-    letter-spacing: 0.1em;
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .logo span {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-weight: 300;
-    font-size: 0.75rem;
-    color: var(--dust);
-    margin-left: 0.6em;
-    letter-spacing: 0.15em;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 2.4rem;
-    list-style: none;
-  }
-  .nav-links a {
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    color: var(--dust);
-    text-decoration: none;
-    transition: color 0.3s;
-  }
+  .logo { font-family: 'Nanum Myeongjo', serif; font-size: 1rem; letter-spacing: 0.1em; color: var(--ink); text-decoration: none; }
+  .logo span { font-family: 'Noto Sans KR', sans-serif; font-weight: 300; font-size: 0.72rem; color: var(--dust); margin-left: 0.6em; letter-spacing: 0.15em; }
+  .nav-links { display: flex; gap: 2.4rem; list-style: none; }
+  .nav-links a { font-size: 0.78rem; letter-spacing: 0.12em; color: var(--dust); text-decoration: none; transition: color 0.3s; }
   .nav-links a:hover { color: var(--ink); }
 
-  /* ── HERO ── */
-  .hero {
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 0 3rem 5rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero-bg {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(to bottom, transparent 50%, var(--fog) 100%),
-      url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1800&auto=format&fit=crop&q=60') center/cover no-repeat;
-    opacity: 0.35;
-  }
-
-  .hero-content { position: relative; max-width: 780px; }
-
-  .hero-eyebrow {
-    font-size: 0.72rem;
-    letter-spacing: 0.25em;
-    color: var(--warm);
-    margin-bottom: 1.8rem;
-    text-transform: uppercase;
-  }
-
-  .hero-title {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: clamp(2.8rem, 6vw, 5.2rem);
-    line-height: 1.2;
-    font-weight: 400;
-    margin-bottom: 2rem;
-    word-break: keep-all;
-  }
-
-  .hero-title em {
-    font-style: normal;
-    color: var(--warm);
-  }
-
-  .hero-sub {
-    font-size: 0.88rem;
-    color: var(--dust);
-    max-width: 440px;
-    line-height: 2;
-    margin-bottom: 3rem;
-  }
-
-  .btn {
-    display: inline-block;
-    padding: 0.9rem 2.4rem;
-    border: 1px solid var(--ink);
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 300;
-    letter-spacing: 0.15em;
-    color: var(--ink);
-    text-decoration: none;
-    transition: background 0.3s, color 0.3s;
-  }
+  /* HERO */
+  .hero { min-height: 100svh; display: grid; grid-template-columns: 1fr 1fr; position: relative; padding-top: 5rem; }
+  .hero-left { display: flex; flex-direction: column; justify-content: flex-end; padding: 0 4rem 5rem 3rem; }
+  .hero-right { position: relative; overflow: hidden; }
+  .hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; filter: saturate(0.88) brightness(0.95); }
+  .hero-eyebrow { font-size: 0.7rem; letter-spacing: 0.28em; color: var(--warm); margin-bottom: 2rem; text-transform: uppercase; }
+  .hero-title { font-family: 'Nanum Myeongjo', serif; font-size: clamp(2.4rem, 4vw, 4rem); line-height: 1.3; font-weight: 400; margin-bottom: 2rem; word-break: keep-all; }
+  .hero-title em { font-style: normal; color: var(--warm); }
+  .hero-sub { font-size: 0.86rem; color: var(--dust); max-width: 380px; line-height: 2.2; margin-bottom: 3rem; word-break: keep-all; }
+  .btn { display: inline-block; padding: 0.9rem 2.4rem; border: 1px solid var(--ink); font-size: 0.78rem; letter-spacing: 0.15em; color: var(--ink); text-decoration: none; transition: background 0.3s, color 0.3s; }
   .btn:hover { background: var(--ink); color: var(--fog); }
 
-  /* ── SECTION BASE ── */
+  /* SECTION BASE */
   section { padding: var(--gap) 3rem; }
+  .section-inner { max-width: 1100px; margin: 0 auto; }
+  .label { font-size: 0.68rem; letter-spacing: 0.3em; color: var(--warm); text-transform: uppercase; margin-bottom: 3rem; display: flex; align-items: center; gap: 1rem; }
+  .label::after { content: ''; width: 40px; height: 1px; background: var(--warm); opacity: 0.5; }
 
-  .label {
-    font-size: 0.68rem;
-    letter-spacing: 0.3em;
-    color: var(--warm);
-    text-transform: uppercase;
-    margin-bottom: 3rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .label::after {
-    content: '';
-    flex: 1;
-    max-width: 60px;
-    height: 1px;
-    background: var(--warm);
-    opacity: 0.5;
-  }
+  /* ABOUT */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+  .about-text h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.8rem, 2.8vw, 2.4rem); font-weight: 400; line-height: 1.6; margin-bottom: 2rem; word-break: keep-all; }
+  .about-text p { font-size: 0.88rem; color: #5A5652; line-height: 2.3; margin-bottom: 1.4rem; word-break: keep-all; }
+  .about-stats { display: flex; flex-direction: column; gap: 2.4rem; padding-top: 0.5rem; }
+  .stat { border-left: 1px solid var(--pale); padding-left: 1.6rem; }
+  .stat-num { font-family: 'Nanum Myeongjo', serif; font-size: 2.4rem; font-weight: 400; line-height: 1; margin-bottom: 0.4rem; }
+  .stat-label { font-size: 0.78rem; color: var(--dust); }
 
-  /* ── ABOUT ── */
-  .about { max-width: 1100px; margin: 0 auto; }
+  /* PORTFOLIO */
+  .film-strip { display: flex; gap: 6px; margin-bottom: 1.6rem; }
+  .film-hole { width: 10px; height: 10px; border-radius: 2px; border: 1px solid var(--warm); opacity: 0.4; }
+  .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+  .portfolio-item { position: relative; overflow: hidden; cursor: pointer; }
+  .portfolio-item::before { content: ''; display: block; padding-top: 66%; }
+  .portfolio-thumb { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.8s ease, filter 0.4s; filter: saturate(0.8) brightness(0.9); }
+  .portfolio-item:hover .portfolio-thumb { transform: scale(1.05); filter: saturate(1) brightness(1); }
+  .portfolio-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.4rem 1rem 0.9rem; background: linear-gradient(to top, rgba(20,18,16,0.8) 0%, transparent 100%); color: #fff; opacity: 0; transform: translateY(4px); transition: opacity 0.4s, transform 0.4s; }
+  .portfolio-item:hover .portfolio-info { opacity: 1; transform: translateY(0); }
+  .portfolio-info-type { font-size: 0.62rem; letter-spacing: 0.22em; color: var(--warm); margin-bottom: 0.3rem; text-transform: uppercase; }
+  .portfolio-info-title { font-family: 'Nanum Myeongjo', serif; font-size: 0.9rem; }
+  /* 큰 카드 */
+  .portfolio-item.large::before { padding-top: 0; }
+  .portfolio-item.large { grid-row: span 2; }
+  .portfolio-item.large .portfolio-thumb { position: relative; inset: auto; height: 100%; min-height: 400px; }
 
-  .about-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6rem;
-    align-items: start;
-  }
-
-  .about-text h2 {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: clamp(1.8rem, 3vw, 2.6rem);
-    font-weight: 400;
-    line-height: 1.5;
-    margin-bottom: 2rem;
-    word-break: keep-all;
-  }
-
-  .about-text p {
-    font-size: 0.9rem;
-    color: #5A5652;
-    line-height: 2.2;
-    margin-bottom: 1.4rem;
-    word-break: keep-all;
-  }
-
-  .about-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 2.4rem;
-    padding-top: 1rem;
-  }
-
-  .stat {
-    border-left: 1px solid var(--pale);
-    padding-left: 1.6rem;
-  }
-  .stat-num {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 2.4rem;
-    font-weight: 400;
-    color: var(--ink);
-    line-height: 1;
-    margin-bottom: 0.4rem;
-  }
-  .stat-label {
-    font-size: 0.78rem;
-    color: var(--dust);
-    letter-spacing: 0.08em;
-  }
-
-  /* ── SERVICES ── */
+  /* SERVICES */
   .services { background: var(--ink); color: var(--fog); }
-  .services-inner { max-width: 1100px; margin: 0 auto; }
   .services .label { color: var(--warm); }
   .services .label::after { background: var(--warm); }
+  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #2a2826; }
+  .service-item { padding: 2.8rem 2.4rem 2.8rem 0; border-bottom: 1px solid #2a2826; }
+  .service-item:nth-child(n+2) { padding-left: 2.4rem; border-left: 1px solid #2a2826; }
+  .service-num { font-size: 0.65rem; color: var(--warm); letter-spacing: 0.22em; margin-bottom: 1.4rem; }
+  .service-name { font-family: 'Nanum Myeongjo', serif; font-size: 1.25rem; font-weight: 400; margin-bottom: 1rem; line-height: 1.5; word-break: keep-all; }
+  .service-desc { font-size: 0.82rem; color: #7a7672; line-height: 2.1; word-break: keep-all; }
 
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0;
-    border-top: 1px solid #333;
-  }
+  /* TOOLS — 경쟁력 섹션 */
+  .tools-section { background: var(--pale); }
+  .tools-intro { margin-bottom: 3.5rem; }
+  .tools-intro h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.6rem, 2.5vw, 2.2rem); font-weight: 400; line-height: 1.6; margin-bottom: 1.2rem; word-break: keep-all; }
+  .tools-intro p { font-size: 0.88rem; color: var(--dust); line-height: 2.2; max-width: 560px; word-break: keep-all; }
+  .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
+  .tool-card { background: var(--fog); padding: 2rem 1.6rem; border: 1px solid var(--pale); text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 0.8rem; transition: border-color 0.3s, box-shadow 0.3s; }
+  .tool-card:hover { border-color: var(--warm); box-shadow: 0 4px 20px rgba(196,168,130,0.15); }
+  .tool-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
+  .tool-name { font-family: 'Nanum Myeongjo', serif; font-size: 1.05rem; font-weight: 400; }
+  .tool-desc { font-size: 0.78rem; color: var(--dust); line-height: 1.9; word-break: keep-all; }
+  .tool-tag { font-size: 0.65rem; letter-spacing: 0.16em; color: var(--warm); text-transform: uppercase; margin-top: auto; padding-top: 0.8rem; border-top: 1px solid var(--pale); }
 
-  .service-item {
-    padding: 3rem 2.4rem 3rem 0;
-    border-bottom: 1px solid #333;
-  }
-  .service-item:not(:last-child) {
-    border-right: 1px solid #333;
-    padding-right: 2.4rem;
-  }
-  .service-item:nth-child(2),
-  .service-item:nth-child(3) { padding-left: 2.4rem; }
+  /* PROCESS */
+  .process-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5rem; }
+  .process-step-label { font-size: 0.65rem; color: var(--warm); letter-spacing: 0.22em; margin-bottom: 0.8rem; }
+  .process-step h3 { font-family: 'Nanum Myeongjo', serif; font-size: 1.05rem; font-weight: 400; margin-bottom: 0.7rem; }
+  .process-step p { font-size: 0.82rem; color: var(--dust); line-height: 2; word-break: keep-all; }
 
-  .service-num {
-    font-size: 0.68rem;
-    color: var(--warm);
-    letter-spacing: 0.2em;
-    margin-bottom: 1.6rem;
-  }
-
-  .service-name {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 1.3rem;
-    font-weight: 400;
-    margin-bottom: 1.2rem;
-    line-height: 1.5;
-    word-break: keep-all;
-  }
-
-  .service-desc {
-    font-size: 0.82rem;
-    color: #8A8680;
-    line-height: 2;
-    word-break: keep-all;
-  }
-
-  /* ── PORTFOLIO ── */
-  .portfolio { max-width: 1100px; margin: 0 auto; }
-
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-  }
-
-  .portfolio-item {
-    position: relative;
-    overflow: hidden;
-    background: var(--pale);
-    cursor: pointer;
-  }
-
-  /* 필름 프레임 느낌 — 시그니처 요소 */
-  .portfolio-item::before {
-    content: '';
-    display: block;
-    padding-top: 62%;
-  }
-
-  .portfolio-thumb {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    transition: transform 0.7s ease, filter 0.4s;
-    filter: saturate(0.85) brightness(0.92);
-  }
-
-  .portfolio-item:hover .portfolio-thumb {
-    transform: scale(1.04);
-    filter: saturate(1) brightness(1);
-  }
-
-  .portfolio-info {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 1.6rem 1.2rem 1rem;
-    background: linear-gradient(to top, rgba(20,18,16,0.75) 0%, transparent 100%);
-    color: #fff;
-    transform: translateY(4px);
-    opacity: 0;
-    transition: opacity 0.4s, transform 0.4s;
-  }
-
-  .portfolio-item:hover .portfolio-info {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .portfolio-info-type {
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: var(--warm);
-    margin-bottom: 0.4rem;
-    text-transform: uppercase;
-  }
-
-  .portfolio-info-title {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 0.95rem;
-    font-weight: 400;
-  }
-
-  /* 필름 홀 장식 */
-  .film-strip {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 1.4rem;
-    align-items: center;
-  }
-  .film-hole {
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    border: 1px solid var(--warm);
-    opacity: 0.5;
-  }
-
-  /* ── PROCESS ── */
-  .process { background: var(--pale); }
-  .process-inner { max-width: 1100px; margin: 0 auto; }
-
-  .process-list {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 3rem;
-    margin-top: 1rem;
-  }
-
-  .process-step { }
-
-  .process-step-label {
-    font-size: 0.68rem;
-    color: var(--warm);
-    letter-spacing: 0.2em;
-    margin-bottom: 0.8rem;
-  }
-
-  .process-step h3 {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 1.1rem;
-    font-weight: 400;
-    margin-bottom: 0.8rem;
-  }
-
-  .process-step p {
-    font-size: 0.82rem;
-    color: var(--dust);
-    line-height: 2;
-    word-break: keep-all;
-  }
-
-  /* ── CONTACT ── */
-  .contact { max-width: 680px; margin: 0 auto; text-align: center; }
-
-  .contact h2 {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-    font-weight: 400;
-    line-height: 1.5;
-    margin-bottom: 1.4rem;
-    word-break: keep-all;
-  }
-
-  .contact p {
-    font-size: 0.88rem;
-    color: var(--dust);
-    margin-bottom: 3rem;
-    line-height: 2;
-  }
-
-  .contact-links {
-    display: flex;
-    gap: 1.2rem;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .btn-ghost {
-    display: inline-block;
-    padding: 0.9rem 2rem;
-    border: 1px solid var(--pale);
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    color: var(--dust);
-    text-decoration: none;
-    transition: border-color 0.3s, color 0.3s;
-  }
+  /* CONTACT */
+  .contact-inner { max-width: 640px; margin: 0 auto; text-align: center; }
+  .contact-inner h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 400; line-height: 1.5; margin-bottom: 1.4rem; word-break: keep-all; }
+  .contact-inner p { font-size: 0.86rem; color: var(--dust); margin-bottom: 3rem; line-height: 2.2; }
+  .contact-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-ghost { display: inline-block; padding: 0.9rem 2rem; border: 1px solid var(--pale); font-size: 0.78rem; letter-spacing: 0.12em; color: var(--dust); text-decoration: none; transition: border-color 0.3s, color 0.3s; }
   .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
 
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid var(--pale);
-    padding: 2.4rem 3rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+  /* FOOTER */
+  footer { border-top: 1px solid var(--pale); padding: 2.2rem 3rem; display: flex; justify-content: space-between; align-items: center; }
+  footer p { font-size: 0.7rem; color: var(--dust); letter-spacing: 0.08em; }
 
-  footer p {
-    font-size: 0.72rem;
-    color: var(--dust);
-    letter-spacing: 0.08em;
-  }
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  /* ── REVEAL ── */
-  .reveal {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-  }
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-right { height: 55vw; }
+    .hero-left { padding: 3rem 1.6rem 4rem; }
     nav { padding: 1.4rem 1.6rem; }
     .nav-links { display: none; }
-    .hero { padding: 0 1.6rem 4rem; }
     section { padding: var(--gap) 1.6rem; }
     .about-grid { grid-template-columns: 1fr; gap: 3rem; }
     .services-grid { grid-template-columns: 1fr; }
-    .service-item { border-right: none !important; padding-left: 0 !important; padding-right: 0 !important; }
+    .service-item { border-left: none !important; padding-left: 0 !important; }
+    .tools-grid { grid-template-columns: 1fr 1fr; }
     .portfolio-grid { grid-template-columns: 1fr 1fr; }
+    .portfolio-item.large { grid-row: span 1; }
     .process-list { grid-template-columns: 1fr 1fr; gap: 2rem; }
-    footer { flex-direction: column; gap: 1rem; text-align: center; }
+    footer { flex-direction: column; gap: 0.8rem; text-align: center; }
   }
-
   @media (max-width: 480px) {
+    .tools-grid { grid-template-columns: 1fr; }
     .portfolio-grid { grid-template-columns: 1fr; }
     .process-list { grid-template-columns: 1fr; }
   }
-
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
-    .portfolio-thumb { transition: none; }
   }
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav id="nav">
   <a href="#" class="logo">미메시스<span>MIMESIS</span></a>
   <ul class="nav-links">
     <li><a href="#about">소개</a></li>
+    <li><a href="#portfolio">포트폴리오</a></li>
     <li><a href="#services">서비스</a></li>
-    <li><a href="#portfolio">작업물</a></li>
+    <li><a href="#tools">도구</a></li>
     <li><a href="#contact">문의</a></li>
   </ul>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-bg"></div>
-  <div class="hero-content">
+  <div class="hero-left">
     <p class="hero-eyebrow">삽만리 · Sapmanri</p>
     <h1 class="hero-title">
       당신의 브랜드를<br>
@@ -495,23 +173,20 @@
     </p>
     <a href="#contact" class="btn">문의하기</a>
   </div>
+  <div class="hero-right">
+    <img class="hero-img" src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/vuf4_c74c35b2_1a21d60c.jpg" alt="삽만리 채널 이미지" />
+  </div>
 </section>
 
 <!-- ABOUT -->
 <section id="about">
-  <div class="about reveal">
+  <div class="section-inner reveal">
     <div class="label">About</div>
     <div class="about-grid">
       <div class="about-text">
         <h2>콘텐츠는 결국<br>사람의 이야기입니다</h2>
-        <p>
-          미메시스는 감성찾아삽만리 채널을 3년간 직접 운영하며 쌓아온 경험을 바탕으로,
-          작지만 진심 있는 브랜드들의 유튜브 채널을 함께 만들어갑니다.
-        </p>
-        <p>
-          화려한 편집보다 오래 남는 장면을, 빠른 성장보다 꾸준히 쌓이는 신뢰를 중심에 둡니다.
-          한 번의 영상이 아니라 채널 전체가 브랜드의 목소리가 될 수 있도록.
-        </p>
+        <p>미메시스는 감성찾아삽만리 채널을 3년간 직접 운영하며 쌓아온 경험을 바탕으로, 작지만 진심 있는 브랜드들의 유튜브 채널을 함께 만들어갑니다.</p>
+        <p>화려한 편집보다 오래 남는 장면을, 빠른 성장보다 꾸준히 쌓이는 신뢰를 중심에 둡니다. 한 번의 영상이 아니라 채널 전체가 브랜드의 목소리가 될 수 있도록.</p>
       </div>
       <div class="about-stats">
         <div class="stat">
@@ -531,45 +206,9 @@
   </div>
 </section>
 
-<!-- SERVICES -->
-<section id="services" class="services">
-  <div class="services-inner">
-    <div class="label">Services</div>
-    <div class="services-grid reveal">
-      <div class="service-item">
-        <div class="service-num">01</div>
-        <div class="service-name">채널 진단<br>컨설팅</div>
-        <p class="service-desc">
-          기존 채널을 분석하고 방향을 제안합니다.
-          구독자 정체, 영상 퀄리티, SEO, 썸네일까지—
-          한 번의 리포트로 개선 포인트를 정리합니다.
-        </p>
-      </div>
-      <div class="service-item">
-        <div class="service-num">02</div>
-        <div class="service-name">채널 런칭<br>패키지</div>
-        <p class="service-desc">
-          없는 채널을 처음부터 만듭니다.
-          채널 콘셉트 기획부터 초기 영상 제작까지.
-          브랜드의 색깔을 찾는 것부터 함께 시작합니다.
-        </p>
-      </div>
-      <div class="service-item">
-        <div class="service-num">03</div>
-        <div class="service-name">월정액<br>운영 대행</div>
-        <p class="service-desc">
-          매달 정해진 편수를 기획·촬영·편집·업로드합니다.
-          SEO, 설명란, 썸네일까지 포함.
-          채널이 꾸준히 살아있도록 함께 유지합니다.
-        </p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- PORTFOLIO -->
 <section id="portfolio">
-  <div class="portfolio reveal">
+  <div class="section-inner reveal">
     <div class="label">Portfolio</div>
     <div class="film-strip">
       <div class="film-hole"></div><div class="film-hole"></div>
@@ -578,55 +217,109 @@
       <div class="film-hole"></div><div class="film-hole"></div>
     </div>
     <div class="portfolio-grid">
-      <div class="portfolio-item">
-        <div class="portfolio-thumb" style="background-image:url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop&q=60')"></div>
-        <div class="portfolio-info">
-          <div class="portfolio-info-type">YouTube · 슬로우라이프</div>
-          <div class="portfolio-info-title">감성찾아삽만리</div>
-        </div>
-      </div>
-      <div class="portfolio-item">
-        <div class="portfolio-thumb" style="background-image:url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&auto=format&fit=crop&q=60')"></div>
-        <div class="portfolio-info">
-          <div class="portfolio-info-type">YouTube · 시골일상</div>
-          <div class="portfolio-info-title">봄, 위공리에서</div>
-        </div>
-      </div>
-      <div class="portfolio-item">
-        <div class="portfolio-thumb" style="background-image:url('https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&auto=format&fit=crop&q=60')"></div>
-        <div class="portfolio-info">
-          <div class="portfolio-info-type">웹 매거진</div>
-          <div class="portfolio-info-title">삽만리 매거진</div>
-        </div>
-      </div>
-      <div class="portfolio-item">
-        <div class="portfolio-thumb" style="background-image:url('https://images.unsplash.com/photo-1543946207-39bd91e70ca7?w=800&auto=format&fit=crop&q=60')"></div>
+      <div class="portfolio-item large">
+        <div class="portfolio-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg');min-height:400px;position:relative;height:100%;"></div>
         <div class="portfolio-info">
           <div class="portfolio-info-type">YouTube · 홈카페</div>
-          <div class="portfolio-info-title">혼자 있는 오후</div>
+          <div class="portfolio-info-title">차를 내리는 오후</div>
         </div>
       </div>
       <div class="portfolio-item">
-        <div class="portfolio-thumb" style="background-image:url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=60')"></div>
+        <div class="portfolio-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/mxw4_44d0b9b6_8e176060.jpg')"></div>
         <div class="portfolio-info">
-          <div class="portfolio-info-type">YouTube · 자연</div>
-          <div class="portfolio-info-title">겨울 아침의 소리</div>
+          <div class="portfolio-info-type">YouTube · 시골일상</div>
+          <div class="portfolio-info-title">여름 정원에서</div>
         </div>
       </div>
       <div class="portfolio-item">
-        <div class="portfolio-thumb" style="background-image:url('https://images.unsplash.com/photo-1474562645009-95b4ced09e4b?w=800&auto=format&fit=crop&q=60')"></div>
+        <div class="portfolio-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/1fxc0_37c5d1b2_7d0d84d6.jpg')"></div>
         <div class="portfolio-info">
-          <div class="portfolio-info-type">YouTube · 계절</div>
-          <div class="portfolio-info-title">가평의 가을</div>
+          <div class="portfolio-info-type">YouTube · 슬로우라이프</div>
+          <div class="portfolio-info-title">돌길 위의 하루</div>
+        </div>
+      </div>
+      <div class="portfolio-item">
+        <div class="portfolio-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/x1bs_79f8ff65_298da3f7.jpg')"></div>
+        <div class="portfolio-info">
+          <div class="portfolio-info-type">YouTube · 공방</div>
+          <div class="portfolio-info-title">손으로 만드는 것들</div>
+        </div>
+      </div>
+      <div class="portfolio-item">
+        <div class="portfolio-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/yuqc_2373e1ae_647b22ac.jpg')"></div>
+        <div class="portfolio-info">
+          <div class="portfolio-info-type">YouTube · 공방</div>
+          <div class="portfolio-info-title">실과 빛의 시간</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- SERVICES -->
+<section id="services" class="services">
+  <div class="section-inner">
+    <div class="label reveal">Services</div>
+    <div class="services-grid reveal">
+      <div class="service-item">
+        <div class="service-num">01</div>
+        <div class="service-name">채널 진단<br>컨설팅</div>
+        <p class="service-desc">기존 채널을 분석하고 방향을 제안합니다. 구독자 정체, 영상 퀄리티, SEO, 썸네일까지 한 번의 리포트로 개선 포인트를 정리합니다.</p>
+      </div>
+      <div class="service-item">
+        <div class="service-num">02</div>
+        <div class="service-name">채널 런칭<br>패키지</div>
+        <p class="service-desc">없는 채널을 처음부터 만듭니다. 채널 콘셉트 기획부터 초기 영상 제작까지. 브랜드의 색깔을 찾는 것부터 함께 시작합니다.</p>
+      </div>
+      <div class="service-item">
+        <div class="service-num">03</div>
+        <div class="service-name">월정액<br>운영 대행</div>
+        <p class="service-desc">매달 정해진 편수를 기획·촬영·편집·업로드합니다. SEO, 설명란, 썸네일, 인스타그램 연계까지 포함. 채널이 꾸준히 살아있도록 함께 유지합니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS — 경쟁력 -->
+<section id="tools" class="tools-section">
+  <div class="section-inner reveal">
+    <div class="label">Our Tools</div>
+    <div class="tools-intro">
+      <h2>채널 하나를 넘어<br>브랜드 전체를 운영합니다</h2>
+      <p>영상 제작에서 끝나지 않아요. 인스타그램 캐러샐, 웹 매거진, 감성 포스트카드까지 — 브랜드의 콘텐츠가 모든 채널에서 일관된 목소리를 낼 수 있도록 자체 도구로 함께 운영합니다.</p>
+    </div>
+    <div class="tools-grid">
+      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/carousel_ai_generator.html" target="_blank">
+        <div class="tool-icon">🎴</div>
+        <div class="tool-name">캐러샐 생성기</div>
+        <div class="tool-desc">AI 기반 인스타그램 캐러샐 슬라이드를 채널 사진으로 즉시 제작합니다.</div>
+        <div class="tool-tag">Instagram · AI</div>
+      </a>
+      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/magazine/index.html" target="_blank">
+        <div class="tool-icon">📖</div>
+        <div class="tool-name">웹 매거진</div>
+        <div class="tool-desc">채널의 이야기를 감성 웹 매거진으로 발행해 브랜드 아카이브를 만듭니다.</div>
+        <div class="tool-tag">Web · Archive</div>
+      </a>
+      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/postcards/index.html" target="_blank">
+        <div class="tool-icon">✉️</div>
+        <div class="tool-name">포스트카드</div>
+        <div class="tool-desc">브랜드 사진으로 감성 디지털 포스트카드를 만들어 팬들과 소통합니다.</div>
+        <div class="tool-tag">SNS · Branding</div>
+      </a>
+      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/skyline_music_matcher.html" target="_blank">
+        <div class="tool-icon">🎵</div>
+        <div class="tool-name">스카이라인 매처</div>
+        <div class="tool-desc">영상의 음악과 장면을 시각적으로 분석해 최적의 편집 리듬을 찾습니다.</div>
+        <div class="tool-tag">Video · Music</div>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- PROCESS -->
-<section id="process" class="process">
-  <div class="process-inner">
+<section id="process">
+  <div class="section-inner">
     <div class="label reveal">Process</div>
     <div class="process-list reveal">
       <div class="process-step">
@@ -642,12 +335,12 @@
       <div class="process-step">
         <div class="process-step-label">STEP 03</div>
         <h3>만들기</h3>
-        <p>촬영·편집·업로드·SEO까지. 하나씩 꼼꼼하게, 서두르지 않고 진행합니다.</p>
+        <p>촬영·편집·업로드·SEO부터 인스타그램 콘텐츠까지. 서두르지 않고 꼼꼼하게.</p>
       </div>
       <div class="process-step">
         <div class="process-step-label">STEP 04</div>
         <h3>함께 쌓기</h3>
-        <p>영상 하나가 아니라 채널 전체가 자산이 되도록. 장기적인 호흡으로 운영합니다.</p>
+        <p>영상 하나가 아니라 채널과 브랜드 전체가 자산이 되도록. 장기적으로 운영합니다.</p>
       </div>
     </div>
   </div>
@@ -655,13 +348,10 @@
 
 <!-- CONTACT -->
 <section id="contact">
-  <div class="contact reveal">
+  <div class="contact-inner reveal">
     <div class="label" style="justify-content:center;">Contact</div>
     <h2>작은 브랜드의<br>큰 이야기를 기다립니다</h2>
-    <p>
-      규모에 상관없이 진심 있는 브랜드라면<br>
-      함께 이야기 나눠보고 싶습니다.
-    </p>
+    <p>규모에 상관없이 진심 있는 브랜드라면<br>함께 이야기 나눠보고 싶습니다.</p>
     <div class="contact-links">
       <a href="https://www.youtube.com/@sapmanri" target="_blank" class="btn">유튜브 채널 보기</a>
       <a href="mailto:contact@mimesis.kr" class="btn-ghost">이메일 문의</a>
@@ -670,29 +360,23 @@
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
   <p>© 2026 미메시스 · Mimesis</p>
-  <p>삽만리 · Sapmanri · 감성찾아삽만리</p>
+  <p>삽만리 · @sapmanri</p>
 </footer>
 
 <script>
-  // nav scroll effect
   const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 40);
-  });
-
-  // reveal on scroll
+  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 40); });
   const reveals = document.querySelectorAll('.reveal');
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
       if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.08 });
   reveals.forEach(el => observer.observe(el));
 </script>
 </body>
