@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.3.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.3.1</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -356,7 +356,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
       <div style="width:2px;height:24px;background:#fff;border-radius:1px"></div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+  <div style="display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap">
     <span style="font-size:9px;color:var(--mute)">슬라이드 수</span>
     <div style="display:flex;gap:4px">
       <button onclick="setPanoSlides(2)" id="panoN2" style="padding:4px 10px;font-size:9px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:2px;cursor:pointer">2장</button>
@@ -364,7 +364,14 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
       <button onclick="setPanoSlides(4)" id="panoN4" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">4장</button>
       <button onclick="setPanoSlides(5)" id="panoN5" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">5장</button>
     </div>
-    <span id="panoPickerInfo" style="font-size:9px;color:rgba(255,255,255,0.3)">선택 구간을 드래그로 조정하세요</span>
+    <span id="panoPickerInfo" style="font-size:9px;color:rgba(255,255,255,0.3)">좌우 핸들로 구간 조정</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+    <span style="font-size:9px;color:var(--mute);white-space:nowrap">세로 중심</span>
+    <input type="range" id="panoVCenter" min="0" max="1" step="0.01" value="0.5"
+      style="flex:1;accent-color:var(--accent);cursor:pointer"
+      oninput="panoVCenterVal=parseFloat(this.value);updateVCenterLabel(this.value)">
+    <span id="panoVCenterLabel" style="font-size:9px;color:rgba(255,255,255,0.3);min-width:28px">중앙</span>
   </div>
 </div>
 
@@ -795,7 +802,14 @@ function removeImg(i) {
 let panoSlideCount = 3;
 let panoSelLeft = 0.0;   // 0~1 비율
 let panoSelRight = 1.0;
+let panoVCenterVal = 0.5; // 세로 중심점 (0=상단, 0.5=중앙, 1=하단)
 
+function updateVCenterLabel(v) {
+  const labels = ['상단','','','','','','','','','','중앙','','','','','','','','','','하단'];
+  const pct = Math.round(v * 100);
+  const lbl = document.getElementById('panoVCenterLabel');
+  if (lbl) lbl.textContent = pct === 50 ? '중앙' : pct < 50 ? '↑' + pct + '%' : '↓' + pct + '%';
+}
 function setPanoSlides(n) {
   panoSlideCount = n;
   [2,3,4,5].forEach(i => {
@@ -991,7 +1005,13 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
       accent_color: img.analysis?.dominant_color || '#c8a97e',
       folio: String(i+1).padStart(2,'0') + ' / ' + String(images.length).padStart(2,'0'),
     }));
-    plan = { slides: panoSlides, caption: '' };
+    const panoMood = images[0]?.analysis?.mood || '';
+    const panoCopy = images[0]?.analysis?.suggested_copy || '';
+    const panoBody = images[0]?.analysis?.suggested_body || '';
+    const panoCaption = [panoCopy, panoBody].filter(Boolean).join('\n') +
+      (tag ? '\n\n' + tag : '') +
+      '\n\n#슬로우라이프 #감성사진 #오늘도느리게 #slowdays #감성찾아삽만리';
+    plan = { slides: panoSlides, caption: panoCaption };
     doneStep(s2);
   } else {
     try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode, textLang); doneStep(s2); }
@@ -2427,9 +2447,11 @@ async function renderPanoramaCanvas(images, slides, style, SIZE, ratio, singleMo
             // cover fit: 슬라이드 비율(W:H)에 맞게 그리기
             const scale = Math.max(W / sliceW, H / imgH);
             const drawW = sliceW * scale, drawH = imgH * scale;
+            // 세로 중심점: 0=상단, 0.5=중앙, 1=하단
+            const vOffset = (H - drawH) * panoVCenterVal;
             ctx.drawImage(img,
               srcX, 0, sliceW, imgH,          // src
-              destX + (W - drawW)/2, (H - drawH)/2, drawW, drawH  // dest
+              destX + (W - drawW)/2, vOffset, drawW, drawH  // dest
             );
             ctx.restore();
           }
