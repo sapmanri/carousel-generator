@@ -215,6 +215,55 @@ header{
 .pc-canvas .pc-edit01-brand{font-family:var(--serif);font-weight:700;font-size:9px;color:#1A1A1A}
 .pc-canvas .pc-edit01-num{font-family:var(--sans);font-size:5.5px;color:rgba(26,26,26,0.35)}
 
+/* ── Back Modern ── */
+.pc-canvas .pc-back-modern{position:absolute;inset:0;background:#FAFAFA;padding:5% 6%;display:flex;flex-direction:column}
+.pc-canvas .pc-bm-header{display:flex;justify-content:space-between;align-items:flex-start}
+.pc-canvas .pc-bm-brand{font-family:var(--sans);font-size:5px;letter-spacing:0.15em;color:rgba(26,26,26,0.35)}
+.pc-canvas .pc-bm-post{font-family:var(--serif);font-weight:700;font-size:15px;line-height:1.1;color:#1A1A1A;letter-spacing:0.15em;text-align:right}
+.pc-canvas .pc-bm-divider{height:1px;background:rgba(26,26,26,0.1);margin:5% 0}
+.pc-canvas .pc-bm-body{flex:1;display:flex}
+.pc-canvas .pc-bm-left{flex:1}
+.pc-canvas .pc-bm-right{flex:1;display:flex;flex-direction:column;justify-content:center;gap:10%}
+.pc-canvas .pc-bm-to{font-family:var(--sans);font-size:6px;letter-spacing:0.2em;color:rgba(26,26,26,0.45);margin-bottom:3%}
+.pc-canvas .pc-bm-lines{display:flex;flex-direction:column;gap:14%}
+.pc-canvas .pc-bm-line{height:1px;background:rgba(26,26,26,0.18)}
+.pc-canvas .pc-bm-line.accent{background:var(--orange);height:2px}
+.pc-canvas .pc-bm-footer{font-family:var(--sans);font-size:4.5px;color:rgba(26,26,26,0.28);margin-top:4%}
+
+/* ── Back Centre ── */
+.pc-canvas .pc-back-centre{position:absolute;inset:0;background:#F8F6F3;padding:5% 6%;display:flex;flex-direction:column}
+.pc-canvas .pc-bc-brand{font-family:var(--sans);font-size:5.5px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(26,26,26,0.38);text-align:center;margin-bottom:4%}
+.pc-canvas .pc-bc-body{flex:1;display:flex;gap:5%}
+.pc-canvas .pc-bc-photo{flex:1;overflow:hidden;background:#1d1815}
+.pc-canvas .pc-bc-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.pc-canvas .pc-bc-right{flex:1;display:flex;flex-direction:column;padding-top:4%}
+.pc-canvas .pc-bc-label{font-family:var(--sans);font-size:5px;letter-spacing:0.1em;color:rgba(26,26,26,0.35);margin-bottom:8%}
+.pc-canvas .pc-bc-to{font-family:var(--sans);font-size:6px;letter-spacing:0.18em;color:rgba(26,26,26,0.45);margin-bottom:6%}
+.pc-canvas .pc-bc-lines{display:flex;flex-direction:column;gap:16%;flex:1;justify-content:center}
+.pc-canvas .pc-bc-line{height:1px;background:rgba(26,26,26,0.15)}
+.pc-canvas .pc-bc-footer{font-family:var(--sans);font-size:4.5px;color:rgba(26,26,26,0.3);margin-top:3%}
+
+/* ── Back Seal ── */
+.pc-canvas .pc-back-seal{position:absolute;inset:0;background:#FAF8F5;padding:5% 6%;display:flex;flex-direction:column}
+.pc-canvas .pc-bs-header{display:flex;justify-content:space-between;align-items:flex-start}
+.pc-canvas .pc-bs-from{display:flex;flex-direction:column;gap:4%}
+.pc-canvas .pc-bs-brand{font-family:var(--sans);font-size:6px;font-weight:700;letter-spacing:0.15em;color:var(--orange)}
+.pc-canvas .pc-bs-addr{font-family:var(--sans);font-size:4.5px;color:rgba(26,26,26,0.35);margin-top:4%}
+.pc-canvas .pc-bs-web{font-family:var(--sans);font-size:4.5px;color:rgba(26,26,26,0.28);margin-top:2%}
+.pc-canvas .pc-bs-stamp{width:11%;aspect-ratio:4/5;border:1px solid rgba(26,26,26,0.2);flex-shrink:0}
+.pc-canvas .pc-bs-divider{height:1px;background:rgba(26,26,26,0.1);margin:5% 0}
+.pc-canvas .pc-bs-body{flex:1;display:flex}
+.pc-canvas .pc-bs-left{flex:1}
+.pc-canvas .pc-bs-right{flex:1;display:flex;flex-direction:column}
+.pc-canvas .pc-bs-to{font-family:var(--sans);font-size:6px;letter-spacing:0.12em;color:rgba(26,26,26,0.45);margin-bottom:6%}
+.pc-canvas .pc-bs-lines{display:flex;flex-direction:column;gap:16%}
+.pc-canvas .pc-bs-line{height:1px;background:rgba(26,26,26,0.18);width:80%}
+.pc-canvas .pc-bs-seal{display:flex;justify-content:flex-end;margin-top:auto}
+.pc-canvas .pc-bs-seal-inner{width:14%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(26,26,26,0.22);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;outline:2px solid transparent;box-shadow:0 0 0 3px rgba(26,26,26,0.08)}
+.pc-canvas .pc-bs-seal-text{font-family:var(--sans);font-size:3.5px;letter-spacing:0.12em;color:rgba(26,26,26,0.4);text-align:center}
+.pc-canvas .pc-bs-seal-sub{font-family:var(--sans);font-size:3px;color:rgba(26,26,26,0.28);text-align:center}
+.pc-canvas .pc-bs-footer{font-family:var(--sans);font-size:4.5px;color:rgba(26,26,26,0.3);margin-top:3%}
+
 /* ── 앞/뒤 전환 (3D flip 대신 단순 show/hide — 크로스 브라우저 안정성) ── */
 .flip-wrap{cursor:pointer;position:relative}
 .flip-inner{position:relative;width:100%;padding-bottom:150%}
@@ -229,7 +278,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Postcard Editor<span class="build-tag">v2026-06-14 01:20 KST</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Postcard Editor<span class="build-tag">v2026-06-14 01:55 KST</span></div>
   <div class="header-right">
     <input type="password" class="key-field" id="apiKeyField" placeholder="Anthropic API Key">
     <button class="btn-ghost" id="apiKeyBtn" onclick="toggleField('apiKeyField','apiKeyBtn',API_KEY_STORAGE)">API Key</button>
@@ -295,9 +344,9 @@ header{
 
 </div>
 
-<script src="../magazine/image-library.js?v=20260614b"></script>
-<script src="./postcards-templates.js?v=20260614b"></script>
-<script src="./postcards-core.js?v=20260614b"></script>
+<script src="../magazine/image-library.js?v=20260614c"></script>
+<script src="./postcards-templates.js?v=20260614c"></script>
+<script src="./postcards-core.js?v=20260614c"></script>
 <script>
 // ── 업로드존: 파일 선택/드래그앤드롭 → ImageLibrary에 등록 → 라이브러리 그리드 새로고침 ──
 (function(){
