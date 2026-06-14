@@ -173,9 +173,23 @@ const TEMPLATES = [
   { id: 'story-01', label: 'Story 01 · 날짜/스토리' },
   { id: 'edit-01',  label: 'Edit 01 · 듀얼 포토' },
 ];
+const BACK_TEMPLATES = [
+  { id: 'back-classic',  label: 'Classic · 클래식 구분선' },
+  { id: 'back-modern',   label: 'Modern · 미니멀 모던' },
+  { id: 'back-centre',   label: 'Centre · 사진+주소' },
+  { id: 'back-seal',     label: 'Seal · 씰 스탬프' },
+];
 function templateOptionsHtml(selectedId) {
   const opts = ['<option value="random">랜덤</option>'];
   for (const t of TEMPLATES) {
+    const sel = t.id === selectedId ? 'selected' : '';
+    opts.push(`<option value="${t.id}" ${sel}>${esc(t.label)}</option>`);
+  }
+  return opts.join('');
+}
+function backTemplateOptionsHtml(selectedId) {
+  const opts = [];
+  for (const t of BACK_TEMPLATES) {
     const sel = t.id === selectedId ? 'selected' : '';
     opts.push(`<option value="${t.id}" ${sel}>${esc(t.label)}</option>`);
   }
@@ -212,6 +226,7 @@ async function addSelectedAsPostcards() {
         number: String(postcards.length + 1).padStart(2, '0'),
         issueId: '',
         template: pickTemplate('random'),
+        backTemplate: 'back-classic',
       };
       await autoFillFromAnalysis(pc, item);
       postcards.push(pc);
@@ -306,7 +321,8 @@ function renderPostcardList() {
       <div class="pc-fields">
         <div class="field-row">
           <div class="field"><label>번호</label><input value="${esc(pc.number)}" oninput="postcards[${idx}].number=this.value; refreshPreview(${idx})"></div>
-          <div class="field"><label>템플릿</label><select onchange="postcards[${idx}].template=pickTemplate(this.value); refreshPreview(${idx})">${templateOptionsHtml(pc.template)}</select></div>
+          <div class="field"><label>템플릿 (앞면)</label><select onchange="postcards[${idx}].template=pickTemplate(this.value); refreshPreview(${idx})">${templateOptionsHtml(pc.template)}</select></div>
+          <div class="field"><label>템플릿 (뒷면)</label><select onchange="postcards[${idx}].backTemplate=this.value; refreshPreview(${idx})">${backTemplateOptionsHtml(pc.backTemplate||'back-classic')}</select></div>
         </div>
         <div class="field"><label>라벨</label><input value="${esc(pc.label)}" oninput="postcards[${idx}].label=this.value; refreshPreview(${idx})"></div>
         <div class="field"><label>제목</label><input value="${esc(pc.title)}" oninput="postcards[${idx}].title=this.value; refreshPreview(${idx})"></div>
