@@ -33,7 +33,8 @@ async function downloadPostcard(idx, side) {
     const ctx = canvas.getContext('2d');
 
     const renderers = CANVAS_RENDERERS[pc.template] || CANVAS_RENDERERS['expo-01'];
-    const renderer = side === 'back' ? renderers.back : renderers.front;
+    const backRenderers = BACK_CANVAS_RENDERERS[pc.backTemplate || 'back-classic'] || BACK_CANVAS_RENDERERS['back-classic'];
+    const renderer = side === 'back' ? backRenderers.back : renderers.front;
     await renderer(ctx, pc, youtubeUrl);
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -523,4 +524,258 @@ async function drawEdit01(ctx, pc) {
   ctx.font = `300 ${Math.round(W * 0.012)}px "Noto Sans KR", sans-serif`;
   ctx.fillText(`No.${pc.number || ''}`, W - padX, sigY);
   ctx.textAlign = 'left';
+}
+
+// ══════════════════════════════════════════════════════════════
+// 뒷면 캔버스 렌더러 (가로형 6x4: 1800x1200px)
+// ══════════════════════════════════════════════════════════════
+const BACK_CANVAS_RENDERERS = {
+  'back-classic': { back: drawBackClassic },
+  'back-modern':  { back: drawBackModern },
+  'back-centre':  { back: drawBackCentre },
+  'back-seal':    { back: drawBackSeal },
+};
+
+const PC_BACK_W = 1800;
+const PC_BACK_H = 1200;
+
+// ── Back Classic — "POST CARD" 중앙상단, 세로 구분선, THIS SIDE FOR MESSAGE/ADDRESS
+async function drawBackClassic(ctx, pc) {
+  const W = PC_BACK_W, H = PC_BACK_H;
+  const padX = W * 0.06, padY = H * 0.08;
+
+  ctx.fillStyle = '#FAF9F7';
+  ctx.fillRect(0, 0, W, H);
+
+  // 상단: 브랜드(좌) + "POST CARD"(중앙) + "STAMP"(우)
+  ctx.fillStyle = 'rgba(26,26,26,0.38)';
+  ctx.font = `300 ${Math.round(W * 0.009)}px "Noto Sans KR", sans-serif`;
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'left';
+  ctx.fillText('SAPMANRI · 감성찾아삽만리', padX, padY);
+
+  ctx.fillStyle = '#1A1A1A';
+  ctx.font = `500 ${Math.round(W * 0.018)}px "Gowun Batang", serif`;
+  ctx.textAlign = 'center';
+  drawSpacedText(ctx, 'POST  CARD', W / 2, padY, W * 0.008);
+
+  ctx.fillStyle = 'rgba(26,26,26,0.35)';
+  ctx.font = `300 ${Math.round(W * 0.009)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'right';
+  ctx.fillText('STAMP', W - padX, padY);
+  ctx.textAlign = 'left';
+
+  // 상단 얇은 선
+  ctx.strokeStyle = 'rgba(26,26,26,0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padX, padY + H * 0.07); ctx.lineTo(W - padX, padY + H * 0.07); ctx.stroke();
+
+  // 중앙 세로 구분선
+  const divX = W * 0.5;
+  ctx.strokeStyle = 'rgba(26,26,26,0.12)';
+  ctx.beginPath(); ctx.moveTo(divX, padY + H * 0.1); ctx.lineTo(divX, H - padY - H * 0.1); ctx.stroke();
+
+  // 세로 중앙 텍스트 (구분선 위)
+  ctx.save();
+  ctx.translate(divX, H / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = 'rgba(26,26,26,0.22)';
+  ctx.font = `300 ${Math.round(W * 0.007)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('오늘도 느리게 · SAPMANRI · slow days', 0, 0);
+  ctx.restore();
+
+  // 하단: THIS SIDE FOR MESSAGE(좌) / THIS SIDE FOR ADDRESS(우)
+  const botY = H - padY;
+  ctx.fillStyle = 'rgba(26,26,26,0.3)';
+  ctx.font = `300 ${Math.round(W * 0.0075)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText('THIS SIDE FOR MESSAGE', padX, botY);
+  ctx.textAlign = 'right';
+  ctx.fillText('THIS SIDE FOR ADDRESS', W - padX, botY);
+  ctx.textAlign = 'left';
+
+  // 하단 선
+  ctx.strokeStyle = 'rgba(26,26,26,0.1)';
+  ctx.beginPath(); ctx.moveTo(padX, botY - H * 0.03); ctx.lineTo(W - padX, botY - H * 0.03); ctx.stroke();
+}
+
+// ── Back Modern — "P O / S T" 세로, "TO" + 주소선, 웹사이트
+async function drawBackModern(ctx, pc) {
+  const W = PC_BACK_W, H = PC_BACK_H;
+  const padX = W * 0.06, padY = H * 0.09;
+
+  ctx.fillStyle = '#FAFAFA';
+  ctx.fillRect(0, 0, W, H);
+
+  // 상단 브랜드 (좌상단 작게)
+  ctx.fillStyle = 'rgba(26,26,26,0.35)';
+  ctx.font = `300 ${Math.round(W * 0.0085)}px "Noto Sans KR", sans-serif`;
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'left';
+  ctx.fillText('SAPMANRI', padX, padY);
+
+  // 우상단 "P O / S T" 세로 배치
+  const postLines = ['P  O', 'S  T'];
+  ctx.fillStyle = '#1A1A1A';
+  ctx.font = `700 ${Math.round(W * 0.022)}px "Gowun Batang", serif`;
+  ctx.textAlign = 'right';
+  postLines.forEach((line, i) => {
+    ctx.fillText(line, W - padX, padY + i * H * 0.1);
+  });
+  ctx.textAlign = 'left';
+
+  // 구분선 (상단 아래)
+  const lineY = padY + H * 0.13;
+  ctx.strokeStyle = 'rgba(26,26,26,0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(padX, lineY); ctx.lineTo(W - padX, lineY); ctx.stroke();
+
+  // "TO" 레이블
+  const toY = lineY + H * 0.14;
+  ctx.fillStyle = 'rgba(26,26,26,0.5)';
+  ctx.font = `500 ${Math.round(W * 0.01)}px "Noto Sans KR", sans-serif`;
+  ctx.fillText('T O', W * 0.52, toY);
+
+  // 주소선 3개 (TO 아래) — 마지막은 강조선(오렌지)
+  const lineColors = ['rgba(26,26,26,0.2)', 'rgba(26,26,26,0.2)', '#E8762C'];
+  const lineStartX = W * 0.52;
+  const lineEndX = W - padX;
+  for (let i = 0; i < 3; i++) {
+    const ly = toY + H * 0.1 + i * H * 0.12;
+    ctx.strokeStyle = lineColors[i];
+    ctx.lineWidth = i === 2 ? 2 : 1;
+    ctx.beginPath(); ctx.moveTo(lineStartX, ly); ctx.lineTo(lineEndX, ly); ctx.stroke();
+  }
+
+  // 좌하단 웹사이트
+  ctx.fillStyle = 'rgba(26,26,26,0.3)';
+  ctx.font = `300 ${Math.round(W * 0.008)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText('carousel-generator-roan.vercel.app', padX, H - padY);
+}
+
+// ── Back Centre — 상단 브랜드+사진섬네일, 우상단 TO+주소선, 좌하단 주소
+async function drawBackCentre(ctx, pc) {
+  const W = PC_BACK_W, H = PC_BACK_H;
+  const padX = W * 0.06, padY = H * 0.08;
+
+  ctx.fillStyle = '#F8F6F3';
+  ctx.fillRect(0, 0, W, H);
+
+  // 상단 브랜드 레이블 (중앙)
+  ctx.fillStyle = 'rgba(26,26,26,0.4)';
+  ctx.font = `300 ${Math.round(W * 0.009)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  drawSpacedText(ctx, 'SAPMANRI', W / 2, padY, W * 0.006);
+  ctx.textAlign = 'left';
+
+  // 좌측 절반: 작은 사진 (앞면 이미지)
+  const photoX = padX, photoY = padY + H * 0.12;
+  const photoW = W * 0.42, photoH = H * 0.62;
+  ctx.fillStyle = '#1d1815';
+  ctx.fillRect(photoX, photoY, photoW, photoH);
+  try {
+    const img = await loadImage(pc.image);
+    drawImageCover(ctx, img, photoX, photoY, photoW, photoH);
+  } catch(e) {}
+
+  // 사진 하단 라벨
+  ctx.fillStyle = 'rgba(26,26,26,0.4)';
+  ctx.font = `300 ${Math.round(W * 0.0075)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.fillText(pc.label || 'SAPMANRI', photoX + photoW / 2, photoY + photoH + H * 0.04);
+  ctx.textAlign = 'left';
+
+  // 우측: TO + 주소선
+  const rightX = W * 0.55;
+  const toY = padY + H * 0.18;
+  ctx.fillStyle = 'rgba(26,26,26,0.45)';
+  ctx.font = `500 ${Math.round(W * 0.0095)}px "Noto Sans KR", sans-serif`;
+  ctx.fillText('TO', rightX, toY);
+
+  ctx.strokeStyle = 'rgba(26,26,26,0.18)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 3; i++) {
+    const ly = toY + H * 0.14 + i * H * 0.13;
+    ctx.beginPath(); ctx.moveTo(rightX, ly); ctx.lineTo(W - padX, ly); ctx.stroke();
+  }
+
+  // 좌하단 발신자 주소
+  ctx.fillStyle = 'rgba(26,26,26,0.35)';
+  ctx.font = `300 ${Math.round(W * 0.0075)}px "Noto Sans KR", sans-serif`;
+  ctx.fillText('@sapmanri · No.' + (pc.number || ''), padX, H - padY);
+}
+
+// ── Back Seal — 발신자정보(좌상단), 우표박스(우상단), TO+주소선(중앙우), 원형씰(우하단)
+async function drawBackSeal(ctx, pc) {
+  const W = PC_BACK_W, H = PC_BACK_H;
+  const padX = W * 0.06, padY = H * 0.09;
+
+  ctx.fillStyle = '#FAF8F5';
+  ctx.fillRect(0, 0, W, H);
+
+  // 좌상단: 발신자 정보
+  ctx.fillStyle = '#E8762C';
+  ctx.font = `700 ${Math.round(W * 0.009)}px "Noto Sans KR", sans-serif`;
+  ctx.textBaseline = 'top';
+  ctx.fillText('SAPMANRI', padX, padY);
+  ctx.fillStyle = 'rgba(26,26,26,0.38)';
+  ctx.font = `300 ${Math.round(W * 0.0075)}px "Noto Sans KR", sans-serif`;
+  ctx.fillText('Wigong-ri, Seorak-myeon, Gapyeong-gun · Korea', padX, padY + H * 0.09);
+  ctx.fillText('carousel-generator-roan.vercel.app', padX, padY + H * 0.16);
+
+  // 우상단: 우표 박스
+  const stampSize = W * 0.1;
+  const stampX = W - padX - stampSize;
+  ctx.strokeStyle = 'rgba(26,26,26,0.2)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(stampX, padY, stampSize, stampSize * 1.25);
+
+  // 구분선
+  const divY = padY + H * 0.27;
+  ctx.strokeStyle = 'rgba(26,26,26,0.1)';
+  ctx.beginPath(); ctx.moveTo(padX, divY); ctx.lineTo(W - padX, divY); ctx.stroke();
+
+  // 중앙 우측: TO + 주소선
+  const rightX = W * 0.52;
+  const toY = divY + H * 0.1;
+  ctx.fillStyle = 'rgba(26,26,26,0.4)';
+  ctx.font = `500 ${Math.round(W * 0.009)}px "Noto Sans KR", sans-serif`;
+  ctx.fillText('TO:', rightX, toY);
+
+  ctx.strokeStyle = 'rgba(26,26,26,0.18)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 2; i++) {
+    const ly = toY + H * 0.16 + i * H * 0.15;
+    ctx.beginPath(); ctx.moveTo(rightX, ly); ctx.lineTo(W - padX - W * 0.14, ly); ctx.stroke();
+  }
+
+  // 우하단: 원형 씰 스탬프
+  const sealR = W * 0.065;
+  const sealX = W - padX - sealR;
+  const sealY = H - padY - sealR;
+  ctx.strokeStyle = 'rgba(26,26,26,0.25)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(sealX, sealY, sealR, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(sealX, sealY, sealR * 0.75, 0, Math.PI * 2); ctx.stroke();
+  // 씰 안 텍스트
+  ctx.save();
+  ctx.translate(sealX, sealY);
+  ctx.fillStyle = 'rgba(26,26,26,0.4)';
+  ctx.font = `300 ${Math.round(W * 0.007)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('SAPMANRI', 0, -sealR * 0.18);
+  ctx.font = `300 ${Math.round(W * 0.006)}px "Noto Sans KR", sans-serif`;
+  ctx.fillText('slow days', 0, sealR * 0.22);
+  ctx.restore();
+
+  // 좌하단 발신자 서명
+  ctx.fillStyle = 'rgba(26,26,26,0.3)';
+  ctx.font = `300 ${Math.round(W * 0.0075)}px "Noto Sans KR", sans-serif`;
+  ctx.textAlign = 'left';
+  ctx.fillText(`No.${pc.number || ''} · @sapmanri`, padX, H - padY);
 }
