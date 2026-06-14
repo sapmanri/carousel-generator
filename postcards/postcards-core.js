@@ -188,12 +188,16 @@ function templateOptionsHtml(selectedId) {
   return opts.join('');
 }
 function backTemplateOptionsHtml(selectedId) {
-  const opts = [];
+  const opts = ['<option value="random">랜덤</option>'];
   for (const t of BACK_TEMPLATES) {
     const sel = t.id === selectedId ? 'selected' : '';
     opts.push(`<option value="${t.id}" ${sel}>${esc(t.label)}</option>`);
   }
   return opts.join('');
+}
+function pickBackTemplate(template) {
+  if (template && template !== 'random') return template;
+  return BACK_TEMPLATES[Math.floor(Math.random() * BACK_TEMPLATES.length)].id;
 }
 function pickTemplate(template) {
   if (template && template !== 'random') return template;
@@ -226,7 +230,7 @@ async function addSelectedAsPostcards() {
         number: String(postcards.length + 1).padStart(2, '0'),
         issueId: '',
         template: pickTemplate('random'),
-        backTemplate: 'back-classic',
+        backTemplate: pickBackTemplate('random'),
       };
       await autoFillFromAnalysis(pc, item);
       postcards.push(pc);
@@ -322,7 +326,7 @@ function renderPostcardList() {
         <div class="field-row">
           <div class="field"><label>번호</label><input value="${esc(pc.number)}" oninput="postcards[${idx}].number=this.value; refreshPreview(${idx})"></div>
           <div class="field"><label>템플릿 (앞면)</label><select onchange="postcards[${idx}].template=pickTemplate(this.value); refreshPreview(${idx})">${templateOptionsHtml(pc.template)}</select></div>
-          <div class="field"><label>템플릿 (뒷면)</label><select onchange="postcards[${idx}].backTemplate=this.value; refreshPreview(${idx})">${backTemplateOptionsHtml(pc.backTemplate||'back-classic')}</select></div>
+          <div class="field"><label>템플릿 (뒷면)</label><select onchange="postcards[${idx}].backTemplate=pickBackTemplate(this.value); refreshPreview(${idx})">${backTemplateOptionsHtml(pc.backTemplate||'back-classic')}</select></div>
         </div>
         <div class="field"><label>라벨</label><input value="${esc(pc.label)}" oninput="postcards[${idx}].label=this.value; refreshPreview(${idx})"></div>
         <div class="field"><label>제목</label><input value="${esc(pc.title)}" oninput="postcards[${idx}].title=this.value; refreshPreview(${idx})"></div>
