@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAPMANRI · Postcards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E8762C;
+  --cream:#FAF5EE;
+  --dark:#120E0C;
+  --ink:#1A1A1A;
+  --hairline:rgba(0,0,0,0.08);
+  --serif:"Gowun Batang",Georgia,serif;
+  --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+}
+html,body{background:var(--cream);color:var(--ink);font-family:var(--sans);min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:28px 24px 18px;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--hairline);
+}
+.wordmark{font-family:var(--serif);font-weight:700;font-size:28px;color:var(--orange);letter-spacing:0.06em}
+.wordmark .sub{display:block;font-family:var(--sans);font-weight:300;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(0,0,0,0.4);margin-top:4px}
+.wordmark .build-tag{display:block;font-family:monospace;font-weight:300;font-size:9px;letter-spacing:0.08em;color:rgba(0,0,0,0.25);margin-top:6px;text-transform:none}
+.back{font-size:11px;letter-spacing:0.08em;color:var(--orange)}
+
+.grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:16px;padding:24px;
+}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);gap:20px}}
+@media(min-width:980px){.grid{grid-template-columns:repeat(4,1fr);gap:24px;padding:32px}}
+
+.card{display:flex;flex-direction:column;gap:8px;cursor:pointer}
+.card .pc-canvas{
+  width:100%;aspect-ratio:2/3;position:relative;overflow:hidden;border-radius:2px;
+  background:#FAF5EE;color:#1A1A1A;font-family:var(--serif);
+  box-shadow:0 1px 3px rgba(0,0,0,0.08);transition:transform .25s ease;
+}
+.card:hover .pc-canvas{transform:translateY(-2px)}
+.card .pc-photo{position:absolute;inset:11% 8% 32% 8%;overflow:hidden;background:#1d1815}
+.card .pc-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.card .pc-top{position:absolute;top:4%;left:8%;right:8%;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-family:var(--sans);font-weight:300}
+.card .pc-label{font-size:6px;letter-spacing:0.15em;text-transform:uppercase;line-height:1.6;flex:1;min-width:0;overflow:hidden}
+.card .pc-label .l1{opacity:0.5}
+.card .pc-number{font-family:var(--serif);font-weight:700;font-size:20px;line-height:1;color:#1A1A1A;flex-shrink:0}
+.card .pc-bottom{position:absolute;left:8%;right:8%;bottom:5%}
+.card .pc-title{font-family:var(--serif);font-weight:700;font-size:13px;line-height:1.35;margin-bottom:10px;word-break:keep-all}
+.card .pc-meta{display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--sans);gap:8px}
+.card .pc-meta-text{font-size:5px;line-height:1.7;color:rgba(0,0,0,0.4);min-width:0}
+.card .pc-meta-full .pc-meta-text{width:100%}
+.card .pc-qr{width:13%;aspect-ratio:1;background:#fff;border:1px solid rgba(0,0,0,0.08)}
+.card .pc-qr canvas{width:100%;height:100%;display:block}
+
+/* ── 뒷면 (우편엽서 레이아웃) ── */
+.card .pc-back{position:absolute;inset:0;padding:6% 6%;display:flex;flex-direction:column;font-family:var(--sans)}
+.card .pc-back-header{font-family:var(--serif);font-weight:700;font-size:11px;letter-spacing:0.3em;text-align:center;color:#1A1A1A;margin-bottom:6%}
+.card .pc-back-body{flex:1;display:flex;gap:4%}
+.card .pc-back-left{flex:1.1;display:flex;flex-direction:column;justify-content:flex-end;padding-right:4%}
+.card .pc-back-brand{font-family:var(--serif);font-weight:700;font-size:9px;letter-spacing:0.15em;color:var(--orange);margin-bottom:6%}
+.card .pc-back-caption{font-family:var(--serif);font-size:11px;line-height:1.6;color:#1A1A1A;margin-bottom:8%;word-break:keep-all}
+.card .pc-back-sub{font-size:5px;line-height:1.8;color:rgba(0,0,0,0.35)}
+.card .pc-back-divider{width:1px;background:rgba(0,0,0,0.12)}
+.card .pc-back-right{flex:1;display:flex;flex-direction:column}
+.card .pc-back-stamp{width:22%;aspect-ratio:4/5;border:1px solid rgba(0,0,0,0.2);align-self:flex-end;margin-bottom:8%}
+.card .pc-back-addrlines{display:flex;flex-direction:column;gap:10%;margin-top:auto}
+.card .pc-back-addr-label{font-size:6px;letter-spacing:0.15em;color:rgba(0,0,0,0.35);margin-bottom:4%}
+.card .pc-back-line{height:1px;background:rgba(0,0,0,0.15)}
+
+/* ── 플립 ── */
+/* ── 앞/뒤 전환 (3D flip 대신 단순 show/hide — 크로스 브라우저 안정성) ── */
+.flip-wrap{cursor:pointer;position:relative}
+.flip-inner{position:relative;width:100%;padding-bottom:150%}
+.card .flip-face{position:absolute;inset:0;border-radius:2px;overflow:hidden;aspect-ratio:auto}
+.flip-face.back{display:none}
+.flip-wrap.flipped .flip-face.front{display:none}
+.flip-wrap.flipped .flip-face.back{display:block}
+.dl-links{display:flex;gap:10px;justify-content:center;font-size:11px}
+.dl-links a, .dl-links button{
+  background:none;border:none;color:rgba(0,0,0,0.5);font-family:var(--sans);font-size:11px;
+  letter-spacing:0.05em;cursor:pointer;padding:0;text-decoration:underline;
+}
+
+.dl-label{font-size:11px;letter-spacing:0.05em;color:rgba(0,0,0,0.5);text-align:center}
+.dl-label .spinner{
+  display:inline-block;width:9px;height:9px;border:1.5px solid rgba(0,0,0,0.2);
+  border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;
+  margin-right:4px;vertical-align:-1px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.empty{
+  grid-column:1/-1;text-align:center;padding:80px 20px;color:rgba(0,0,0,0.3);
+  font-size:12px;letter-spacing:0.08em;line-height:2;
+}
+.empty .big{font-family:var(--serif);font-size:20px;color:rgba(0,0,0,0.5);display:block;margin-bottom:10px}
+
+footer{padding:40px 24px;text-align:center;font-size:10px;letter-spacing:0.1em;color:rgba(0,0,0,0.3)}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="wordmark">SAPMANRI<span class="sub">postcards</span><span class="build-tag">Last update: 2026-06-14 00:30 KST</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+    <a class="back" href="./editor.html">+ 에디터 ↗</a>
+    <a class="back" href="../index.html">← Tools</a>
+  </div>
+</header>
+
+<div class="grid" id="grid">
+  <div class="empty"><span class="big">불러오는 중…</span></div>
+</div>
+
+<footer>오늘도 느리게 · slow days — 사진을 클릭하면 인쇄용 이미지로 다운로드됩니다</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+<script src="./postcards-templates.js?v=20260614a"></script>
+<script src="./postcards-canvas.js?v=20260614a"></script>
+<script>
+async function load() {
+  const grid = document.getElementById('grid');
+  try {
+    const res = await fetch('./postcards.json?t=' + Date.now(), { cache: 'no-store' });
+    const data = await res.json();
+    const postcards = (data.postcards || []);
+    if (!postcards.length) {
+      grid.innerHTML = '<div class="empty"><span class="big">아직 등록된 포스트카드가 없어요</span><a href="./editor.html" style="color:var(--orange)">editor.html에서 만들어보세요 →</a></div>';
+      return;
+    }
+    // 호 목록 (QR용 유튜브 링크)
+    let issues = [];
+    try {
+      const r2 = await fetch('../magazine/issues.json?t=' + Date.now(), { cache: 'no-store' });
+      issues = (await r2.json()).issues || [];
+    } catch (e) {}
+
+    grid.innerHTML = postcards.map((pc, idx) => {
+      const issue = issues.find(x => x.id === pc.issueId);
+      const hasQr = !!(issue && issue.youtubeUrl);
+      return `
+      <div class="card">
+        <div class="flip-wrap" id="flipWrap${idx}" onclick="document.getElementById('flipWrap${idx}').classList.toggle('flipped')">
+          <div class="flip-inner">
+            <div class="flip-face front pc-canvas" id="pcCardFront${idx}">${renderTemplateHtml(pc, hasQr, 'front')}</div>
+            <div class="flip-face back pc-canvas" id="pcCardBack${idx}">${renderTemplateHtml(pc, hasQr, 'back')}</div>
+          </div>
+        </div>
+        <div class="dl-links">
+          <button id="dlFront${idx}" onclick="event.stopPropagation(); downloadPostcard(${idx}, 'front')">↓ 앞면</button>
+          <button id="dlBack${idx}" onclick="event.stopPropagation(); downloadPostcard(${idx}, 'back')">↓ 뒷면</button>
+        </div>
+      </div>
+    `;
+    }).join('');
+
+    // QR 미리보기 (화면 표시용, 작게) — 앞면에만
+    postcards.forEach((pc, idx) => {
+      const issue = issues.find(x => x.id === pc.issueId);
+      const url = issue && issue.youtubeUrl;
+      const qrEl = document.querySelector(`#pcCardFront${idx} .pc-qr`);
+      if (url && qrEl && window.QRCode) {
+        const canvas = document.createElement('canvas');
+        qrEl.appendChild(canvas);
+        QRCode.toCanvas(canvas, url, { width: 64, margin: 0, color: { dark: '#1A1A1A', light: '#FFFFFF' } }, () => {});
+      }
+    });
+
+    window.__postcards = postcards;
+    window.__issues = issues;
+  } catch (e) {
+    grid.innerHTML = '<div class="empty"><span class="big">불러오기 실패</span>' + (e.message || '') + '</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
