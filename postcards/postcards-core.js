@@ -167,7 +167,11 @@ function issueOptionsHtml(selectedId) {
 // 템플릿 목록 (계속 추가될 예정 — id로 postcards-templates.js의 렌더러를 찾음)
 // ══════════════════════════════════════════════════════════════
 const TEMPLATES = [
-  { id: 'expo-01', label: 'Expo 01 · 전시 포스터' },
+  { id: 'expo-01',   label: 'Expo 01 · 전시 포스터' },
+  { id: 'mag-01',   label: 'Mag 01 · 잡지형' },
+  { id: 'typo-01',  label: 'Typo 01 · 타이포 중심' },
+  { id: 'story-01', label: 'Story 01 · 날짜/스토리' },
+  { id: 'edit-01',  label: 'Edit 01 · 듀얼 포토' },
 ];
 function templateOptionsHtml(selectedId) {
   const opts = ['<option value="random">랜덤</option>'];
