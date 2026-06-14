@@ -33,9 +33,12 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   transition:border-color 0.2s,background 0.2s;
 }
 .tool-card:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04)}
+.tool-card.accent{border-color:rgba(184,122,110,0.3);background:rgba(184,122,110,0.04)}
+.tool-card.accent:hover{border-color:rgba(184,122,110,0.6);background:rgba(184,122,110,0.08)}
 .tool-card .name{font-family:var(--serif);font-size:17px;font-weight:300;color:var(--canvas);letter-spacing:0.02em}
 .tool-card .desc{font-size:11px;color:var(--mute);letter-spacing:0.04em}
 .tool-card .ver{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-top:8px}
+.tool-card.accent .ver{color:rgba(184,122,110,0.5)}
 
 footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.18);text-align:center;padding:24px 0 8px}
 </style>
@@ -95,6 +98,15 @@ footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(2
   <a class="tool-card" href="/postcards/editor.html">
     <div class="name">Postcard Editor</div>
     <div class="desc">이미지 라이브러리 → 포스트카드 생성 → 발행</div>
+    <div class="ver">v1.0.0</div>
+  </a>
+</div>
+
+<div class="section-label">Business</div>
+<div class="tools-grid">
+  <a class="tool-card accent" href="/mimesis-landing.html">
+    <div class="name">미메시스 · Mimesis</div>
+    <div class="desc">삽만리 · 채널 기획 · 제작 · 운영 랜딩 페이지</div>
     <div class="ver">v1.0.0</div>
   </a>
 </div>
