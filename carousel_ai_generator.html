@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.3.1</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.3.2</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -999,7 +999,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
       image_index: i,
       headline: img.analysis?.suggested_copy || '',
       body: img.analysis?.suggested_body || '',
-      label: img.analysis?.mood || '',
+      label: i === 0 ? (img.analysis?.mood || '') : '',
       layout: 'overlay_bottom',
       text_position: 'bottom_left',
       accent_color: img.analysis?.dominant_color || '#c8a97e',
@@ -2699,15 +2699,15 @@ async function exportPanorama() {
     slides = Array.from({length: slideCount}, (_, i) => ({
       headline: i === 0 ? (images[0].analysis?.suggested_copy || '') : '',
       body: i === 0 ? (images[0].analysis?.suggested_body || '') : '',
-      label: images[0].analysis?.mood || '',
+      label: i === 0 ? (images[0].analysis?.mood || '') : '',
     }));
   } else {
-    // 여러 장 모드: 장 수 = 이미지 수
+    // 여러 장 모드: 장 수 = 이미지 수, 레이블은 첫 장만
     slideCount = images.length;
     slides = images.map((img, i) => ({
       headline: img.analysis?.suggested_copy || '',
       body: img.analysis?.suggested_body || '',
-      label: img.analysis?.mood || '',
+      label: i === 0 ? (img.analysis?.mood || '') : '',
     }));
   }
 
