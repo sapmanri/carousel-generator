@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.2.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.3.0</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -339,6 +339,34 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 </div>
 
 <div class="image-grid" id="imageGrid"></div>
+
+<!-- 파노라마 구간 픽커 (파노라마 스타일 + 이미지 1장일 때만 표시) -->
+<div id="panoPicker" style="display:none;margin-top:8px">
+  <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px">파노라마 구간 선택</div>
+  <div style="position:relative;width:100%;border-radius:2px;overflow:hidden;background:#111;cursor:crosshair" id="panoPickerWrap">
+    <img id="panoPickerImg" style="width:100%;display:block;opacity:0.75;user-select:none;pointer-events:none" />
+    <!-- 선택 구간 오버레이 -->
+    <div id="panoSelOverlay" style="position:absolute;top:0;bottom:0;background:rgba(184,122,110,0.25);border-left:2px solid #b87a6e;border-right:2px solid #b87a6e;pointer-events:none"></div>
+    <!-- 왼쪽 핸들 -->
+    <div id="panoHandleL" style="position:absolute;top:0;bottom:0;width:18px;background:rgba(184,122,110,0.5);cursor:ew-resize;display:flex;align-items:center;justify-content:center">
+      <div style="width:2px;height:24px;background:#fff;border-radius:1px"></div>
+    </div>
+    <!-- 오른쪽 핸들 -->
+    <div id="panoHandleR" style="position:absolute;top:0;bottom:0;width:18px;background:rgba(184,122,110,0.5);cursor:ew-resize;display:flex;align-items:center;justify-content:center">
+      <div style="width:2px;height:24px;background:#fff;border-radius:1px"></div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+    <span style="font-size:9px;color:var(--mute)">슬라이드 수</span>
+    <div style="display:flex;gap:4px">
+      <button onclick="setPanoSlides(2)" id="panoN2" style="padding:4px 10px;font-size:9px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:2px;cursor:pointer">2장</button>
+      <button onclick="setPanoSlides(3)" id="panoN3" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">3장</button>
+      <button onclick="setPanoSlides(4)" id="panoN4" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">4장</button>
+      <button onclick="setPanoSlides(5)" id="panoN5" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">5장</button>
+    </div>
+    <span id="panoPickerInfo" style="font-size:9px;color:rgba(255,255,255,0.3)">선택 구간을 드래그로 조정하세요</span>
+  </div>
+</div>
 
 <div class="field" style="margin-bottom:4px">
   <label>유튜브 URL <span style="font-size:8px;color:var(--accent);letter-spacing:0.06em;text-transform:none;font-weight:normal">선택 — 넣으면 영상 분석으로 주제/문구 자동 완성</span></label>
@@ -661,6 +689,8 @@ function updateKeyVisibility() {
 function saveGhToken(val) {
   SapmanriCache.setToken(val);
   updateGhKeyVisibility();
+  initPanoPicker();
+  setPanoSlides(3);
 }
 function updateGhKeyVisibility() {
   const token = SapmanriCache.getToken();
@@ -750,6 +780,7 @@ function handleFiles(files) {
     reader.onload = ev => {
       images.push({ file, dataUrl: ev.target.result, objectUrl, analysis: null });
       renderThumbs(); updateBtn();
+      updatePanoPickerVisibility();
     };
     reader.readAsDataURL(file);
   });
@@ -757,7 +788,102 @@ function handleFiles(files) {
 function removeImg(i) {
   if (images[i]?.objectUrl) URL.revokeObjectURL(images[i].objectUrl);
   images.splice(i, 1); renderThumbs(); updateBtn();
+  updatePanoPickerVisibility();
 }
+
+// ── 파노라마 픽커 ──
+let panoSlideCount = 3;
+let panoSelLeft = 0.0;   // 0~1 비율
+let panoSelRight = 1.0;
+
+function setPanoSlides(n) {
+  panoSlideCount = n;
+  [2,3,4,5].forEach(i => {
+    const btn = document.getElementById('panoN'+i);
+    if (!btn) return;
+    btn.style.background = i===n ? 'rgba(255,255,255,0.15)' : 'transparent';
+    btn.style.color = i===n ? '#fff' : 'rgba(255,255,255,0.35)';
+  });
+  updatePanoPickerOverlay();
+}
+
+function updatePanoPickerOverlay() {
+  const wrap = document.getElementById('panoPickerWrap');
+  const overlay = document.getElementById('panoSelOverlay');
+  const handleL = document.getElementById('panoHandleL');
+  const handleR = document.getElementById('panoHandleR');
+  const info = document.getElementById('panoPickerInfo');
+  if (!wrap || !overlay) return;
+  const W = wrap.offsetWidth;
+  const lx = panoSelLeft * W;
+  const rx = panoSelRight * W;
+  overlay.style.left = lx + 'px';
+  overlay.style.width = (rx - lx) + 'px';
+  handleL.style.left = (lx - 9) + 'px';
+  handleR.style.left = (rx - 9) + 'px';
+  // 슬라이드 구분선 표시
+  const existing = wrap.querySelectorAll('.pano-divider');
+  existing.forEach(e => e.remove());
+  for (let i = 1; i < panoSlideCount; i++) {
+    const divX = lx + (rx - lx) * (i / panoSlideCount);
+    const div = document.createElement('div');
+    div.className = 'pano-divider';
+    div.style.cssText = `position:absolute;top:0;bottom:0;left:${divX}px;width:1px;background:rgba(255,255,255,0.4);pointer-events:none`;
+    wrap.appendChild(div);
+  }
+  if (info) {
+    const pct = Math.round((panoSelRight - panoSelLeft) * 100);
+    info.textContent = `구간 ${pct}% · ${panoSlideCount}장으로 분할`;
+  }
+}
+
+function initPanoPicker() {
+  const wrap = document.getElementById('panoPickerWrap');
+  if (!wrap) return;
+  let dragging = null; // 'L' | 'R'
+
+  function getX(e) {
+    const rect = wrap.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  }
+
+  document.getElementById('panoHandleL').addEventListener('mousedown', e => { dragging='L'; e.preventDefault(); });
+  document.getElementById('panoHandleL').addEventListener('touchstart', e => { dragging='L'; }, {passive:true});
+  document.getElementById('panoHandleR').addEventListener('mousedown', e => { dragging='R'; e.preventDefault(); });
+  document.getElementById('panoHandleR').addEventListener('touchstart', e => { dragging='R'; }, {passive:true});
+
+  function onMove(e) {
+    if (!dragging) return;
+    const x = getX(e);
+    if (dragging === 'L') {
+      panoSelLeft = Math.min(x, panoSelRight - 0.1);
+    } else {
+      panoSelRight = Math.max(x, panoSelLeft + 0.1);
+    }
+    updatePanoPickerOverlay();
+  }
+  function onUp() { dragging = null; }
+
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, {passive:true});
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+}
+
+function updatePanoPickerVisibility() {
+  const style = document.getElementById('metaStyle').value;
+  const picker = document.getElementById('panoPicker');
+  if (!picker) return;
+  const show = style.startsWith('pano-') && images.length === 1;
+  picker.style.display = show ? 'block' : 'none';
+  if (show && images[0]) {
+    const img = document.getElementById('panoPickerImg');
+    img.src = images[0].dataUrl;
+    setTimeout(updatePanoPickerOverlay, 50);
+  }
+}
+
 function renderThumbs() {
   document.getElementById('imageGrid').innerHTML = images.map((img, i) => `
     <div class="img-thumb" id="thumb-${i}">
@@ -791,6 +917,7 @@ function doneStep(id, suffix='') {
 document.getElementById('metaStyle').addEventListener('change', function() {
   const isPano = this.value.startsWith('pano-');
   document.getElementById('panoNotice').style.display = isPano ? 'block' : 'none';
+  updatePanoPickerVisibility();
 });
 
 document.getElementById('generateBtn').addEventListener('click', async () => {
@@ -2262,10 +2389,10 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages, rati
 // ── 파노라마 모드 ──
 function isPanoStyle(style) { return style && style.startsWith('pano-'); }
 
-async function renderPanoramaCanvas(images, slides, style, SIZE, ratio) {
+async function renderPanoramaCanvas(images, slides, style, SIZE, ratio, singleMode=false, selLeft=0, selRight=1, nSlides=3) {
   const W = SIZE;
   const H = ratio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
-  const N = Math.max(images.length, 1);
+  const N = singleMode ? nSlides : Math.max(images.length, 1);
   // 파노라마 전체 캔버스 (슬라이드 수만큼 가로로 긺)
   const TOTAL_W = W * N;
 
@@ -2280,25 +2407,55 @@ async function renderPanoramaCanvas(images, slides, style, SIZE, ratio) {
 
   function setFont(size, weight, family) { ctx.font = weight + ' ' + size + 'px ' + family; }
 
-  // 배경 사진들을 가로로 이어 붙이기
+  // 배경 사진들을 가로로 이어 붙이기 (singleMode: 1장을 구간 크롭해서 N등분)
   async function drawBgImages() {
-    for (let i = 0; i < images.length; i++) {
-      const dataUrl = images[i].dataUrl;
-      if (!dataUrl) continue;
+    if (singleMode && images[0]) {
+      // 1장 모드: 픽커 구간을 N등분해서 각 슬라이드에 배치
       await new Promise(res => {
         const img = new Image();
         img.onload = () => {
-          const x = i * W;
-          const scale = Math.max(W / img.width, H / img.height);
-          const iw = img.width * scale, ih = img.height * scale;
-          ctx.save();
-          ctx.beginPath(); ctx.rect(x, 0, W, H); ctx.clip();
-          ctx.drawImage(img, x + (W - iw) / 2, (H - ih) / 2, iw, ih);
-          ctx.restore();
+          const imgW = img.width, imgH = img.height;
+          // 픽커 구간 → 이미지 픽셀 좌표
+          const cropX = Math.round(imgW * selLeft);
+          const cropW = Math.round(imgW * (selRight - selLeft));
+          const sliceW = cropW / nSlides; // 각 슬라이드에 해당하는 원본 너비
+          for (let i = 0; i < nSlides; i++) {
+            const srcX = cropX + sliceW * i;
+            const destX = i * W;
+            ctx.save();
+            ctx.beginPath(); ctx.rect(destX, 0, W, H); ctx.clip();
+            // cover fit: 슬라이드 비율(W:H)에 맞게 그리기
+            const scale = Math.max(W / sliceW, H / imgH);
+            const drawW = sliceW * scale, drawH = imgH * scale;
+            ctx.drawImage(img,
+              srcX, 0, sliceW, imgH,          // src
+              destX + (W - drawW)/2, (H - drawH)/2, drawW, drawH  // dest
+            );
+            ctx.restore();
+          }
           res();
         };
-        img.onerror = res; img.src = dataUrl;
+        img.onerror = res; img.src = images[0].dataUrl;
       });
+    } else {
+      for (let i = 0; i < images.length; i++) {
+        const dataUrl = images[i].dataUrl;
+        if (!dataUrl) continue;
+        await new Promise(res => {
+          const img = new Image();
+          img.onload = () => {
+            const x = i * W;
+            const scale = Math.max(W / img.width, H / img.height);
+            const iw = img.width * scale, ih = img.height * scale;
+            ctx.save();
+            ctx.beginPath(); ctx.rect(x, 0, W, H); ctx.clip();
+            ctx.drawImage(img, x + (W - iw) / 2, (H - ih) / 2, iw, ih);
+            ctx.restore();
+            res();
+          };
+          img.onerror = res; img.src = dataUrl;
+        });
+      }
     }
   }
 
@@ -2510,17 +2667,30 @@ async function exportPanorama() {
 
   const SIZE = 1080;
   const style = document.getElementById('metaStyle').value;
-  const slideCount = images.length;
+  const isSingleImage = images.length === 1;
 
-  // generatePlan 없이 이미지 분석 결과로 간단 슬라이드 데이터 생성
-  const slides = images.map((img, i) => ({
-    headline: img.analysis?.suggested_copy || '',
-    body: img.analysis?.suggested_body || '',
-    label: img.analysis?.mood || '',
-  }));
+  let slideCount, slides;
+
+  if (isSingleImage) {
+    // 1장 모드: 픽커 구간을 N등분
+    slideCount = panoSlideCount;
+    slides = Array.from({length: slideCount}, (_, i) => ({
+      headline: i === 0 ? (images[0].analysis?.suggested_copy || '') : '',
+      body: i === 0 ? (images[0].analysis?.suggested_body || '') : '',
+      label: images[0].analysis?.mood || '',
+    }));
+  } else {
+    // 여러 장 모드: 장 수 = 이미지 수
+    slideCount = images.length;
+    slides = images.map((img, i) => ({
+      headline: img.analysis?.suggested_copy || '',
+      body: img.analysis?.suggested_body || '',
+      label: img.analysis?.mood || '',
+    }));
+  }
 
   btn.textContent = '파노라마 그리는 중...';
-  const panCanvas = await renderPanoramaCanvas(images, slides, style, SIZE, aspectRatio);
+  const panCanvas = await renderPanoramaCanvas(images, slides, style, SIZE, aspectRatio, isSingleImage, panoSelLeft, panoSelRight, slideCount);
 
   // 슬라이드별로 잘라서 저장
   const W = SIZE;
