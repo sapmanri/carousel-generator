@@ -231,6 +231,9 @@ async function addSelectedAsPostcards() {
         issueId: '',
         template: pickTemplate('random'),
         backTemplate: pickBackTemplate('random'),
+        lang: 'ko',
+        label_ko: '', label_en: '',
+        caption_ko: '', caption_en: '',
       };
       await autoFillFromAnalysis(pc, item);
       postcards.push(pc);
@@ -262,8 +265,13 @@ async function autoFillFromAnalysis(pc, item) {
   }
 
   if (result) {
-    pc.label = result.suggested_label || '';
-    pc.title = result.suggested_caption || result.suggested_label || '';
+    pc.label_ko = result.label_ko || result.suggested_label || '';
+    pc.label_en = result.label_en || '';
+    pc.caption_ko = result.caption_ko || result.suggested_caption || '';
+    pc.caption_en = result.caption_en || '';
+    pc.lang = pc.lang || 'ko';
+    pc.label = pc.lang === 'en' ? pc.label_en : pc.label_ko;
+    pc.title = pc.lang === 'en' ? pc.caption_en : pc.caption_ko;
   }
   if (!pc.title) pc.title = '제목 없음';
 }
@@ -273,6 +281,13 @@ async function analyzeImageForPostcard(dataUrl) {
   const base64 = dataUrl.split(',')[1];
   const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
   const key = getApiKey();
+  const prompt = `이 이미지를 보고 포스트카드용 텍스트를 한국어/영어 각각 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
+{
+  "label_ko": "소제목 한국어 (4-8자, 분위기 묘사)",
+  "label_en": "Short English label (2-4 words, mood/scene)",
+  "caption_ko": "Vase 문체 한국어 캡션 한 줄 (감각적, 12자 이내, 명조체 어울리는 문장)",
+  "caption_en": "English caption one line (poetic, under 8 words)"
+}`;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -282,12 +297,11 @@ async function analyzeImageForPostcard(dataUrl) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 300,
+      model: 'claude-sonnet-4-6',
+      max_tokens: 400,
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-        { type: 'text', text: `이 이미지를 보고 포스트카드용 짧은 한국어 텍스트를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"suggested_label":"소제목 한국어 (4-8자)","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)"}` }
+        { type: 'text', text: prompt }
       ]}]
     })
   });
@@ -328,8 +342,29 @@ function renderPostcardList() {
           <div class="field"><label>템플릿 (앞면)</label><select onchange="postcards[${idx}].template=pickTemplate(this.value); refreshPreview(${idx})">${templateOptionsHtml(pc.template)}</select></div>
           <div class="field"><label>템플릿 (뒷면)</label><select onchange="postcards[${idx}].backTemplate=pickBackTemplate(this.value); refreshPreview(${idx})">${backTemplateOptionsHtml(pc.backTemplate||'back-classic')}</select></div>
         </div>
-        <div class="field"><label>라벨</label><input value="${esc(pc.label)}" oninput="postcards[${idx}].label=this.value; refreshPreview(${idx})"></div>
-        <div class="field"><label>제목</label><input value="${esc(pc.title)}" oninput="postcards[${idx}].title=this.value; refreshPreview(${idx})"></div>
+        <div class="field field-lang">
+          <label>라벨 / Label
+            <span class="lang-toggle">
+              <button class="${pc.lang==='ko'?'active':''}" onclick="setLang(${idx},'ko')">한</button>
+              <button class="${pc.lang==='en'?'active':''}" onclick="setLang(${idx},'en')">EN</button>
+            </span>
+          </label>
+          <input value="${esc(pc.label)}" oninput="
+            const f = postcards[${idx}].lang==='en' ? 'label_en' : 'label_ko';
+            postcards[${idx}][f]=this.value;
+            postcards[${idx}].label=this.value;
+            refreshPreview(${idx})
+          ">
+        </div>
+        <div class="field">
+          <label>제목 / Caption</label>
+          <input value="${esc(pc.title)}" oninput="
+            const f = postcards[${idx}].lang==='en' ? 'caption_en' : 'caption_ko';
+            postcards[${idx}][f]=this.value;
+            postcards[${idx}].title=this.value;
+            refreshPreview(${idx})
+          ">
+        </div>
         <div class="field"><label>연결할 호 (QR코드 → 유튜브)</label>
           <select onchange="postcards[${idx}].issueId=this.value; refreshPreview(${idx})">${issueOptionsHtml(pc.issueId)}</select>
         </div>
@@ -365,8 +400,12 @@ async function reAnalyze(idx) {
   try {
     const dataUrl = await window.ImageLibrary.fetchAsDataUrl(item.path);
     const result = await analyzeImageForPostcard(dataUrl);
-    pc.label = result.suggested_label || pc.label;
-    pc.title = result.suggested_caption || pc.title;
+    pc.label_ko = result.label_ko || result.suggested_label || pc.label_ko || '';
+    pc.label_en = result.label_en || pc.label_en || '';
+    pc.caption_ko = result.caption_ko || result.suggested_caption || pc.caption_ko || '';
+    pc.caption_en = result.caption_en || pc.caption_en || '';
+    pc.label = pc.lang === 'en' ? pc.label_en : pc.label_ko;
+    pc.title = pc.lang === 'en' ? pc.caption_en : pc.caption_ko;
     renderPostcardList();
   } catch (e) {
     alert('분석 실패: ' + e.message);
@@ -394,6 +433,14 @@ function renderPreview(pc, idx) {
     </div>
   `;
 }
+function setLang(idx, lang) {
+  const pc = postcards[idx];
+  pc.lang = lang;
+  pc.label = lang === 'en' ? (pc.label_en || pc.label) : (pc.label_ko || pc.label);
+  pc.title = lang === 'en' ? (pc.caption_en || pc.title) : (pc.caption_ko || pc.title);
+  renderPostcardList();
+}
+
 function refreshPreview(idx) {
   const pc = postcards[idx];
   const hasQr = !!issueYoutubeUrl(pc.issueId);
