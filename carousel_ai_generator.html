@@ -298,6 +298,12 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .jw-grid-wrap.g1p2{grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr}
 .jw-grid-cell{position:relative;overflow:hidden;background:#ddd}
 .jw-grid-big{grid-row:1 / 3}
+
+/* ── 파노라마 스타일 ── */
+:root{--pf-cream:#f7f4ef;--pf-dark:#111;--pf-accent:#c8a97e}
+.pano-preview-wrap{width:100%;overflow-x:auto;border-radius:4px;background:#1a1a1a;padding:12px}
+.pano-preview-inner{display:flex;gap:0;height:220px}
+.pano-slide-preview{flex:0 0 220px;height:220px;position:relative;overflow:hidden;border:0.5px solid rgba(255,255,255,0.08)}
 </style>
 
 </head>
@@ -305,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.1.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.2.0</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -362,6 +368,11 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
       <option value="sapmanri">감성찾아삽만리 (다크 · 감성)</option>
       <option value="applemd">Apple (미니멀 · 여백)</option>
       <option value="jeonwon">전원생활 (매거진 표지·내지)</option>
+      <optgroup label="── 파노라마 ──">
+      <option value="pano-light">Panorama Light (크림 · 연속 화보)</option>
+      <option value="pano-dark">Panorama Dark (다크 · 흐르는 텍스트)</option>
+      <option value="pano-film">Panorama Film (필름 스트립 · 타이포)</option>
+      </optgroup>
     </select>
   </div>
   <div class="field">
@@ -394,6 +405,10 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   </div>
 </div>
 
+<div id="panoNotice" style="display:none;padding:8px 12px;background:rgba(180,160,255,0.08);border:1px solid rgba(180,160,255,0.2);border-radius:2px;font-size:9px;color:rgba(255,255,255,0.45);line-height:1.7;letter-spacing:0.03em">
+  파노라마 모드 — 하나의 넓은 화폭이 슬라이드마다 이어지는 방식으로 생성돼요.<br>PNG 저장 시 각 슬라이드가 자동으로 잘려서 저장돼요.
+</div>
+
 <div style="display:flex;align-items:center;gap:10px;padding:4px 0 8px">
   <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
     <input type="checkbox" id="infographicMode"
@@ -419,7 +434,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
     <span id="textScaleVal" style="font-size:10px;color:var(--canvas);min-width:32px;text-align:right">1.0×</span>
   </div>
   <div class="action-row">
-    <button class="action-btn btn-primary" onclick="exportSlides()">PNG 저장</button>
+    <button class="action-btn btn-primary" onclick="isPanoStyle(document.getElementById('metaStyle').value) ? exportPanorama() : exportSlides()">PNG 저장</button>
     <button class="action-btn btn-secondary" onclick="toggleCaption()">인스타 캡션</button>
   </div>
   <div class="caption-box" id="captionBox">
@@ -772,6 +787,12 @@ function doneStep(id, suffix='') {
 }
 
 // ── generate ──
+// 스타일 변경 시 파노라마 안내 표시
+document.getElementById('metaStyle').addEventListener('change', function() {
+  const isPano = this.value.startsWith('pano-');
+  document.getElementById('panoNotice').style.display = isPano ? 'block' : 'none';
+});
+
 document.getElementById('generateBtn').addEventListener('click', async () => {
   if (!images.length) return;
   document.getElementById('progressArea').classList.add('visible');
@@ -785,6 +806,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   const closing = document.getElementById('metaClosing').value;
   const manualText = document.getElementById('metaTextSlide').value.trim();
   const infographicMode = document.getElementById('infographicMode').checked;
+  const isPanorama = style.startsWith('pano-');
 
   // 이미지 해시 계산 (아직 없으면)
   for (let i = 0; i < images.length; i++) {
@@ -828,8 +850,26 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 
   const s2 = log('슬라이드 계획 중...');
   let plan;
-  try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode, textLang); doneStep(s2); }
-  catch(e) { doneStep(s2); log('플랜 생성 실패: ' + e.message, true); document.getElementById('generateBtn').disabled=false; return; }
+
+  if (isPanorama) {
+    // 파노라마: AI 플랜 없이 이미지 분석 결과로 바로 슬라이드 생성
+    const panoSlides = images.map((img, i) => ({
+      type: 'feature',
+      image_index: i,
+      headline: img.analysis?.suggested_copy || '',
+      body: img.analysis?.suggested_body || '',
+      label: img.analysis?.mood || '',
+      layout: 'overlay_bottom',
+      text_position: 'bottom_left',
+      accent_color: img.analysis?.dominant_color || '#c8a97e',
+      folio: String(i+1).padStart(2,'0') + ' / ' + String(images.length).padStart(2,'0'),
+    }));
+    plan = { slides: panoSlides, caption: '' };
+    doneStep(s2);
+  } else {
+    try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode, textLang); doneStep(s2); }
+    catch(e) { doneStep(s2); log('플랜 생성 실패: ' + e.message, true); document.getElementById('generateBtn').disabled=false; return; }
+  }
 
   const s3 = log('렌더링 중...');
   try {
@@ -839,19 +879,40 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     generatedSlides = plan.slides;
     generatedCaption = plan.caption || '';
 
-    // 모든 이미지가 사용됐는지 검증
-    const usedIndices = new Set();
-    plan.slides.forEach(s => {
-      if (s.image_index != null) usedIndices.add(s.image_index);
-      if (Array.isArray(s.image_indices)) s.image_indices.forEach(ix => usedIndices.add(ix));
-    });
-    const missing = [];
-    for (let i = 0; i < images.length; i++) if (!usedIndices.has(i)) missing.push(i+1);
-    if (missing.length) {
-      log(`⚠️ ${missing.length}장(${missing.join(', ')}번)이 결과에 포함되지 않았어요. 재생성하면 다른 구성이 나올 수 있어요.`, true);
+    if (isPanorama) {
+      // 파노라마: 미리보기는 가로 스크롤 슬라이드 행으로 보여주고 "PNG 저장" 버튼으로 잘라서 저장
+      const row = document.getElementById('slidesRow');
+      row.style.overflowX = 'auto';
+      row.style.flexWrap = 'nowrap';
+      row.style.gridTemplateColumns = 'unset';
+      row.style.display = 'flex';
+      row.innerHTML = plan.slides.map((s, i) => {
+        const img = images[s.image_index];
+        const src = img ? img.dataUrl : '';
+        return `<div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:#111;position:relative;overflow:hidden">
+          ${src ? `<img style="width:100%;height:100%;object-fit:cover;opacity:0.8" src="${src}"/>` : ''}
+          <div style="position:absolute;bottom:10px;left:10px;right:10px;z-index:2">
+            <div style="font-size:6px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:3px">${(s.label||'').toUpperCase()}</div>
+            <div style="font-family:var(--serif);font-size:12px;font-weight:300;color:#fff;line-height:1.3">${s.headline||''}</div>
+          </div>
+          <div style="position:absolute;top:6px;right:8px;font-size:7px;color:rgba(255,255,255,0.3)">${String(i+1).padStart(2,'0')}</div>
+        </div>`;
+      }).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
+      log('파노라마 미리보기 완성! PNG 저장으로 각 슬라이드를 잘라서 다운로드하세요.', true);
+    } else {
+      // 모든 이미지가 사용됐는지 검증
+      const usedIndices = new Set();
+      plan.slides.forEach(s => {
+        if (s.image_index != null) usedIndices.add(s.image_index);
+        if (Array.isArray(s.image_indices)) s.image_indices.forEach(ix => usedIndices.add(ix));
+      });
+      const missing = [];
+      for (let i = 0; i < images.length; i++) if (!usedIndices.has(i)) missing.push(i+1);
+      if (missing.length) {
+        log(`⚠️ ${missing.length}장(${missing.join(', ')}번)이 결과에 포함되지 않았어요. 재생성하면 다른 구성이 나올 수 있어요.`, true);
+      }
+      renderCarousel(plan.slides);
     }
-
-    renderCarousel(plan.slides);
     doneStep(s3);
     log('완성!', true);
     document.getElementById('carouselSection').classList.add('visible');
@@ -2195,6 +2256,303 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages, rati
   ctx.textAlign = 'left';
 
   return canvas;
+}
+
+
+// ── 파노라마 모드 ──
+function isPanoStyle(style) { return style && style.startsWith('pano-'); }
+
+async function renderPanoramaCanvas(images, slides, style, SIZE, ratio) {
+  const W = SIZE;
+  const H = ratio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
+  const N = Math.max(images.length, 1);
+  // 파노라마 전체 캔버스 (슬라이드 수만큼 가로로 긺)
+  const TOTAL_W = W * N;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = TOTAL_W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const CREAM = '#f7f4ef', DARK = '#111', ACCENT = '#c8a97e';
+  const serifFont = '"Cormorant Garamond","Noto Serif KR",Georgia,serif';
+  const sansFont = '"Helvetica Neue","Noto Sans KR",Arial,sans-serif';
+
+  function setFont(size, weight, family) { ctx.font = weight + ' ' + size + 'px ' + family; }
+
+  // 배경 사진들을 가로로 이어 붙이기
+  async function drawBgImages() {
+    for (let i = 0; i < images.length; i++) {
+      const dataUrl = images[i].dataUrl;
+      if (!dataUrl) continue;
+      await new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          const x = i * W;
+          const scale = Math.max(W / img.width, H / img.height);
+          const iw = img.width * scale, ih = img.height * scale;
+          ctx.save();
+          ctx.beginPath(); ctx.rect(x, 0, W, H); ctx.clip();
+          ctx.drawImage(img, x + (W - iw) / 2, (H - ih) / 2, iw, ih);
+          ctx.restore();
+          res();
+        };
+        img.onerror = res; img.src = dataUrl;
+      });
+    }
+  }
+
+  if (style === 'pano-light') {
+    // 크림 배경 + 사진들 + 큰 헤드라인이 경계 넘어 흐름
+    ctx.fillStyle = CREAM; ctx.fillRect(0, 0, TOTAL_W, H);
+
+    // 사진들: 각 슬라이드에서 중앙 60% 영역에 배치
+    for (let i = 0; i < images.length; i++) {
+      const dataUrl = images[i].dataUrl;
+      if (!dataUrl) continue;
+      await new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          const x = i * W + W * 0.05;
+          const pw = W * 0.9, ph = H * 0.72;
+          const py = H * 0.08;
+          const scale = Math.max(pw / img.width, ph / img.height);
+          const iw = img.width * scale, ih = img.height * scale;
+          ctx.save();
+          ctx.beginPath(); ctx.rect(x, py, pw, ph); ctx.clip();
+          ctx.drawImage(img, x + (pw - iw) / 2, py + (ph - ih) / 2, iw, ih);
+          ctx.restore();
+          res();
+        };
+        img.onerror = res; img.src = dataUrl;
+      });
+    }
+
+    // 상단 마스트헤드
+    setFont(Math.round(H * 0.035), '400', sansFont);
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.letterSpacing = '0.18em';
+    ctx.fillText('SAPMANRI', Math.round(W * 0.05), Math.round(H * 0.06));
+    ctx.letterSpacing = '0';
+
+    // 슬라이드마다 텍스트 (하단)
+    slides.forEach((slide, i) => {
+      const x = i * W;
+      const textX = x + Math.round(W * 0.05);
+      const textY = H * 0.84;
+      // 레이블
+      setFont(Math.round(H * 0.022), '400', sansFont);
+      ctx.fillStyle = ACCENT;
+      ctx.fillText((slide.label || '').toUpperCase(), textX, textY);
+      // 헤드라인 — 경계를 살짝 넘어가도 OK (연속감)
+      setFont(Math.round(H * 0.062), '300', serifFont);
+      ctx.fillStyle = DARK;
+      ctx.fillText(slide.headline || '', textX, textY + Math.round(H * 0.075));
+      // 바디
+      setFont(Math.round(H * 0.025), '300', sansFont);
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      const body = (slide.body || '').slice(0, 40);
+      ctx.fillText(body, textX, textY + Math.round(H * 0.075) + Math.round(H * 0.038));
+    });
+
+    // 폴리오 (우하단)
+    slides.forEach((slide, i) => {
+      const x = i * W;
+      setFont(Math.round(H * 0.02), '400', sansFont);
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.textAlign = 'right';
+      ctx.fillText(String(i + 1).padStart(2, '0') + ' / ' + String(images.length).padStart(2, '0'), x + W - Math.round(W * 0.05), H - Math.round(H * 0.03));
+    });
+    ctx.textAlign = 'left';
+
+  } else if (style === 'pano-dark') {
+    // 다크 배경 + 전체 폭 사진 이어붙임 + 어두운 오버레이 + 흰 텍스트
+    ctx.fillStyle = DARK; ctx.fillRect(0, 0, TOTAL_W, H);
+    await drawBgImages();
+
+    // 전체 어두운 오버레이
+    ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0, 0, TOTAL_W, H);
+
+    // 하단 그라디언트
+    const grad = ctx.createLinearGradient(0, H * 0.55, 0, H);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.88)');
+    ctx.fillStyle = grad; ctx.fillRect(0, H * 0.55, TOTAL_W, H * 0.45);
+
+    // 상단 브랜드
+    setFont(Math.round(H * 0.03), '400', sansFont);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.letterSpacing = '0.2em';
+    ctx.fillText('SAPMANRI', Math.round(W * 0.05), Math.round(H * 0.07));
+    ctx.letterSpacing = '0';
+
+    // 각 슬라이드 텍스트 블록
+    slides.forEach((slide, i) => {
+      const x = i * W;
+      const pad = Math.round(W * 0.07);
+
+      // 레이블
+      setFont(Math.round(H * 0.022), '400', sansFont);
+      ctx.fillStyle = ACCENT;
+      ctx.fillText((slide.label || '').toUpperCase(), x + pad, H * 0.72);
+
+      // 헤드라인 (크게, 경계 넘어도 자연스러움)
+      setFont(Math.round(H * 0.075), '300', serifFont);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(slide.headline || '', x + pad, H * 0.72 + Math.round(H * 0.085));
+
+      // 바디
+      setFont(Math.round(H * 0.026), '300', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.font = 'italic 300 ' + Math.round(H * 0.026) + 'px ' + serifFont;
+      const body = (slide.body || '').slice(0, 45);
+      ctx.fillText(body, x + pad, H * 0.72 + Math.round(H * 0.085) + Math.round(H * 0.045));
+    });
+
+    // 폴리오
+    slides.forEach((slide, i) => {
+      const x = i * W;
+      setFont(Math.round(H * 0.02), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.textAlign = 'right';
+      ctx.fillText(String(i + 1).padStart(2, '0') + ' / ' + String(images.length).padStart(2, '0'), x + W - Math.round(W * 0.05), H - Math.round(H * 0.03));
+    });
+    ctx.textAlign = 'left';
+
+  } else if (style === 'pano-film') {
+    // 필름 스트립 — 사진이 고정 크기 프레임 안에, 큰 타이포가 배경에 흐름
+    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, TOTAL_W, H);
+
+    // 큰 배경 타이포 (전체 폭에 걸쳐)
+    setFont(Math.round(H * 0.45), '700', sansFont);
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.textAlign = 'left';
+    ctx.fillText('SAPMANRI SLOW DAYS', Math.round(W * 0.03), H * 0.68);
+
+    // 필름 스프라켓 홀 (상단/하단)
+    const sprocketSize = Math.round(H * 0.028);
+    const sprocketCount = Math.ceil(TOTAL_W / (sprocketSize * 2.5));
+    for (let j = 0; j < sprocketCount; j++) {
+      const sx = Math.round(j * sprocketSize * 2.5 + sprocketSize * 0.5);
+      // 상단
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.beginPath();
+      ctx.roundRect(sx, Math.round(H * 0.028), sprocketSize, Math.round(sprocketSize * 0.7), 2);
+      ctx.fill();
+      // 하단
+      ctx.beginPath();
+      ctx.roundRect(sx, H - Math.round(H * 0.028) - Math.round(sprocketSize * 0.7), sprocketSize, Math.round(sprocketSize * 0.7), 2);
+      ctx.fill();
+    }
+
+    // 사진 프레임들
+    const frameH = Math.round(H * 0.62);
+    const frameW = Math.round(W * 0.82);
+    const frameY = (H - frameH) / 2;
+    for (let i = 0; i < images.length; i++) {
+      const frameX = i * W + Math.round(W * 0.09);
+      // 프레임 테두리
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(frameX, frameY, frameW, frameH);
+
+      const dataUrl = images[i].dataUrl;
+      if (!dataUrl) { ctx.fillStyle = '#222'; ctx.fillRect(frameX, frameY, frameW, frameH); continue; }
+      await new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.max(frameW / img.width, frameH / img.height);
+          const iw = img.width * scale, ih = img.height * scale;
+          ctx.save();
+          ctx.beginPath(); ctx.rect(frameX, frameY, frameW, frameH); ctx.clip();
+          ctx.drawImage(img, frameX + (frameW - iw) / 2, frameY + (frameH - ih) / 2, iw, ih);
+          ctx.restore(); res();
+        };
+        img.onerror = res; img.src = dataUrl;
+      });
+    }
+
+    // 슬라이드 텍스트 (하단)
+    slides.forEach((slide, i) => {
+      const x = i * W + Math.round(W * 0.09);
+      setFont(Math.round(H * 0.028), '700', sansFont);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(slide.headline || '', x, frameY + frameH + Math.round(H * 0.06));
+
+      setFont(Math.round(H * 0.02), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fillText((slide.label || '').toUpperCase(), x, frameY + frameH + Math.round(H * 0.06) + Math.round(H * 0.032));
+    });
+
+    // 번호
+    slides.forEach((slide, i) => {
+      const x = i * W;
+      setFont(Math.round(H * 0.018), '400', sansFont);
+      ctx.fillStyle = 'rgba(255,255,255,0.18)';
+      ctx.textAlign = 'right';
+      ctx.fillText(String(i + 1).padStart(2, '0'), x + W - Math.round(W * 0.09), frameY - Math.round(H * 0.025));
+    });
+    ctx.textAlign = 'left';
+  }
+
+  return canvas;
+}
+
+// 파노라마 슬라이드별로 잘라서 PNG 저장
+async function exportPanorama() {
+  if (!images.length) return;
+  const btn = document.querySelector('.btn-primary');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '파노라마 렌더링 중...';
+
+  try { await document.fonts.ready; } catch(e) {}
+
+  const SIZE = 1080;
+  const style = document.getElementById('metaStyle').value;
+  const slideCount = images.length;
+
+  // generatePlan 없이 이미지 분석 결과로 간단 슬라이드 데이터 생성
+  const slides = images.map((img, i) => ({
+    headline: img.analysis?.suggested_copy || '',
+    body: img.analysis?.suggested_body || '',
+    label: img.analysis?.mood || '',
+  }));
+
+  btn.textContent = '파노라마 그리는 중...';
+  const panCanvas = await renderPanoramaCanvas(images, slides, style, SIZE, aspectRatio);
+
+  // 슬라이드별로 잘라서 저장
+  const W = SIZE;
+  const H = aspectRatio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
+
+  if (isIOS) {
+    // iOS: 잘라낸 이미지 모달로 보여주기
+    _iosPngs = [];
+    for (let i = 0; i < slideCount; i++) {
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = W; sliceCanvas.height = H;
+      const sCtx = sliceCanvas.getContext('2d');
+      sCtx.drawImage(panCanvas, i * W, 0, W, H, 0, 0, W, H);
+      _iosPngs.push(sliceCanvas.toDataURL('image/png'));
+    }
+    btn.textContent = orig; btn.disabled = false;
+    _iosIdx = 0; openIosModal();
+  } else {
+    for (let i = 0; i < slideCount; i++) {
+      btn.textContent = '저장 중 ' + (i + 1) + '/' + slideCount + '...';
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = W; sliceCanvas.height = H;
+      const sCtx = sliceCanvas.getContext('2d');
+      sCtx.drawImage(panCanvas, i * W, 0, W, H, 0, 0, W, H);
+      const link = document.createElement('a');
+      link.download = 'sapmanri_pano_' + String(i + 1).padStart(2, '0') + '.png';
+      link.href = sliceCanvas.toDataURL('image/png');
+      link.click();
+      await new Promise(r => setTimeout(r, 400));
+    }
+    btn.textContent = orig; btn.disabled = false;
+  }
 }
 
 function toggleCaption() {
