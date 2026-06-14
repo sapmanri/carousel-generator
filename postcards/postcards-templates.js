@@ -14,6 +14,14 @@ function esc(s) {
 function renderTemplateHtml(pc, hasQr, side) {
   side = side || 'front';
   switch (pc.template) {
+    case 'mag-01':
+      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderMag01(pc);
+    case 'typo-01':
+      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderTypo01(pc);
+    case 'story-01':
+      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderStory01(pc);
+    case 'edit-01':
+      return side === 'back' ? renderExpo01Back(pc, hasQr) : renderEdit01(pc);
     case 'expo-01':
     default:
       return side === 'back' ? renderExpo01Back(pc, hasQr) : renderExpo01(pc, hasQr);
@@ -62,6 +70,102 @@ function renderExpo01(pc, hasQr) {
       <div class="${metaCls}">
         <div class="pc-meta-text">오늘도 느리게 · slow days<br>@sapmanri</div>
         ${qrHtml}
+      </div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// Mag 01 — 잡지형: 상단 헤더(번호+메타), 대형 사진, 하단 굵은 타이틀+설명
+// ──────────────────────────────────────────────
+function renderMag01(pc) {
+  return `
+    <div class="pc-mag01">
+      <div class="pc-mag01-header">
+        <div class="pc-mag01-meta">
+          <span class="pc-mag01-brand">SAPMANRI</span>
+          <span class="pc-mag01-label">${esc(pc.label || '')}</span>
+        </div>
+        <div class="pc-mag01-num">${esc(pc.number || '')}</div>
+      </div>
+      <div class="pc-mag01-title-over">${esc(pc.title || '')}</div>
+      <div class="pc-mag01-photo"><img src="${esc(pc.image)}" alt="" loading="lazy"></div>
+      <div class="pc-mag01-footer">
+        <div class="pc-mag01-desc">${esc(pc.label || '')}</div>
+        <div class="pc-mag01-sig">오늘도 느리게 · slow days<br>@sapmanri</div>
+      </div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// Typo 01 — 타이포 중심형: 세로 사이드 텍스트, 대형 볼드 워드, 인용구, 하단 작은 사진
+// ──────────────────────────────────────────────
+function renderTypo01(pc) {
+  return `
+    <div class="pc-typo01">
+      <div class="pc-typo01-side">CAPTURE YOUR MOMENTS</div>
+      <div class="pc-typo01-main">
+        <div class="pc-typo01-word">${esc(pc.label || 'SLOW')}</div>
+        <div class="pc-typo01-quote">
+          <span class="pc-typo01-qq">"</span>
+          <div class="pc-typo01-qtext">${esc(pc.title || '')}</div>
+          <div class="pc-typo01-attr">— @sapmanri</div>
+        </div>
+        <div class="pc-typo01-photo"><img src="${esc(pc.image)}" alt="" loading="lazy"></div>
+        <div class="pc-typo01-sig">오늘도 느리게 · slow days · No.${esc(pc.number || '')}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// Story 01 — 스토리/날짜형: 상단 타이틀+날짜, 대형 사진, 좌측 세로 텍스트 블록
+// ──────────────────────────────────────────────
+function renderStory01(pc) {
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { month:'2-digit', day:'2-digit' })
+    + '\n' + today.toLocaleDateString('en-US', { weekday:'long' });
+  return `
+    <div class="pc-story01">
+      <div class="pc-story01-top">
+        <div class="pc-story01-titlewrap">
+          <div class="pc-story01-label">${esc(pc.label || '')}</div>
+          <div class="pc-story01-title">${esc(pc.title || '')}</div>
+        </div>
+        <div class="pc-story01-datetag">
+          <div class="pc-story01-brand">SAPMANRI</div>
+          <div class="pc-story01-date">${today.toLocaleDateString('en-US',{month:'2-digit',day:'2-digit'})}</div>
+          <div class="pc-story01-dow">${today.toLocaleDateString('en-US',{weekday:'long'})}</div>
+        </div>
+      </div>
+      <div class="pc-story01-photo"><img src="${esc(pc.image)}" alt="" loading="lazy"></div>
+      <div class="pc-story01-footer">
+        <div class="pc-story01-side">오늘도 느리게 · slow days · @sapmanri</div>
+        <div class="pc-story01-num">No.${esc(pc.number || '')}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ──────────────────────────────────────────────
+// Edit 01 — 편집숍/듀얼 포토형: 상단 대형 타이틀, 두 개 사진 그리드, 우측 텍스트 단락, 하단 서명
+// ──────────────────────────────────────────────
+function renderEdit01(pc) {
+  return `
+    <div class="pc-edit01">
+      <div class="pc-edit01-title">${esc(pc.title || '')}</div>
+      <div class="pc-edit01-sub">${esc(pc.label || '')}</div>
+      <div class="pc-edit01-grid">
+        <div class="pc-edit01-photoa"><img src="${esc(pc.image)}" alt="" loading="lazy"></div>
+        <div class="pc-edit01-photob"><img src="${esc(pc.image)}" alt="" loading="lazy" style="filter:brightness(.75) contrast(1.1)"></div>
+      </div>
+      <div class="pc-edit01-body">
+        <div class="pc-edit01-text">감성찾아삽만리의 기록 · 오늘도 느리게, 조금씩.<br><br>${esc(pc.label || '')}</div>
+        <div class="pc-edit01-sig">
+          <div class="pc-edit01-brand">— SAPMANRI</div>
+          <div class="pc-edit01-num">No.${esc(pc.number || '')}</div>
+        </div>
       </div>
     </div>
   `;
