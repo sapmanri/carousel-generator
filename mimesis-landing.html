@@ -344,6 +344,59 @@
     .tools-links { flex-direction: column; align-items: center; gap: 1rem; }
   }
 
+
+  /* ── CORE SERVICE ── */
+  .core-service { background: var(--fog); }
+  .cs-intro { max-width: 560px; margin-bottom: 5rem; }
+  .cs-intro h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.8rem, 2.8vw, 2.6rem); font-weight: 400; line-height: 1.5; margin-bottom: 1.2rem; word-break: keep-all; }
+  .cs-intro p { font-size: 0.87rem; color: var(--dust); line-height: 2.2; word-break: keep-all; }
+
+  .cs-steps { display: flex; flex-direction: column; gap: 0; }
+
+  .cs-step {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 480px;
+    border-top: 1px solid var(--pale);
+  }
+  .cs-step:last-child { border-bottom: 1px solid var(--pale); }
+  .cs-step.reverse { direction: rtl; }
+  .cs-step.reverse > * { direction: ltr; }
+
+  .cs-step-img {
+    position: relative; overflow: hidden;
+  }
+  .cs-step-img img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: saturate(0.82) brightness(0.92);
+    transition: filter 0.6s, transform 0.8s;
+    display: block;
+  }
+  .cs-step:hover .cs-step-img img {
+    filter: saturate(0.95) brightness(1);
+    transform: scale(1.03);
+  }
+
+  .cs-step-body {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 4rem 4rem;
+    background: var(--fog);
+  }
+  .cs-step.reverse .cs-step-body { padding: 4rem 4rem 4rem 3rem; }
+
+  .cs-step-num { font-size: 0.62rem; letter-spacing: 0.3em; color: var(--warm); text-transform: uppercase; margin-bottom: 1.4rem; }
+  .cs-step-title { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.6rem, 2.2vw, 2rem); font-weight: 400; line-height: 1.4; margin-bottom: 1.6rem; word-break: keep-all; }
+  .cs-step-desc { font-size: 0.86rem; color: #5A5652; line-height: 2.3; word-break: keep-all; margin-bottom: 2rem; }
+  .cs-step-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .cs-tag { font-size: 0.68rem; letter-spacing: 0.1em; color: var(--dust); border: 1px solid var(--pale); padding: 0.3rem 0.8rem; border-radius: 1px; }
+
+  @media (max-width: 900px) {
+    .cs-step { grid-template-columns: 1fr; min-height: auto; direction: ltr !important; }
+    .cs-step.reverse { direction: ltr; }
+    .cs-step-img { height: 260px; }
+    .cs-step-body { padding: 2.5rem 1.6rem !important; }
+  }
+
 </style>
 </head>
 <body>
@@ -495,26 +548,84 @@
   </div>
 </section>
 
-<!-- SERVICES -->
-<section id="services" class="services">
+<!-- CORE SERVICE -->
+<section id="services" class="core-service">
   <div class="section-inner">
-    <div class="label reveal">Services</div>
-    <div class="services-grid reveal">
-      <div class="service-item">
-        <div class="service-num">01</div>
-        <div class="service-name">채널 진단<br>컨설팅</div>
-        <p class="service-desc">기존 채널을 분석하고 방향을 제안합니다. 구독자 정체, 영상 퀄리티, SEO, 썸네일까지 한 번의 리포트로 개선 포인트를 정리합니다.</p>
+    <div class="label reveal">What We Do</div>
+    <div class="cs-intro reveal">
+      <h2>기획부터 운영까지<br>채널의 모든 것을 함께합니다</h2>
+      <p>영상 하나를 만드는 것보다 채널 전체가 브랜드가 되는 것이 목표입니다. 기획, 촬영, 편집, 운영 — 네 단계 모두 직접 합니다.</p>
+    </div>
+    <div class="cs-steps">
+
+      <div class="cs-step reveal">
+        <div class="cs-step-img">
+          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/u8es_b948c8ed_bec7d1e7.jpg" alt="기획" loading="lazy" />
+        </div>
+        <div class="cs-step-body">
+          <div class="cs-step-num">01 · Planning</div>
+          <h3 class="cs-step-title">브랜드의 이야기를<br>채널로 설계합니다</h3>
+          <p class="cs-step-desc">어떤 사람에게 닿고 싶은지, 무엇을 보여주고 싶은지 — 방향이 잡혀야 영상이 쌓입니다. 채널 콘셉트, 타깃 설정, 업로드 전략, 콘텐츠 캘린더까지 처음부터 함께 그립니다.</p>
+          <div class="cs-step-tags">
+            <span class="cs-tag">채널 콘셉트</span>
+            <span class="cs-tag">타깃 설정</span>
+            <span class="cs-tag">업로드 전략</span>
+            <span class="cs-tag">콘텐츠 캘린더</span>
+          </div>
+        </div>
       </div>
-      <div class="service-item">
-        <div class="service-num">02</div>
-        <div class="service-name">채널 런칭<br>패키지</div>
-        <p class="service-desc">없는 채널을 처음부터 만듭니다. 채널 콘셉트 기획부터 초기 영상 제작까지. 브랜드의 색깔을 찾는 것부터 함께 시작합니다.</p>
+
+      <div class="cs-step reverse reveal">
+        <div class="cs-step-img">
+          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ojgw_ffd43862_cce75ecc.jpg" alt="촬영" loading="lazy" />
+        </div>
+        <div class="cs-step-body">
+          <div class="cs-step-num">02 · Filming</div>
+          <h3 class="cs-step-title">장면을 고르는 눈으로<br>직접 현장에 섭니다</h3>
+          <p class="cs-step-desc">3년간 매주 직접 카메라를 들고 나간 경험이 있습니다. 무엇을 찍을지, 어떻게 담을지 — 현장 디렉팅부터 촬영까지. 브랜드의 일상이 영상이 되는 순간을 함께 만듭니다.</p>
+          <div class="cs-step-tags">
+            <span class="cs-tag">현장 촬영</span>
+            <span class="cs-tag">씬 구성</span>
+            <span class="cs-tag">Sony A7C</span>
+            <span class="cs-tag">자연광 활용</span>
+          </div>
+        </div>
       </div>
-      <div class="service-item">
-        <div class="service-num">03</div>
-        <div class="service-name">월정액<br>운영 대행</div>
-        <p class="service-desc">매달 정해진 편수를 기획·촬영·편집·업로드합니다. SEO, 설명란, 썸네일, 인스타그램 연계까지 포함. 채널이 꾸준히 살아있도록 함께 유지합니다.</p>
+
+      <div class="cs-step reveal">
+        <div class="cs-step-img">
+          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/zhys_bca05c2d_9693ad5d.jpg" alt="편집" loading="lazy" />
+        </div>
+        <div class="cs-step-body">
+          <div class="cs-step-num">03 · Editing</div>
+          <h3 class="cs-step-title">색감 하나까지<br>브랜드의 온도로 맞춥니다</h3>
+          <p class="cs-step-desc">빠른 편집이 아니라 브랜드에 맞는 색감과 리듬으로. 자막, BGM 선곡, 색보정, 썸네일 디자인까지 — 영상이 채널 안에서 일관된 세계관을 갖도록 다듬습니다.</p>
+          <div class="cs-step-tags">
+            <span class="cs-tag">색보정 LUT</span>
+            <span class="cs-tag">자막 디자인</span>
+            <span class="cs-tag">BGM 선곡</span>
+            <span class="cs-tag">썸네일</span>
+          </div>
+        </div>
       </div>
+
+      <div class="cs-step reverse reveal">
+        <div class="cs-step-img">
+          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/1kptk_b9c1c832_980a58dc.jpg" alt="운영" loading="lazy" />
+        </div>
+        <div class="cs-step-body">
+          <div class="cs-step-num">04 · Publishing</div>
+          <h3 class="cs-step-title">업로드 이후가<br>진짜 운영입니다</h3>
+          <p class="cs-step-desc">SEO 최적화 제목, 설명란, 태그, 해시태그, 챕터 타임스탬프, 인스타그램 릴스 연계까지 — 영상이 더 많은 사람에게 닿을 수 있도록 업로드 이후도 함께 챙깁니다.</p>
+          <div class="cs-step-tags">
+            <span class="cs-tag">SEO 최적화</span>
+            <span class="cs-tag">설명란 작성</span>
+            <span class="cs-tag">인스타 연계</span>
+            <span class="cs-tag">성과 분석</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
