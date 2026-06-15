@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.4.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.4.1</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -2759,21 +2759,7 @@ async function renderPanoramaCanvas(images, slides, style, SIZE, ratio, singleMo
     const txtColor = panoTextColor || '#fff';
     ctx.fillStyle = bgColor; ctx.fillRect(0, 0, TOTAL_W, H);
 
-    // 배경 이미지가 있으면 살짝 배경에 블렌드 (선택사항)
-    if (images.length && images[0]?.dataUrl) {
-      await new Promise(res => {
-        const img = new Image();
-        img.onload = () => {
-          const scale = Math.max(TOTAL_W / img.width, H / img.height);
-          const iw = img.width * scale, ih = img.height * scale;
-          ctx.globalAlpha = 0.12;
-          ctx.drawImage(img, (TOTAL_W - iw) / 2, (H - ih) / 2, iw, ih);
-          ctx.globalAlpha = 1;
-          res();
-        };
-        img.onerror = res; img.src = images[0].dataUrl;
-      });
-    }
+    // pano-text는 순수 단색 배경만 — 이미지 블렌드 없음 (텍스트 가독성 우선)
 
     // 텍스트 준비 — slides[0].headline에 AI가 채운 텍스트
     const rawText = slides[0]?.headline || 'SAPMANRI';
