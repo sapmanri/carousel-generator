@@ -3,803 +3,426 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>미메시스 — 삽만리</title>
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&family=Noto+Sans+KR:wght@300;400&display=swap" rel="stylesheet">
+<title>MIMESIS — Stories, Objects and Memories</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Sans+KR:wght@300;400&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --fog: #F0EEE9;
-    --ink: #1E1C1A;
-    --dust: #9A9590;
-    --warm: #C4A882;
-    --pale: #E8E4DC;
-    --gap: clamp(4rem, 9vw, 8rem);
+    --forest:   #355743;
+    --sage:     #A7B49A;
+    --beige:    #F4F0E7;
+    --paper:    #FAF8F4;
+    --brown:    #8A6A4A;
+    --charcoal: #333333;
+    --mid:      #7A7972;
+    --hairline: #D8D4CC;
+    --gap: clamp(4.5rem, 9vw, 8rem);
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans:  'Noto Sans KR', sans-serif;
+    --hand:  'Nanum Pen Script', cursive;
   }
   html { scroll-behavior: smooth; }
-  body { background: var(--fog); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; font-weight: 300; line-height: 1.8; -webkit-font-smoothing: antialiased; }
+  body { background: var(--paper); color: var(--charcoal); font-family: var(--sans); font-weight: 300; line-height: 1.8; -webkit-font-smoothing: antialiased; }
 
-  /* NAV */
+  /* ── NAV ── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     display: flex; justify-content: space-between; align-items: center;
-    padding: 1.5rem 3rem;
-    background: rgba(240,238,233,0); backdrop-filter: blur(0px);
-    transition: background 0.5s, backdrop-filter 0.5s, border-color 0.5s;
+    padding: 1.4rem 3rem;
+    background: rgba(250,248,244,0); backdrop-filter: blur(0);
     border-bottom: 1px solid transparent;
+    transition: background 0.5s, backdrop-filter 0.5s, border-color 0.5s;
   }
-  nav.scrolled {
-    background: rgba(240,238,233,0.9); backdrop-filter: blur(10px);
-    border-color: var(--pale);
-  }
-  .logo { font-family: 'Nanum Myeongjo', serif; font-size: 1rem; letter-spacing: 0.1em; color: #fff; text-decoration: none; transition: color 0.5s; }
-  .logo span { font-family: 'Noto Sans KR', sans-serif; font-weight: 300; font-size: 0.72rem; color: rgba(255,255,255,0.6); margin-left: 0.6em; letter-spacing: 0.15em; transition: color 0.5s; }
-  nav.scrolled .logo { color: var(--ink); }
-  nav.scrolled .logo span { color: var(--dust); }
+  nav.scrolled { background: rgba(250,248,244,0.93); backdrop-filter: blur(12px); border-color: var(--hairline); }
+  .logo-wrap { display: flex; flex-direction: column; gap: 1px; text-decoration: none; }
+  .logo-main { font-family: var(--serif); font-size: 1.1rem; letter-spacing: 0.28em; color: #fff; font-weight: 400; transition: color 0.5s; }
+  .logo-sub  { font-size: 0.6rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.55); text-transform: uppercase; transition: color 0.5s; }
+  nav.scrolled .logo-main { color: var(--charcoal); }
+  nav.scrolled .logo-sub  { color: var(--mid); }
   .nav-links { display: flex; gap: 2.4rem; list-style: none; }
-  .nav-links a { font-size: 0.75rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.7); text-decoration: none; transition: color 0.3s; }
+  .nav-links a { font-size: 0.72rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.3s; }
   .nav-links a:hover { color: #fff; }
-  nav.scrolled .nav-links a { color: var(--dust); }
-  nav.scrolled .nav-links a:hover { color: var(--ink); }
+  nav.scrolled .nav-links a { color: var(--mid); }
+  nav.scrolled .nav-links a:hover { color: var(--charcoal); }
 
-  /* HERO — 전체 배경 이미지 + 흐림 + 오버레이 */
-  .hero {
-    min-height: 100svh;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    overflow: hidden;
-  }
+  /* ── HERO ── */
+  .hero { min-height: 100svh; position: relative; display: flex; align-items: flex-end; overflow: hidden; }
   .hero-bg {
     position: absolute; inset: 0;
     background: url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ydgw_3fee1146_99b15c58.jpg') center/cover no-repeat;
-    filter: blur(3px) brightness(0.55) saturate(0.7);
+    filter: blur(2px) brightness(0.45) saturate(0.6);
     transform: scale(1.05);
   }
-  .hero-overlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(
-      160deg,
-      rgba(20,18,16,0.3) 0%,
-      rgba(20,18,16,0.15) 40%,
-      rgba(20,18,16,0.6) 100%
-    );
+  .hero-tint { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(53,87,67,0.25) 0%, rgba(20,18,16,0.55) 100%); }
+  .hero-content { position: relative; padding: 0 3rem 5.5rem; max-width: 760px; }
+  .hero-brand {
+    font-size: 0.62rem; letter-spacing: 0.3em; color: var(--sage);
+    text-transform: uppercase; margin-bottom: 1.8rem;
+    display: flex; align-items: center; gap: 1rem;
   }
-  .hero-content {
-    position: relative;
-    padding: 0 3rem 5rem;
-    max-width: 700px;
-  }
-  .hero-eyebrow { font-size: 0.7rem; letter-spacing: 0.28em; color: var(--warm); margin-bottom: 2rem; text-transform: uppercase; }
-  .hero-title {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: clamp(2.6rem, 5vw, 4.8rem);
-    line-height: 1.25; font-weight: 400;
-    color: #fff; margin-bottom: 2rem; word-break: keep-all;
-  }
-  .hero-title em { font-style: normal; color: var(--warm); }
-  .hero-sub { font-size: 0.86rem; color: rgba(255,255,255,0.65); max-width: 380px; line-height: 2.3; margin-bottom: 3rem; word-break: keep-all; }
-  .btn { display: inline-block; padding: 0.9rem 2.4rem; border: 1px solid rgba(255,255,255,0.6); font-size: 0.78rem; letter-spacing: 0.15em; color: #fff; text-decoration: none; transition: background 0.3s, border-color 0.3s; }
-  .btn:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
-  .btn.dark { border-color: var(--ink); color: var(--ink); }
-  .btn.dark:hover { background: var(--ink); color: var(--fog); }
+  .hero-brand::before { content: ''; width: 28px; height: 1px; background: var(--sage); opacity: 0.6; }
+  .hero-title { font-family: var(--serif); font-size: clamp(2.8rem, 5.5vw, 5.2rem); line-height: 1.15; font-weight: 300; color: #fff; margin-bottom: 0.6rem; letter-spacing: 0.02em; }
+  .hero-hand { font-family: var(--hand); font-size: clamp(2rem, 4vw, 3.6rem); color: var(--sage); display: block; margin-bottom: 2rem; line-height: 1.4; }
+  .hero-sub { font-size: 0.84rem; color: rgba(255,255,255,0.58); max-width: 400px; line-height: 2.3; margin-bottom: 3.2rem; word-break: keep-all; }
+  .btn-outline { display: inline-block; padding: 0.85rem 2.4rem; border: 1px solid rgba(255,255,255,0.45); font-size: 0.72rem; letter-spacing: 0.2em; color: #fff; text-decoration: none; text-transform: uppercase; transition: background 0.3s, border-color 0.3s; }
+  .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+  .btn-forest { border-color: var(--forest); background: var(--forest); color: #fff; }
+  .btn-forest:hover { background: #2a4535; border-color: #2a4535; }
+  .btn-ghost { display: inline-block; padding: 0.85rem 2rem; border: 1px solid var(--hairline); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--mid); text-decoration: none; text-transform: uppercase; transition: border-color 0.3s, color 0.3s; }
+  .btn-ghost:hover { border-color: var(--charcoal); color: var(--charcoal); }
 
-  /* SECTION */
+  /* ── SECTION ── */
   section { padding: var(--gap) 3rem; }
-  .section-inner { max-width: 1100px; margin: 0 auto; }
-  .label { font-size: 0.66rem; letter-spacing: 0.3em; color: var(--warm); text-transform: uppercase; margin-bottom: 3rem; display: flex; align-items: center; gap: 1rem; }
-  .label::after { content: ''; width: 36px; height: 1px; background: var(--warm); opacity: 0.5; }
-
-  /* ABOUT */
-  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
-  .about-text h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.7rem, 2.6vw, 2.3rem); font-weight: 400; line-height: 1.6; margin-bottom: 2rem; word-break: keep-all; }
-  .about-text p { font-size: 0.87rem; color: #5A5652; line-height: 2.3; margin-bottom: 1.3rem; word-break: keep-all; }
-  .about-stats { display: flex; flex-direction: column; gap: 2.2rem; }
-  .stat { border-left: 1px solid var(--pale); padding-left: 1.6rem; }
-  .stat-num { font-family: 'Nanum Myeongjo', serif; font-size: 2.2rem; font-weight: 400; line-height: 1; margin-bottom: 0.4rem; }
-  .stat-label { font-size: 0.76rem; color: var(--dust); }
-
-  /* PORTFOLIO — 섞인 그리드 */
-  .film-strip { display: flex; gap: 6px; margin-bottom: 1.6rem; }
-  .film-hole { width: 9px; height: 9px; border-radius: 2px; border: 1px solid var(--warm); opacity: 0.35; }
-
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(12, 1fr);
-    grid-template-rows: auto;
-    gap: 3px;
+  .inner { max-width: 1100px; margin: 0 auto; }
+  .label {
+    font-size: 0.6rem; letter-spacing: 0.32em; color: var(--sage);
+    text-transform: uppercase; margin-bottom: 3rem;
+    display: flex; align-items: center; gap: 1rem;
   }
+  .label::after { content: ''; width: 32px; height: 1px; background: var(--sage); }
 
-  /* 사진 카드 — 비율 유지 */
-  .pf-item {
-    position: relative; overflow: hidden; cursor: pointer;
-    background: var(--pale);
+  /* ── INTRO / ABOUT ── */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7rem; align-items: start; }
+  .about-left h2 { font-family: var(--serif); font-size: clamp(1.9rem, 2.8vw, 2.6rem); font-weight: 300; line-height: 1.5; margin-bottom: 0.5rem; letter-spacing: 0.02em; word-break: keep-all; }
+  .about-left .hand-accent { font-family: var(--hand); font-size: clamp(1.4rem, 2vw, 1.9rem); color: var(--forest); display: block; margin-bottom: 2rem; }
+  .about-left p { font-size: 0.86rem; color: #5a5652; line-height: 2.4; margin-bottom: 1.3rem; word-break: keep-all; }
+  .about-right { display: flex; flex-direction: column; gap: 2rem; padding-top: 0.5rem; }
+  .stat { border-left: 2px solid var(--sage); padding-left: 1.6rem; }
+  .stat-num { font-family: var(--serif); font-size: 2.6rem; font-weight: 300; color: var(--forest); line-height: 1; margin-bottom: 0.3rem; }
+  .stat-label { font-size: 0.75rem; color: var(--mid); }
+
+  /* ── CORE SERVICE — 교차 레이아웃 ── */
+  .cs-intro { max-width: 580px; margin-bottom: 5rem; }
+  .cs-intro h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1.5; margin-bottom: 0.4rem; letter-spacing: 0.02em; word-break: keep-all; }
+  .cs-intro .hand-accent { font-family: var(--hand); font-size: clamp(1.3rem, 1.8vw, 1.7rem); color: var(--forest); display: block; margin-bottom: 1.2rem; }
+  .cs-intro p { font-size: 0.86rem; color: var(--mid); line-height: 2.2; word-break: keep-all; }
+
+  .cs-steps { display: flex; flex-direction: column; }
+  .cs-step { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hairline); min-height: 500px; }
+  .cs-step:last-child { border-bottom: 1px solid var(--hairline); }
+  .cs-step.rev { direction: rtl; }
+  .cs-step.rev > * { direction: ltr; }
+  .cs-img { overflow: hidden; position: relative; }
+  .cs-img img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(0.78) brightness(0.94); transition: filter 0.7s, transform 0.9s; }
+  .cs-step:hover .cs-img img { filter: saturate(0.92) brightness(1); transform: scale(1.04); }
+  .cs-img-badge {
+    position: absolute; bottom: 1.4rem; left: 1.4rem;
+    background: var(--forest); color: #fff;
+    font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
   }
-  .pf-item::before { content: ''; display: block; }
-  .pf-thumb {
-    position: absolute; inset: 0;
-    background-size: cover; background-position: center;
-    transition: transform 0.8s ease, filter 0.4s;
-    filter: saturate(0.82) brightness(0.9);
-  }
-  .pf-item:hover .pf-thumb { transform: scale(1.04); filter: saturate(1) brightness(1); }
-  .pf-info {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    padding: 1.4rem 1.1rem 0.9rem;
-    background: linear-gradient(to top, rgba(16,14,12,0.82) 0%, transparent 100%);
-    color: #fff; opacity: 0; transform: translateY(4px);
-    transition: opacity 0.4s, transform 0.4s;
-  }
+  .cs-step.rev .cs-img-badge { left: auto; right: 1.4rem; }
+  .cs-body { display: flex; flex-direction: column; justify-content: center; padding: 4rem; background: var(--paper); }
+  .cs-step.rev .cs-body { background: var(--beige); }
+  .cs-num { font-size: 0.58rem; letter-spacing: 0.3em; color: var(--sage); text-transform: uppercase; margin-bottom: 1.6rem; }
+  .cs-title { font-family: var(--serif); font-size: clamp(1.6rem, 2vw, 2rem); font-weight: 300; line-height: 1.45; margin-bottom: 1.6rem; word-break: keep-all; letter-spacing: 0.01em; }
+  .cs-desc { font-size: 0.84rem; color: #5a5652; line-height: 2.4; margin-bottom: 2rem; word-break: keep-all; }
+  .cs-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .cs-tag { font-size: 0.65rem; letter-spacing: 0.1em; color: var(--forest); border: 1px solid var(--sage); padding: 0.28rem 0.75rem; }
+
+  /* ── PORTFOLIO ── */
+  .portfolio-section { background: var(--beige); }
+  .pf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+  .pf-item { position: relative; overflow: hidden; cursor: pointer; }
+  .pf-item::before { content: ''; display: block; padding-top: 70%; }
+  .pf-thumb { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(0.8) brightness(0.92); transition: filter 0.5s, transform 0.8s; }
+  .pf-item:hover .pf-thumb { filter: saturate(1) brightness(1); transform: scale(1.04); }
+  .pf-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.6rem 1.2rem 1rem; background: linear-gradient(to top, rgba(53,87,67,0.82) 0%, transparent 100%); color: #fff; opacity: 0; transform: translateY(4px); transition: opacity 0.4s, transform 0.4s; }
   .pf-item:hover .pf-info { opacity: 1; transform: translateY(0); }
-  .pf-type { font-size: 0.6rem; letter-spacing: 0.22em; color: var(--warm); margin-bottom: 0.3rem; text-transform: uppercase; }
-  .pf-title { font-family: 'Nanum Myeongjo', serif; font-size: 0.88rem; }
+  .pf-type { font-size: 0.58rem; letter-spacing: 0.22em; color: var(--sage); margin-bottom: 0.3rem; text-transform: uppercase; }
+  .pf-title { font-family: var(--serif); font-size: 1rem; font-weight: 300; }
+  .pf-item.wide { grid-column: span 2; }
+  .pf-item.wide::before { padding-top: 42%; }
 
-  /* 콘텐츠 카드 — 매거진/포스트카드 결과물 */
-  .pf-card {
-    position: relative; overflow: hidden; cursor: pointer;
-    display: flex; flex-direction: column;
-  }
-  .pf-card-img {
-    width: 100%; flex: 1;
-    background-size: cover; background-position: center;
-    filter: saturate(0.85) brightness(0.92);
-    transition: filter 0.4s, transform 0.8s;
-  }
-  .pf-card:hover .pf-card-img { filter: saturate(1) brightness(1); transform: scale(1.02); }
-  .pf-card-meta {
-    padding: 1rem 1.1rem 0.9rem;
-    background: var(--ink); color: var(--fog);
-    flex-shrink: 0;
-  }
-  .pf-card-badge { font-size: 0.58rem; letter-spacing: 0.2em; color: var(--warm); text-transform: uppercase; margin-bottom: 0.3rem; }
-  .pf-card-title { font-family: 'Nanum Myeongjo', serif; font-size: 0.85rem; font-weight: 400; line-height: 1.4; }
+  /* ── TOOLS (작게) ── */
+  .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); }
+  .tool-card { background: var(--paper); padding: 2.2rem 2rem; text-decoration: none; color: var(--charcoal); display: flex; flex-direction: column; gap: 0.6rem; transition: background 0.3s; }
+  .tool-card:hover { background: var(--beige); }
+  .tool-icon { font-size: 1.1rem; margin-bottom: 0.4rem; }
+  .tool-name { font-family: var(--serif); font-size: 1.05rem; font-weight: 300; letter-spacing: 0.02em; }
+  .tool-desc { font-size: 0.76rem; color: var(--mid); line-height: 1.9; word-break: keep-all; }
+  .tool-link-txt { font-size: 0.62rem; letter-spacing: 0.16em; color: var(--forest); text-transform: uppercase; margin-top: auto; padding-top: 1rem; }
 
-  /* 그리드 배치 */
-  /* 행1: [큰사진 5col] [포스트카드 3col] [사진 4col] */
-  .pf-a { grid-column: 1 / 6; grid-row: 1 / 3; }
-  .pf-a::before { padding-top: 0; }
-  .pf-a .pf-thumb { position: relative; min-height: 480px; height: 100%; }
+  /* ── CONTACT ── */
+  .contact-section { background: var(--forest); color: #fff; }
+  .contact-section .label { color: var(--sage); }
+  .contact-section .label::after { background: var(--sage); }
+  .contact-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+  .contact-left h2 { font-family: var(--serif); font-size: clamp(2rem, 3.2vw, 3rem); font-weight: 300; line-height: 1.4; margin-bottom: 0.6rem; letter-spacing: 0.02em; word-break: keep-all; }
+  .contact-left .hand-accent { font-family: var(--hand); font-size: clamp(1.4rem, 2vw, 2rem); color: var(--sage); display: block; margin-bottom: 2rem; }
+  .contact-left p { font-size: 0.84rem; color: rgba(255,255,255,0.58); line-height: 2.3; word-break: keep-all; }
+  .contact-right { display: flex; flex-direction: column; gap: 1rem; }
+  .contact-right a { display: block; padding: 1.2rem 1.8rem; border: 1px solid rgba(255,255,255,0.2); font-size: 0.76rem; letter-spacing: 0.16em; color: rgba(255,255,255,0.75); text-decoration: none; text-transform: uppercase; transition: background 0.3s, border-color 0.3s, color 0.3s; }
+  .contact-right a:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.5); color: #fff; }
+  .contact-right a.primary { background: #fff; color: var(--forest); border-color: #fff; }
+  .contact-right a.primary:hover { background: var(--beige); }
 
-  .pf-b { grid-column: 6 / 9; grid-row: 1 / 2; }
-  .pf-b::before { padding-top: 100%; }
+  /* ── FOOTER ── */
+  footer { background: var(--charcoal); padding: 2rem 3rem; display: flex; justify-content: space-between; align-items: center; }
+  footer .f-logo { font-family: var(--serif); font-size: 0.9rem; letter-spacing: 0.28em; color: rgba(255,255,255,0.6); }
+  footer .f-sub { font-size: 0.6rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+  footer .f-copy { font-size: 0.65rem; color: rgba(255,255,255,0.28); letter-spacing: 0.06em; }
 
-  .pf-c { grid-column: 9 / 13; grid-row: 1 / 2; }
-  .pf-c::before { padding-top: 75%; }
-
-  /* 행2: [포스트카드 3col] [매거진카드 4col] */
-  .pf-d { grid-column: 6 / 9; grid-row: 2 / 3; }
-
-  .pf-e { grid-column: 9 / 13; grid-row: 2 / 3; }
-
-  /* 행3: [사진 4col] [매거진카드 4col] [사진 4col] */
-  .pf-f { grid-column: 1 / 5; grid-row: 3 / 4; }
-  .pf-f::before { padding-top: 66%; }
-
-  .pf-g { grid-column: 5 / 9; grid-row: 3 / 4; }
-
-  .pf-h { grid-column: 9 / 13; grid-row: 3 / 4; }
-  .pf-h::before { padding-top: 66%; }
-
-  /* pf-card 높이 */
-  .pf-b, .pf-d, .pf-e, .pf-g {
-    display: flex; flex-direction: column;
-  }
-  .pf-b .pf-card-img,
-  .pf-d .pf-card-img,
-  .pf-e .pf-card-img,
-  .pf-g .pf-card-img {
-    flex: 1; min-height: 160px;
-    display: block;
-    background-repeat: no-repeat;
-  }
-
-  /* SERVICES */
-  .services { background: var(--ink); color: var(--fog); }
-  .services .label { color: var(--warm); }
-  .services .label::after { background: var(--warm); }
-  .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid #2a2826; }
-  .service-item { padding: 2.8rem 2.4rem 2.8rem 0; border-bottom: 1px solid #2a2826; }
-  .service-item:nth-child(n+2) { padding-left: 2.4rem; border-left: 1px solid #2a2826; }
-  .service-num { font-size: 0.62rem; color: var(--warm); letter-spacing: 0.22em; margin-bottom: 1.4rem; }
-  .service-name { font-family: 'Nanum Myeongjo', serif; font-size: 1.2rem; font-weight: 400; margin-bottom: 1rem; line-height: 1.5; word-break: keep-all; }
-  .service-desc { font-size: 0.81rem; color: #7a7672; line-height: 2.1; word-break: keep-all; }
-
-  /* TOOLS */
-  .tools-section { background: var(--pale); }
-  .tools-intro { margin-bottom: 3.5rem; }
-  .tools-intro h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 400; line-height: 1.6; margin-bottom: 1.2rem; word-break: keep-all; }
-  .tools-intro p { font-size: 0.87rem; color: var(--dust); line-height: 2.2; max-width: 540px; word-break: keep-all; }
-  .tools-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
-  .tool-card { background: var(--fog); padding: 1.8rem 1.5rem; border: 1px solid var(--pale); text-decoration: none; color: var(--ink); display: flex; flex-direction: column; gap: 0.7rem; transition: border-color 0.3s, box-shadow 0.3s; }
-  .tool-card:hover { border-color: var(--warm); box-shadow: 0 4px 20px rgba(196,168,130,0.15); }
-  .tool-icon { font-size: 1.3rem; margin-bottom: 0.3rem; }
-  .tool-name { font-family: 'Nanum Myeongjo', serif; font-size: 1rem; font-weight: 400; }
-  .tool-desc { font-size: 0.78rem; color: var(--dust); line-height: 1.9; word-break: keep-all; }
-  .tool-tag { font-size: 0.62rem; letter-spacing: 0.16em; color: var(--warm); text-transform: uppercase; margin-top: auto; padding-top: 0.8rem; border-top: 1px solid var(--pale); }
-
-  /* PROCESS */
-  .process-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5rem; }
-  .process-step-label { font-size: 0.62rem; color: var(--warm); letter-spacing: 0.22em; margin-bottom: 0.8rem; }
-  .process-step h3 { font-family: 'Nanum Myeongjo', serif; font-size: 1rem; font-weight: 400; margin-bottom: 0.7rem; }
-  .process-step p { font-size: 0.81rem; color: var(--dust); line-height: 2; word-break: keep-all; }
-
-  /* CONTACT */
-  .contact-inner { max-width: 620px; margin: 0 auto; text-align: center; }
-  .contact-inner h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.8rem, 3vw, 2.6rem); font-weight: 400; line-height: 1.5; margin-bottom: 1.4rem; word-break: keep-all; }
-  .contact-inner p { font-size: 0.86rem; color: var(--dust); margin-bottom: 3rem; line-height: 2.2; }
-  .contact-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-  .btn-ghost { display: inline-block; padding: 0.9rem 2rem; border: 1px solid var(--pale); font-size: 0.76rem; letter-spacing: 0.12em; color: var(--dust); text-decoration: none; transition: border-color 0.3s, color 0.3s; }
-  .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
-
-  /* FOOTER */
-  footer { border-top: 1px solid var(--pale); padding: 2rem 3rem; display: flex; justify-content: space-between; align-items: center; }
-  footer p { font-size: 0.68rem; color: var(--dust); letter-spacing: 0.08em; }
-
-  /* REVEAL */
-  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.8s ease, transform 0.8s ease; }
+  /* ── REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.9s ease, transform 0.9s ease; }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  /* RESPONSIVE */
+  /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
-    nav { padding: 1.4rem 1.6rem; }
+    nav { padding: 1.3rem 1.6rem; }
     .nav-links { display: none; }
     section { padding: var(--gap) 1.6rem; }
     .about-grid { grid-template-columns: 1fr; gap: 3rem; }
-    .services-grid { grid-template-columns: 1fr; }
-    .service-item { border-left: none !important; padding-left: 0 !important; }
-    .tools-grid { grid-template-columns: 1fr 1fr; }
-    .portfolio-grid { grid-template-columns: 1fr 1fr; display: grid; }
-    .pf-a, .pf-b, .pf-c, .pf-d, .pf-e, .pf-f, .pf-g, .pf-h { grid-column: auto; grid-row: auto; }
-    .pf-a::before, .pf-c::before, .pf-f::before, .pf-h::before { padding-top: 66%; }
-    .pf-a .pf-thumb { position: absolute; min-height: 0; }
-    .process-list { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .cs-step { grid-template-columns: 1fr; min-height: auto; direction: ltr !important; }
+    .cs-img { height: 280px; }
+    .cs-body { padding: 2.6rem 1.6rem; }
+    .pf-grid { grid-template-columns: 1fr 1fr; }
+    .pf-item.wide { grid-column: span 2; }
+    .pf-item.wide::before { padding-top: 52%; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .contact-inner { grid-template-columns: 1fr; gap: 3rem; }
     footer { flex-direction: column; gap: 0.8rem; text-align: center; }
   }
   @media (max-width: 480px) {
-    .tools-grid, .portfolio-grid { grid-template-columns: 1fr; }
-    .process-list { grid-template-columns: 1fr; }
+    .pf-grid { grid-template-columns: 1fr; }
+    .pf-item.wide { grid-column: span 1; }
   }
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
   }
-
-  /* ── MOCKUP SECTION ── */
-  .tools-intro { margin-bottom: 4rem; }
-  .tools-intro h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.6rem, 2.4vw, 2.2rem); font-weight: 400; line-height: 1.6; margin-bottom: 1.2rem; word-break: keep-all; }
-  .tools-intro p { font-size: 0.87rem; color: var(--dust); line-height: 2.2; max-width: 540px; word-break: keep-all; }
-
-  .mockup-grid { display: grid; grid-template-columns: 1fr 1.4fr 1fr; gap: 3rem; align-items: end; margin-bottom: 3rem; }
-  .mockup-block { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
-  .mockup-center { align-items: center; }
-  .mockup-tag { font-size: 0.62rem; letter-spacing: 0.22em; color: var(--warm); text-transform: uppercase; }
-  .mockup-label { font-size: 0.78rem; color: var(--dust); text-align: center; line-height: 1.9; word-break: keep-all; }
-
-  /* 폰 */
-  .phone-mockup { width: 180px; }
-  .phone-frame { background: #1a1a1a; border-radius: 32px; padding: 10px; box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 0 0 1px rgba(255,255,255,0.08); position: relative; }
-  .phone-notch { width: 60px; height: 18px; background: #1a1a1a; border-radius: 0 0 12px 12px; margin: 0 auto 6px; position: relative; z-index: 2; }
-  .phone-screen { background: #000; border-radius: 22px; overflow: hidden; }
-  .phone-home { width: 40px; height: 4px; background: #444; border-radius: 2px; margin: 8px auto 2px; }
-
-  /* 인스타 UI */
-  .insta-header { display: flex; align-items: center; gap: 6px; padding: 8px 10px 6px; background: #fff; }
-  .insta-avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, var(--warm), #8B6A4A); flex-shrink: 0; }
-  .insta-name { font-size: 8px; font-weight: 600; color: #1a1a1a; flex: 1; }
-  .insta-dots { font-size: 10px; color: #888; }
-  .insta-carousel { position: relative; width: 100%; aspect-ratio: 1; overflow: hidden; }
-  .insta-slide { width: 100%; height: 100%; background-size: cover; background-position: center; position: relative; filter: saturate(0.88); }
-  .slide-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 10px 10px; background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 100%); }
-  .slide-label { font-size: 7px; letter-spacing: 0.15em; color: var(--warm); text-transform: uppercase; margin-bottom: 3px; }
-  .slide-copy { font-size: 10px; color: #fff; font-family: 'Nanum Myeongjo', serif; line-height: 1.3; }
-  .insta-dots-nav { display: flex; gap: 3px; justify-content: center; padding: 6px 0 4px; background: #fff; }
-  .dot { width: 4px; height: 4px; border-radius: 50%; background: #ddd; }
-  .dot.active { background: #3897f0; width: 12px; border-radius: 2px; }
-  .insta-actions { display: flex; gap: 10px; padding: 6px 10px 10px; background: #fff; font-size: 13px; }
-
-  /* 태블릿 */
-  .tablet-mockup { width: 100%; max-width: 340px; }
-  .tablet-frame { background: #1c1c1e; border-radius: 20px; padding: 12px; box-shadow: 0 24px 70px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.06); }
-  .tablet-camera { width: 8px; height: 8px; border-radius: 50%; background: #2a2a2a; margin: 0 auto 8px; }
-  .tablet-screen { background: #fff; border-radius: 12px; overflow: hidden; }
-  .tablet-home-bar { width: 60px; height: 3px; background: #333; border-radius: 2px; margin: 8px auto 2px; }
-
-  /* 매거진 UI */
-  .mag-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #faf9f7; border-bottom: 1px solid #eee; }
-  .mag-logo { font-size: 8px; letter-spacing: 0.2em; font-weight: 600; color: #1a1a1a; }
-  .mag-nav { display: flex; gap: 8px; }
-  .mag-nav span { font-size: 7px; color: #888; }
-  .mag-hero { height: 110px; background-size: cover; background-position: center; position: relative; filter: brightness(0.75) saturate(0.85); }
-  .mag-hero-text { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px 8px; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 100%); }
-  .mag-issue { font-size: 7px; letter-spacing: 0.2em; color: var(--warm); margin-bottom: 3px; }
-  .mag-title { font-size: 10px; color: #fff; font-family: 'Nanum Myeongjo', serif; line-height: 1.4; }
-  .mag-body { display: grid; grid-template-columns: 80px 1fr; gap: 8px; padding: 8px 10px; background: #faf9f7; }
-  .mag-body-img { height: 70px; background-size: cover; background-position: center; border-radius: 4px; filter: saturate(0.85); }
-  .mag-section-label { font-size: 6px; letter-spacing: 0.18em; color: var(--warm); text-transform: uppercase; margin-bottom: 5px; }
-  .mag-text-lines { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
-  .line { height: 5px; background: #ddd; border-radius: 2px; width: 100%; }
-  .line.short { width: 70%; }
-  .line.shorter { width: 50%; }
-
-  /* 포스트카드 스택 */
-  .postcard-mockup { width: 200px; height: 240px; position: relative; }
-  .postcard-stack { position: relative; width: 160px; height: 220px; margin: 0 auto; }
-  .postcard { position: absolute; width: 155px; height: 200px; border-radius: 6px; background-size: cover; background-position: center; box-shadow: 0 8px 30px rgba(0,0,0,0.2); overflow: hidden; filter: saturate(0.85) brightness(0.92); transition: transform 0.3s; }
-  .postcard:hover { filter: saturate(1) brightness(1); }
-  .postcard-1 { top: 0; left: 0; z-index: 3; transform: rotate(-1deg); }
-  .postcard-2 { top: 10px; left: 12px; z-index: 2; transform: rotate(3deg); filter: saturate(0.7) brightness(0.75); }
-  .postcard-3 { top: 18px; left: 22px; z-index: 1; transform: rotate(6deg); filter: saturate(0.6) brightness(0.6); }
-  .postcard-inner { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 55%); }
-  .postcard-badge { font-size: 6px; letter-spacing: 0.2em; color: var(--warm); text-transform: uppercase; margin-bottom: 4px; }
-  .postcard-title { font-family: 'Nanum Myeongjo', serif; font-size: 11px; color: #fff; line-height: 1.4; margin-bottom: 3px; }
-  .postcard-sub { font-size: 7px; color: rgba(255,255,255,0.6); letter-spacing: 0.08em; }
-  .postcard-num { font-size: 9px; color: rgba(255,255,255,0.4); letter-spacing: 0.15em; position: absolute; top: 10px; right: 10px; }
-
-  /* 하단 링크 */
-  .tools-links { display: flex; gap: 2rem; justify-content: center; padding-top: 1rem; border-top: 1px solid var(--pale); }
-  .tool-link { font-size: 0.78rem; color: var(--dust); text-decoration: none; letter-spacing: 0.05em; transition: color 0.3s; }
-  .tool-link:hover { color: var(--ink); }
-
-  @media (max-width: 900px) {
-    .mockup-grid { grid-template-columns: 1fr; gap: 3rem; }
-    .mockup-block { max-width: 340px; margin: 0 auto; }
-    .tools-links { flex-direction: column; align-items: center; gap: 1rem; }
-  }
-
-
-  /* ── CORE SERVICE ── */
-  .core-service { background: var(--fog); }
-  .cs-intro { max-width: 560px; margin-bottom: 5rem; }
-  .cs-intro h2 { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.8rem, 2.8vw, 2.6rem); font-weight: 400; line-height: 1.5; margin-bottom: 1.2rem; word-break: keep-all; }
-  .cs-intro p { font-size: 0.87rem; color: var(--dust); line-height: 2.2; word-break: keep-all; }
-
-  .cs-steps { display: flex; flex-direction: column; gap: 0; }
-
-  .cs-step {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 480px;
-    border-top: 1px solid var(--pale);
-  }
-  .cs-step:last-child { border-bottom: 1px solid var(--pale); }
-  .cs-step.reverse { direction: rtl; }
-  .cs-step.reverse > * { direction: ltr; }
-
-  .cs-step-img {
-    position: relative; overflow: hidden;
-  }
-  .cs-step-img img {
-    width: 100%; height: 100%; object-fit: cover;
-    filter: saturate(0.82) brightness(0.92);
-    transition: filter 0.6s, transform 0.8s;
-    display: block;
-  }
-  .cs-step:hover .cs-step-img img {
-    filter: saturate(0.95) brightness(1);
-    transform: scale(1.03);
-  }
-
-  .cs-step-body {
-    display: flex; flex-direction: column; justify-content: center;
-    padding: 4rem 4rem;
-    background: var(--fog);
-  }
-  .cs-step.reverse .cs-step-body { padding: 4rem 4rem 4rem 3rem; }
-
-  .cs-step-num { font-size: 0.62rem; letter-spacing: 0.3em; color: var(--warm); text-transform: uppercase; margin-bottom: 1.4rem; }
-  .cs-step-title { font-family: 'Nanum Myeongjo', serif; font-size: clamp(1.6rem, 2.2vw, 2rem); font-weight: 400; line-height: 1.4; margin-bottom: 1.6rem; word-break: keep-all; }
-  .cs-step-desc { font-size: 0.86rem; color: #5A5652; line-height: 2.3; word-break: keep-all; margin-bottom: 2rem; }
-  .cs-step-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .cs-tag { font-size: 0.68rem; letter-spacing: 0.1em; color: var(--dust); border: 1px solid var(--pale); padding: 0.3rem 0.8rem; border-radius: 1px; }
-
-  @media (max-width: 900px) {
-    .cs-step { grid-template-columns: 1fr; min-height: auto; direction: ltr !important; }
-    .cs-step.reverse { direction: ltr; }
-    .cs-step-img { height: 260px; }
-    .cs-step-body { padding: 2.5rem 1.6rem !important; }
-  }
-
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav id="nav">
-  <a href="#" class="logo">미메시스<span>MIMESIS</span></a>
+  <a href="#" class="logo-wrap">
+    <span class="logo-main">MIMESIS</span>
+    <span class="logo-sub">Stories, Objects and Memories</span>
+  </a>
   <ul class="nav-links">
     <li><a href="#about">소개</a></li>
-    <li><a href="#portfolio">포트폴리오</a></li>
     <li><a href="#services">서비스</a></li>
+    <li><a href="#portfolio">포트폴리오</a></li>
     <li><a href="#tools">도구</a></li>
     <li><a href="#contact">문의</a></li>
   </ul>
 </nav>
 
-<!-- HERO — 전체 배경 흐린 이미지 -->
+<!-- HERO -->
 <section class="hero">
   <div class="hero-bg"></div>
-  <div class="hero-overlay"></div>
+  <div class="hero-tint"></div>
   <div class="hero-content">
-    <p class="hero-eyebrow">삽만리 · Sapmanri</p>
-    <h1 class="hero-title">
-      당신의 브랜드를<br>
-      <em>느리고 정직하게</em><br>
-      영상으로 담습니다
-    </h1>
-    <p class="hero-sub">
-      로컬 카페, 공방, 숙소, 작은 브랜드—<br>
-      서두르지 않아도 되는 이야기들을 위한<br>
-      유튜브 채널 기획 · 제작 · 운영
-    </p>
-    <a href="#contact" class="btn">문의하기</a>
+    <div class="hero-brand">SAPMANRI · 삽만리</div>
+    <h1 class="hero-title">당신의 브랜드를</h1>
+    <span class="hero-hand">느리고 정직하게.</span>
+    <p class="hero-sub">로컬 카페, 공방, 숙소, 작은 브랜드—<br>서두르지 않아도 되는 이야기들을 위한<br>유튜브 채널 기획 · 촬영 · 편집 · 운영</p>
+    <a href="#contact" class="btn-outline">문의하기</a>
   </div>
 </section>
 
 <!-- ABOUT -->
 <section id="about">
-  <div class="section-inner reveal">
+  <div class="inner reveal">
     <div class="label">About</div>
     <div class="about-grid">
-      <div class="about-text">
-        <h2>콘텐츠는 결국<br>사람의 이야기입니다</h2>
+      <div class="about-left">
+        <h2>콘텐츠는 결국</h2>
+        <span class="hand-accent">사람의 이야기입니다.</span>
         <p>미메시스는 감성찾아삽만리 채널을 3년간 직접 운영하며 쌓아온 경험을 바탕으로, 작지만 진심 있는 브랜드들의 유튜브 채널을 함께 만들어갑니다.</p>
-        <p>화려한 편집보다 오래 남는 장면을, 빠른 성장보다 꾸준히 쌓이는 신뢰를 중심에 둡니다. 한 번의 영상이 아니라 채널 전체가 브랜드의 목소리가 될 수 있도록.</p>
+        <p>화려한 편집보다 오래 남는 장면을, 빠른 성장보다 꾸준히 쌓이는 신뢰를 중심에 둡니다.</p>
       </div>
-      <div class="about-stats">
-        <div class="stat">
-          <div class="stat-num">3년</div>
-          <div class="stat-label">단 한 주도 빠지지 않은 주간 업로드</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">5만+</div>
-          <div class="stat-label">감성찾아삽만리 채널 구독자</div>
-        </div>
-        <div class="stat">
-          <div class="stat-num">150+</div>
-          <div class="stat-label">직접 기획·촬영·편집한 영상</div>
-        </div>
+      <div class="about-right">
+        <div class="stat"><div class="stat-num">3</div><div class="stat-label">년 — 단 한 주도 빠지지 않은 주간 업로드</div></div>
+        <div class="stat"><div class="stat-num">50,000+</div><div class="stat-label">감성찾아삽만리 채널 구독자</div></div>
+        <div class="stat"><div class="stat-num">150+</div><div class="stat-label">직접 기획·촬영·편집한 영상</div></div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- PORTFOLIO -->
-<section id="portfolio">
-  <div class="section-inner reveal">
-    <div class="label">Portfolio</div>
-    <div class="film-strip">
-      <div class="film-hole"></div><div class="film-hole"></div>
-      <div class="film-hole"></div><div class="film-hole"></div>
-      <div class="film-hole"></div><div class="film-hole"></div>
-      <div class="film-hole"></div><div class="film-hole"></div>
-    </div>
-    <div class="portfolio-grid">
-
-      <!-- A: 큰 채널 영상 사진 -->
-      <div class="pf-item pf-a">
-        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg')"></div>
-        <div class="pf-info">
-          <div class="pf-type">YouTube · 홈카페</div>
-          <div class="pf-title">차를 내리는 오후</div>
-        </div>
-      </div>
-
-      <!-- B: 포스트카드 결과물 -->
-      <div class="pf-card pf-b">
-        <div class="pf-card-img" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/166ac_a21e72fc_7899acc.jpg');background-size:cover;background-position:center;filter:saturate(0.85) brightness(0.92);"></div>
-        <div class="pf-card-meta">
-          <div class="pf-card-badge">Postcard · 02</div>
-          <div class="pf-card-title">오후, 데이지밭에서</div>
-        </div>
-      </div>
-
-      <!-- C: 채널 사진 -->
-      <div class="pf-item pf-c">
-        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/mxw4_44d0b9b6_8e176060.jpg')"></div>
-        <div class="pf-info">
-          <div class="pf-type">YouTube · 시골일상</div>
-          <div class="pf-title">여름 정원에서</div>
-        </div>
-      </div>
-
-      <!-- D: 포스트카드 결과물 -->
-      <div class="pf-card pf-d">
-        <div class="pf-card-img" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/17keo_5232b0a9_d29fed3b.jpg');background-size:cover;background-position:center;filter:saturate(0.85) brightness(0.92);"></div>
-        <div class="pf-card-meta">
-          <div class="pf-card-badge">Postcard · 01</div>
-          <div class="pf-card-title">빛이 지나간 자리</div>
-        </div>
-      </div>
-
-      <!-- E: 매거진 결과물 -->
-      <div class="pf-card pf-e">
-        <div class="pf-card-img" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/rbks_e2412097_461f4605.jpg');background-size:cover;background-position:center;filter:saturate(0.85) brightness(0.92);"></div>
-        <div class="pf-card-meta">
-          <div class="pf-card-badge">Magazine · 00</div>
-          <div class="pf-card-title">손바닥 위, 붉은 것들</div>
-        </div>
-      </div>
-
-      <!-- F: 채널 사진 -->
-      <div class="pf-item pf-f">
-        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/vuf4_c74c35b2_1a21d60c.jpg')"></div>
-        <div class="pf-info">
-          <div class="pf-type">YouTube · 자연</div>
-          <div class="pf-title">호숫가에서</div>
-        </div>
-      </div>
-
-      <!-- G: 매거진 결과물 -->
-      <div class="pf-card pf-g">
-        <div class="pf-card-img" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/sqmc_83dd7dfb_a12b826f.jpg');background-size:cover;background-position:center;filter:saturate(0.85) brightness(0.92);"></div>
-        <div class="pf-card-meta">
-          <div class="pf-card-badge">Magazine · 00</div>
-          <div class="pf-card-title">내 손으로 만드는 작은 불빛</div>
-        </div>
-      </div>
-
-      <!-- H: 채널 사진 -->
-      <div class="pf-item pf-h">
-        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/1fxc0_37c5d1b2_7d0d84d6.jpg')"></div>
-        <div class="pf-info">
-          <div class="pf-type">YouTube · 슬로우라이프</div>
-          <div class="pf-title">돌길 위의 하루</div>
-        </div>
-      </div>
-
     </div>
   </div>
 </section>
 
 <!-- CORE SERVICE -->
-<section id="services" class="core-service">
-  <div class="section-inner">
+<section id="services" style="padding-left:0;padding-right:0;padding-top:var(--gap);">
+  <div class="inner" style="padding: 0 3rem;">
     <div class="label reveal">What We Do</div>
     <div class="cs-intro reveal">
-      <h2>기획부터 운영까지<br>채널의 모든 것을 함께합니다</h2>
+      <h2>기획부터 운영까지</h2>
+      <span class="hand-accent">채널의 모든 것을 함께합니다.</span>
       <p>영상 하나를 만드는 것보다 채널 전체가 브랜드가 되는 것이 목표입니다. 기획, 촬영, 편집, 운영 — 네 단계 모두 직접 합니다.</p>
     </div>
-    <div class="cs-steps">
+  </div>
+  <div class="cs-steps">
 
-      <div class="cs-step reveal">
-        <div class="cs-step-img">
-          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/u8es_b948c8ed_bec7d1e7.jpg" alt="기획" loading="lazy" />
-        </div>
-        <div class="cs-step-body">
-          <div class="cs-step-num">01 · Planning</div>
-          <h3 class="cs-step-title">브랜드의 이야기를<br>채널로 설계합니다</h3>
-          <p class="cs-step-desc">어떤 사람에게 닿고 싶은지, 무엇을 보여주고 싶은지 — 방향이 잡혀야 영상이 쌓입니다. 채널 콘셉트, 타깃 설정, 업로드 전략, 콘텐츠 캘린더까지 처음부터 함께 그립니다.</p>
-          <div class="cs-step-tags">
-            <span class="cs-tag">채널 콘셉트</span>
-            <span class="cs-tag">타깃 설정</span>
-            <span class="cs-tag">업로드 전략</span>
-            <span class="cs-tag">콘텐츠 캘린더</span>
-          </div>
+    <div class="cs-step reveal">
+      <div class="cs-img">
+        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/u8es_b948c8ed_bec7d1e7.jpg" alt="기획" loading="lazy"/>
+        <span class="cs-img-badge">Planning</span>
+      </div>
+      <div class="cs-body">
+        <div class="cs-num">01 · Planning</div>
+        <h3 class="cs-title">브랜드의 이야기를<br>채널로 설계합니다</h3>
+        <p class="cs-desc">어떤 사람에게 닿고 싶은지, 무엇을 보여주고 싶은지 — 방향이 잡혀야 영상이 쌓입니다. 채널 콘셉트, 타깃 설정, 업로드 전략, 콘텐츠 캘린더까지 처음부터 함께 그립니다.</p>
+        <div class="cs-tags">
+          <span class="cs-tag">채널 콘셉트</span><span class="cs-tag">타깃 설정</span>
+          <span class="cs-tag">업로드 전략</span><span class="cs-tag">콘텐츠 캘린더</span>
         </div>
       </div>
+    </div>
 
-      <div class="cs-step reverse reveal">
-        <div class="cs-step-img">
-          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ojgw_ffd43862_cce75ecc.jpg" alt="촬영" loading="lazy" />
-        </div>
-        <div class="cs-step-body">
-          <div class="cs-step-num">02 · Filming</div>
-          <h3 class="cs-step-title">장면을 고르는 눈으로<br>직접 현장에 섭니다</h3>
-          <p class="cs-step-desc">3년간 매주 직접 카메라를 들고 나간 경험이 있습니다. 무엇을 찍을지, 어떻게 담을지 — 현장 디렉팅부터 촬영까지. 브랜드의 일상이 영상이 되는 순간을 함께 만듭니다.</p>
-          <div class="cs-step-tags">
-            <span class="cs-tag">현장 촬영</span>
-            <span class="cs-tag">씬 구성</span>
-            <span class="cs-tag">Sony A7C</span>
-            <span class="cs-tag">자연광 활용</span>
-          </div>
+    <div class="cs-step rev reveal">
+      <div class="cs-img">
+        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ojgw_ffd43862_cce75ecc.jpg" alt="촬영" loading="lazy"/>
+        <span class="cs-img-badge">Filming</span>
+      </div>
+      <div class="cs-body">
+        <div class="cs-num">02 · Filming</div>
+        <h3 class="cs-title">장면을 고르는 눈으로<br>직접 현장에 섭니다</h3>
+        <p class="cs-desc">3년간 매주 직접 카메라를 들고 나간 경험이 있습니다. 무엇을 찍을지, 어떻게 담을지 — 현장 디렉팅부터 촬영까지. 브랜드의 일상이 영상이 되는 순간을 함께 만듭니다.</p>
+        <div class="cs-tags">
+          <span class="cs-tag">현장 촬영</span><span class="cs-tag">씬 구성</span>
+          <span class="cs-tag">Sony A7C</span><span class="cs-tag">자연광 활용</span>
         </div>
       </div>
+    </div>
 
-      <div class="cs-step reveal">
-        <div class="cs-step-img">
-          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/zhys_bca05c2d_9693ad5d.jpg" alt="편집" loading="lazy" />
-        </div>
-        <div class="cs-step-body">
-          <div class="cs-step-num">03 · Editing</div>
-          <h3 class="cs-step-title">색감 하나까지<br>브랜드의 온도로 맞춥니다</h3>
-          <p class="cs-step-desc">빠른 편집이 아니라 브랜드에 맞는 색감과 리듬으로. 자막, BGM 선곡, 색보정, 썸네일 디자인까지 — 영상이 채널 안에서 일관된 세계관을 갖도록 다듬습니다.</p>
-          <div class="cs-step-tags">
-            <span class="cs-tag">색보정 LUT</span>
-            <span class="cs-tag">자막 디자인</span>
-            <span class="cs-tag">BGM 선곡</span>
-            <span class="cs-tag">썸네일</span>
-          </div>
+    <div class="cs-step reveal">
+      <div class="cs-img">
+        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/zhys_bca05c2d_9693ad5d.jpg" alt="편집" loading="lazy"/>
+        <span class="cs-img-badge">Editing</span>
+      </div>
+      <div class="cs-body">
+        <div class="cs-num">03 · Editing</div>
+        <h3 class="cs-title">색감 하나까지<br>브랜드의 온도로 맞춥니다</h3>
+        <p class="cs-desc">빠른 편집이 아니라 브랜드에 맞는 색감과 리듬으로. 자막, BGM 선곡, 색보정, 썸네일 디자인까지 — 영상이 채널 안에서 일관된 세계관을 갖도록 다듬습니다.</p>
+        <div class="cs-tags">
+          <span class="cs-tag">색보정 LUT</span><span class="cs-tag">자막 디자인</span>
+          <span class="cs-tag">BGM 선곡</span><span class="cs-tag">썸네일</span>
         </div>
       </div>
+    </div>
 
-      <div class="cs-step reverse reveal">
-        <div class="cs-step-img">
-          <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/1kptk_b9c1c832_980a58dc.jpg" alt="운영" loading="lazy" />
-        </div>
-        <div class="cs-step-body">
-          <div class="cs-step-num">04 · Publishing</div>
-          <h3 class="cs-step-title">업로드 이후가<br>진짜 운영입니다</h3>
-          <p class="cs-step-desc">SEO 최적화 제목, 설명란, 태그, 해시태그, 챕터 타임스탬프, 인스타그램 릴스 연계까지 — 영상이 더 많은 사람에게 닿을 수 있도록 업로드 이후도 함께 챙깁니다.</p>
-          <div class="cs-step-tags">
-            <span class="cs-tag">SEO 최적화</span>
-            <span class="cs-tag">설명란 작성</span>
-            <span class="cs-tag">인스타 연계</span>
-            <span class="cs-tag">성과 분석</span>
-          </div>
+    <div class="cs-step rev reveal">
+      <div class="cs-img">
+        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/1kptk_b9c1c832_980a58dc.jpg" alt="운영" loading="lazy"/>
+        <span class="cs-img-badge">Publishing</span>
+      </div>
+      <div class="cs-body">
+        <div class="cs-num">04 · Publishing</div>
+        <h3 class="cs-title">업로드 이후가<br>진짜 운영입니다</h3>
+        <p class="cs-desc">SEO 최적화 제목, 설명란, 태그, 해시태그, 챕터 타임스탬프, 인스타그램 릴스 연계까지 — 영상이 더 많은 사람에게 닿을 수 있도록 업로드 이후도 함께 챙깁니다.</p>
+        <div class="cs-tags">
+          <span class="cs-tag">SEO 최적화</span><span class="cs-tag">설명란 작성</span>
+          <span class="cs-tag">인스타 연계</span><span class="cs-tag">성과 분석</span>
         </div>
       </div>
+    </div>
 
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section id="tools">
+  <div class="inner">
+    <div class="label reveal">Our Tools</div>
+    <p class="reveal" style="font-size:0.86rem;color:var(--mid);max-width:500px;line-height:2.2;margin-bottom:2.5rem;word-break:keep-all;">영상 제작을 넘어 인스타그램, 웹 매거진, 포스트카드까지 — 브랜드 콘텐츠가 모든 채널에서 일관된 목소리를 낼 수 있도록 자체 도구로 함께 운영합니다.</p>
+    <div class="tools-grid reveal">
+      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/carousel_ai_generator.html" target="_blank">
+        <div class="tool-icon">🎴</div>
+        <div class="tool-name">Carousel Generator</div>
+        <div class="tool-desc">AI 기반 인스타그램 캐러샐 슬라이드를 채널 사진으로 즉시 제작합니다.</div>
+        <div class="tool-link-txt">Instagram · AI →</div>
+      </a>
+      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/magazine/index.html" target="_blank">
+        <div class="tool-icon">📖</div>
+        <div class="tool-name">Web Magazine</div>
+        <div class="tool-desc">채널의 이야기를 감성 웹 매거진으로 발행해 브랜드 아카이브를 만듭니다.</div>
+        <div class="tool-link-txt">Web · Archive →</div>
+      </a>
+      <a class="tool-card" href="https://carousel-generator-roan.vercel.app/postcards/index.html" target="_blank">
+        <div class="tool-icon">✉️</div>
+        <div class="tool-name">Postcard</div>
+        <div class="tool-desc">브랜드 사진으로 감성 디지털 포스트카드를 만들어 팬들과 소통합니다.</div>
+        <div class="tool-link-txt">SNS · Branding →</div>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- TOOLS — 목업 -->
-<section id="tools" class="tools-section">
-  <div class="section-inner reveal">
-    <div class="label">Our Tools</div>
-    <div class="tools-intro">
-      <h2>채널 하나를 넘어<br>브랜드 전체를 운영합니다</h2>
-      <p>영상 제작에서 끝나지 않아요. 인스타그램 캐러샐, 웹 매거진, 감성 포스트카드까지 — 브랜드의 콘텐츠가 모든 채널에서 일관된 목소리를 낼 수 있도록 자체 도구로 함께 운영합니다.</p>
-    </div>
-
-    <div class="mockup-grid">
-
-      <!-- 폰 목업 — 인스타 캐러샐 -->
-      <div class="mockup-block">
-        <div class="mockup-tag">Instagram Carousel</div>
-        <div class="phone-mockup">
-          <div class="phone-frame">
-            <div class="phone-notch"></div>
-            <div class="phone-screen">
-              <div class="insta-header">
-                <div class="insta-avatar"></div>
-                <div class="insta-name">sapmanri</div>
-                <div class="insta-dots">···</div>
-              </div>
-              <div class="insta-carousel">
-                <div class="insta-slide" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/166ac_a21e72fc_7899acc.jpg')">
-                  <div class="slide-overlay">
-                    <div class="slide-label">봄날의 산책</div>
-                    <div class="slide-copy">오후, 데이지밭에서</div>
-                  </div>
-                </div>
-              </div>
-              <div class="insta-dots-nav">
-                <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
-              </div>
-              <div class="insta-actions"><span>♡</span><span>💬</span><span>✈</span></div>
-            </div>
-            <div class="phone-home"></div>
-          </div>
-        </div>
-        <div class="mockup-label">AI가 사진을 분석해<br>캐러샐 카드를 자동 생성</div>
+<!-- PORTFOLIO -->
+<section id="portfolio" class="portfolio-section">
+  <div class="inner">
+    <div class="label reveal">Portfolio</div>
+    <div class="pf-grid reveal">
+      <div class="pf-item wide">
+        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg')"></div>
+        <div class="pf-info"><div class="pf-type">YouTube · 홈카페</div><div class="pf-title">차를 내리는 오후</div></div>
       </div>
-
-      <!-- 태블릿 목업 — 매거진 -->
-      <div class="mockup-block mockup-center">
-        <div class="mockup-tag">Web Magazine</div>
-        <div class="tablet-mockup">
-          <div class="tablet-frame">
-            <div class="tablet-camera"></div>
-            <div class="tablet-screen">
-              <div class="mag-header">
-                <div class="mag-logo">SAPMANRI</div>
-                <div class="mag-nav"><span>Issue</span><span>About</span></div>
-              </div>
-              <div class="mag-hero" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ydgw_3fee1146_99b15c58.jpg')">
-                <div class="mag-hero-text">
-                  <div class="mag-issue">No. 00</div>
-                  <div class="mag-title">내 손으로 만드는<br>작은 불빛 하나</div>
-                </div>
-              </div>
-              <div class="mag-body">
-                <div class="mag-body-img" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/yuqc_2373e1ae_647b22ac.jpg')"></div>
-                <div class="mag-body-text">
-                  <div class="mag-section-label">직조의 순간</div>
-                  <div class="mag-text-lines">
-                    <div class="line"></div><div class="line short"></div>
-                    <div class="line"></div><div class="line shorter"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="tablet-home-bar"></div>
-          </div>
-        </div>
-        <div class="mockup-label">채널 콘텐츠를 감성<br>웹 매거진으로 발행</div>
+      <div class="pf-item">
+        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/166ac_a21e72fc_7899acc.jpg')"></div>
+        <div class="pf-info"><div class="pf-type">YouTube · 시골일상</div><div class="pf-title">봄날의 데이지밭</div></div>
       </div>
-
-      <!-- 포스트카드 스택 -->
-      <div class="mockup-block">
-        <div class="mockup-tag">Digital Postcard</div>
-        <div class="postcard-mockup">
-          <div class="postcard-stack">
-            <div class="postcard postcard-3" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/rbks_e2412097_461f4605.jpg')">
-              <div class="postcard-inner"><div class="postcard-num">03</div></div>
-            </div>
-            <div class="postcard postcard-2" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/17keo_5232b0a9_d29fed3b.jpg')">
-              <div class="postcard-inner"><div class="postcard-num">01</div></div>
-            </div>
-            <div class="postcard postcard-1" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/166ac_a21e72fc_7899acc.jpg')">
-              <div class="postcard-inner">
-                <div class="postcard-badge">SAPMANRI</div>
-                <div class="postcard-title">오후, 데이지밭에서</div>
-                <div class="postcard-sub">봄날의 산책 · 02</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="mockup-label">브랜드 감성을 담은<br>포스트카드로 팬과 소통</div>
+      <div class="pf-item">
+        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/vuf4_c74c35b2_1a21d60c.jpg')"></div>
+        <div class="pf-info"><div class="pf-type">YouTube · 자연</div><div class="pf-title">호숫가에서</div></div>
       </div>
-
-    </div>
-
-    <div class="tools-links">
-      <a href="https://carousel-generator-roan.vercel.app/carousel_ai_generator.html" target="_blank" class="tool-link">캐러샐 생성기 →</a>
-      <a href="https://carousel-generator-roan.vercel.app/magazine/index.html" target="_blank" class="tool-link">웹 매거진 →</a>
-      <a href="https://carousel-generator-roan.vercel.app/postcards/index.html" target="_blank" class="tool-link">포스트카드 →</a>
-    </div>
-  </div>
-</section>
-
-<!-- PROCESS -->
-<section id="process">
-  <div class="section-inner">
-    <div class="label reveal">Process</div>
-    <div class="process-list reveal">
-      <div class="process-step">
-        <div class="process-step-label">STEP 01</div>
-        <h3>이야기 듣기</h3>
-        <p>브랜드가 무엇을 소중히 여기는지, 누구에게 닿고 싶은지 먼저 천천히 듣습니다.</p>
+      <div class="pf-item">
+        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/x1bs_79f8ff65_298da3f7.jpg')"></div>
+        <div class="pf-info"><div class="pf-type">YouTube · 공방</div><div class="pf-title">손으로 만드는 것들</div></div>
       </div>
-      <div class="process-step">
-        <div class="process-step-label">STEP 02</div>
-        <h3>방향 잡기</h3>
-        <p>채널 콘셉트, 영상 톤, 업로드 주기, 목표 구독자—구체적인 그림을 함께 그립니다.</p>
+      <div class="pf-item">
+        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/2ae3s_d0eca596_ac05975c.jpg')"></div>
+        <div class="pf-info"><div class="pf-type">YouTube · 자연</div><div class="pf-title">장미 정원의 오후</div></div>
       </div>
-      <div class="process-step">
-        <div class="process-step-label">STEP 03</div>
-        <h3>만들기</h3>
-        <p>촬영·편집·업로드·SEO부터 인스타그램 콘텐츠까지. 서두르지 않고 꼼꼼하게.</p>
-      </div>
-      <div class="process-step">
-        <div class="process-step-label">STEP 04</div>
-        <h3>함께 쌓기</h3>
-        <p>영상 하나가 아니라 채널과 브랜드 전체가 자산이 되도록. 장기적으로 운영합니다.</p>
+      <div class="pf-item">
+        <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/rw8s_fbb7a1ca_ce086316.jpg')"></div>
+        <div class="pf-info"><div class="pf-type">YouTube · 슬로우라이프</div><div class="pf-title">책과 차가 있는 자리</div></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- CONTACT -->
-<section id="contact">
-  <div class="contact-inner reveal">
-    <div class="label" style="justify-content:center;">Contact</div>
-    <h2>작은 브랜드의<br>큰 이야기를 기다립니다</h2>
-    <p>규모에 상관없이 진심 있는 브랜드라면<br>함께 이야기 나눠보고 싶습니다.</p>
-    <div class="contact-links">
-      <a href="https://www.youtube.com/@sapmanri" target="_blank" class="btn dark">유튜브 채널 보기</a>
-      <a href="mailto:contact@mimesis.kr" class="btn-ghost">이메일 문의</a>
-      <a href="#" class="btn-ghost">인스타그램</a>
+<section id="contact" class="contact-section">
+  <div class="inner reveal">
+    <div class="label">Contact</div>
+    <div class="contact-inner">
+      <div class="contact-left">
+        <h2>작은 브랜드의<br>큰 이야기를</h2>
+        <span class="hand-accent">기다립니다.</span>
+        <p>규모에 상관없이 진심 있는 브랜드라면 함께 이야기 나눠보고 싶습니다. 먼저 채널을 보여드릴게요.</p>
+      </div>
+      <div class="contact-right">
+        <a href="https://www.youtube.com/@sapmanri" target="_blank" class="primary">유튜브 채널 보기</a>
+        <a href="mailto:contact@mimesis.kr">이메일 문의 →</a>
+        <a href="#">인스타그램 →</a>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- FOOTER -->
 <footer>
-  <p>© 2026 미메시스 · Mimesis</p>
-  <p>삽만리 · @sapmanri</p>
+  <div>
+    <div class="f-logo">MIMESIS</div>
+    <div class="f-sub" style="margin-top:4px;">Stories, Objects and Memories</div>
+  </div>
+  <div class="f-copy">© 2026 미메시스 · SAPMANRI</div>
 </footer>
 
 <script>
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); });
   const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 60);
-        observer.unobserve(entry.target);
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        io.unobserve(e.target);
       }
     });
-  }, { threshold: 0.08 });
-  reveals.forEach(el => observer.observe(el));
+  }, { threshold: 0.07 });
+  reveals.forEach(el => io.observe(el));
 </script>
 </body>
 </html>
