@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.4.2</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.4.3</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -1072,26 +1072,32 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   let plan;
 
   if (isPanorama) {
-    // 파노라마: AI 플랜 없이 이미지 분석 결과로 바로 슬라이드 생성
-    const panoSlides = images.map((img, i) => ({
-      type: 'feature',
-      image_index: i,
-      headline: img.analysis?.suggested_copy || '',
-      body: img.analysis?.suggested_body || '',
-      label: i === 0 ? (img.analysis?.mood || '') : '',
-      layout: 'overlay_bottom',
-      text_position: 'bottom_left',
-      accent_color: img.analysis?.dominant_color || '#c8a97e',
-      folio: String(i+1).padStart(2,'0') + ' / ' + String(images.length).padStart(2,'0'),
-    }));
-    const panoMood = images[0]?.analysis?.mood || '';
-    const panoCopy = images[0]?.analysis?.suggested_copy || '';
-    const panoBody = images[0]?.analysis?.suggested_body || '';
-    const panoCaption = [panoCopy, panoBody].filter(Boolean).join('\n') +
-      (tag ? '\n\n' + tag : '') +
-      '\n\n#슬로우라이프 #감성사진 #오늘도느리게 #slowdays #감성찾아삽만리';
-    plan = { slides: panoSlides, caption: panoCaption };
-    doneStep(s2);
+    if (style === 'pano-text') {
+      // 텍스트 파노라마: 미리보기 없이 바로 완성 (PNG 저장 시 exportPanorama에서 처리)
+      plan = { slides: [], caption: '' };
+      doneStep(s2);
+    } else {
+      // 파노라마: AI 플랜 없이 이미지 분석 결과로 바로 슬라이드 생성
+      const panoSlides = images.map((img, i) => ({
+        type: 'feature',
+        image_index: i,
+        headline: img.analysis?.suggested_copy || '',
+        body: img.analysis?.suggested_body || '',
+        label: i === 0 ? (img.analysis?.mood || '') : '',
+        layout: 'overlay_bottom',
+        text_position: 'bottom_left',
+        accent_color: img.analysis?.dominant_color || '#c8a97e',
+        folio: String(i+1).padStart(2,'0') + ' / ' + String(images.length).padStart(2,'0'),
+      }));
+      const panoMood = images[0]?.analysis?.mood || '';
+      const panoCopy = images[0]?.analysis?.suggested_copy || '';
+      const panoBody = images[0]?.analysis?.suggested_body || '';
+      const panoCaption = [panoCopy, panoBody].filter(Boolean).join('\n') +
+        (tag ? '\n\n' + tag : '') +
+        '\n\n#슬로우라이프 #감성사진 #오늘도느리게 #slowdays #감성찾아삽만리';
+      plan = { slides: panoSlides, caption: panoCaption };
+      doneStep(s2);
+    }
   } else {
     try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode, textLang); doneStep(s2); }
     catch(e) { doneStep(s2); log('플랜 생성 실패: ' + e.message, true); document.getElementById('generateBtn').disabled=false; return; }
@@ -1106,25 +1112,41 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     generatedCaption = plan.caption || '';
 
     if (isPanorama) {
-      // 파노라마: 미리보기는 가로 스크롤 슬라이드 행으로 보여주고 "PNG 저장" 버튼으로 잘라서 저장
-      const row = document.getElementById('slidesRow');
-      row.style.overflowX = 'auto';
-      row.style.flexWrap = 'nowrap';
-      row.style.gridTemplateColumns = 'unset';
-      row.style.display = 'flex';
-      row.innerHTML = plan.slides.map((s, i) => {
-        const img = images[s.image_index];
-        const src = img ? img.dataUrl : '';
-        return `<div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:#111;position:relative;overflow:hidden">
-          ${src ? `<img style="width:100%;height:100%;object-fit:cover;opacity:0.8" src="${src}"/>` : ''}
-          <div style="position:absolute;bottom:10px;left:10px;right:10px;z-index:2">
-            <div style="font-size:6px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:3px">${(s.label||'').toUpperCase()}</div>
-            <div style="font-family:var(--serif);font-size:12px;font-weight:300;color:#fff;line-height:1.3">${s.headline||''}</div>
-          </div>
-          <div style="position:absolute;top:6px;right:8px;font-size:7px;color:rgba(255,255,255,0.3)">${String(i+1).padStart(2,'0')}</div>
-        </div>`;
-      }).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
-      log('파노라마 미리보기 완성! PNG 저장으로 각 슬라이드를 잘라서 다운로드하세요.', true);
+      if (style === 'pano-text') {
+        // 텍스트 파노라마: 미리보기 대신 색상 블록으로 표시
+        const row = document.getElementById('slidesRow');
+        row.style.overflowX = 'auto';
+        row.style.flexWrap = 'nowrap';
+        row.style.gridTemplateColumns = 'unset';
+        row.style.display = 'flex';
+        const txt = document.getElementById('panoTextInput')?.value?.trim() || '텍스트';
+        row.innerHTML = Array.from({length: panoSlideCount}, (_, i) => `
+          <div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:${panoTextBgColor};position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+            <div style="font-size:28px;font-weight:700;color:${panoTextColor};opacity:0.4;font-family:var(--sans);text-align:center;padding:8px;word-break:break-all">${txt}</div>
+            <div style="position:absolute;top:6px;right:8px;font-size:7px;color:${panoTextColor};opacity:0.4">${String(i+1).padStart(2,'0')}</div>
+          </div>`).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
+        log('텍스트 파노라마 준비됨. PNG 저장으로 각 슬라이드를 다운로드하세요.', true);
+      } else {
+        // 파노라마: 미리보기는 가로 스크롤 슬라이드 행
+        const row = document.getElementById('slidesRow');
+        row.style.overflowX = 'auto';
+        row.style.flexWrap = 'nowrap';
+        row.style.gridTemplateColumns = 'unset';
+        row.style.display = 'flex';
+        row.innerHTML = plan.slides.map((s, i) => {
+          const img = images[s.image_index];
+          const src = img ? img.dataUrl : '';
+          return `<div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:#111;position:relative;overflow:hidden">
+            ${src ? `<img style="width:100%;height:100%;object-fit:cover;opacity:0.8" src="${src}"/>` : ''}
+            <div style="position:absolute;bottom:10px;left:10px;right:10px;z-index:2">
+              <div style="font-size:6px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:3px">${(s.label||'').toUpperCase()}</div>
+              <div style="font-family:var(--serif);font-size:12px;font-weight:300;color:#fff;line-height:1.3">${s.headline||''}</div>
+            </div>
+            <div style="position:absolute;top:6px;right:8px;font-size:7px;color:rgba(255,255,255,0.3)">${String(i+1).padStart(2,'0')}</div>
+          </div>`;
+        }).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
+        log('파노라마 미리보기 완성! PNG 저장으로 각 슬라이드를 잘라서 다운로드하세요.', true);
+      }
     } else {
       // 모든 이미지가 사용됐는지 검증
       const usedIndices = new Set();
@@ -2835,51 +2857,36 @@ async function exportPanorama() {
 
   let slideCount, slides;
 
-  if (isSingleImage) {
+  if (style === 'pano-text') {
+    // 텍스트 파노라마: isSingleImage보다 먼저 처리 (이미지 없어도 가능)
+    slideCount = panoSlideCount;
+    let panoTxt2 = document.getElementById('panoTextInput')?.value?.trim() || '';
+    if (!panoTxt2 && images.length) {
+      btn.textContent = '텍스트 생성 중...';
+      try {
+        const res2 = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001', max_tokens: 60,
+            messages: [{ role: 'user', content: [
+              { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: images[0].dataUrl.split(',')[1] } },
+              { type: 'text', text: '이 이미지의 분위기에 맞는 짧은 감성 문구를 한 줄로 만들어줘. 글자수는 10~20자 한국어. 텍스트만 반환.' }
+            ]}]
+          })
+        });
+        const data2 = await res2.json();
+        panoTxt2 = data2.content?.find(b=>b.type==='text')?.text?.trim() || 'SAPMANRI';
+      } catch(e) { panoTxt2 = 'SAPMANRI'; }
+    } else if (!panoTxt2) { panoTxt2 = 'SAPMANRI'; }
+    slides = Array.from({length: slideCount}, (_, i) => ({ headline: panoTxt2, body: '', label: '' }));
+  } else if (isSingleImage) {
     // 1장 모드: 픽커 구간을 N등분
     slideCount = panoSlideCount;
     slides = Array.from({length: slideCount}, (_, i) => ({
       headline: i === 0 ? (images[0].analysis?.suggested_copy || '') : '',
       body: i === 0 ? (images[0].analysis?.suggested_body || '') : '',
       label: i === 0 ? (images[0].analysis?.mood || '') : '',
-    }));
-  } else if (style === 'pano-text') {
-    // 텍스트 파노라마: 이미지 없어도 가능
-    slideCount = panoSlideCount;
-    let panoTxt = document.getElementById('panoTextInput')?.value?.trim() || '';
-    if (!panoTxt && images.length) {
-      // 비어있으면 AI 자동 생성
-      btn.textContent = '텍스트 생성 중...';
-      try {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
-          body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 60,
-            messages: [{
-              role: 'user',
-              content: [{
-                type: 'image',
-                source: { type: 'base64', media_type: 'image/jpeg', data: images[0].dataUrl.split(',')[1] }
-              }, {
-                type: 'text',
-                text: '이 이미지의 분위기에 맞는 짧은 감성 문구를 한 줄로 만들어줘. 글자수는 10~20자 한국어. 텍스트만 반환. 예: "숲으로 돌아가다" "천천히, 그렇게"'
-              }]
-            }]
-          })
-        });
-        const data = await res.json();
-        panoTxt = data.content?.find(b=>b.type==='text')?.text?.trim() || 'SAPMANRI';
-      } catch(e) {
-        panoTxt = 'SAPMANRI';
-      }
-    } else if (!panoTxt) {
-      panoTxt = 'SAPMANRI';
-    }
-    slides = Array.from({length: slideCount}, (_, i) => ({
-      headline: panoTxt,
-      body: '', label: '',
     }));
   } else {
     // 여러 장 모드: 장 수 = 이미지 수, 레이블은 첫 장만
