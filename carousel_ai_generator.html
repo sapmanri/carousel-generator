@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.3.3</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.4.0</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -407,6 +407,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
       <option value="pano-light">Panorama Light (크림 · 연속 화보)</option>
       <option value="pano-dark">Panorama Dark (다크 · 흐르는 텍스트)</option>
       <option value="pano-film">Panorama Film (필름 스트립 · 타이포)</option>
+      <option value="pano-text">Panorama Text (텍스트 흐름 · 단색배경)</option>
       </optgroup>
     </select>
   </div>
@@ -442,6 +443,44 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 
 <div id="panoNotice" style="display:none;padding:8px 12px;background:rgba(180,160,255,0.08);border:1px solid rgba(180,160,255,0.2);border-radius:2px;font-size:9px;color:rgba(255,255,255,0.45);line-height:1.7;letter-spacing:0.03em">
   파노라마 모드 — 하나의 넓은 화폭이 슬라이드마다 이어지는 방식으로 생성돼요.<br>PNG 저장 시 각 슬라이드가 자동으로 잘려서 저장돼요.
+</div>
+
+<!-- 텍스트 파노라마 전용 UI -->
+<div id="panoTextUI" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:2px">
+  <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px">텍스트 파노라마 설정</div>
+  <div style="display:flex;gap:8px;margin-bottom:8px">
+    <input type="text" id="panoTextInput" placeholder="텍스트 입력 (비우면 AI 자동 생성)"
+      style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:7px 10px;color:#fff;font-family:var(--sans);font-size:12px;outline:none" />
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+    <span style="font-size:9px;color:var(--mute)">배경색</span>
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      <button onclick="setPanoTextBg('#c8191a')" style="width:22px;height:22px;background:#c8191a;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg0"></button>
+      <button onclick="setPanoTextBg('#111111')" style="width:22px;height:22px;background:#111111;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg1"></button>
+      <button onclick="setPanoTextBg('#f7f4ef')" style="width:22px;height:22px;background:#f7f4ef;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg2"></button>
+      <button onclick="setPanoTextBg('#1a2a4a')" style="width:22px;height:22px;background:#1a2a4a;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg3"></button>
+      <button onclick="setPanoTextBg('#2d4a2d')" style="width:22px;height:22px;background:#2d4a2d;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg4"></button>
+      <input type="color" id="ptBgCustom" value="#c8191a" onchange="setPanoTextBg(this.value)"
+        style="width:22px;height:22px;padding:0;border:none;border-radius:2px;cursor:pointer;background:none">
+    </div>
+    <span style="font-size:9px;color:var(--mute)">글자색</span>
+    <div style="display:flex;gap:4px">
+      <button onclick="setPanoTextColor('#ffffff')" style="width:22px;height:22px;background:#fff;border:2px solid rgba(255,255,255,0.3);border-radius:2px;cursor:pointer" id="ptCol0"></button>
+      <button onclick="setPanoTextColor('#111111')" style="width:22px;height:22px;background:#111;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptCol1"></button>
+      <input type="color" id="ptColCustom" value="#ffffff" onchange="setPanoTextColor(this.value)"
+        style="width:22px;height:22px;padding:0;border:none;border-radius:2px;cursor:pointer;background:none">
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:9px;color:var(--mute)">슬라이드 수</span>
+    <div style="display:flex;gap:4px">
+      <button onclick="setPanoSlides(2)" id="ptN2" style="padding:4px 10px;font-size:9px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:2px;cursor:pointer">2장</button>
+      <button onclick="setPanoSlides(3)" id="ptN3" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">3장</button>
+      <button onclick="setPanoSlides(4)" id="ptN4" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">4장</button>
+      <button onclick="setPanoSlides(5)" id="ptN5" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">5장</button>
+      <button onclick="setPanoSlides(6)" id="ptN6" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">6장</button>
+    </div>
+  </div>
 </div>
 
 <div style="display:flex;align-items:center;gap:10px;padding:4px 0 8px">
@@ -803,6 +842,25 @@ let panoSlideCount = 3;
 let panoSelLeft = 0.0;   // 0~1 비율
 let panoSelRight = 1.0;
 let panoVCenterVal = 0.5; // 세로 중심점 (0=상단, 0.5=중앙, 1=하단)
+let panoTextBgColor = '#c8191a';
+let panoTextColor = '#ffffff';
+
+function setPanoTextBg(color) {
+  panoTextBgColor = color;
+  document.getElementById('ptBgCustom').value = color;
+  ['ptBg0','ptBg1','ptBg2','ptBg3','ptBg4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.borderColor = el.style.background === color || el.style.backgroundColor === color ? '#fff' : 'transparent';
+  });
+}
+function setPanoTextColor(color) {
+  panoTextColor = color;
+  document.getElementById('ptColCustom').value = color;
+  ['ptCol0','ptCol1'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.borderColor = el.style.background === color || el.style.backgroundColor === color ? 'var(--accent)' : 'transparent';
+  });
+}
 
 function updateVCenterLabel(v) {
   const labels = ['상단','','','','','','','','','','중앙','','','','','','','','','','하단'];
@@ -812,11 +870,13 @@ function updateVCenterLabel(v) {
 }
 function setPanoSlides(n) {
   panoSlideCount = n;
-  [2,3,4,5].forEach(i => {
-    const btn = document.getElementById('panoN'+i);
-    if (!btn) return;
-    btn.style.background = i===n ? 'rgba(255,255,255,0.15)' : 'transparent';
-    btn.style.color = i===n ? '#fff' : 'rgba(255,255,255,0.35)';
+  [2,3,4,5,6].forEach(i => {
+    ['panoN','ptN'].forEach(prefix => {
+      const btn = document.getElementById(prefix+i);
+      if (!btn) return;
+      btn.style.background = i===n ? 'rgba(255,255,255,0.15)' : 'transparent';
+      btn.style.color = i===n ? '#fff' : 'rgba(255,255,255,0.35)';
+    });
   });
   updatePanoPickerOverlay();
 }
@@ -888,13 +948,27 @@ function initPanoPicker() {
 function updatePanoPickerVisibility() {
   const style = document.getElementById('metaStyle').value;
   const picker = document.getElementById('panoPicker');
+  const textUI = document.getElementById('panoTextUI');
+  const notice = document.getElementById('panoNotice');
   if (!picker) return;
-  const show = style.startsWith('pano-') && images.length === 1;
-  picker.style.display = show ? 'block' : 'none';
-  if (show && images[0]) {
+  const isPano = style.startsWith('pano-');
+  const isTextPano = style === 'pano-text';
+
+  // 텍스트 파노라마: 이미지 없어도 가능 (배경색만 있으면 됨)
+  picker.style.display = (isPano && !isTextPano && images.length === 1) ? 'block' : 'none';
+  if (textUI) textUI.style.display = isTextPano ? 'block' : 'none';
+  if (notice) notice.style.display = (isPano && !isTextPano) ? 'block' : 'none';
+
+  if (isPano && !isTextPano && images.length === 1 && images[0]) {
     const img = document.getElementById('panoPickerImg');
     img.src = images[0].dataUrl;
     setTimeout(updatePanoPickerOverlay, 50);
+  }
+
+  // 생성 버튼 활성화: 텍스트 파노라마는 이미지 없어도 가능
+  const generateBtn = document.getElementById('generateBtn');
+  if (generateBtn && isTextPano) {
+    generateBtn.disabled = false;
   }
 }
 
@@ -906,7 +980,11 @@ function renderThumbs() {
       <div class="img-num">${i+1} / ${images.length}</div>
     </div>`).join('');
 }
-function updateBtn() { document.getElementById('generateBtn').disabled = images.length === 0; }
+function updateBtn() {
+  const style = document.getElementById('metaStyle').value;
+  const isTextPano = style === 'pano-text';
+  document.getElementById('generateBtn').disabled = !isTextPano && images.length === 0;
+}
 
 // ── progress ──
 function log(text, done=false) {
@@ -930,8 +1008,9 @@ function doneStep(id, suffix='') {
 // 스타일 변경 시 파노라마 안내 표시
 document.getElementById('metaStyle').addEventListener('change', function() {
   const isPano = this.value.startsWith('pano-');
-  document.getElementById('panoNotice').style.display = isPano ? 'block' : 'none';
+  document.getElementById('panoNotice').style.display = isPano && this.value !== 'pano-text' ? 'block' : 'none';
   updatePanoPickerVisibility();
+  updateBtn();
 });
 
 document.getElementById('generateBtn').addEventListener('click', async () => {
@@ -956,8 +1035,8 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     }
   }
 
-  const needsAnalysis = images.some(img => !img.analysis);
-  if (needsAnalysis) {
+  const needsAnalysis = images.some(img => !img.analysis) && style !== 'pano-text';
+  if (needsAnalysis && images.length) {
     const s1 = log(`이미지 ${images.length}장 분석 중...`);
     let sharedHits = 0;
     for (let i = 0; i < images.length; i++) {
@@ -2674,6 +2753,65 @@ async function renderPanoramaCanvas(images, slides, style, SIZE, ratio, singleMo
     ctx.textAlign = 'left';
   }
 
+  // ── pano-text: 단색 배경 + 큰 텍스트가 전체 폭에 흘러가는 방식 ──
+  if (style === 'pano-text') {
+    const bgColor = nSlides ? panoTextBgColor : '#111';
+    const txtColor = panoTextColor || '#fff';
+    ctx.fillStyle = bgColor; ctx.fillRect(0, 0, TOTAL_W, H);
+
+    // 배경 이미지가 있으면 살짝 배경에 블렌드 (선택사항)
+    if (images.length && images[0]?.dataUrl) {
+      await new Promise(res => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.max(TOTAL_W / img.width, H / img.height);
+          const iw = img.width * scale, ih = img.height * scale;
+          ctx.globalAlpha = 0.12;
+          ctx.drawImage(img, (TOTAL_W - iw) / 2, (H - ih) / 2, iw, ih);
+          ctx.globalAlpha = 1;
+          res();
+        };
+        img.onerror = res; img.src = images[0].dataUrl;
+      });
+    }
+
+    // 텍스트 준비 — slides[0].headline에 AI가 채운 텍스트
+    const rawText = slides[0]?.headline || 'SAPMANRI';
+    // 텍스트가 전체 가로폭에 꽉 차도록 폰트 크기 자동 계산
+    const targetFontSize = Math.round(H * 0.38);
+    setFont(targetFontSize, '700', sansFont);
+    const textW = ctx.measureText(rawText).width;
+    // 전체 폭의 90% 정도에 맞추되, 최소 H*0.2
+    const fitSize = Math.max(Math.round(H * 0.2), Math.round(targetFontSize * (TOTAL_W * 0.92) / textW));
+    const fontSize = Math.min(fitSize, Math.round(H * 0.52));
+    setFont(fontSize, '700', sansFont);
+
+    // 텍스트를 수직 중앙에 배치
+    const textY = H / 2 + fontSize * 0.35;
+    ctx.fillStyle = txtColor;
+    ctx.textAlign = 'left';
+    // 약간 왼쪽 패딩
+    const textX = Math.round(W * 0.08);
+    ctx.fillText(rawText, textX, textY);
+
+    // 하단 브랜드 + 슬라이드 번호
+    slides.forEach((slide, i) => {
+      const x = i * W;
+      setFont(Math.round(H * 0.022), '400', sansFont);
+      ctx.fillStyle = txtColor === '#ffffff' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)';
+      ctx.textAlign = 'right';
+      ctx.fillText(String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0'), x + W - Math.round(W * 0.05), H - Math.round(H * 0.04));
+    });
+
+    // 브랜드명 (첫 슬라이드 상단)
+    setFont(Math.round(H * 0.028), '400', sansFont);
+    ctx.fillStyle = txtColor === '#ffffff' ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
+    ctx.letterSpacing = '0.18em';
+    ctx.textAlign = 'left';
+    ctx.fillText('SAPMANRI', Math.round(W * 0.05), Math.round(H * 0.07));
+    ctx.letterSpacing = '0';
+  }
+
   return canvas;
 }
 
@@ -2700,6 +2838,44 @@ async function exportPanorama() {
       headline: i === 0 ? (images[0].analysis?.suggested_copy || '') : '',
       body: i === 0 ? (images[0].analysis?.suggested_body || '') : '',
       label: i === 0 ? (images[0].analysis?.mood || '') : '',
+    }));
+  } else if (style === 'pano-text') {
+    // 텍스트 파노라마: 이미지 없어도 가능
+    slideCount = panoSlideCount;
+    let panoTxt = document.getElementById('panoTextInput')?.value?.trim() || '';
+    if (!panoTxt && images.length) {
+      // 비어있으면 AI 자동 생성
+      btn.textContent = '텍스트 생성 중...';
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 60,
+            messages: [{
+              role: 'user',
+              content: [{
+                type: 'image',
+                source: { type: 'base64', media_type: 'image/jpeg', data: images[0].dataUrl.split(',')[1] }
+              }, {
+                type: 'text',
+                text: '이 이미지의 분위기에 맞는 짧은 감성 문구를 한 줄로 만들어줘. 글자수는 10~20자 한국어. 텍스트만 반환. 예: "숲으로 돌아가다" "천천히, 그렇게"'
+              }]
+            }]
+          })
+        });
+        const data = await res.json();
+        panoTxt = data.content?.find(b=>b.type==='text')?.text?.trim() || 'SAPMANRI';
+      } catch(e) {
+        panoTxt = 'SAPMANRI';
+      }
+    } else if (!panoTxt) {
+      panoTxt = 'SAPMANRI';
+    }
+    slides = Array.from({length: slideCount}, (_, i) => ({
+      headline: panoTxt,
+      body: '', label: '',
     }));
   } else {
     // 여러 장 모드: 장 수 = 이미지 수, 레이블은 첫 장만
