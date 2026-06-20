@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.4.3</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.5.0</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -408,6 +408,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
       <option value="pano-dark">Panorama Dark (다크 · 흐르는 텍스트)</option>
       <option value="pano-film">Panorama Film (필름 스트립 · 타이포)</option>
       <option value="pano-text">Panorama Text (텍스트 흐름 · 단색배경)</option>
+      <option value="pano-stretch">Pixel Stretch (픽셀 스트레치 효과)</option>
       </optgroup>
     </select>
   </div>
@@ -443,6 +444,33 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 
 <div id="panoNotice" style="display:none;padding:8px 12px;background:rgba(180,160,255,0.08);border:1px solid rgba(180,160,255,0.2);border-radius:2px;font-size:9px;color:rgba(255,255,255,0.45);line-height:1.7;letter-spacing:0.03em">
   파노라마 모드 — 하나의 넓은 화폭이 슬라이드마다 이어지는 방식으로 생성돼요.<br>PNG 저장 시 각 슬라이드가 자동으로 잘려서 저장돼요.
+</div>
+
+<!-- 픽셀 스트레치 전용 UI -->
+<div id="panoStretchUI" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:2px">
+  <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px">픽셀 스트레치 설정</div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="font-size:9px;color:var(--mute);white-space:nowrap">스트레치 위치</span>
+    <input type="range" id="stretchPosSlider" min="0" max="1" step="0.01" value="0.3"
+      style="flex:1;accent-color:var(--accent);cursor:pointer"
+      oninput="stretchPos=parseFloat(this.value);document.getElementById('stretchPosLabel').textContent=Math.round(this.value*100)+'%'">
+    <span id="stretchPosLabel" style="font-size:9px;color:rgba(255,255,255,0.4);min-width:30px">30%</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+    <span style="font-size:9px;color:var(--mute);white-space:nowrap">스트레치 폭</span>
+    <input type="range" id="stretchHeightSlider" min="0.05" max="0.5" step="0.01" value="0.18"
+      style="flex:1;accent-color:var(--accent);cursor:pointer"
+      oninput="stretchHeight=parseFloat(this.value);document.getElementById('stretchHeightLabel').textContent=Math.round(this.value*100)+'%'">
+    <span id="stretchHeightLabel" style="font-size:9px;color:rgba(255,255,255,0.4);min-width:30px">18%</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:9px;color:var(--mute)">방향</span>
+    <div style="display:flex;gap:4px">
+      <button onclick="setStretchDir('both')" id="strDirBoth" style="padding:4px 10px;font-size:9px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:2px;cursor:pointer">양방향</button>
+      <button onclick="setStretchDir('up')" id="strDirUp" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">위로</button>
+      <button onclick="setStretchDir('down')" id="strDirDown" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">아래로</button>
+    </div>
+  </div>
 </div>
 
 <!-- 텍스트 파노라마 전용 UI -->
@@ -508,7 +536,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
     <span id="textScaleVal" style="font-size:10px;color:var(--canvas);min-width:32px;text-align:right">1.0×</span>
   </div>
   <div class="action-row">
-    <button class="action-btn btn-primary" onclick="isPanoStyle(document.getElementById('metaStyle').value) ? exportPanorama() : exportSlides()">PNG 저장</button>
+    <button class="action-btn btn-primary" onclick="const _s=document.getElementById('metaStyle').value; _s==='pano-stretch' ? exportStretch() : isPanoStyle(_s) ? exportPanorama() : exportSlides()" >PNG 저장</button>
     <button class="action-btn btn-secondary" onclick="toggleCaption()">인스타 캡션</button>
   </div>
   <div class="caption-box" id="captionBox">
@@ -843,6 +871,19 @@ let panoSelLeft = 0.0;   // 0~1 비율
 let panoSelRight = 1.0;
 let panoVCenterVal = 0.5; // 세로 중심점 (0=상단, 0.5=중앙, 1=하단)
 let panoTextBgColor = '#c8191a';
+let stretchPos = 0.3;
+let stretchHeight = 0.18;
+let stretchDir = 'both';
+
+function setStretchDir(dir) {
+  stretchDir = dir;
+  ['Both','Up','Down'].forEach(d => {
+    const btn = document.getElementById('strDir'+d);
+    if (!btn) return;
+    btn.style.background = d.toLowerCase()===dir ? 'rgba(255,255,255,0.15)' : 'transparent';
+    btn.style.color = d.toLowerCase()===dir ? '#fff' : 'rgba(255,255,255,0.35)';
+  });
+}
 let panoTextColor = '#ffffff';
 
 function setPanoTextBg(color) {
@@ -959,10 +1000,19 @@ function updatePanoPickerVisibility() {
   if (textUI) textUI.style.display = isTextPano ? 'block' : 'none';
   if (notice) notice.style.display = (isPano && !isTextPano) ? 'block' : 'none';
 
-  if (isPano && !isTextPano && images.length === 1 && images[0]) {
+  const isStretchPano = style === 'pano-stretch';
+  const stretchUI = document.getElementById('panoStretchUI');
+  if (stretchUI) stretchUI.style.display = isStretchPano ? 'block' : 'none';
+
+  if (isPano && !isTextPano && !isStretchPano && images.length === 1 && images[0]) {
     const img = document.getElementById('panoPickerImg');
     img.src = images[0].dataUrl;
     setTimeout(updatePanoPickerOverlay, 50);
+  }
+
+  // stretch도 이미지 없어도 버튼 활성화 안 함 (이미지 필수)
+  if (isStretchPano && generateBtn) {
+    generateBtn.disabled = images.length === 0;
   }
 
   // 생성 버튼 활성화: 텍스트 파노라마는 이미지 없어도 가능
@@ -1026,7 +1076,8 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   const closing = document.getElementById('metaClosing').value;
   const manualText = document.getElementById('metaTextSlide').value.trim();
   const infographicMode = document.getElementById('infographicMode').checked;
-  const isPanorama = style.startsWith('pano-');
+  const isPanorama = style.startsWith('pano-') && style !== 'pano-stretch';
+  const isStretch = style === 'pano-stretch';
 
   // 이미지 해시 계산 (아직 없으면)
   for (let i = 0; i < images.length; i++) {
@@ -1071,7 +1122,10 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
   const s2 = log('슬라이드 계획 중...');
   let plan;
 
-  if (isPanorama) {
+  if (isStretch) {
+    plan = { slides: images.map((img,i)=>({ image_index:i })), caption: '' };
+    doneStep(s2);
+  } else if (isPanorama) {
     if (style === 'pano-text') {
       // 텍스트 파노라마: 미리보기 없이 바로 완성 (PNG 저장 시 exportPanorama에서 처리)
       plan = { slides: [], caption: '' };
@@ -1111,7 +1165,23 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     generatedSlides = plan.slides;
     generatedCaption = plan.caption || '';
 
-    if (isPanorama) {
+    if (isStretch) {
+      // 픽셀 스트레치: 미리보기 — 원본 이미지 썸네일 그리드
+      const row = document.getElementById('slidesRow');
+      row.style.overflowX = 'auto';
+      row.style.flexWrap = 'nowrap';
+      row.style.gridTemplateColumns = 'unset';
+      row.style.display = 'flex';
+      row.innerHTML = images.map((img, i) =>
+        `<div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:#111;position:relative;overflow:hidden">
+          <img style="width:100%;height:100%;object-fit:cover;opacity:0.7" src="${img.dataUrl}"/>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <span style="font-size:9px;color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);padding:3px 8px;border-radius:2px">스트레치 적용 예정</span>
+          </div>
+        </div>`
+      ).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
+      log('PNG 저장으로 픽셀 스트레치 효과를 적용해서 다운로드하세요.', true);
+    } else if (isPanorama) {
       if (style === 'pano-text') {
         // 텍스트 파노라마: 미리보기 대신 색상 블록으로 표시
         const row = document.getElementById('slidesRow');
@@ -2507,6 +2577,110 @@ async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages, rati
 }
 
 
+
+// ── 픽셀 스트레치 효과 ──
+async function applyPixelStretch(dataUrl, outputW, outputH, pos, stretchH, dir) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      // 1. 원본 이미지를 임시 캔버스에 그리기
+      const srcCanvas = document.createElement('canvas');
+      srcCanvas.width = img.width; srcCanvas.height = img.height;
+      const srcCtx = srcCanvas.getContext('2d');
+      srcCtx.drawImage(img, 0, 0);
+
+      // 2. 스트레치할 픽셀 행 위치 (Y좌표)
+      const srcY = Math.round(img.height * pos);
+      const srcRow = srcCtx.getImageData(0, srcY, img.width, 1);
+
+      // 3. 결과 캔버스
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = outputW; outCanvas.height = outputH;
+      const ctx = outCanvas.getContext('2d');
+
+      // 4. 원본 이미지를 결과 캔버스에 맞게 그리기 (cover)
+      const scale = Math.max(outputW / img.width, outputH / img.height);
+      const dw = img.width * scale, dh = img.height * scale;
+      const dx = (outputW - dw) / 2, dy = (outputH - dh) / 2;
+      ctx.drawImage(img, dx, dy, dw, dh);
+
+      // 5. 스트레치 영역 계산 (출력 캔버스 기준)
+      const stretchZoneH = Math.round(outputH * stretchH);
+      // 원본 이미지에서 스트레치 행의 출력 Y좌표
+      const centerY = Math.round(dy + srcY * scale);
+      const topY    = dir === 'down' ? centerY : Math.max(0, centerY - stretchZoneH);
+      const botY    = dir === 'up'   ? centerY : Math.min(outputH, centerY + stretchZoneH);
+
+      // 6. 스트레치 영역에 픽셀 row를 한 줄씩 그리기
+      // 임시 캔버스에 1행 그리고 outputW로 늘려서 사용
+      const rowCanvas = document.createElement('canvas');
+      rowCanvas.width = img.width; rowCanvas.height = 1;
+      const rowCtx = rowCanvas.getContext('2d');
+      rowCtx.putImageData(srcRow, 0, 0);
+
+      // 스트레치 영역: y=topY ~ botY 한 줄씩 그림
+      for (let y = topY; y < botY; y++) {
+        ctx.drawImage(rowCanvas, 0, 0, img.width, 1, 0, y, outputW, 1);
+      }
+
+      // 7. 원본 이미지 다시 그 위에 (스트레치 효과 위에 원본 얹기)
+      // 스트레치 영역 위아래의 원본만 복원
+      // 위쪽 원본 (topY 위)
+      if (topY > 0) {
+        ctx.drawImage(img, 0, 0, img.width, srcY,
+          dx, dy, dw, srcY * scale);
+      }
+      // 아래쪽 원본 (botY 아래)
+      const srcBotY = Math.round((botY - dy) / scale);
+      if (srcBotY < img.height) {
+        ctx.drawImage(img, 0, srcBotY, img.width, img.height - srcBotY,
+          dx, dy + srcBotY * scale, dw, (img.height - srcBotY) * scale);
+      }
+
+      resolve(outCanvas);
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+async function exportStretch() {
+  if (!images.length) return;
+  const btn = document.querySelector('.btn-primary');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '스트레치 생성 중...';
+
+  try { await document.fonts.ready; } catch(e) {}
+
+  const SIZE = 1080;
+  const H = aspectRatio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
+  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+
+  if (isIOS) _iosPngs = [];
+
+  for (let i = 0; i < images.length; i++) {
+    btn.textContent = '처리 중 ' + (i+1) + '/' + images.length + '...';
+    const outCanvas = await applyPixelStretch(
+      images[i].dataUrl, SIZE, H, stretchPos, stretchHeight, stretchDir
+    );
+    if (!outCanvas) continue;
+
+    if (isIOS) {
+      _iosPngs.push(outCanvas.toDataURL('image/png'));
+    } else {
+      const link = document.createElement('a');
+      link.download = 'sapmanri_stretch_' + String(i+1).padStart(2,'0') + '.png';
+      link.href = outCanvas.toDataURL('image/png');
+      link.click();
+      await new Promise(r => setTimeout(r, 400));
+    }
+  }
+
+  btn.textContent = orig; btn.disabled = false;
+  if (isIOS && _iosPngs.length) { _iosIdx = 0; openIosModal(); }
+}
+
 // ── 파노라마 모드 ──
 function isPanoStyle(style) { return style && style.startsWith('pano-'); }
 
@@ -2792,8 +2966,7 @@ async function renderPanoramaCanvas(images, slides, style, SIZE, ratio, singleMo
           ctx.save();
           ctx.beginPath(); ctx.rect(lastX, 0, W, H); ctx.clip();
           ctx.drawImage(img, lastX + (W - iw) / 2, (H - ih) / 2, iw, ih);
-          // 어두운 오버레이로 텍스트 가독성 확보
-          ctx.fillStyle = 'rgba(0,0,0,0.42)'; ctx.fillRect(lastX, 0, W, H);
+          // 오버레이 없이 사진 위에 텍스트만 얹힘
           ctx.restore();
           res();
         };
