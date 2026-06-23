@@ -311,7 +311,7 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="app">
 
 <div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.5.0</span></div>
+  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.5.1</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
     <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
@@ -1396,14 +1396,28 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
       const profRes = await fetch('./profile_data.json');
       const prof = await profRes.json();
       const rules = prof.rules || [];
-      const examples = (prof.examples || []).slice(-3);
+      const examples = (prof.examples || []).filter(e => e.type === 'instagram' || e.type === 'poem').slice(-4);
+      const pairs = (prof.pairs || []).filter(p => p.type === 'instagram').slice(-2);
+
       if (rules.length) {
-        styleBlock += `\n\nVASE 문체 규칙 (인스타 캡션에 반드시 따를 것):\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
+        styleBlock += `\n\nVASE 문체 규칙 (반드시 따를 것):\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
       }
       if (examples.length) {
-        styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬을 참고하여 caption 작성):\n`;
+        styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬 참고, 복사 금지):\n`;
         examples.forEach((e,i) => { styleBlock += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,400)}\n`; });
       }
+      if (pairs.length) {
+        styleBlock += `\n\nVASE 수정 패턴 (AI 초안 → 수정본, 이 패턴에서 선호 파악):\n`;
+        pairs.forEach((p,i) => { styleBlock += `\n[AI]: ${p.original.slice(0,200)}\n[수정]: ${p.edited.slice(0,200)}\n`; });
+      }
+
+      // v3 강화: 절대 금지 패턴
+      styleBlock += `\n\n절대 금지 (삽만리 글쓰기 원칙):\n`;
+      styleBlock += `- 교훈형 결말 금지: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게" 등\n`;
+      styleBlock += `- 감성 상투어 금지: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"\n`;
+      styleBlock += `- 입력에 없는 장면 지어내기 금지\n`;
+      styleBlock += `- 감정을 직접 설명하는 문장 금지 (장면과 사물로 드러낼 것)\n`;
+      styleBlock += `\n생성 순서 원칙: 장면 → 사실 → 리듬 → 감정 → 의미`;
     } catch(e) { /* profile_data.json 없으면 기본 스타일로 진행 */ }
   }
 
