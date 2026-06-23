@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.1.6</title>
+<title>감성찾아삽만리 · Writing Studio v3.2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,8 +308,13 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.1.6</span>
+    <span class="ver">v3.2.0</span>
   </div>
+  <nav style="display:flex;gap:2px">
+    <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
+    <button class="mode-btn" id="tabExamplesBtn" onclick="switchMainTab('examples')">예시 글</button>
+    <button class="mode-btn" id="tabProfileBtn" onclick="switchMainTab('profile')">문체 프로필</button>
+  </nav>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
     <div class="mode-toggle">
@@ -742,6 +747,99 @@ header {
 </div>
 
 </div><!-- .main -->
+
+<!-- ═══ 예시 글 패널 ═══ -->
+<div id="panelExamples" style="display:none;flex:1;overflow:hidden">
+  <div style="display:flex;flex:1;overflow:hidden">
+    <!-- 왼쪽 필터 -->
+    <aside style="width:180px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:12px">
+      <div class="sec-label" style="padding:4px 0 10px">필터</div>
+      <div style="display:flex;flex-direction:column;gap:3px" id="exFilterBtns">
+        <button class="chip active" data-filter="all" onclick="setExFilter(this)" style="border-radius:4px;text-align:left;justify-content:space-between">전체 <span id="fc-all">0</span></button>
+        <button class="chip" data-filter="poem" onclick="setExFilter(this)" style="border-radius:4px;text-align:left;justify-content:space-between">시·산문 <span id="fc-poem">0</span></button>
+        <button class="chip" data-filter="instagram" onclick="setExFilter(this)" style="border-radius:4px;text-align:left;justify-content:space-between">인스타 <span id="fc-instagram">0</span></button>
+        <button class="chip" data-filter="youtube" onclick="setExFilter(this)" style="border-radius:4px;text-align:left;justify-content:space-between">유튜브 <span id="fc-youtube">0</span></button>
+        <button class="chip" data-filter="blog" onclick="setExFilter(this)" style="border-radius:4px;text-align:left;justify-content:space-between">블로그 <span id="fc-blog">0</span></button>
+        <button class="chip" data-filter="pairs" onclick="setExFilter(this)" style="border-radius:4px;text-align:left;justify-content:space-between">피드백 쌍 <span id="fc-pairs">0</span></button>
+      </div>
+    </aside>
+    <!-- 메인 -->
+    <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+      <div style="height:48px;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:0 16px">
+        <input type="text" id="exSearch" placeholder="검색…" oninput="renderExamples()"
+          style="flex:1;background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 10px;border-radius:4px;outline:none">
+        <button class="btn-sm" onclick="openAddExModal()">+ 추가</button>
+      </div>
+      <div id="examplesGrid" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 예시 추가 모달 -->
+<div id="addExModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;width:560px;max-width:94vw;max-height:80vh;display:flex;flex-direction:column">
+    <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-family:var(--mono);font-size:12px">예시 글 추가</span>
+      <button style="background:none;border:none;color:var(--dim);font-size:16px;cursor:pointer" onclick="closeAddExModal()">×</button>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto">
+      <div>
+        <div class="sec-label" style="margin-bottom:6px">글 타입</div>
+        <select id="addExType" class="field" style="resize:none;padding:7px 10px;font-size:12px;cursor:pointer">
+          <option value="poem">시·산문</option>
+          <option value="instagram">인스타 캡션</option>
+          <option value="youtube">유튜브</option>
+          <option value="blog">블로그</option>
+        </select>
+      </div>
+      <div>
+        <div class="sec-label" style="margin-bottom:6px">내용</div>
+        <textarea id="addExText" class="field" rows="10" placeholder="직접 쓴 글을 붙여넣으세요."></textarea>
+      </div>
+    </div>
+    <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+      <button class="btn-sm" onclick="closeAddExModal()">취소</button>
+      <button class="btn-accent" style="font-size:12px;padding:6px 16px" onclick="saveAddEx()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ 문체 프로필 패널 ═══ -->
+<div id="panelProfile" style="display:none;flex:1;overflow-y:auto;padding:32px;max-width:760px;margin:0 auto;width:100%">
+  <!-- 통계 -->
+  <div style="margin-bottom:32px">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">통계</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:14px;text-align:center">
+        <div style="font-family:var(--mono);font-size:22px;color:var(--accent)" id="stat-examples">0</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:4px">예시 글</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:14px;text-align:center">
+        <div style="font-family:var(--mono);font-size:22px;color:var(--accent)" id="stat-pairs">0</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:4px">피드백 쌍</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:14px;text-align:center">
+        <div style="font-family:var(--mono);font-size:22px;color:var(--accent)" id="stat-rules">0</div>
+        <div style="font-size:11px;color:var(--dim);margin-top:4px">문체 규칙</div>
+      </div>
+    </div>
+  </div>
+  <!-- 규칙 -->
+  <div style="margin-bottom:32px">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">문체 규칙 <span style="color:var(--dim);font-size:9px">(AI에게 직접 전달됩니다)</span></div>
+    <div id="ruleList" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input id="newRuleInput" class="field" style="resize:none;padding:7px 10px;font-size:12px" placeholder="새 규칙 입력…" onkeydown="if(event.key==='Enter')addRule()">
+      <button class="btn-sm" onclick="addRule()">추가</button>
+    </div>
+    <button class="btn-sm" style="width:100%;margin-top:10px;color:var(--accent);border-color:var(--accent)" onclick="analyzeStyle()">✦ 피드백 분석 → 규칙 제안</button>
+  </div>
+  <!-- 피드백 쌍 -->
+  <div>
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.16em;color:var(--accent);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)">피드백 쌍</div>
+    <div id="pairsList"></div>
+  </div>
+</div>
 
 <!-- 다듬기 모달 -->
 <div id="refineModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center">
@@ -1571,6 +1669,257 @@ function toast(msg) {
 }
 
 // ══════════════════════════════════════════
+// 메인 탭 전환 (쓰기 / 예시 글 / 문체 프로필)
+// ══════════════════════════════════════════
+let currentMainTab = 'write';
+let currentExFilter = 'all';
+let editingExId = null;
+
+function switchMainTab(tab) {
+  currentMainTab = tab;
+  ['write','examples','profile'].forEach(t => {
+    document.getElementById('tab'+t[0].toUpperCase()+t.slice(1)+'Btn').classList.toggle('active', t===tab);
+  });
+  // 쓰기 패널
+  const writeEls = [document.getElementById('autoPanel'), document.getElementById('stepBar')];
+  document.querySelectorAll('.step-panel').forEach(p => { if(tab!=='write') p.style.display='none'; });
+  if (tab === 'write') {
+    setMode(currentMode);
+  } else {
+    document.getElementById('autoPanel').style.display = 'none';
+    document.getElementById('stepBar').style.display = 'none';
+  }
+  // 예시/프로필
+  document.getElementById('panelExamples').style.display = tab==='examples' ? 'flex' : 'none';
+  document.getElementById('panelProfile').style.display = tab==='profile' ? 'block' : 'none';
+  if (tab==='examples') renderExamples();
+  if (tab==='profile') renderProfile();
+}
+
+// ── 예시 글 ──
+function setExFilter(btn) {
+  document.querySelectorAll('#exFilterBtns .chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentExFilter = btn.dataset.filter;
+  renderExamples();
+}
+
+function renderExamples() {
+  const search = (document.getElementById('exSearch')?.value||'').toLowerCase();
+  const grid = document.getElementById('examplesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  updateExFilterCounts();
+
+  let items;
+  if (currentExFilter === 'pairs') {
+    items = db.pairs.map(p=>({...p, _kind:'pair'}));
+  } else {
+    items = db.examples
+      .filter(e => currentExFilter==='all' || e.type===currentExFilter)
+      .map(e=>({...e, _kind:'example'}));
+  }
+  if (search) items = items.filter(i=>(i.text||i.original||'').toLowerCase().includes(search));
+
+  if (!items.length) {
+    grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--dim);font-size:13px">저장된 글이 없어요.</div>';
+    return;
+  }
+
+  items.slice().reverse().forEach(item => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:var(--s1);border:1px solid var(--border);border-radius:5px;overflow:hidden';
+
+    if (item._kind === 'pair') {
+      card.innerHTML = `
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">피드백 쌍 · ${item.type||''} · ${item.date||''}</span>
+          <button style="background:none;border:none;color:var(--red);font-size:11px;cursor:pointer" onclick="deletePair(${item.id})">삭제</button>
+        </div>
+        <div style="display:flex">
+          <div style="flex:1;padding:10px 12px;font-size:12px;line-height:1.8;color:var(--dim);border-right:1px solid var(--border)">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px">AI 원본</div>
+            ${escHtml((item.original||'').slice(0,200))}
+          </div>
+          <div style="flex:1;padding:10px 12px;font-size:12px;line-height:1.8;color:var(--text)">
+            <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:4px">수정본</div>
+            ${escHtml((item.edited||'').slice(0,200))}
+          </div>
+        </div>`;
+    } else {
+      const lines = (item.text||'').split('\n');
+      const titleLine = lines[0].startsWith('[') ? lines[0] : '';
+      const body = titleLine ? lines.slice(1).join('\n').trim() : item.text;
+      const typeLabel = {poem:'시·산문',instagram:'인스타',youtube:'유튜브',blog:'블로그'}[item.type]||item.type;
+
+      const hdr = document.createElement('div');
+      hdr.style.cssText = 'padding:8px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center';
+      hdr.innerHTML = `<span style="font-family:var(--mono);font-size:10px;color:var(--dim)">${typeLabel} · ${item.date||''}${titleLine?' · '+escHtml(titleLine):''}</span>`;
+      const acts = document.createElement('div');
+      acts.style.cssText = 'display:flex;gap:6px';
+      const btnEdit = document.createElement('button');
+      btnEdit.style.cssText = 'background:none;border:none;color:var(--accent);font-size:11px;cursor:pointer;font-family:var(--mono)';
+      btnEdit.textContent = '수정';
+      btnEdit.onclick = () => loadExForEdit(item.id);
+      const btnLoad = document.createElement('button');
+      btnLoad.style.cssText = 'background:none;border:none;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--mono)';
+      btnLoad.textContent = '불러오기';
+      btnLoad.onclick = () => { document.getElementById('assembleEditor').value = item.text; switchMainTab('write'); toast('에디터로 불러왔어요.'); };
+      const btnDel = document.createElement('button');
+      btnDel.style.cssText = 'background:none;border:none;color:var(--red);font-size:11px;cursor:pointer;font-family:var(--mono)';
+      btnDel.textContent = '삭제';
+      btnDel.onclick = () => deleteExample(item.id);
+      acts.appendChild(btnEdit); acts.appendChild(btnLoad); acts.appendChild(btnDel);
+      hdr.appendChild(acts);
+      card.appendChild(hdr);
+
+      const bodyEl = document.createElement('div');
+      bodyEl.style.cssText = 'padding:12px;font-family:var(--serif);font-size:13px;line-height:1.9;color:#e2ddd6;white-space:pre-wrap;max-height:160px;overflow:hidden;cursor:pointer';
+      bodyEl.textContent = body;
+      bodyEl.onclick = () => {
+        bodyEl.style.maxHeight = bodyEl.style.maxHeight === 'none' ? '160px' : 'none';
+      };
+      card.appendChild(bodyEl);
+    }
+    grid.appendChild(card);
+  });
+}
+
+function updateExFilterCounts() {
+  const all = document.getElementById('fc-all');
+  if (all) all.textContent = db.examples.length;
+  ['poem','instagram','youtube','blog'].forEach(t => {
+    const el = document.getElementById('fc-'+t);
+    if (el) el.textContent = db.examples.filter(e=>e.type===t).length;
+  });
+  const fp = document.getElementById('fc-pairs');
+  if (fp) fp.textContent = db.pairs.length;
+}
+
+function loadExForEdit(id) {
+  const ex = db.examples.find(e=>e.id===id);
+  if (!ex) return;
+  editingExId = id;
+  document.getElementById('assembleEditor').value = ex.text;
+  switchMainTab('write');
+  setMode('auto');
+  document.getElementById('autoEditor').value = '';
+  toast('수정 모드. STEP 4 에디터에서 수정 후 "예시로 저장" 누르세요.');
+}
+
+async function deleteExample(id) {
+  if (!confirm('삭제할까요?')) return;
+  db.examples = db.examples.filter(e=>e.id!==id);
+  await saveDB(); renderExamples();
+}
+async function deletePair(id) {
+  if (!confirm('삭제할까요?')) return;
+  db.pairs = db.pairs.filter(p=>p.id!==id);
+  await saveDB(); renderExamples();
+}
+
+function openAddExModal() {
+  document.getElementById('addExText').value = '';
+  document.getElementById('addExModal').style.display = 'flex';
+}
+function closeAddExModal() { document.getElementById('addExModal').style.display = 'none'; }
+async function saveAddEx() {
+  const text = document.getElementById('addExText').value.trim();
+  const type = document.getElementById('addExType').value;
+  if (!text) { toast('내용을 입력해주세요.'); return; }
+  db.examples.push({ id:Date.now(), type, text, date:new Date().toLocaleDateString('ko-KR') });
+  await saveDB(); closeAddExModal(); renderExamples(); toast('저장됐어요.');
+}
+
+// ── 문체 프로필 ──
+function renderProfile() {
+  document.getElementById('stat-examples').textContent = db.examples.length;
+  document.getElementById('stat-pairs').textContent = db.pairs.length;
+  document.getElementById('stat-rules').textContent = db.rules.length;
+
+  const rl = document.getElementById('ruleList');
+  rl.innerHTML = '';
+  db.rules.forEach((r,i) => {
+    const el = document.createElement('div');
+    el.style.cssText = 'background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:10px 12px;display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.7;color:var(--muted)';
+    el.innerHTML = `<span style="width:4px;height:4px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:8px"></span>
+      <span style="flex:1">${escHtml(r)}</span>
+      <button style="background:none;border:none;color:var(--dim);font-size:11px;cursor:pointer;margin-left:auto" onclick="deleteRule(${i})">×</button>`;
+    rl.appendChild(el);
+  });
+
+  const pl = document.getElementById('pairsList');
+  pl.innerHTML = '';
+  if (!db.pairs.length) {
+    pl.innerHTML = '<div style="color:var(--dim);font-size:12px;padding:8px 0">아직 피드백 쌍이 없어요.</div>';
+    return;
+  }
+  db.pairs.slice().reverse().forEach(p => {
+    const el = document.createElement('div');
+    el.style.cssText = 'background:var(--s1);border:1px solid var(--border);border-radius:5px;overflow:hidden;margin-bottom:8px';
+    el.innerHTML = `
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--dim)">${p.type||''} · ${p.date||''}</span>
+        <button style="background:none;border:none;color:var(--red);font-size:10px;cursor:pointer" onclick="deletePair(${p.id});renderProfile()">삭제</button>
+      </div>
+      <div style="display:flex">
+        <div style="flex:1;padding:10px 12px;font-size:12px;line-height:1.75;color:var(--dim);border-right:1px solid var(--border)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:4px">AI 원본</div>
+          ${escHtml((p.original||'').slice(0,300))}
+        </div>
+        <div style="flex:1;padding:10px 12px;font-size:12px;line-height:1.75;color:var(--text)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--green);margin-bottom:4px">수정본</div>
+          ${escHtml((p.edited||'').slice(0,300))}
+        </div>
+      </div>`;
+    pl.appendChild(el);
+  });
+}
+
+async function addRule() {
+  const input = document.getElementById('newRuleInput');
+  const val = input.value.trim();
+  if (!val) return;
+  db.rules.push(val);
+  await saveDB(); input.value = ''; renderProfile(); toast('규칙 추가됨');
+}
+async function deleteRule(i) {
+  if (!confirm('이 규칙을 삭제할까요?')) return;
+  db.rules.splice(i,1);
+  await saveDB(); renderProfile();
+}
+
+async function analyzeStyle() {
+  const key = getApiKey(); if (!key) return;
+  if (!db.pairs.length && !db.examples.length) { toast('피드백 쌍이나 예시 글이 있어야 분석할 수 있어요.'); return; }
+  toast('분석 중…');
+  const exStr = db.examples.slice(-5).map((e,i)=>`[예시 ${i+1}]\n${e.text.slice(0,300)}`).join('\n\n');
+  const pStr = db.pairs.slice(-4).map((p,i)=>`[AI]: ${p.original.slice(0,200)}\n[수정]: ${p.edited.slice(0,200)}`).join('\n\n');
+  const prompt = `Vase Lim(@sapmanri)의 글쓰기 데이터를 분석해서 새 문체 규칙을 제안해주세요.
+
+현재 규칙:
+${db.rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}
+
+예시 글:
+${exStr}
+
+피드백 패턴:
+${pStr}
+
+기존 규칙과 중복되지 않는 새 규칙 3-5개를 JSON으로만 반환:
+{"suggestions":["규칙1","규칙2","규칙3"]}`;
+
+  try {
+    const raw = await callClaude(key, prompt, '', 800);
+    const data = JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+    const suggestions = data.suggestions || [];
+    if (!suggestions.length) { toast('제안할 규칙이 없어요.'); return; }
+    const ok = confirm(`새 규칙 제안:\n\n${suggestions.map((s,i)=>`${i+1}. ${s}`).join('\n')}\n\n전체 추가할까요?`);
+    if (ok) { db.rules.push(...suggestions); await saveDB(); renderProfile(); toast(`${suggestions.length}개 규칙 추가됨`); }
+  } catch(e) { toast('분석 실패: '+e.message); }
+}
+
+// ══════════════════════════════════════════
 // 모드 전환
 // ══════════════════════════════════════════
 let currentMode = 'auto';
@@ -1865,7 +2214,8 @@ async function init() {
     document.getElementById('apiBtn').style.color = 'var(--green)';
   }
   updateSettingSummary();
-  setMode('auto'); // 초기 모드 설정 (수동 스텝 패널 숨기기)
+  switchMainTab('write'); // 초기 탭
+  setMode('auto'); // 초기 모드
   await loadDB();
 }
 init();
