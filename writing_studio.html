@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.1.2</title>
+<title>감성찾아삽만리 · Writing Studio v3.1.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.1.2</span>
+    <span class="ver">v3.1.3</span>
   </div>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
@@ -1558,15 +1558,24 @@ function setMode(mode) {
   currentMode = mode;
   document.getElementById('modeAutoBtn').classList.toggle('active', mode === 'auto');
   document.getElementById('modeManualBtn').classList.toggle('active', mode === 'manual');
-  document.getElementById('autoPanel').classList.toggle('active', mode === 'auto');
+
+  // 자동 패널
+  const autoPanel = document.getElementById('autoPanel');
+  autoPanel.style.display = mode === 'auto' ? 'flex' : 'none';
+  autoPanel.classList.toggle('active', mode === 'auto');
+
+  // 스텝 바
   document.getElementById('stepBar').style.display = mode === 'manual' ? 'flex' : 'none';
 
-  // 수동 모드 스텝 패널 토글
+  // 수동 스텝 패널 — 자동 모드에선 완전히 숨김
   document.querySelectorAll('.step-panel').forEach(p => {
-    p.style.display = mode === 'manual' ? '' : 'none';
+    p.style.display = 'none';
+    p.classList.remove('active');
   });
   if (mode === 'manual') {
-    document.getElementById('step-1').classList.add('active');
+    const s1 = document.getElementById('step-1');
+    s1.style.display = 'flex';
+    s1.classList.add('active');
   }
 }
 
@@ -1630,23 +1639,18 @@ async function autoGenerate() {
   const examples = db.examples.filter(e => e.type === autoType || e.type === 'poem').slice(-4);
   const pairs = db.pairs.filter(p => p.type === autoType).slice(-2);
 
-  let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 글쓰기 도구입니다.
-Vase의 문체로 글을 씁니다.
-
-## 문체 규칙
-${db.rules.map((r,i) => `${i+1}. ${r}`).join('
-')}
-
-## 절대 금지
-- 교훈형 결말: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게"
-- 감성 상투어: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"
-- 입력에 없는 장면 지어내기
-- 감정 직접 설명 (장면·사물로 드러낼 것)
-
-## 생성 원칙
-장면 → 사실 → 리듬 → 감정 → 의미
-
-${TYPE_INSTRUCTION[autoType]}`;
+  const ruleStr = db.rules.map((r,i) => `${i+1}. ${r}`).join('\n');
+  let system = '당신은 한국 크리에이터 Vase Lim(@sapmanri)의 글쓰기 도구입니다.\n'
+    + 'Vase의 문체로 글을 씁니다.\n\n'
+    + '## 문체 규칙\n' + ruleStr + '\n\n'
+    + '## 절대 금지\n'
+    + '- 교훈형 결말: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게"\n'
+    + '- 감성 상투어: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"\n'
+    + '- 입력에 없는 장면 지어내기\n'
+    + '- 감정 직접 설명 (장면·사물로 드러낼 것)\n\n'
+    + '## 생성 원칙\n'
+    + '장면 → 사실 → 리듬 → 감정 → 의미\n\n'
+    + TYPE_INSTRUCTION[autoType];
 
   if (examples.length) {
     system += `
@@ -1794,6 +1798,7 @@ async function init() {
     document.getElementById('apiBtn').style.color = 'var(--green)';
   }
   updateSettingSummary();
+  setMode('auto'); // 초기 모드 설정 (수동 스텝 패널 숨기기)
   await loadDB();
 }
 init();
