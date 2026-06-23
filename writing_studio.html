@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.1.1</title>
+<title>감성찾아삽만리 · Writing Studio v3.1.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.1.1</span>
+    <span class="ver">v3.1.2</span>
   </div>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
@@ -362,7 +362,7 @@ header {
         <input type="file" id="autoFileInput" accept="image/*" style="display:none" onchange="autoImageSelected(event)">
         <div class="img-dropzone" id="autoDropzone"
           onclick="document.getElementById('autoFileInput').click()"
-          ondragover="autoDragOver(event)" ondragleave="autoDragLeave(event)" ondrop="autoDrop(event)">
+          ondragenter="autoDragEnter(event)" ondragover="autoDragOver(event)" ondragleave="autoDragLeave(event)" ondrop="autoDrop(event)">
           <div id="autoDropLabel" style="font-size:12px;color:var(--dim);line-height:1.8;pointer-events:none">
             📎 클릭하거나 드래그<br><span style="font-size:10px;font-family:var(--mono)">JPG · PNG · WEBP</span>
           </div>
@@ -1511,10 +1511,12 @@ function updateRefCount() {
 // Claude API 호출
 // ══════════════════════════════════════════
 async function callClaude(key, userMsg, systemMsg='', maxTokens=1500) {
+  // userMsg는 string 또는 배열(이미지+텍스트) 둘 다 지원
+  const content = Array.isArray(userMsg) ? userMsg : userMsg;
   const body = {
     model: 'claude-sonnet-4-5',
     max_tokens: maxTokens,
-    messages: [{ role:'user', content: userMsg }],
+    messages: [{ role:'user', content: content }],
   };
   if (systemMsg) body.system = systemMsg;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1569,13 +1571,15 @@ function setMode(mode) {
 }
 
 // ── 자동 모드: 이미지 ──
-function autoDragOver(e) { e.preventDefault(); document.getElementById('autoDropzone').classList.add('dragover'); }
-function autoDragLeave(e) { document.getElementById('autoDropzone').classList.remove('dragover'); }
+function autoDragOver(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('autoDropzone').classList.add('dragover'); }
+function autoDragEnter(e) { e.preventDefault(); e.stopPropagation(); }
+function autoDragLeave(e) { e.stopPropagation(); document.getElementById('autoDropzone').classList.remove('dragover'); }
 function autoDrop(e) {
-  e.preventDefault();
+  e.preventDefault(); e.stopPropagation();
   document.getElementById('autoDropzone').classList.remove('dragover');
   const file = e.dataTransfer.files[0];
   if (file && file.type.startsWith('image/')) loadAutoImage(file);
+  else toast('이미지 파일만 넣어주세요.');
 }
 function autoImageSelected(e) {
   const file = e.target.files[0];
@@ -1593,7 +1597,9 @@ function loadAutoImage(file) {
     document.getElementById('autoImgRemove').style.display = 'flex';
     document.getElementById('autoDropzone').style.borderStyle = 'solid';
     document.getElementById('autoDropzone').style.borderColor = 'var(--accent)';
+    toast('이미지 첨부됐어요.');
   };
+  reader.onerror = () => toast('이미지 로드 실패');
   reader.readAsDataURL(file);
 }
 function removeAutoImage(e) {
