@@ -1477,9 +1477,16 @@ async function generateInstaCaption(){
         styleBlock += `\n\nVASE 문체 규칙 (반드시 따를 것):\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
       }
       if(examples.length){
-        styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬을 참고):\n`;
-        examples.forEach((e,i)=>{ styleBlock += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,500)}\n`; });
+        const filteredEx = examples.filter(e => e.type === 'poem' || e.type === 'instagram').slice(-3);
+        styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬 참고, 복사 금지):\n`;
+        filteredEx.forEach((e,i)=>{ styleBlock += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,400)}\n`; });
       }
+      // v3 강화: 절대 금지 패턴
+      styleBlock += `\n\n절대 금지:\n`;
+      styleBlock += `- 교훈형 결말: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게"\n`;
+      styleBlock += `- 감성 상투어: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"\n`;
+      styleBlock += `- 입력에 없는 장면 지어내기\n`;
+      styleBlock += `- 감정 직접 설명 (장면·사물로 드러낼 것)`;
     }catch(e){ /* profile_data.json 없으면 기본 스타일로 진행 */ }
   }
 
