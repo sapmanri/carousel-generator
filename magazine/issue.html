@@ -749,27 +749,20 @@ async function exportPdf() {
   btn.disabled = true;
   overlay.classList.add('active');
 
-  // topbar 숨기기 (캡처에서 제외)
   const topbar = document.getElementById('topbar');
   topbar.style.display = 'none';
 
   try {
     const { jsPDF } = window.jspdf;
+    const PDF_W_MM = 210; // A4 너비 기준
+    const canvases = [];
 
-    // 첫 페이지로 PDF 크기 결정 (A4 비율 기준, 실제 화면 크기 사용)
-    const firstPage = pages[0];
-    const firstRect = firstPage.getBoundingClientRect();
-    const pdfW = 210; // A4 mm
-    const pdfH = Math.round(pdfW * (firstPage.scrollHeight / firstPage.offsetWidth));
-
-    const pdf = new jsPDF({ orientation: pdfH > pdfW ? 'p' : 'l', unit: 'mm', format: [pdfW, pdfH] });
-
+    // 1단계: 전체 캡처
     for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
       sub.textContent = `캡처 중… (${i + 1} / ${pages.length})`;
-      bar.style.width = `${Math.round((i / pages.length) * 100)}%`;
+      bar.style.width = `${Math.round((i / pages.length) * 80)}%`;
 
-      // 스크롤 없이 전체 높이 캡처
+      const page = pages[i];
       const canvas = await html2canvas(page, {
         scale: 2,
         useCORS: true,
@@ -782,26 +775,34 @@ async function exportPdf() {
         windowWidth: page.offsetWidth,
         windowHeight: page.scrollHeight,
       });
+      canvases.push(canvas);
+    }
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const pageH = Math.round(pdfW * (canvas.height / canvas.width));
-      const pagePdf = new jsPDF({ orientation: pageH > pdfW ? 'p' : 'l', unit: 'mm', format: [pdfW, pageH] });
+    // 2단계: PDF 생성
+    sub.textContent = 'PDF 조합 중…';
+    bar.style.width = '85%';
+
+    let pdf = null;
+
+    for (let i = 0; i < canvases.length; i++) {
+      const canvas = canvases[i];
+      const ratio = canvas.height / canvas.width;
+      const pageH = Math.round(PDF_W_MM * ratio);
+      const orient = ratio > 1 ? 'portrait' : 'landscape';
 
       if (i === 0) {
-        // 첫 페이지는 이미 만들어진 pdf 객체 사용
-        pdf.internal.pageSize.width = pdfW;
-        pdf.internal.pageSize.height = pageH;
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pageH);
+        pdf = new jsPDF({ orientation: orient, unit: 'mm', format: [PDF_W_MM, pageH] });
       } else {
-        pdf.addPage([pdfW, pageH], pageH > pdfW ? 'p' : 'l');
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pageH);
+        pdf.addPage([PDF_W_MM, pageH], orient);
       }
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      pdf.addImage(imgData, 'JPEG', 0, 0, PDF_W_MM, pageH);
     }
 
     bar.style.width = '100%';
-    sub.textContent = 'PDF 저장 중…';
+    sub.textContent = '저장 중…';
 
-    // 파일명: 이슈 제목 또는 URL ID
     const issueId = new URLSearchParams(location.search).get('id') || 'magazine';
     pdf.save(`SAPMANRI_${issueId}.pdf`);
 
