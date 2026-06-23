@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.1.4</title>
+<title>감성찾아삽만리 · Writing Studio v3.1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.1.4</span>
+    <span class="ver">v3.1.5</span>
   </div>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
@@ -352,7 +352,7 @@ header {
 <div class="main">
 
 <!-- ═══ 자동 모드 ═══ -->
-<div id="autoPanel" class="active">
+<div id="autoPanel" style="display:flex;flex:1;overflow:hidden">
   <div class="auto-layout">
 
     <!-- 왼쪽: 입력 -->
@@ -435,8 +435,23 @@ header {
   <div class="panel-wrap">
     <div class="panel-left">
       <div class="sec">
+        <div class="sec-label">이미지 첨부 (선택)</div>
+        <input type="file" id="manualFileInput" accept="image/*" style="display:none" onchange="manualImageSelected(event)">
+        <div class="img-dropzone" id="manualDropzone"
+          onclick="document.getElementById('manualFileInput').click()"
+          ondragenter="manualDragEnter(event)" ondragover="manualDragOver(event)"
+          ondragleave="manualDragLeave(event)" ondrop="manualDrop(event)"
+          style="padding:14px">
+          <div id="manualDropLabel" style="font-size:11px;color:var(--dim);pointer-events:none">
+            📎 클릭하거나 드래그
+          </div>
+          <img id="manualImgPreview" style="display:none;pointer-events:none;width:100%;border-radius:3px;margin-top:6px;max-height:120px;object-fit:cover">
+          <button id="manualImgRemove" class="img-remove" style="display:none" onclick="removeManualImage(event)">×</button>
+        </div>
+      </div>
+      <div class="sec">
         <div class="sec-label">오늘의 메모 · 소재</div>
-        <textarea class="field" id="rawInput" rows="8"
+        <textarea class="field" id="rawInput" rows="6"
           placeholder="마당에 목련이 다 졌는데 하나만 남아 있었다. 커피는 식었고 고양이는 창가에 앉아 있었다.&#10;&#10;영상 설명, SRT 일부, 떠오른 메모 뭐든 괜찮아요."></textarea>
         <div style="margin-top:8px;display:flex;gap:8px">
           <button class="btn-accent" id="extractBtn" onclick="extractMaterials()" style="flex:1">
@@ -1562,7 +1577,6 @@ function setMode(mode) {
   // 자동 패널
   const autoPanel = document.getElementById('autoPanel');
   autoPanel.style.display = mode === 'auto' ? 'flex' : 'none';
-  autoPanel.classList.toggle('active', mode === 'auto');
 
   // 스텝 바
   document.getElementById('stepBar').style.display = mode === 'manual' ? 'flex' : 'none';
@@ -1580,6 +1594,52 @@ function setMode(mode) {
 }
 
 // ── 자동 모드: 이미지 ──
+// ── 수동 모드 이미지 ──
+let manualImageBase64 = null;
+let manualImageType = null;
+
+function manualDragEnter(e) { e.preventDefault(); e.stopPropagation(); }
+function manualDragOver(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('manualDropzone').classList.add('dragover'); }
+function manualDragLeave(e) { e.stopPropagation(); document.getElementById('manualDropzone').classList.remove('dragover'); }
+function manualDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  document.getElementById('manualDropzone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadManualImage(file);
+  else toast('이미지 파일만 넣어주세요.');
+}
+function manualImageSelected(e) {
+  const file = e.target.files[0];
+  if (file) loadManualImage(file);
+}
+function loadManualImage(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    manualImageBase64 = ev.target.result.split(',')[1];
+    manualImageType = file.type;
+    const preview = document.getElementById('manualImgPreview');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    document.getElementById('manualDropLabel').style.display = 'none';
+    document.getElementById('manualImgRemove').style.display = 'flex';
+    document.getElementById('manualDropzone').style.borderStyle = 'solid';
+    document.getElementById('manualDropzone').style.borderColor = 'var(--accent)';
+    toast('이미지 첨부됐어요.');
+  };
+  reader.onerror = () => toast('이미지 로드 실패');
+  reader.readAsDataURL(file);
+}
+function removeManualImage(e) {
+  e.stopPropagation();
+  manualImageBase64 = null; manualImageType = null;
+  document.getElementById('manualImgPreview').style.display = 'none';
+  document.getElementById('manualDropLabel').style.display = 'block';
+  document.getElementById('manualImgRemove').style.display = 'none';
+  document.getElementById('manualDropzone').style.borderStyle = 'dashed';
+  document.getElementById('manualDropzone').style.borderColor = 'var(--border)';
+}
+
+// ── 자동 모드 이미지 ──
 function autoDragOver(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('autoDropzone').classList.add('dragover'); }
 function autoDragEnter(e) { e.preventDefault(); e.stopPropagation(); }
 function autoDragLeave(e) { e.stopPropagation(); document.getElementById('autoDropzone').classList.remove('dragover'); }
