@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.2.4</title>
+<title>감성찾아삽만리 · Writing Studio v3.2.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.2.4</span>
+    <span class="ver">v3.2.5</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -1024,13 +1024,25 @@ function setDbStatus(msg, type) {
 // ══════════════════════════════════════════
 let currentStep = 1;
 function goStep(n) {
-  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+  if (currentMode !== 'manual') setMode('manual');
+
+  document.querySelectorAll('.step-panel').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
+
   document.querySelectorAll('.step-item').forEach(s => {
     const sn = parseInt(s.dataset.step);
     s.classList.toggle('active', sn === n);
     if (sn < n) s.classList.add('done'); else s.classList.remove('done');
   });
-  document.getElementById('step-' + n).classList.add('active');
+
+  const panel = document.getElementById('step-' + n);
+  if (panel) {
+    panel.style.display = 'flex';
+    panel.classList.add('active');
+  }
+
   currentStep = n;
   if (n === 2) renderSceneSelector();
   if (n === 3) updateGenSummary();
