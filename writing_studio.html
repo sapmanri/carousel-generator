@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.1.0</title>
+<title>감성찾아삽만리 · Writing Studio v3.1.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.1.0</span>
+    <span class="ver">v3.1.1</span>
   </div>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
@@ -359,13 +359,14 @@ header {
     <div class="auto-left">
       <div class="sec">
         <div class="sec-label">이미지 첨부</div>
+        <input type="file" id="autoFileInput" accept="image/*" style="display:none" onchange="autoImageSelected(event)">
         <div class="img-dropzone" id="autoDropzone"
+          onclick="document.getElementById('autoFileInput').click()"
           ondragover="autoDragOver(event)" ondragleave="autoDragLeave(event)" ondrop="autoDrop(event)">
-          <input type="file" accept="image/*" onchange="autoImageSelected(event)">
-          <div id="autoDropLabel" style="font-size:12px;color:var(--dim);line-height:1.8">
+          <div id="autoDropLabel" style="font-size:12px;color:var(--dim);line-height:1.8;pointer-events:none">
             📎 클릭하거나 드래그<br><span style="font-size:10px;font-family:var(--mono)">JPG · PNG · WEBP</span>
           </div>
-          <img id="autoImgPreview" style="display:none" class="img-preview">
+          <img id="autoImgPreview" style="display:none;pointer-events:none" class="img-preview">
           <button id="autoImgRemove" class="img-remove" style="display:none" onclick="removeAutoImage(event)">×</button>
         </div>
       </div>
