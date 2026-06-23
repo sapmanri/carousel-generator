@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.2.2</title>
+<title>감성찾아삽만리 · Writing Studio v3.2.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.2.2</span>
+    <span class="ver">v3.2.3</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -751,7 +751,7 @@ header {
 
 <!-- ═══ 예시 글 패널 ═══ -->
 <div id="panelExamples" style="display:none;flex:1;overflow:hidden;min-height:0">
-  <div style="display:flex;flex:1;overflow:hidden">
+  <div style="display:flex;flex:1;min-height:0">
     <!-- 왼쪽 필터 -->
     <aside style="width:180px;flex-shrink:0;border-right:1px solid var(--border);overflow-y:auto;padding:12px">
       <div class="sec-label" style="padding:4px 0 10px">필터</div>
@@ -771,7 +771,7 @@ header {
           style="flex:1;background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 10px;border-radius:4px;outline:none">
         <button class="btn-sm" onclick="openAddExModal()">+ 추가</button>
       </div>
-      <div id="examplesGrid" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px"></div>
+      <div id="examplesGrid" style="flex:1;overflow-y:auto;padding:16px;display:block"></div>
     </div>
   </div>
 </div>
@@ -1736,7 +1736,7 @@ function renderExamples() {
 
   items.slice().reverse().forEach(item => {
     const card = document.createElement('div');
-    card.style.cssText = 'background:var(--s1);border:1px solid var(--border);border-radius:5px;overflow:hidden';
+    card.style.cssText = 'background:var(--s1);border:1px solid var(--border);border-radius:5px;margin-bottom:10px';
 
     if (item._kind === 'pair') {
       card.innerHTML = `
@@ -1782,7 +1782,7 @@ function renderExamples() {
       card.appendChild(hdr);
 
       const bodyEl = document.createElement('div');
-      bodyEl.style.cssText = 'padding:12px;font-family:var(--serif);font-size:13px;line-height:1.9;color:#e2ddd6;white-space:pre-wrap;max-height:160px;overflow:hidden;cursor:pointer';
+      bodyEl.style.cssText = 'padding:12px;font-family:var(--serif);font-size:13px;line-height:1.9;color:#e2ddd6;white-space:pre-wrap;cursor:pointer;display:block';
       bodyEl.textContent = body;
       bodyEl.onclick = () => {
         bodyEl.style.maxHeight = bodyEl.style.maxHeight === 'none' ? '160px' : 'none';
