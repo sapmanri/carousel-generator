@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.2.3</title>
+<title>감성찾아삽만리 · Writing Studio v3.2.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.2.3</span>
+    <span class="ver">v3.2.4</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -1782,12 +1782,22 @@ function renderExamples() {
       card.appendChild(hdr);
 
       const bodyEl = document.createElement('div');
-      bodyEl.style.cssText = 'padding:12px;font-family:var(--serif);font-size:13px;line-height:1.9;color:#e2ddd6;white-space:pre-wrap;cursor:pointer;display:block';
+      bodyEl.style.cssText = 'padding:12px;font-family:var(--serif);font-size:13px;line-height:1.9;color:#e2ddd6;white-space:pre-wrap;display:block;max-height:120px;overflow:hidden;cursor:pointer';
+      const footer = document.createElement('div');
+      footer.style.cssText = 'padding:4px 12px 10px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.3);cursor:pointer;text-align:center';
+      footer.textContent = '▾ 펼치기';
+      footer.onclick = () => {
+        const expanded = bodyEl.style.maxHeight === 'none';
+        bodyEl.style.maxHeight = expanded ? '120px' : 'none';
+        footer.textContent = expanded ? '▾ 펼치기' : '▴ 접기';
+      };
+      bodyEl.onclick = footer.onclick;
+      card.appendChild(bodyEl);
+      card.appendChild(footer);
       bodyEl.textContent = body;
       bodyEl.onclick = () => {
         bodyEl.style.maxHeight = bodyEl.style.maxHeight === 'none' ? '160px' : 'none';
       };
-      card.appendChild(bodyEl);
     }
     grid.appendChild(card);
   });
