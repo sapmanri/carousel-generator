@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.1.5</title>
+<title>감성찾아삽만리 · Writing Studio v3.1.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.1.5</span>
+    <span class="ver">v3.1.6</span>
   </div>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
@@ -472,7 +472,7 @@ header {
 
     <div class="panel-main" style="overflow-y:auto;padding:20px 24px">
       <div id="materialsEmpty" style="padding:60px 0;text-align:center;color:var(--dim);font-size:13px;line-height:2">
-        왼쪽에 메모를 입력하고<br>소재 추출하기를 눌러주세요.
+        왼쪽에 이미지나 메모를 입력하고<br>소재 추출하기를 눌러주세요.
       </div>
       <div id="materialsResult" style="display:none">
         <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between">
@@ -993,21 +993,28 @@ function updateSettingSummary() {
 async function extractMaterials() {
   const key = getApiKey(); if (!key) return;
   const raw = document.getElementById('rawInput').value.trim();
-  if (!raw) { toast('메모를 입력해주세요.'); return; }
+  if (!raw && !manualImageBase64) { toast('이미지나 메모를 입력해주세요.'); return; }
   state.rawInput = raw;
 
   const btn = document.getElementById('extractBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>추출 중…';
 
-  const prompt = `다음 메모에서 소재를 추출해주세요. 반드시 아래 JSON 형식으로만 답하세요.
-
-메모: ${raw}
-
-출력 형식 (설명 없이 JSON만):
-{"objects":["사물1","사물2"],"places":["장소1"],"actions":["행동1","행동2"],"sensory":["감각 디테일1","감각 디테일2"]}`;
+  // 이미지만 있는 경우 — 이미지 분석으로 소재 추출
+  let userContent;
+  if (manualImageBase64) {
+    const textPart = raw ? `\n\n추가 메모: ${raw}` : '';
+    userContent = [
+      { type:'image', source:{ type:'base64', media_type:manualImageType, data:manualImageBase64 } },
+      { type:'text', text:`이 이미지에서 소재를 추출해주세요.${textPart}\n\n출력 형식 (설명 없이 JSON만):
+{"objects":["사물1","사물2"],"places":["장소1"],"actions":["행동1","행동2"],"sensory":["감각 디테일1","감각 디테일2"]}` }
+    ];
+    if (!state.rawInput) state.rawInput = '(이미지 소재)';
+  } else {
+    userContent = `다음 메모에서 소재를 추출해주세요. 반드시 아래 JSON 형식으로만 답하세요.\n\n메모: ${raw}\n\n출력 형식 (설명 없이 JSON만):\n{"objects":["사물1","사물2"],"places":["장소1"],"actions":["행동1","행동2"],"sensory":["감각 디테일1","감각 디테일2"]}`;
+  }
 
   try {
-    const res = await callClaude(key, prompt, '소재를 추출하는 도구입니다. JSON만 출력합니다.');
+    const res = await callClaude(key, userContent, '소재를 추출하는 도구입니다. JSON만 출력합니다.');
     const text = res.replace(/```json|```/g,'').trim();
     const data = JSON.parse(text);
 
@@ -1123,7 +1130,7 @@ function updateGenSummary() {
 
 async function generateCandidates() {
   const key = getApiKey(); if (!key) return;
-  if (!state.rawInput) { toast('STEP 1로 돌아가 메모를 입력해주세요.'); return; }
+  if (!state.rawInput && !manualImageBase64) { toast('STEP 1로 돌아가 메모나 이미지를 입력해주세요.'); return; }
 
   const btn = document.getElementById('genBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>생성 중…';
@@ -1165,13 +1172,15 @@ ${TYPE_INSTRUCTION[state.type]}
   "prose":   ["짧은 산문 후보1","짧은 산문 후보2","짧은 산문 후보3"]
 }`;
 
-  const user = `소재: ${state.rawInput}
-선택 장면: ${state.scenes.join(', ') || '(전체 소재 참고)'}
-시점: ${state.persp}
-결: ${state.grain}
-도입 방식: ${state.openMode}으로 시작
-전개 방식: ${state.devMode}
-끝맺음: ${state.endMode}`;
+  let user;
+  if (manualImageBase64) {
+    user = [
+      { type:'image', source:{ type:'base64', media_type:manualImageType, data:manualImageBase64 } },
+      { type:'text', text:`소재: ${state.rawInput}\n선택 장면: ${state.scenes.join(', ') || '(이미지 전체 참고)'}\n시점: ${state.persp}\n결: ${state.grain}\n도입 방식: ${state.openMode}으로 시작\n전개 방식: ${state.devMode}\n끝맺음: ${state.endMode}` }
+    ];
+  } else {
+    user = `소재: ${state.rawInput}\n선택 장면: ${state.scenes.join(', ') || '(전체 소재 참고)'}\n시점: ${state.persp}\n결: ${state.grain}\n도입 방식: ${state.openMode}으로 시작\n전개 방식: ${state.devMode}\n끝맺음: ${state.endMode}`;
+  }
 
   try {
     const raw = await callClaude(key, user, system, 2000);
