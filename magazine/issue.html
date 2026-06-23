@@ -39,6 +39,28 @@ img{max-width:100%;display:block}
 .topbar:not(.on-dark) .back .build-tag{color:rgba(0,0,0,0.25)}
 .topbar .indicator{color:rgba(0,0,0,0.4);font-family:var(--sans)}
 .topbar.on-dark .indicator{color:rgba(255,255,255,0.45)}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.btn-pdf{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 13px;border-radius:3px;border:none;cursor:pointer;
+  font-family:var(--sans);font-size:10px;font-weight:500;letter-spacing:0.08em;
+  background:var(--orange);color:#fff;transition:opacity .15s;white-space:nowrap;
+}
+.btn-pdf:hover{opacity:0.82}
+.btn-pdf:disabled{opacity:0.4;cursor:not-allowed}
+.topbar.on-dark .btn-pdf{background:rgba(232,118,44,0.9)}
+/* PDF 진행 오버레이 */
+.pdf-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:rgba(18,14,12,0.78);backdrop-filter:blur(6px);
+  flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  color:#fff;font-family:var(--sans);
+}
+.pdf-overlay.active{display:flex}
+.pdf-overlay-title{font-size:14px;letter-spacing:0.1em;font-weight:500}
+.pdf-bar-wrap{width:240px;height:2px;background:rgba(255,255,255,0.15);border-radius:2px}
+.pdf-bar{height:100%;background:var(--orange);border-radius:2px;width:0%;transition:width .15s}
+.pdf-overlay-sub{font-size:11px;color:rgba(255,255,255,0.5);letter-spacing:0.06em}
 
 /* ── 페이지 컨테이너 ── */
 .pages{display:flex;flex-direction:column}
@@ -334,8 +356,17 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-13 14:10 KST</span></a>
-  <div class="indicator" id="indicator"></div>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-23 10:50 KST</span></a>
+  <div class="topbar-right">
+    <div class="indicator" id="indicator"></div>
+    <button class="btn-pdf" id="pdfBtn" onclick="exportPdf()">↓ PDF 저장</button>
+  </div>
+</div>
+
+<div class="pdf-overlay" id="pdfOverlay">
+  <div class="pdf-overlay-title">PDF 생성 중</div>
+  <div class="pdf-bar-wrap"><div class="pdf-bar" id="pdfBar"></div></div>
+  <div class="pdf-overlay-sub" id="pdfSub">페이지를 캡처하고 있습니다…</div>
 </div>
 
 <div class="pages" id="pages">
@@ -700,6 +731,90 @@ function renderBotanical(p) {
 
 load();
 
+</script>
+
+<!-- PDF 내보내기 라이브러리 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+async function exportPdf() {
+  const pages = document.querySelectorAll('.pages .page');
+  if (!pages.length) { alert('페이지를 먼저 불러오세요.'); return; }
+
+  const btn = document.getElementById('pdfBtn');
+  const overlay = document.getElementById('pdfOverlay');
+  const bar = document.getElementById('pdfBar');
+  const sub = document.getElementById('pdfSub');
+
+  btn.disabled = true;
+  overlay.classList.add('active');
+
+  // topbar 숨기기 (캡처에서 제외)
+  const topbar = document.getElementById('topbar');
+  topbar.style.display = 'none';
+
+  try {
+    const { jsPDF } = window.jspdf;
+
+    // 첫 페이지로 PDF 크기 결정 (A4 비율 기준, 실제 화면 크기 사용)
+    const firstPage = pages[0];
+    const firstRect = firstPage.getBoundingClientRect();
+    const pdfW = 210; // A4 mm
+    const pdfH = Math.round(pdfW * (firstPage.scrollHeight / firstPage.offsetWidth));
+
+    const pdf = new jsPDF({ orientation: pdfH > pdfW ? 'p' : 'l', unit: 'mm', format: [pdfW, pdfH] });
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      sub.textContent = `캡처 중… (${i + 1} / ${pages.length})`;
+      bar.style.width = `${Math.round((i / pages.length) * 100)}%`;
+
+      // 스크롤 없이 전체 높이 캡처
+      const canvas = await html2canvas(page, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        scrollX: 0,
+        scrollY: 0,
+        width: page.offsetWidth,
+        height: page.scrollHeight,
+        windowWidth: page.offsetWidth,
+        windowHeight: page.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const pageH = Math.round(pdfW * (canvas.height / canvas.width));
+      const pagePdf = new jsPDF({ orientation: pageH > pdfW ? 'p' : 'l', unit: 'mm', format: [pdfW, pageH] });
+
+      if (i === 0) {
+        // 첫 페이지는 이미 만들어진 pdf 객체 사용
+        pdf.internal.pageSize.width = pdfW;
+        pdf.internal.pageSize.height = pageH;
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pageH);
+      } else {
+        pdf.addPage([pdfW, pageH], pageH > pdfW ? 'p' : 'l');
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pageH);
+      }
+    }
+
+    bar.style.width = '100%';
+    sub.textContent = 'PDF 저장 중…';
+
+    // 파일명: 이슈 제목 또는 URL ID
+    const issueId = new URLSearchParams(location.search).get('id') || 'magazine';
+    pdf.save(`SAPMANRI_${issueId}.pdf`);
+
+  } catch (e) {
+    alert('PDF 생성 중 오류가 발생했습니다: ' + e.message);
+    console.error(e);
+  } finally {
+    topbar.style.display = '';
+    btn.disabled = false;
+    overlay.classList.remove('active');
+    bar.style.width = '0%';
+  }
+}
 </script>
 </body>
 </html>
