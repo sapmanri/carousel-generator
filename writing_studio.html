@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.1.3</title>
+<title>감성찾아삽만리 · Writing Studio v3.1.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -308,7 +308,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.1.3</span>
+    <span class="ver">v3.1.4</span>
   </div>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
@@ -1732,12 +1732,10 @@ function checkAutoQuality(text) {
 
 function removeAutoLesson() {
   const ed = document.getElementById('autoEditor');
-  const lines = ed.value.split('
-');
+  const lines = ed.value.split('\n');
   const filtered = lines.filter(l => !LESSON_PATTERNS.some(p => l.includes(p)));
   while (filtered.length && !filtered[filtered.length-1].trim()) filtered.pop();
-  ed.value = filtered.join('
-');
+  ed.value = filtered.join('\n');
   document.getElementById('autoCharCount').textContent = ed.value.length.toLocaleString() + '자';
   checkAutoQuality(ed.value);
   toast('교훈형 결말 제거됨');
