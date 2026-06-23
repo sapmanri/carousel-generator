@@ -281,12 +281,26 @@ async function analyzeImageForPostcard(dataUrl) {
   const base64 = dataUrl.split(',')[1];
   const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
   const key = getApiKey();
+  // profile_data.json에서 Vase 문체 규칙 로드
+  let pcStyleBlock = '';
+  try {
+    const profRes = await fetch('../profile_data.json');
+    const prof = await profRes.json();
+    const rules = (prof.rules || []).slice(0, 5);
+    if (rules.length) pcStyleBlock = `\nVase 문체 규칙:\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
+  } catch(e) {}
+
   const prompt = `이 이미지를 보고 포스트카드용 텍스트를 한국어/영어 각각 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
+${pcStyleBlock}
+
+절대 금지: "문득", "따뜻하게", "소소한 행복", "위로", "힐링", 교훈형 결말, 입력에 없는 장면 지어내기.
+장면과 사물로 감정을 드러낼 것. 감정 직접 설명 금지.
+
 {
-  "label_ko": "소제목 한국어 (4-8자, 분위기 묘사)",
-  "label_en": "Short English label (2-4 words, mood/scene)",
-  "caption_ko": "Vase 문체 한국어 캡션 한 줄 (감각적, 12자 이내, 명조체 어울리는 문장)",
-  "caption_en": "English caption one line (poetic, under 8 words)"
+  "label_ko": "소제목 한국어 (4-8자, 장면 묘사, 감정 설명 금지)",
+  "label_en": "Short English label (2-4 words, scene-based)",
+  "caption_ko": "Vase 문체 한국어 캡션 한 줄 (감각적 장면, 12자 이내, 교훈·위로 금지)",
+  "caption_en": "English caption one line (scene-based, poetic, under 8 words)"
 }`;
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
