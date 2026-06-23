@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.0.0</title>
+<title>감성찾아삽만리 · Writing Studio v3.1.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -249,6 +249,46 @@ header {
 ::-webkit-scrollbar { width:3px; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
+/* ── 자동/수동 모드 ── */
+.mode-toggle {
+  display:flex; gap:0; border:1px solid var(--border); border-radius:4px; overflow:hidden;
+}
+.mode-btn {
+  background:none; border:none; color:var(--dim);
+  font-family:var(--mono); font-size:10px; padding:5px 14px;
+  cursor:pointer; transition:all 0.15s; white-space:nowrap;
+}
+.mode-btn.active { background:var(--s2); color:var(--text); }
+
+/* 자동 모드 패널 */
+#autoPanel { display:none; flex:1; overflow:hidden; }
+#autoPanel.active { display:flex; }
+.auto-layout { display:flex; flex:1; overflow:hidden; }
+.auto-left {
+  width:300px; flex-shrink:0; border-right:1px solid var(--border);
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+.auto-main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.auto-right {
+  width:280px; flex-shrink:0; border-left:1px solid var(--border);
+  display:flex; flex-direction:column; overflow-y:auto;
+}
+
+/* 이미지 드롭존 */
+.img-dropzone {
+  border:1px dashed var(--border); border-radius:4px;
+  padding:20px; text-align:center; cursor:pointer;
+  transition:all 0.15s; position:relative;
+}
+.img-dropzone:hover, .img-dropzone.dragover { border-color:var(--accent); background:rgba(184,122,110,0.05); }
+.img-dropzone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.img-preview { width:100%; border-radius:3px; display:block; margin-top:8px; max-height:180px; object-fit:cover; }
+.img-remove {
+  position:absolute; top:4px; right:4px; background:var(--red);
+  border:none; color:#fff; width:18px; height:18px; border-radius:50%;
+  font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+
 /* ── 모바일 ── */
 @media(max-width:768px) {
   header { padding:0 12px; height:44px; }
@@ -268,10 +308,14 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.0.0</span>
+    <span class="ver">v3.1.0</span>
   </div>
   <div class="header-right">
     <span id="dbStatus" style="color:var(--dim)"></span>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeAutoBtn" onclick="setMode('auto')">자동</button>
+      <button class="mode-btn" id="modeManualBtn" onclick="setMode('manual')">수동 5단계</button>
+    </div>
     <div id="ghWrap" style="display:none;align-items:center;gap:4px">
       <input type="password" class="key-input open" id="ghKey" placeholder="ghp_..." onkeydown="if(event.key==='Enter')saveGhKey()">
       <button class="btn-sm" onclick="saveGhKey()">저장</button>
@@ -285,8 +329,8 @@ header {
   </div>
 </header>
 
-<!-- 스텝 바 -->
-<div class="step-bar">
+<!-- 스텝 바 (수동 모드에서만 표시) -->
+<div class="step-bar" id="stepBar" style="display:none">
   <div class="step-item active" data-step="1" onclick="goStep(1)">
     <span class="step-num">1</span><span>소재</span>
   </div>
@@ -306,6 +350,84 @@ header {
 
 <!-- 메인 -->
 <div class="main">
+
+<!-- ═══ 자동 모드 ═══ -->
+<div id="autoPanel" class="active">
+  <div class="auto-layout">
+
+    <!-- 왼쪽: 입력 -->
+    <div class="auto-left">
+      <div class="sec">
+        <div class="sec-label">이미지 첨부</div>
+        <div class="img-dropzone" id="autoDropzone"
+          ondragover="autoDragOver(event)" ondragleave="autoDragLeave(event)" ondrop="autoDrop(event)">
+          <input type="file" accept="image/*" onchange="autoImageSelected(event)">
+          <div id="autoDropLabel" style="font-size:12px;color:var(--dim);line-height:1.8">
+            📎 클릭하거나 드래그<br><span style="font-size:10px;font-family:var(--mono)">JPG · PNG · WEBP</span>
+          </div>
+          <img id="autoImgPreview" style="display:none" class="img-preview">
+          <button id="autoImgRemove" class="img-remove" style="display:none" onclick="removeAutoImage(event)">×</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-label">텍스트 (선택)</div>
+        <textarea class="field" id="autoTextInput" rows="5"
+          placeholder="이미지 설명, 메모, 키워드 등&#10;이미지만 있으면 생략 가능"></textarea>
+      </div>
+
+      <div class="sec">
+        <div class="sec-label">글 타입</div>
+        <div class="chip-group" id="autoTypeChips">
+          <button class="chip active" data-type="poem" onclick="setAutoType(this)">시·산문</button>
+          <button class="chip" data-type="instagram" onclick="setAutoType(this)">인스타 캡션</button>
+          <button class="chip" data-type="youtube" onclick="setAutoType(this)">유튜브</button>
+          <button class="chip" data-type="blog" onclick="setAutoType(this)">블로그</button>
+        </div>
+      </div>
+
+      <div class="sec">
+        <button class="btn-accent" id="autoGenBtn" onclick="autoGenerate()" style="width:100%">
+          글 생성하기 →
+        </button>
+      </div>
+    </div>
+
+    <!-- 중앙: 에디터 -->
+    <div class="auto-main">
+      <div style="height:38px;flex-shrink:0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;padding:0 16px">
+        <button class="btn-ghost-sm" onclick="clearAutoEditor()">지우기</button>
+        <button class="btn-ghost-sm" onclick="copyAutoEditor()">복사</button>
+        <button class="btn-ghost-sm" onclick="saveAutoAsExample()">예시로 저장</button>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim)" id="autoCharCount">0자</span>
+      </div>
+      <textarea class="assemble-editor" id="autoEditor"
+        placeholder="여기에 생성된 글이 나타나요. 직접 수정도 가능해요."
+        oninput="document.getElementById('autoCharCount').textContent=this.value.length.toLocaleString()+'자'"></textarea>
+    </div>
+
+    <!-- 오른쪽: 품질 + 반복 문구 -->
+    <div class="auto-right">
+      <div class="sec">
+        <div class="sec-label">반복 문구 경고</div>
+        <div id="autoRepeatWarn" style="font-size:11px;color:var(--dim)">생성 후 표시됩니다</div>
+      </div>
+      <div class="sec">
+        <div class="sec-label">교훈형 결말</div>
+        <div id="autoLessonCheck" style="font-size:11px;color:var(--dim)">생성 후 표시됩니다</div>
+        <button class="btn-ghost-sm" onclick="removeAutoLesson()" style="width:100%;margin-top:6px">교훈 결말 제거</button>
+      </div>
+      <div class="sec">
+        <div class="sec-label">다듬기</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn-ghost-sm" onclick="openAutoRefine('proofread')">교열</button>
+          <button class="btn-ghost-sm" onclick="openAutoRefine('suggest')">제안</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- ═══ STEP 1: 소재 ═══ -->
 <div class="step-panel active" id="step-1">
@@ -1419,6 +1541,232 @@ function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg; el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════════
+// 모드 전환
+// ══════════════════════════════════════════
+let currentMode = 'auto';
+let autoImageBase64 = null;
+let autoImageType = null;
+let autoType = 'poem';
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('modeAutoBtn').classList.toggle('active', mode === 'auto');
+  document.getElementById('modeManualBtn').classList.toggle('active', mode === 'manual');
+  document.getElementById('autoPanel').classList.toggle('active', mode === 'auto');
+  document.getElementById('stepBar').style.display = mode === 'manual' ? 'flex' : 'none';
+
+  // 수동 모드 스텝 패널 토글
+  document.querySelectorAll('.step-panel').forEach(p => {
+    p.style.display = mode === 'manual' ? '' : 'none';
+  });
+  if (mode === 'manual') {
+    document.getElementById('step-1').classList.add('active');
+  }
+}
+
+// ── 자동 모드: 이미지 ──
+function autoDragOver(e) { e.preventDefault(); document.getElementById('autoDropzone').classList.add('dragover'); }
+function autoDragLeave(e) { document.getElementById('autoDropzone').classList.remove('dragover'); }
+function autoDrop(e) {
+  e.preventDefault();
+  document.getElementById('autoDropzone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadAutoImage(file);
+}
+function autoImageSelected(e) {
+  const file = e.target.files[0];
+  if (file) loadAutoImage(file);
+}
+function loadAutoImage(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    autoImageBase64 = ev.target.result.split(',')[1];
+    autoImageType = file.type;
+    const preview = document.getElementById('autoImgPreview');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    document.getElementById('autoDropLabel').style.display = 'none';
+    document.getElementById('autoImgRemove').style.display = 'flex';
+    document.getElementById('autoDropzone').style.borderStyle = 'solid';
+    document.getElementById('autoDropzone').style.borderColor = 'var(--accent)';
+  };
+  reader.readAsDataURL(file);
+}
+function removeAutoImage(e) {
+  e.stopPropagation();
+  autoImageBase64 = null; autoImageType = null;
+  document.getElementById('autoImgPreview').style.display = 'none';
+  document.getElementById('autoDropLabel').style.display = 'block';
+  document.getElementById('autoImgRemove').style.display = 'none';
+  document.getElementById('autoDropzone').style.borderStyle = 'dashed';
+  document.getElementById('autoDropzone').style.borderColor = 'var(--border)';
+}
+function setAutoType(btn) {
+  document.querySelectorAll('#autoTypeChips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  autoType = btn.dataset.type;
+}
+
+// ── 자동 모드: 글 생성 ──
+async function autoGenerate() {
+  const key = getApiKey(); if (!key) return;
+  const text = document.getElementById('autoTextInput').value.trim();
+  if (!autoImageBase64 && !text) { toast('이미지나 텍스트를 입력해주세요.'); return; }
+
+  const btn = document.getElementById('autoGenBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>생성 중…';
+
+  // profile_data 기반 시스템 프롬프트
+  const examples = db.examples.filter(e => e.type === autoType || e.type === 'poem').slice(-4);
+  const pairs = db.pairs.filter(p => p.type === autoType).slice(-2);
+
+  let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 글쓰기 도구입니다.
+Vase의 문체로 글을 씁니다.
+
+## 문체 규칙
+${db.rules.map((r,i) => `${i+1}. ${r}`).join('
+')}
+
+## 절대 금지
+- 교훈형 결말: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게"
+- 감성 상투어: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"
+- 입력에 없는 장면 지어내기
+- 감정 직접 설명 (장면·사물로 드러낼 것)
+
+## 생성 원칙
+장면 → 사실 → 리듬 → 감정 → 의미
+
+${TYPE_INSTRUCTION[autoType]}`;
+
+  if (examples.length) {
+    system += `
+
+## Vase가 직접 쓴 예시 (문체 참고, 복사 금지)
+`;
+    examples.forEach((e,i) => { system += `
+--- 예시 ${i+1} ---
+${e.text.slice(0,400)}
+`; });
+  }
+  if (pairs.length) {
+    system += `
+
+## Vase 수정 패턴
+`;
+    pairs.forEach((p,i) => { system += `
+[AI]: ${p.original.slice(0,200)}
+[수정]: ${p.edited.slice(0,200)}
+`; });
+  }
+
+  try {
+    let userContent;
+    if (autoImageBase64) {
+      userContent = [
+        { type:'image', source:{ type:'base64', media_type:autoImageType, data:autoImageBase64 } },
+        { type:'text', text: text
+          ? `이 이미지를 보고, 아래 내용도 참고해서 글을 써주세요.
+
+${text}`
+          : '이 이미지를 보고 글을 써주세요. 이미지의 분위기, 빛, 계절, 감각적 디테일을 Vase 문체로 담아주세요.' }
+      ];
+    } else {
+      userContent = `다음 내용을 바탕으로 글을 써주세요:
+
+${text}`;
+    }
+
+    const raw = await callClaude(key, userContent, system, 1500);
+    document.getElementById('autoEditor').value = raw;
+    document.getElementById('autoCharCount').textContent = raw.length.toLocaleString() + '자';
+
+    // 히스토리 + 품질 체크
+    state.generationHistory.push(raw);
+    if (state.generationHistory.length > 50) state.generationHistory.shift();
+    checkAutoQuality(raw);
+    toast('생성 완료');
+  } catch(e) {
+    toast('생성 실패: ' + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '글 생성하기 →';
+  }
+}
+
+function checkAutoQuality(text) {
+  // 반복 문구
+  const recentText = state.generationHistory.slice(-30).join(' ');
+  const warns = WATCH_PHRASES.filter(p => {
+    const cnt = (recentText.match(new RegExp(p,'g'))||[]).length;
+    return cnt >= 3;
+  });
+  const warnEl = document.getElementById('autoRepeatWarn');
+  if (warns.length) {
+    warnEl.innerHTML = warns.map(w => `<span class="warn-badge" style="margin:2px">${escHtml(w)}</span>`).join('');
+  } else {
+    warnEl.innerHTML = '<span style="color:var(--green);font-size:11px">반복 문구 없음 ✓</span>';
+  }
+
+  // 교훈형 결말
+  const lessonEl = document.getElementById('autoLessonCheck');
+  const found = LESSON_PATTERNS.filter(p => text.includes(p));
+  if (found.length) {
+    lessonEl.innerHTML = found.map(p => `<span class="warn-badge">${escHtml(p)}</span>`).join(' ');
+  } else {
+    lessonEl.innerHTML = '<span style="color:var(--green);font-size:11px">교훈형 결말 없음 ✓</span>';
+  }
+}
+
+function removeAutoLesson() {
+  const ed = document.getElementById('autoEditor');
+  const lines = ed.value.split('
+');
+  const filtered = lines.filter(l => !LESSON_PATTERNS.some(p => l.includes(p)));
+  while (filtered.length && !filtered[filtered.length-1].trim()) filtered.pop();
+  ed.value = filtered.join('
+');
+  document.getElementById('autoCharCount').textContent = ed.value.length.toLocaleString() + '자';
+  checkAutoQuality(ed.value);
+  toast('교훈형 결말 제거됨');
+}
+
+function clearAutoEditor() {
+  if (document.getElementById('autoEditor').value && confirm('지울까요?')) {
+    document.getElementById('autoEditor').value = '';
+    document.getElementById('autoCharCount').textContent = '0자';
+  }
+}
+async function copyAutoEditor() {
+  const v = document.getElementById('autoEditor').value;
+  if (!v) return;
+  await navigator.clipboard.writeText(v);
+  toast('복사했습니다.');
+}
+async function saveAutoAsExample() {
+  const text = document.getElementById('autoEditor').value.trim();
+  if (!text) { toast('저장할 내용이 없어요.'); return; }
+  db.examples.push({ id:Date.now(), type:autoType, text, date:new Date().toLocaleDateString('ko-KR') });
+  await saveDB();
+  toast('예시 글로 저장됐어요.');
+}
+function openAutoRefine(mode) {
+  const text = document.getElementById('autoEditor').value.trim();
+  if (!text) { toast('에디터에 글을 먼저 입력해주세요.'); return; }
+  // 수동 모드의 refine 함수 재활용
+  document.getElementById('assembleEditor').value = text;
+  state.editorText = text;
+  openRefine(mode);
+  // 적용 시 자동 모드 에디터로 복사
+  const origApply = applyRefine;
+  window._autoRefineApply = () => {
+    document.getElementById('autoEditor').value = document.getElementById('assembleEditor').value;
+    document.getElementById('autoCharCount').textContent = document.getElementById('autoEditor').value.length.toLocaleString() + '자';
+    checkAutoQuality(document.getElementById('autoEditor').value);
+    closeRefine();
+  };
+  document.getElementById('refineApplyBtn').onclick = window._autoRefineApply;
 }
 
 // ══════════════════════════════════════════
