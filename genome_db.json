@@ -1,12 +1,20 @@
 {
-  "version": "0.2.1",
+  "version": "0.3.0",
   "schema": "observation_genome_v0.2",
   "data_source": {
-    "type": "image_library_analysis",
-    "sample_size": 107,
-    "source": "sapmanri/carousel-generator/image_cache.json",
-    "analyzed_at": "2026-06-24",
-    "note": "캐러셀 생성기용 이미지 라이브러리 107장 분석 기반. 수동 검증 필요."
+    "photo_real": {
+      "sample": 74,
+      "source": "magazine/images/library",
+      "analyzed": "Claude Vision API"
+    },
+    "photo_meta": {
+      "sample": 107,
+      "source": "image_cache.json"
+    },
+    "writing": {
+      "sample": 50,
+      "source": "profile_data.json examples"
+    }
   },
   "taxonomy": {
     "attention_axes": [
@@ -170,7 +178,10 @@
           "평온",
           "따스함",
           "평화로운"
-        ]
+        ],
+        "person_type": "행위/손/뒷모습 — 얼굴 클로즈업 아님",
+        "light_preference": "오후빛(36%) + 흐린빛(28%) = 부드러운 확산광 64%",
+        "food_pattern": "음식은 먹는 장면이 아닌 놓인 상태 — 환대/희망의 신호"
       },
       "writing_signature": {
         "avg_sentence_length": 31.0,
@@ -213,6 +224,469 @@
           "sample_size": 50,
           "source": "profile_data.json examples"
         }
+      },
+      "medium_specific_weights": {
+        "writing": {
+          "attention": {
+            "person": 0.85,
+            "time": 0.95,
+            "emotion": 0.55,
+            "object": 0.54,
+            "relationship": 0.53,
+            "light": 0.38,
+            "trace": 0.34,
+            "space": 0.34,
+            "color": 0.13,
+            "movement": 0.12
+          },
+          "meaning": {
+            "contemplation": 0.93,
+            "hope": 0.48,
+            "nostalgia": 0.33,
+            "hospitality": 0.28,
+            "loss": 0.22,
+            "loneliness": 0.14,
+            "anxiety": 0.14,
+            "wonder": 0.11,
+            "humor": 0.1,
+            "irony": 0.1
+          }
+        },
+        "photo": {
+          "attention": {
+            "person": 0.72,
+            "object": 0.28,
+            "color": 0.2,
+            "light": 0.2,
+            "space": 0.08,
+            "movement": 0.06,
+            "trace": 0.04,
+            "time": 0.04,
+            "emotion": 0.03,
+            "relationship": 0.02
+          },
+          "meaning": {
+            "nostalgia": 0.93,
+            "contemplation": 0.42,
+            "wonder": 0.22,
+            "hospitality": 0.18,
+            "hope": 0.18,
+            "longing": 0.18,
+            "solitude": 0.06,
+            "anxiety": 0.04,
+            "humor": 0.02,
+            "irony": 0.02
+          }
+        }
+      },
+      "attention_subtypes": {
+        "time": {
+          "moment": {
+            "score": 0.9,
+            "freq": 35,
+            "note": "순간/지금 이 장면"
+          },
+          "aging": {
+            "score": 0.55,
+            "freq": 16,
+            "note": "낡음/오래된 것"
+          },
+          "season": {
+            "score": 0.52,
+            "freq": 15,
+            "note": "계절의 흐름"
+          },
+          "memory": {
+            "score": 0.38,
+            "freq": 10,
+            "note": "기억/추억"
+          },
+          "waiting": {
+            "score": 0.18,
+            "freq": 4,
+            "note": "기다림"
+          }
+        },
+        "light": {
+          "afternoon": {
+            "score": 0.93,
+            "freq": 27,
+            "note": "오후빛 — 가장 많음 (사진)"
+          },
+          "overcast": {
+            "score": 0.8,
+            "freq": 21,
+            "note": "흐린빛/확산광"
+          },
+          "window": {
+            "score": 0.68,
+            "freq": 11,
+            "note": "창문빛"
+          },
+          "indoor": {
+            "score": 0.55,
+            "freq": 11,
+            "note": "실내등"
+          },
+          "backlight": {
+            "score": 0.12,
+            "freq": 2,
+            "note": "역광 — 거의 없음"
+          },
+          "reflection": {
+            "score": 0.06,
+            "freq": 1,
+            "note": "반사광 — 거의 없음"
+          }
+        },
+        "object": {
+          "hand_body": {
+            "score": 0.92,
+            "freq": 57,
+            "note": "손/손끝/신체 감각"
+          },
+          "light_obj": {
+            "score": 0.85,
+            "freq": 51,
+            "note": "창가/그림자/빛 닿은 것"
+          },
+          "food_drink": {
+            "score": 0.72,
+            "freq": 40,
+            "note": "커피/차/음식 — 놓인 상태"
+          },
+          "plant": {
+            "score": 0.7,
+            "freq": 39,
+            "note": "식물/나무"
+          },
+          "book": {
+            "score": 0.55,
+            "freq": 16,
+            "note": "책"
+          },
+          "tool": {
+            "score": 0.38,
+            "freq": 8,
+            "note": "일상 도구"
+          },
+          "cat": {
+            "score": 0.22,
+            "freq": 2,
+            "note": "빼빼/콩"
+          }
+        },
+        "person": {
+          "writing_self": {
+            "score": 0.92,
+            "note": "글: 1인칭 내면 관찰 (나/내가)"
+          },
+          "photo_gesture": {
+            "score": 0.85,
+            "note": "사진: 손/행위/뒷모습"
+          },
+          "photo_face": {
+            "score": 0.08,
+            "note": "사진: 얼굴 클로즈업 — 거의 없음"
+          }
+        }
+      },
+      "meaning_subtypes": {
+        "contemplation": {
+          "judgment_suspension": {
+            "note": "판단 보류",
+            "marker": "모른다 23회"
+          },
+          "long_gaze": {
+            "note": "오래 바라봄",
+            "marker": "조용히 25회"
+          },
+          "deferred_conclusion": {
+            "note": "결론 미루기",
+            "marker": "~ㄹ까 의문문"
+          }
+        },
+        "nostalgia": {
+          "preservation": {
+            "note": "보존하고 싶은 마음",
+            "marker": "낡음 16회"
+          },
+          "fixing_moment": {
+            "note": "지금을 붙들기",
+            "marker": "순간 35회"
+          },
+          "affection_old": {
+            "note": "오래된 것에 대한 애정"
+          }
+        },
+        "hospitality": {
+          "permissive_warmth": {
+            "note": "들어가도 되는 마음"
+          },
+          "prepared_place": {
+            "note": "누군가를 위해 놓인 자리",
+            "marker": "음식+희망 조합"
+          },
+          "quiet_warmth": {
+            "note": "강요하지 않는 따뜻함"
+          }
+        },
+        "hope": {
+          "quiet_expectation": {
+            "note": "조용한 기대",
+            "marker": "계절+빛 조합"
+          },
+          "remaining": {
+            "note": "남아있다는 것",
+            "marker": "아직 23회"
+          },
+          "return": {
+            "note": "돌아올 수 있음"
+          }
+        }
+      },
+      "co_occurrence_patterns": {
+        "photo_top": [
+          {
+            "combo": [
+              "사람(손/뒷모습)",
+              "향수"
+            ],
+            "count": 9,
+            "note": "가장 전형적인 패턴"
+          },
+          {
+            "combo": [
+              "사람(손)",
+              "관조"
+            ],
+            "count": 3
+          },
+          {
+            "combo": [
+              "사물(책)",
+              "향수"
+            ],
+            "count": 3
+          },
+          {
+            "combo": [
+              "빛",
+              "천",
+              "향수"
+            ],
+            "count": 3
+          },
+          {
+            "combo": [
+              "음식",
+              "희망"
+            ],
+            "count": 2,
+            "note": "차려진 것 = 환대"
+          },
+          {
+            "combo": [
+              "빛",
+              "책",
+              "향수"
+            ],
+            "count": 2
+          },
+          {
+            "combo": [
+              "커피머신",
+              "기다림"
+            ],
+            "count": 2
+          }
+        ],
+        "writing_top": [
+          {
+            "combo": [
+              "시간",
+              "빛",
+              "조용히"
+            ],
+            "note": "가장 전형적인 Sapmanri 문장"
+          },
+          {
+            "combo": [
+              "손",
+              "오래",
+              "우회감정"
+            ],
+            "note": "감각으로 감정 대신하기"
+          },
+          {
+            "combo": [
+              "계절",
+              "아직",
+              "열린결말"
+            ],
+            "note": "변화 앞에서 머물기"
+          },
+          {
+            "combo": [
+              "나무/식물",
+              "빛",
+              "관조"
+            ],
+            "note": "자연 + 시선 멈춤"
+          },
+          {
+            "combo": [
+              "고양이",
+              "그냥 있음"
+            ],
+            "note": "사물처럼 존재하는 생명"
+          }
+        ],
+        "cross_medium": [
+          {
+            "combo": [
+              "오후빛",
+              "관조/향수"
+            ],
+            "note": "글+사진 공통"
+          },
+          {
+            "combo": [
+              "작은 것에 머묾",
+              "결론없음"
+            ],
+            "note": "글+사진 공통 태도"
+          },
+          {
+            "combo": [
+              "손/행위",
+              "기다림"
+            ],
+            "note": "글+사진 공통"
+          }
+        ]
+      },
+      "cognitive_paths": {
+        "photo": [
+          {
+            "path": "사람(손/뒷모습) → 향수 → 관찰",
+            "count": 4,
+            "rank": 1
+          },
+          {
+            "path": "사람(손/뒷모습) → 향수 → 기다림",
+            "count": 4,
+            "rank": 2
+          },
+          {
+            "path": "사람(손) → 관조 → 기록",
+            "count": 3,
+            "rank": 3
+          },
+          {
+            "path": "사물(책) → 향수 → 회상",
+            "count": 2,
+            "rank": 4
+          },
+          {
+            "path": "빛 → 책 → 향수 → 회상",
+            "count": 2,
+            "rank": 5
+          },
+          {
+            "path": "음식 → 희망 → 기록",
+            "count": 2,
+            "rank": 6
+          },
+          {
+            "path": "커피머신 → 기다림 → 기록",
+            "count": 2,
+            "rank": 7
+          }
+        ],
+        "writing": [
+          {
+            "path": "시간(순간) → 사물(손/빛) → 관조 → 판단보류",
+            "rank": 1
+          },
+          {
+            "path": "시간(낡음) → 사물(오래된) → 향수 → 보존",
+            "rank": 2
+          },
+          {
+            "path": "관계(나/너) → 감정우회 → 관조 → 열린결말",
+            "rank": 3
+          },
+          {
+            "path": "계절 → 빛 → 희망 → 조용한기대",
+            "rank": 4
+          },
+          {
+            "path": "시간(기다림) → 빈자리 → 환대 → 머물게함",
+            "rank": 5
+          }
+        ],
+        "convergence": "입구는 다르지만(글:시간 / 사진:향수) 관조/기다림의 태도로 수렴"
+      },
+      "negative_patterns": {
+        "absent_writing": {
+          "단정결론": {
+            "count": 0,
+            "examples": [
+              "반드시",
+              "분명히",
+              "확실히",
+              "당연히"
+            ]
+          },
+          "자극흥분": {
+            "count": 0,
+            "examples": [
+              "짜릿",
+              "열광",
+              "폭발적"
+            ]
+          },
+          "과시승리": {
+            "count": 2,
+            "note": "극소"
+          },
+          "경쟁권력": {
+            "count": 2,
+            "note": "극소"
+          },
+          "극적사건": {
+            "count": 3,
+            "note": "극소"
+          }
+        },
+        "absent_photo": {
+          "강렬조명": {
+            "count": 2,
+            "note": "역광/드라마틱 광원"
+          },
+          "불안아이러니": {
+            "count": 1
+          },
+          "꽉찬프레임": {
+            "count": "소수"
+          },
+          "빠른움직임": {
+            "count": 2
+          }
+        },
+        "significance": "부재가 정체성이다. 단정이 없으니 독자가 머물 수 있고, 극적 사건이 없으니 일상이 사건이 된다."
+      },
+      "attitude": {
+        "primary": "관조",
+        "secondary": "기다림",
+        "consistency_score": 1.0,
+        "restraint_level": "매우강함",
+        "judgment_tendency": "없음",
+        "emotional_handling": "우회 — 감정을 사물/빛/시간으로 대신한다",
+        "conclusion_style": "열린결말 — 모른다/~ㄹ까로 닫지 않는다",
+        "person_in_photo": "얼굴이 아닌 행위/손/뒷모습 — 분위기를 통해 감정을 읽는다",
+        "person_in_writing": "1인칭이지만 자기 과시 없음 — 자신을 관찰의 도구로 쓴다"
       }
     }
   }
