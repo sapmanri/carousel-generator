@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.9</title>
+<title>MIMESIS Viewfinder v0.1.10</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -216,7 +216,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.9 · 20260624h</span>
+    <span class="ver">v0.1.10 · 20260624i</span>
   </div>
 </header>
 
@@ -265,7 +265,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   </div>
   <div class="step-dot" data-step="7" onclick="goStep(7)">
     <div class="dot">09</div>
-    <div class="dot-label" id="step7Label">직접<br>다시 쓰기</div>
+    <div class="dot-label" id="step7Label">장면<br>다시 보기</div>
   </div>
   <div class="step-dot" data-step="8" onclick="goStep(8)">
     <div class="dot">10</div>
@@ -479,7 +479,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <div class="panel" id="panel-6">
   <div>
     <div class="panel-title">이 선택들을<br><em id="step6CreatorName">이 창작자의 문법</em>으로 통과시키면</div>
-    <div class="panel-desc" style="margin-top:8px">이건 정답이 아닙니다. 시선이 문장으로 어떻게 이동하는지 보여주는 감각 샘플입니다.</div>
+    <div class="panel-desc" style="margin-top:8px">정답이 아닙니다. 선택한 시선을 따라가면 같은 장면이 어떻게 보이는지 — 그 감각을 보여드립니다.</div>
   </div>
 
   <div class="loading" id="load-6"><div class="spinner"></div>예시 생성 중…</div>
@@ -500,8 +500,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <!-- ════════════════════════════════ -->
 <div class="panel" id="panel-7">
   <div>
-    <div class="panel-title" id="step7Title">이제 당신의 문장으로<br>다시 써보세요</div>
-    <div class="panel-desc" style="margin-top:8px" id="step7Desc">방금 선택한 Attention · Selection · Meaning을 따라,<br>당신이 직접 이 장면을 다시 씁니다.</div>
+    <div class="panel-title" id="step7Title">이제 같은 장면을<br>다시 바라봅니다</div>
+    <div class="panel-desc" style="margin-top:8px" id="step7Desc">방금 선택한 시선을 따라, 같은 장면을 다시 봅니다.<br>문체를 따라 하는 것이 아니라, 무엇을 보고 무엇을 남길지 다시 선택하는 단계입니다.</div>
   </div>
 
   <!-- 선택 요약 -->
@@ -513,7 +513,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <!-- 글 모드 -->
   <div id="writingMode">
     <div class="rewrite-area">
-      <textarea id="rewriteInput" placeholder="지금 당장 완성본이 아니어도 됩니다. 그 시선으로 장면을 보고, 떠오르는 문장부터 써보세요." rows="7" oninput="updateCharCount()"></textarea>
+      <textarea id="rewriteInput" placeholder="완성된 문장이 아니어도 됩니다. 방금 고른 시선으로 같은 장면을 다시 보며, 새롭게 보이는 것부터 적어보세요." rows="7" oninput="updateCharCount()"></textarea>
       <div class="char-count" id="charCount">0자</div>
     </div>
   </div>
@@ -546,7 +546,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <div class="panel" id="panel-8">
   <div>
     <div class="panel-title" id="step8Title">당신의 시선이<br>어떻게 이동했는지</div>
-    <div class="panel-desc" style="margin-top:8px" id="step8Desc">점수가 아닙니다. 시선의 변화를 봅니다.</div>
+    <div class="panel-desc" style="margin-top:8px" id="step8Desc">점수가 아닙니다. 처음 장면에서 다시 본 장면으로, 시선이 어떻게 이동했는지를 봅니다.</div>
   </div>
 
   <!-- 글 모드: 기존 비교 -->
@@ -906,22 +906,28 @@ async function renderAttention() {
   const topAtt = Object.entries(creator.attention)
     .sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 시선으로 사용자 장면을 Attention 단계에서 분석합니다.
-${creator.display_name_ko}의 Attention 우선순위: ${topAtt.join(', ')}
-시선 이동 순서: ${creator.movement_sequence.slice(0,3).join(' → ')}
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 Attention 단계를 분석합니다.
+
+이 창작자의 시선 이동 순서:
+${creator.movement_sequence.slice(0,3).join(' → ')}
+
+Attention 가중치 높은 축: ${topAtt.join(', ')}
+자주 주목하는 것: ${(creator.keep_patterns||[]).slice(0,3).join(', ')}
 
 사용자에게 "이 장면에서 다시 볼 하나"를 고르게 할 선택지 4개를 만드세요.
+선택지는 창작자의 Attention 축에서 생성하되, 사용자의 실제 장면에 맞게 구체화하세요.
+
 반드시 JSON으로만 응답:
 {
-  "desc": "${creator.display_name_ko}의 시선이라면 이 장면에서 어디에 멈출지 한 문장으로",
+  "desc": "이 창작자의 시선이라면 이 장면에서 어디에 먼저 멈출지 한 문장",
   "choices": [
-    {"label": "선택지 제목", "desc": "왜 이걸 봐야 하는지 한 문장", "genome_match": true/false},
-    {"label": "선택지 제목", "desc": "왜 이걸 봐야 하는지 한 문장", "genome_match": false},
-    {"label": "선택지 제목", "desc": "왜 이걸 봐야 하는지 한 문장", "genome_match": false},
-    {"label": "선택지 제목", "desc": "왜 이걸 봐야 하는지 한 문장", "genome_match": false}
+    {"label": "선택지 제목", "desc": "이 지점을 보는 이유 한 문장", "genome_match": true},
+    {"label": "선택지 제목", "desc": "한 문장", "genome_match": false},
+    {"label": "선택지 제목", "desc": "한 문장", "genome_match": false},
+    {"label": "선택지 제목", "desc": "한 문장", "genome_match": false}
   ]
 }
-genome_match: true는 창작자 Genome과 가장 가까운 선택지 1개에만.`;
+genome_match: true는 이 창작자 Genome과 가장 가까운 선택지 1개에만.`;
 
   const context = `현재 장면: ${state.textInput || '(사진 입력)'}
 현재 분석: ${state.currentAnalysis?.summary || ''}
@@ -935,7 +941,7 @@ genome_match: true는 창작자 Genome과 가장 가까운 선택지 1개에만.
     const grid = document.getElementById('attChoices');
     grid.innerHTML = data.choices.map((c,i) =>
       `<button class="choice-btn" onclick="selectChoice('att',${i},this)">
-        <span class="choice-label">${c.genome_match ? '✦ Genome 근접' : '선택지 ' + (i+1)}</span>
+        <span class="choice-label">${c.genome_match ? '✦ 이 시선에 가깝습니다' : '선택지 ' + (i+1)}</span>
         <strong>${c.label}</strong><br>
         <span style="color:var(--mute);font-size:11px">${c.desc}</span>
       </button>`
@@ -962,23 +968,29 @@ async function renderSelection() {
   const topSel = Object.entries(creator.selection)
     .sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
 
+  const outputDo   = (creator.output_guidance?.do   || creator.keep_patterns || []).join(', ');
+  const outputDont = (creator.output_guidance?.dont || creator.avoid_patterns || []).join(', ');
+
   const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Selection 패턴으로 분석합니다.
-자주 남기는 것: ${creator.keep_patterns.join(', ')}
-자주 버리는 것: ${creator.avoid_patterns.join(', ')}
-Selection 우선순위: ${topSel.join(', ')}
+
+Selection 가중치 높은 축: ${topSel.join(', ')}
+자주 남기는 것: ${(creator.keep_patterns||[]).join(', ')}
+자주 버리는 것: ${(creator.avoid_patterns||[]).join(', ')}
+출력 원칙 — 할 것: ${outputDo}
+출력 원칙 — 하지 말 것: ${outputDont}
 
 JSON으로만 응답:
 {
-  "desc": "${creator.display_name_ko}의 시선이 이 장면에서 무엇을 남기고 버릴지 한 문장",
+  "desc": "이 창작자의 시선이 이 장면에서 무엇을 남기고 버릴지 한 문장",
   "keep": [
-    {"label": "남길 요소", "reason": "이유 한 문장"},
-    {"label": "남길 요소", "reason": "이유 한 문장"},
-    {"label": "남길 요소", "reason": "이유 한 문장"}
+    {"label": "남길 것", "reason": "이유 한 문장"},
+    {"label": "남길 것", "reason": "이유 한 문장"},
+    {"label": "남길 것", "reason": "이유 한 문장"}
   ],
   "drop": [
-    {"label": "버릴 요소", "reason": "이유 한 문장"},
-    {"label": "버릴 요소", "reason": "이유 한 문장"},
-    {"label": "버릴 요소", "reason": "이유 한 문장"}
+    {"label": "버릴 것", "reason": "이유 한 문장"},
+    {"label": "버릴 것", "reason": "이유 한 문장"},
+    {"label": "버릴 것", "reason": "이유 한 문장"}
   ]
 }`;
 
@@ -1057,7 +1069,7 @@ Attention: ${state.attChoice?.label || ''}
     const grid = document.getElementById('meaChoices');
     grid.innerHTML = data.choices.map((c,i) =>
       `<button class="choice-btn" onclick="selectChoice('mea',${i},this)">
-        <span class="choice-label">${c.genome_match ? '✦ Genome 근접' : '선택지 ' + (i+1)}</span>
+        <span class="choice-label">${c.genome_match ? '✦ 이 시선에 가깝습니다' : '선택지 ' + (i+1)}</span>
         <strong>${c.label}</strong><br>
         <span style="color:var(--mute);font-size:11px">${c.desc}</span>
       </button>`
@@ -1167,7 +1179,7 @@ function renderStep8ByMode() {
     document.getElementById('guideRecap').textContent = guideText;
   } else {
     title.innerHTML  = '당신의 시선이<br>어떻게 이동했는지';
-    desc.textContent = '점수가 아닙니다. 시선의 변화를 봅니다.';
+    desc.textContent = '점수가 아닙니다. 처음 장면에서 다시 본 장면으로, 시선이 어떻게 이동했는지를 봅니다.';
     btn.textContent  = '다른 장면으로 다시 →';
   }
 }
@@ -1239,16 +1251,20 @@ async function comparePhotos() {
   }
   document.getElementById('afterPhoto').src = state.retakeDataUrl;
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 두 사진을 비교합니다.
-Attention → Selection → Meaning 3층 구조로 각각 변화를 설명하세요.
-점수 없이, 시선의 이동 언어로만 씁니다. 따뜻하고 관찰자적 톤으로.
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 두 사진의 시선 이동을 분석합니다.
+
+중요 원칙:
+- 절대 "더 좋은 사진", "향상됐다", "개선됐다" 같은 평가를 하지 않는다
+- 오직 시선이 어디서 어디로 이동했는지만 말한다
+- Attention / Selection / Meaning 각 레이어별로 관찰 지점이 어떻게 달라졌는지 설명한다
+- 따뜻하고 관찰자적 톤
 
 JSON으로만 응답:
 {
-  "attention": "Attention 레이어에서 달라진 것 (2~3문장)",
-  "selection": "Selection 레이어에서 달라진 것 (2~3문장)",
-  "meaning": "Meaning 레이어에서 달라진 것 (2~3문장)",
-  "next_suggestion": "다음 촬영에서 하나만 더 바꿔본다면 — 구체적 제안 한 문장"
+  "attention": "Attention — 시선이 머문 지점이 어떻게 달라졌는지 (2~3문장)",
+  "selection": "Selection — 무엇을 남기고 버리는 방식이 어떻게 달라졌는지 (2~3문장)",
+  "meaning": "Meaning — 장면을 해석하는 방향이 어떻게 달라졌는지 (2~3문장)",
+  "next_suggestion": "다음 촬영에서 하나만 달리 본다면 — 구체적 제안 한 문장"
 }`;
 
   const userContent = [
@@ -1289,19 +1305,24 @@ async function compareResult() {
 
   showLoading('load-7', true);
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome 기준으로 변화를 분석합니다.
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 시선의 이동을 분석합니다.
 
-점수가 아닌 시선의 변화 언어로 설명합니다.
-자연스럽고 따뜻한 관찰자 톤으로 씁니다.
+중요 원칙:
+- 절대 점수나 평가를 하지 않는다
+- "더 좋다", "향상됐다", "개선됐다" 같은 표현은 쓰지 않는다
+- 오직 시선이 어떻게 이동했는지만 말한다
+- 관찰자 톤으로, 따뜻하게
+
+권장 표현: "시선이 이동했다", "관찰 지점이 바뀌었다", "다른 부분이 보이기 시작했다", "해석의 방향이 달라졌다"
 
 JSON으로만 응답:
 {
   "changes": [
-    "변화 설명 (예: 중심이 사건에서 사물로 이동했다)",
-    "변화 설명",
-    "변화 설명"
+    "시선 이동 설명 (예: 중심이 사건에서 사물로 이동했다)",
+    "시선 이동 설명",
+    "시선 이동 설명"
   ],
-  "next_suggestion": "다음 시도에서 하나만 바꿔본다면 무엇인지 — 구체적이고 실천 가능한 제안 한 문장"
+  "next_suggestion": "다음 시도에서 하나만 달리 본다면 — 구체적이고 실천 가능한 제안 한 문장"
 }`;
 
   const modeLabel = state.coachingMode === 'photo' ? '사진 재촬영' : '글 재작성';
@@ -1429,7 +1450,7 @@ function updateStepLabels() {
     if (s8) s8.innerHTML = '재촬영<br>업로드';
     if (dot9) dot9.style.display = '';
   } else {
-    if (s7) s7.innerHTML = '직접<br>다시 쓰기';
+    if (s7) s7.innerHTML = '장면<br>다시 보기';
     if (s8) s8.innerHTML = '변화<br>비교';
     if (dot9) dot9.style.display = 'none';
   }
@@ -1518,9 +1539,9 @@ function renderStep7ByMode() {
     btn.textContent  = '다시 찍은 사진 올리기 →';
     generatePhotoGuide();
   } else {
-    title.innerHTML  = '이제 당신의 문장으로<br>다시 써보세요';
-    desc.textContent = '방금 선택한 Attention · Selection · Meaning을 따라, 당신이 직접 이 장면을 다시 씁니다.';
-    btn.textContent  = '변화 확인하기 →';
+    title.innerHTML  = '이제 같은 장면을<br>다시 바라봅니다';
+    desc.textContent = '방금 선택한 시선을 따라, 같은 장면을 다시 봅니다. 문체를 따라 하는 것이 아니라, 무엇을 보고 무엇을 남길지 다시 선택하는 단계입니다.';
+    btn.textContent  = '시선 변화 확인하기 →';
   }
 }
 
@@ -1565,7 +1586,10 @@ function restart() {
 // ══════════════════════════════════════════
 function getCreator() {
   if (!state.genome) return null;
-  return state.genome.creators.find(c => c.id === state.creatorId);
+  const db = state.genome;
+  if (db.creators && db.creators[state.creatorId]) return db.creators[state.creatorId];
+  if (Array.isArray(db.creators)) return db.creators.find(c => c.id === state.creatorId);
+  return null;
 }
 function buildUserContent(text, imageBase64, imageType, prompt) {
   if (imageBase64) {
