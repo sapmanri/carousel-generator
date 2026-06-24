@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.2</title>
+<title>MIMESIS Viewfinder v0.1.3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -191,7 +191,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.2 · 20260624a</span>
+    <span class="ver">v0.1.3 · 20260624b</span>
   </div>
 </header>
 
@@ -557,14 +557,16 @@ function toggleKey() {
   if (p.classList.contains('open')) document.getElementById('apiKey').focus();
 }
 function saveKey() {
-  const v = document.getElementById('apiKey').value.trim();
+  const v = document.getElementById('apiKey').value.replace(/[^\x20-\x7E]/g, '').trim();
   if (!v) return toast('API Key를 입력해주세요.');
   localStorage.setItem(API_KEY_KEY, v);
   toast('API Key 저장됨');
   document.getElementById('keyPanel').classList.remove('open');
 }
 function getKey() {
-  const v = document.getElementById('apiKey').value.trim() || localStorage.getItem(API_KEY_KEY) || '';
+  const raw = document.getElementById('apiKey').value.trim() || localStorage.getItem(API_KEY_KEY) || '';
+  // ASCII 범위 문자만 남겨서 헤더 에러 방지
+  const v = raw.replace(/[^ -~]/g, '').trim();
   if (!v) { toast('API Key를 입력해주세요.'); toggleKey(); return null; }
   return v;
 }
