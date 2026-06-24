@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.2.0</title>
+<title>MIMESIS Viewfinder v0.2.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -216,7 +216,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.2.0 · 20260624j</span>
+    <span class="ver">v0.2.1</span>
   </div>
 </header>
 
@@ -696,6 +696,52 @@ function updateMobileProgress(n) {
   if (fill) fill.style.width = pct + '%';
 }
 
+
+// ══════════════════════════════════════════
+// Genome 컨텍스트 빌더 (v0.3 필드 활용)
+// ══════════════════════════════════════════
+function buildGenomeContext(creator, mode) {
+  const mw = creator.medium_specific_weights?.[mode] || {};
+  const topAtt = Object.entries(mw.attention || creator.attention || {})
+    .sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+  const topMea = Object.entries(mw.meaning || creator.meaning || {})
+    .sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+
+  const att_sub = creator.attention_subtypes || {};
+  const lightSub = Object.entries(att_sub.light || {})
+    .sort((a,b)=>(b[1].score||0)-(a[1].score||0)).slice(0,3)
+    .map(e=>`${e[0]}(${e[1].note||''})`).join(', ');
+  const objSub = Object.entries(att_sub.object || {})
+    .sort((a,b)=>(b[1].score||0)-(a[1].score||0)).slice(0,3)
+    .map(e=>`${e[0]}(${e[1].note||''})`).join(', ');
+  const timeSub = Object.entries(att_sub.time || {})
+    .sort((a,b)=>(b[1].score||0)-(a[1].score||0)).slice(0,3)
+    .map(e=>e[0]).join(', ');
+
+  const neg = creator.negative_patterns || {};
+  const negList = Object.keys(neg.absent_writing || {})
+    .filter(k => (neg.absent_writing[k].count || 0) === 0).join(', ');
+
+  const paths = (creator.cognitive_paths?.[mode] || []).slice(0,3)
+    .map(p=>p.path).join(' / ');
+
+  const attitude = creator.attitude || {};
+
+  return {
+    topAtt, topMea, lightSub, objSub, timeSub, negList, paths, attitude,
+    keep: (creator.keep_patterns||[]).join(', '),
+    avoid: (creator.avoid_patterns||[]).join(', '),
+    outputDo:   (creator.output_guidance?.do||[]).join(', '),
+    outputDont: (creator.output_guidance?.dont||[]).join(', '),
+    cooc: (creator.co_occurrence_patterns?.[mode+'_top']||[]).slice(0,3)
+      .map(c=>c.combo.join('+')).join(' / '),
+    restraint: attitude.restraint_level || '강함',
+    personNote: mode==='photo'
+      ? (creator.attention_subtypes?.person?.photo_gesture?.note||'손/행위/뒷모습')
+      : (creator.attention_subtypes?.person?.writing_self?.note||'1인칭 내면')
+  };
+}
+
 // ══════════════════════════════════════════
 // 상수 · 상태
 // ══════════════════════════════════════════
@@ -866,18 +912,26 @@ async function analyzeScene() {
 
   showLoading('load-1', true);
 
-  const systemPrompt = `당신은 창작자의 시선을 분석하는 도구입니다.
-사용자가 가져온 글이나 사진을 분석해 현재 사용자의 시선 패턴을 파악하고,
-이후 ${creator.display_name_ko}의 Observation Genome과 비교할 준비를 합니다.
+  const _mode = state.coachingMode || 'writing';
+  const _gc = buildGenomeContext(creator, _mode);
 
-반드시 JSON으로만 응답하세요. 아래 구조를 정확히 따르세요:
+  const systemPrompt = `당신은 창작자의 시선 태도를 분석하는 도구입니다.
+사용자의 장면을 분석해 현재 태도를 파악합니다.
+
+참고 — ${creator.display_name_ko} Genome:
+- 주요 Attention(${_mode}): ${_gc.topAtt.join(', ')}
+- 인지 경로 패턴: ${_gc.paths}
+- 절제 수준: ${_gc.restraint}
+
+반드시 JSON으로만 응답:
 {
   "current_focus": "사용자가 지금 이 장면에서 가장 주목한 것 (한 문장)",
-  "center": "중심 피사체나 중심 소재",
+  "center": "중심 피사체나 소재",
   "elements": ["포착된 요소1", "요소2", "요소3"],
   "emotion_direction": "감정이 흐르는 방향 (한 문장)",
-  "what_was_missed": "무심코 지나친 것들 (한 문장)",
-  "summary": "지금 이 시선을 두 문장으로 자연스럽게 설명"
+  "what_was_missed": "무심코 지나친 것들 — Genome 관점에서 (한 문장)",
+  "attitude_now": "지금 사용자의 태도 한 단어 (관찰/기록/회상/기다림/판단 중)",
+  "summary": "지금 이 시선을 두 문장으로"
 }`;
 
   const userContent = buildUserContent(state.textInput, state.imageBase64, state.imageType,
@@ -920,32 +974,35 @@ async function renderAttention() {
   const creator = getCreator();
   showLoading('load-3', true);
 
-  // Attention 상위 축 추출
-  const topAtt = Object.entries(creator.attention)
-    .sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+  const _attMode = state.coachingMode || 'writing';
+  const _gc_att = buildGenomeContext(creator, _attMode);
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 Attention 단계를 분석합니다.
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome v0.3으로 Attention 단계를 분석합니다.
 
-이 창작자의 시선 이동 순서:
+시선 이동 순서:
 ${creator.movement_sequence.slice(0,3).join(' → ')}
 
-Attention 가중치 높은 축: ${topAtt.join(', ')}
-자주 주목하는 것: ${(creator.keep_patterns||[]).slice(0,3).join(', ')}
+Attention 우선순위(${_attMode}): ${_gc_att.topAtt.join(', ')}
+빛 세부 패턴: ${_gc_att.lightSub}
+사물 세부 패턴: ${_gc_att.objSub}
+시간 세부 패턴: ${_gc_att.timeSub}
+자주 주목: ${_gc_att.keep.split(',').slice(0,3).join(', ')}
+자주 나타나는 조합: ${_gc_att.cooc}
+${_attMode === 'photo' ? '사진에서 사람 = ' + _gc_att.personNote : '글에서 자아 = ' + _gc_att.personNote}
 
-사용자에게 "이 장면에서 다시 볼 하나"를 고르게 할 선택지 4개를 만드세요.
-선택지는 창작자의 Attention 축에서 생성하되, 사용자의 실제 장면에 맞게 구체화하세요.
+"이 장면에서 다시 볼 하나"를 고르게 할 선택지 4개. Genome 축에서 생성하되 실제 장면에 맞게 구체화.
 
-반드시 JSON으로만 응답:
+JSON으로만 응답:
 {
-  "desc": "이 창작자의 시선이라면 이 장면에서 어디에 먼저 멈출지 한 문장",
+  "desc": "이 창작자의 태도라면 이 장면에서 어디에 먼저 머물지 한 문장",
   "choices": [
-    {"label": "선택지 제목", "desc": "이 지점을 보는 이유 한 문장", "genome_match": true},
-    {"label": "선택지 제목", "desc": "한 문장", "genome_match": false},
-    {"label": "선택지 제목", "desc": "한 문장", "genome_match": false},
-    {"label": "선택지 제목", "desc": "한 문장", "genome_match": false}
+    {"label": "구체적 선택지", "desc": "이 지점을 보는 이유 한 문장", "genome_match": true},
+    {"label": "구체적 선택지", "desc": "한 문장", "genome_match": false},
+    {"label": "구체적 선택지", "desc": "한 문장", "genome_match": false},
+    {"label": "구체적 선택지", "desc": "한 문장", "genome_match": false}
   ]
 }
-genome_match: true는 이 창작자 Genome과 가장 가까운 선택지 1개에만.`;
+genome_match true는 Genome 인지 경로(${_gc_att.paths.split('/')[0]?.trim()})에 가장 가까운 것 1개만.`;
 
   const context = `현재 장면: ${state.textInput || '(사진 입력)'}
 현재 분석: ${state.currentAnalysis?.summary || ''}
@@ -983,32 +1040,33 @@ async function renderSelection() {
   const creator = getCreator();
   showLoading('load-4', true);
 
+  const _selMode = state.coachingMode || 'writing';
+  const _gc_sel = buildGenomeContext(creator, _selMode);
   const topSel = Object.entries(creator.selection)
     .sort((a,b)=>b[1]-a[1]).slice(0,3).map(e=>e[0]);
 
-  const outputDo   = (creator.output_guidance?.do   || creator.keep_patterns || []).join(', ');
-  const outputDont = (creator.output_guidance?.dont || creator.avoid_patterns || []).join(', ');
-
   const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Selection 패턴으로 분석합니다.
 
-Selection 가중치 높은 축: ${topSel.join(', ')}
-자주 남기는 것: ${(creator.keep_patterns||[]).join(', ')}
-자주 버리는 것: ${(creator.avoid_patterns||[]).join(', ')}
-출력 원칙 — 할 것: ${outputDo}
-출력 원칙 — 하지 말 것: ${outputDont}
+Selection 가중치: ${topSel.join(', ')}
+자주 남기는 것: ${_gc_sel.keep}
+자주 버리는 것: ${_gc_sel.avoid}
+출력 원칙(do): ${_gc_sel.outputDo}
+출력 원칙(dont): ${_gc_sel.outputDont}
+부재 패턴 — 절대 등장 안 함: ${_gc_sel.negList}
+절제 수준: ${_gc_sel.restraint} (결론/단정/과시 없음)
 
 JSON으로만 응답:
 {
-  "desc": "이 창작자의 시선이 이 장면에서 무엇을 남기고 버릴지 한 문장",
+  "desc": "이 창작자의 태도라면 이 장면에서 무엇을 받아들이고 무엇을 내려놓을지 한 문장",
   "keep": [
     {"label": "남길 것", "reason": "이유 한 문장"},
     {"label": "남길 것", "reason": "이유 한 문장"},
     {"label": "남길 것", "reason": "이유 한 문장"}
   ],
   "drop": [
-    {"label": "버릴 것", "reason": "이유 한 문장"},
-    {"label": "버릴 것", "reason": "이유 한 문장"},
-    {"label": "버릴 것", "reason": "이유 한 문장"}
+    {"label": "내려놓을 것", "reason": "이유 한 문장"},
+    {"label": "내려놓을 것", "reason": "이유 한 문장"},
+    {"label": "내려놓을 것", "reason": "이유 한 문장"}
   ]
 }`;
 
@@ -1053,25 +1111,38 @@ async function renderMeaning() {
   const creator = getCreator();
   showLoading('load-5', true);
 
-  const topMea = Object.entries(creator.meaning)
-    .sort((a,b)=>b[1]-a[1]).slice(0,4).map(e=>e[0]);
+  const _meaMode = state.coachingMode || 'writing';
+  const _gc_mea = buildGenomeContext(creator, _meaMode);
+
+  // Meaning 세부 설명 추출
+  const meaSub = creator.meaning_subtypes || {};
+  const meaSubText = Object.entries(meaSub).slice(0,3)
+    .map(([k,v]) => `${k}: ${Object.keys(v).join('/')}`)
+    .join(' | ');
 
   const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Meaning 패턴으로 분석합니다.
-주로 도착하는 감정: ${topMea.join(', ')}
-대표 문장 결: ${creator.signature_endings.join(' / ')}
-금지 패턴: ${creator.avoid_patterns.join(', ')}
+
+주로 도착하는 태도(${_meaMode}): ${_gc_mea.topMea.join(', ')}
+Meaning 세부: ${meaSubText}
+대표 마무리: ${creator.signature_endings.slice(0,3).join(' / ')}
+이 창작자의 태도: ${_gc_mea.attitude.primary} + ${_gc_mea.attitude.secondary}
+감정 처리 방식: ${_gc_mea.attitude.emotional_handling || '우회'}
+결론 스타일: ${_gc_mea.attitude.conclusion_style || '열린결말'}
+
+선택지 5개. Genome 주요 Meaning 축 중심으로, 실제 장면에 맞게.
 
 JSON으로만 응답:
 {
-  "desc": "이 장면의 감정 방향에 대해 한 문장",
+  "desc": "이 장면의 태도 방향 한 문장",
   "choices": [
-    {"label": "감정 이름", "desc": "이 감정이 이 장면에 어떻게 있는지 한 문장", "genome_match": true},
-    {"label": "감정 이름", "desc": "한 문장", "genome_match": false},
-    {"label": "감정 이름", "desc": "한 문장", "genome_match": false},
-    {"label": "감정 이름", "desc": "한 문장", "genome_match": false},
-    {"label": "감정 이름", "desc": "한 문장", "genome_match": false}
+    {"label": "태도/감정", "desc": "이 태도가 이 장면에 어떻게 있는지 한 문장", "genome_match": true},
+    {"label": "태도/감정", "desc": "한 문장", "genome_match": false},
+    {"label": "태도/감정", "desc": "한 문장", "genome_match": false},
+    {"label": "태도/감정", "desc": "한 문장", "genome_match": false},
+    {"label": "태도/감정", "desc": "한 문장", "genome_match": false}
   ]
-}`;
+}
+genome_match true는 인지 경로(${_gc_mea.paths.split('/')[0]?.trim()})의 종착 태도에 가장 가까운 것.`;
 
   const context = `장면: ${state.textInput || '(사진)'}
 분석: ${state.currentAnalysis?.summary || ''}
@@ -1111,26 +1182,23 @@ async function generateExample() {
   showLoading('load-6', true);
   goStep(6);
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}가 세상을 받아들이는 태도로 짧은 산문을 씁니다.
-이 사람이 무엇을 쓰는가가 아니라, 이 사람이 세상을 어떻게 받아들이는가를 보여주는 글입니다.
+  const _gc_ex = buildGenomeContext(creator, 'writing');
 
-${creator.display_name_ko}의 시선 순서:
-${creator.movement_sequence.map((s,i)=>`${i+1}. ${s}`).join('\n')}
-
-반드시 지켜야 할 것:
-- 감정의 이름을 직접 말하지 않는다
-- 사물과 빛을 통해 감정을 우회한다
-- 결론을 내지 않는다
-- 마지막은 여백으로 끝낸다
-- 3~5문장 이내
-
-금지 패턴: ${creator.avoid_patterns.join(', ')}
-
-JSON으로만 응답:
-{
-  "text": "산문 본문",
-  "note": "이 예시에서 어떤 시선 이동이 일어났는지 한두 문장으로"
-}`;
+  const seqText = creator.movement_sequence.map((s,i)=>(i+1)+'. '+s).join('\n');
+  const systemPrompt = '당신은 창작자 '+creator.display_name_ko+'가 세상을 받아들이는 태도로 짧은 산문을 씁니다.\n'
+    +'이 사람이 무엇을 쓰는가가 아니라, 이 사람이 세상을 어떻게 받아들이는가를 보여주는 글입니다.\n\n'
+    +'시선 이동 순서:\n'+seqText+'\n\n'
+    +'실측 데이터 기반 패턴:\n'
+    +'- 자주 쓰는 시간 표현: 순간/낡음/계절/아직\n'
+    +'- 자주 쓰는 사물: 손/빛 닿은 것/식물/음식(놓인 상태)\n'
+    +'- 절제 마커: "아니라"로 부정 / "모른다"로 열어둠\n'
+    +'- 단정결론 0회 — 절대 닫지 않는다\n\n'
+    +'출력 원칙:\n'
+    +'할 것: '+_gc_ex.outputDo+'\n'
+    +'하지 말 것: '+_gc_ex.outputDont+'\n\n'
+    +'3~5문장, 여백으로 끝낸다.\n\n'
+    +'JSON으로만 응답:\n'
+    +'{"text":"산문 본문","note":"어떤 인지 경로(Attention→Selection→Meaning)가 일어났는지 한두 문장"}';
 
   const context = `원래 장면: ${state.textInput || '(사진 입력)'}
 현재 분석: ${state.currentAnalysis?.summary || ''}
@@ -1270,20 +1338,26 @@ async function comparePhotos() {
   }
   document.getElementById('afterPhoto').src = state.retakeDataUrl;
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 두 사진의 시선 이동을 분석합니다.
+  const _gc_cp = buildGenomeContext(creator, 'photo');
 
-중요 원칙:
-- 절대 "더 좋은 사진", "향상됐다", "개선됐다" 같은 평가를 하지 않는다
-- 오직 시선이 어디서 어디로 이동했는지만 말한다
-- Attention / Selection / Meaning 각 레이어별로 관찰 지점이 어떻게 달라졌는지 설명한다
-- 따뜻하고 관찰자적 톤
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome v0.3으로 두 사진의 관찰 태도 이동을 분석합니다.
+
+Genome 기반 비교 기준:
+- Attention 주요 축: ${_gc_cp.topAtt.join(', ')}
+- 빛 패턴: ${_gc_cp.lightSub}
+- 인지 경로: ${_gc_cp.paths}
+- 태도 일관성: ${_gc_cp.attitude.primary}/${_gc_cp.attitude.secondary}
+- 절제 수준: ${_gc_cp.restraint}
+
+금지 언어: "더 좋다", "향상됐다", "개선됐다", "더 깊다"
+권장 언어: "관찰이 이동했다", "관심의 중심이 달라졌다", "태도가 달라졌다", "머무는 방식이 달라졌다"
 
 JSON으로만 응답:
 {
-  "attention": "Attention — 관심이 머문 곳이 어떻게 달라졌는지 (2~3문장, 태도 언어로)",
-  "selection": "Selection — 장면을 받아들이는 방식에서 무엇이 달라졌는지 (2~3문장)",
-  "meaning": "Meaning — 장면을 해석하는 태도가 어떻게 달라졌는지 (2~3문장)",
-  "next_suggestion": "다음 촬영에서 하나만 달리 받아들여본다면 — 구체적 제안 한 문장"
+  "attention": "관심이 머문 곳이 어떻게 달라졌는지 (2~3문장, 태도 언어)",
+  "selection": "받아들이는 방식에서 무엇이 달라졌는지 (2~3문장)",
+  "meaning": "해석의 태도가 어떻게 달라졌는지 (2~3문장)",
+  "next_suggestion": "다음에 하나만 달리 받아들여본다면 — Genome 인지 경로 기반 제안"
 }`;
 
   const userContent = [
@@ -1492,16 +1566,28 @@ async function generatePhotoGuide() {
   const creator = getCreator();
   document.getElementById('load-guide').classList.add('show');
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 시선으로 재촬영 가이드를 만듭니다.
-감각적이고 구체적으로, 하지만 짧게 씁니다.
+  const _gc_guide = buildGenomeContext(creator, 'photo');
+
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 관찰 태도로 재촬영 가이드를 만듭니다.
+
+실측 데이터 기반 패턴(사진 74장):
+- 주요 Attention: ${_gc_guide.topAtt.join(', ')}
+- 빛: ${_gc_guide.lightSub}
+- 피사체: 사람은 얼굴이 아닌 손/행위/뒷모습
+- 음식: 먹는 장면 아닌 놓인 상태
+- 자주 나타나는 조합: ${_gc_guide.cooc}
+- 인지 경로: ${_gc_guide.paths}
+
+재촬영 가이드는 기술 지시가 아니라 태도 제안이다.
+"더 좋게", "개선" 같은 평가 언어 금지.
 
 JSON으로만 응답:
 {
-  "guide": "이 장면을 다시 찍는다면 어떻게 할지 2~3문장으로",
+  "guide": "이 장면을 다시 받아들인다면 — 태도 중심으로 2~3문장",
   "checklist": [
-    "체크 항목 1 (구체적인 행동)",
-    "체크 항목 2",
-    "체크 항목 3"
+    "구체적 관찰 태도 제안 1",
+    "구체적 관찰 태도 제안 2",
+    "구체적 관찰 태도 제안 3"
   ]
 }`;
 
