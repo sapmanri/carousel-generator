@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.8</title>
+<title>MIMESIS Viewfinder v0.1.9</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -216,7 +216,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.8 · 20260624g</span>
+    <span class="ver">v0.1.9 · 20260624h</span>
   </div>
 </header>
 
@@ -1591,7 +1591,7 @@ function toast(msg) {
 // ══════════════════════════════════════════
 async function callClaude(key, userMsg, systemMsg='', maxTokens=1000, retryCount=2) {
   const body = {
-    model: 'claude-sonnet-4-5-20251001',
+    model: 'claude-haiku-4-5-20251001',
     max_tokens: maxTokens,
     messages: [{ role:'user', content: userMsg }]
   };
