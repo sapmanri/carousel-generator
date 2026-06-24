@@ -35,10 +35,24 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .tool-card:hover{border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04)}
 .tool-card.accent{border-color:rgba(184,122,110,0.3);background:rgba(184,122,110,0.04)}
 .tool-card.accent:hover{border-color:rgba(184,122,110,0.6);background:rgba(184,122,110,0.08)}
+
+/* Viewfinder 카드 — 조금 더 존재감 있게 */
+.tool-card.viewfinder{
+  border-color:rgba(184,122,110,0.45);
+  background:rgba(184,122,110,0.06);
+  grid-column: span 2;
+}
+.tool-card.viewfinder:hover{border-color:rgba(184,122,110,0.8);background:rgba(184,122,110,0.11)}
+@media(max-width:520px){.tool-card.viewfinder{grid-column:span 1}}
+
 .tool-card .name{font-family:var(--serif);font-size:17px;font-weight:300;color:var(--canvas);letter-spacing:0.02em}
+.tool-card.viewfinder .name{font-size:20px}
 .tool-card .desc{font-size:11px;color:var(--mute);letter-spacing:0.04em}
 .tool-card .ver{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.2);margin-top:8px}
-.tool-card.accent .ver{color:rgba(184,122,110,0.5)}
+.tool-card.accent .ver,.tool-card.viewfinder .ver{color:rgba(184,122,110,0.5)}
+.badge{display:inline-block;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--accent);border:1px solid rgba(184,122,110,0.4);border-radius:1px;
+  padding:1px 5px;margin-left:6px;vertical-align:middle}
 
 footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.18);text-align:center;padding:24px 0 8px}
 </style>
@@ -50,22 +64,32 @@ footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(2
   <div class="logo">감성찾아삽만리<span>Tools &amp; Workspace</span></div>
 </div>
 
+<!-- MIMESIS Viewfinder — 메인 섹션 -->
+<div class="section-label">MIMESIS · 창작 훈련</div>
+<div class="tools-grid">
+  <a class="tool-card viewfinder" href="/viewfinder.html">
+    <div class="name">MIMESIS Viewfinder <span class="badge">New</span></div>
+    <div class="desc">내 글·사진을 특정 창작자의 시선으로 다시 보는 훈련 시스템 · Attention → Selection → Meaning</div>
+    <div class="ver">v0.1.0 · Vase / Sapmanri Genome</div>
+  </a>
+  <a class="tool-card" href="/writing_studio.html">
+    <div class="name">Writing Studio</div>
+    <div class="desc">글쓰기 도구 · 소재 추출 → 장면 선택 → 후보 생성 → 조립</div>
+    <div class="ver">v3.2.6</div>
+  </a>
+</div>
+
 <div class="section-label">Production Tools</div>
 <div class="tools-grid">
   <a class="tool-card" href="/carousel_ai_generator.html">
     <div class="name">Carousel Generator</div>
     <div class="desc">카드 슬라이드 생성기 · AI 기반 인스타그램 캐러셀</div>
-    <div class="ver">v2.0.0</div>
+    <div class="ver">v2.5.1</div>
   </a>
   <a class="tool-card" href="/skyline_music_matcher.html">
     <div class="name">Skyline Music Matcher</div>
     <div class="desc">능선 × 음악 · 파형 매칭 도구</div>
-    <div class="ver">v1.7.8</div>
-  </a>
-  <a class="tool-card" href="/writing_studio.html">
-    <div class="name">Writing Studio</div>
-    <div class="desc">글쓰기 도구 · 원고 작성 및 정리</div>
-    <div class="ver">v1.0.0</div>
+    <div class="ver">v2.0.8</div>
   </a>
   <a class="tool-card" href="/design_docs.html">
     <div class="name">Design Docs</div>
@@ -111,7 +135,7 @@ footer{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:rgba(2
   </a>
 </div>
 
-<footer>@sapmanri · carousel-generator</footer>
+<footer>@sapmanri · MIMESIS</footer>
 
 </div>
 </body>
