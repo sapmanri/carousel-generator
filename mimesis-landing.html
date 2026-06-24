@@ -297,9 +297,9 @@
     <div class="ba-slider-wrap reveal">
       <div class="ba-slider" id="baSlider">
         <!-- AFTER (아래) -->
-        <div class="ba-img ba-after" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg')"></div>
+        <div class="ba-img ba-after" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg');filter:brightness(1.08) saturate(1.2) contrast(0.95) sepia(0.08);"></div>
         <!-- BEFORE (위, clip) -->
-        <div class="ba-img ba-before" id="baBefore" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg');filter:saturate(0) brightness(1.1) contrast(0.85);"></div>
+        <div class="ba-img ba-before" id="baBefore" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg');filter:saturate(0.15) brightness(1.05) contrast(0.82) grayscale(0.6);"></div>
         <div class="ba-line" id="baLine"></div>
         <div class="ba-handle" id="baHandle">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -571,15 +571,54 @@
   const line   = document.getElementById('baLine');
   const handle = document.getElementById('baHandle');
   let dragging = false;
+  let autoPlayed = false;
 
-  function setPos(x) {
-    const rect = slider.getBoundingClientRect();
-    let pct = Math.min(Math.max((x - rect.left) / rect.width, 0), 1);
-    const p = (pct * 100).toFixed(2);
+  function setPct(pct) {
+    const p = Math.min(Math.max(pct, 0), 100).toFixed(2);
     before.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
     line.style.left = p + '%';
     handle.style.left = p + '%';
   }
+
+  function setPos(x) {
+    const rect = slider.getBoundingClientRect();
+    setPct((x - rect.left) / rect.width * 100);
+  }
+
+  // 자동 애니메이션 — After(100%)에서 시작해 30%까지 쓸어서 After를 먼저 보여주고, 70%로 멈춤
+  function autoPlay() {
+    if (autoPlayed) return;
+    autoPlayed = true;
+    setPct(100); // After 풀로 시작
+    let start = null;
+    const dur1 = 900;  // 100% → 25% (Before 드러내기)
+    const dur2 = 700;  // 25% → 72% (After 다시 드러내기)
+    const pause = 500; // 사이 멈춤
+
+    function phase1(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / dur1, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      setPct(100 - 75 * ease); // 100 → 25
+      if (p < 1) requestAnimationFrame(phase1);
+      else setTimeout(() => { start = null; requestAnimationFrame(phase2); }, pause);
+    }
+    function phase2(ts) {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / dur2, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      setPct(25 + 47 * ease); // 25 → 72
+      if (p < 1) requestAnimationFrame(phase2);
+    }
+    setTimeout(() => requestAnimationFrame(phase1), 600);
+  }
+
+  // 섹션 진입 시 자동 재생
+  const baSection = document.getElementById('before-after');
+  const baObs = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) { autoPlay(); baObs.disconnect(); }
+  }, { threshold: 0.4 });
+  baObs.observe(baSection);
 
   slider.addEventListener('mousedown', e => { dragging = true; setPos(e.clientX); });
   slider.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
