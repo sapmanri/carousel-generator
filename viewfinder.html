@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.10</title>
+<title>MIMESIS Viewfinder v0.2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -216,7 +216,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.10 · 20260624i</span>
+    <span class="ver">v0.2.0 · 20260624j</span>
   </div>
 </header>
 
@@ -386,12 +386,12 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <!-- ════════════════════════════════ -->
 <div class="panel" id="panel-2">
   <div>
-    <div class="panel-title">지금 당신의 시선</div>
-    <div class="panel-desc" style="margin-top:8px">아직 창작자의 시선을 적용하기 전입니다.<br>먼저 지금 당신이 이 장면에서 무엇을 보고 있는지 확인합니다.</div>
+    <div class="panel-title" id="step2Title">지금 당신의 시선</div>
+    <div class="panel-desc" style="margin-top:8px" id="step2Desc">아직 창작자의 시선을 적용하기 전입니다.<br>먼저 지금 당신이 이 장면에서 무엇을 보고 있는지 확인합니다.</div>
   </div>
 
   <div class="analysis-block" id="currentAnalysis">
-    <div class="label">현재 시선 분석</div>
+    <div class="label" id="step2AnalysisLabel">현재 시선 분석</div>
     <div class="content" id="currentAnalysisText">분석 중…</div>
   </div>
 
@@ -606,8 +606,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <!-- ════════════════════════════════ -->
 <div class="panel" id="panel-9">
   <div>
-    <div class="panel-title">시선이<br>어떻게 달라졌는지</div>
-    <div class="panel-desc" style="margin-top:8px">처음 사진과 다시 찍은 사진을 창작자의 시선으로 비교합니다.</div>
+    <div class="panel-title">관찰 태도가<br>어떻게 달라졌는지</div>
+    <div class="panel-desc" style="margin-top:8px">처음 사진과 다시 찍은 사진에서 관심의 중심이 어떻게 이동했는지 봅니다.</div>
   </div>
 
   <div class="loading" id="load-9"><div class="spinner"></div>두 사진을 비교하는 중…</div>
@@ -627,19 +627,19 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 
     <!-- Attention 변화 -->
     <div class="card">
-      <div class="layer-badge att" style="margin-bottom:10px">Attention 변화</div>
+      <div class="layer-badge att" style="margin-bottom:10px">관심의 이동</div>
       <div id="compareAtt" style="font-size:12px;color:var(--text);line-height:1.8"></div>
     </div>
 
     <!-- Selection 변화 -->
     <div class="card">
-      <div class="layer-badge sel" style="margin-bottom:10px">Selection 변화</div>
+      <div class="layer-badge sel" style="margin-bottom:10px">받아들이는 방식</div>
       <div id="compareSel" style="font-size:12px;color:var(--text);line-height:1.8"></div>
     </div>
 
     <!-- Meaning 변화 -->
     <div class="card">
-      <div class="layer-badge mea" style="margin-bottom:10px">Meaning 변화</div>
+      <div class="layer-badge mea" style="margin-bottom:10px">해석 태도</div>
       <div id="compareMea" style="font-size:12px;color:var(--text);line-height:1.8"></div>
     </div>
 
@@ -661,6 +661,24 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <div class="toast" id="toast"></div>
 
 <script>
+
+
+// ── STEP 2: 모드별 제목 ──
+function renderStep2ByMode() {
+  const isPhoto = state.coachingMode === 'photo';
+  const title = document.getElementById('step2Title');
+  const desc  = document.getElementById('step2Desc');
+  const label = document.getElementById('step2AnalysisLabel');
+  if (isPhoto) {
+    if (title) title.textContent = '지금 당신이 장면을 받아들이는 방식';
+    if (desc)  desc.innerHTML = '창작자의 관찰 태도를 적용하기 전입니다.<br>먼저 지금 당신이 이 장면을 어떻게 받아들이고 있는지 확인합니다.';
+    if (label) label.textContent = '현재 관찰 태도';
+  } else {
+    if (title) title.textContent = '지금 당신의 시선';
+    if (desc)  desc.innerHTML = '아직 창작자의 시선을 적용하기 전입니다.<br>먼저 지금 당신이 이 장면에서 무엇을 보고 있는지 확인합니다.';
+    if (label) label.textContent = '현재 시선 분석';
+  }
+}
 
 // ── 모바일 진행바 업데이트 ──
 const STEP_NAMES = ['창작자 선택','코칭 모드','장면 가져오기','현재 시선 분석',
@@ -1093,7 +1111,8 @@ async function generateExample() {
   showLoading('load-6', true);
   goStep(6);
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 문법으로 짧은 산문을 씁니다.
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}가 세상을 받아들이는 태도로 짧은 산문을 씁니다.
+이 사람이 무엇을 쓰는가가 아니라, 이 사람이 세상을 어떻게 받아들이는가를 보여주는 글입니다.
 
 ${creator.display_name_ko}의 시선 순서:
 ${creator.movement_sequence.map((s,i)=>`${i+1}. ${s}`).join('\n')}
@@ -1171,8 +1190,8 @@ function renderStep8ByMode() {
   const desc  = document.getElementById('step8Desc');
   const btn   = document.getElementById('step8NextBtn');
   if (isPhoto) {
-    title.innerHTML  = '다시 찍은 사진을<br>올려주세요';
-    desc.textContent = '재촬영 가이드를 따라 찍은 사진을 업로드하면 비교 분석을 시작합니다.';
+    title.innerHTML  = '다시 담은 장면을<br>올려주세요';
+    desc.textContent = '다시 받아들인 장면을 올려주세요. 태도가 달라지면 담기는 것도 달라집니다.';
     btn.textContent  = '비교 분석 시작 →';
     // 가이드 요약 채우기
     const guideText = document.getElementById('photoGuideText')?.textContent || '';
@@ -1261,10 +1280,10 @@ async function comparePhotos() {
 
 JSON으로만 응답:
 {
-  "attention": "Attention — 시선이 머문 지점이 어떻게 달라졌는지 (2~3문장)",
-  "selection": "Selection — 무엇을 남기고 버리는 방식이 어떻게 달라졌는지 (2~3문장)",
-  "meaning": "Meaning — 장면을 해석하는 방향이 어떻게 달라졌는지 (2~3문장)",
-  "next_suggestion": "다음 촬영에서 하나만 달리 본다면 — 구체적 제안 한 문장"
+  "attention": "Attention — 관심이 머문 곳이 어떻게 달라졌는지 (2~3문장, 태도 언어로)",
+  "selection": "Selection — 장면을 받아들이는 방식에서 무엇이 달라졌는지 (2~3문장)",
+  "meaning": "Meaning — 장면을 해석하는 태도가 어떻게 달라졌는지 (2~3문장)",
+  "next_suggestion": "다음 촬영에서 하나만 달리 받아들여본다면 — 구체적 제안 한 문장"
 }`;
 
   const userContent = [
@@ -1305,7 +1324,9 @@ async function compareResult() {
 
   showLoading('load-7', true);
 
-  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 시선의 이동을 분석합니다.
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 관찰 태도의 변화를 분석합니다.
+
+이것은 문체 훈련이 아니라 태도 훈련입니다. 장면을 받아들이는 방식, 생략하는 방식, 해석하는 방식이 어떻게 달라졌는지를 봅니다.
 
 중요 원칙:
 - 절대 점수나 평가를 하지 않는다
@@ -1313,7 +1334,7 @@ async function compareResult() {
 - 오직 시선이 어떻게 이동했는지만 말한다
 - 관찰자 톤으로, 따뜻하게
 
-권장 표현: "시선이 이동했다", "관찰 지점이 바뀌었다", "다른 부분이 보이기 시작했다", "해석의 방향이 달라졌다"
+권장 표현: "관찰이 이동했다", "관심의 중심이 달라졌다", "태도가 달라졌다", "머무는 방식이 달라졌다", "받아들이는 방식이 바뀌었다"
 
 JSON으로만 응답:
 {
@@ -1515,6 +1536,7 @@ goStep = function(n) {
   _origGoStep(n);
   updateMobileProgress(n);
   if (n === 0.5) renderModeSelect();
+  if (n === 2) renderStep2ByMode();
   if (n === 6) { const c = getCreator(); const el = document.getElementById("step6CreatorName"); if (c && el) el.textContent = c.display_name_ko + "의 문법"; }
   if (n === 3) renderAttention();
   if (n === 4) renderSelection();
