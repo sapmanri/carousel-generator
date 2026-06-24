@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAPMANRI Studio — by MIMESIS</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Sans+KR:wght@300;400&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -12,7 +12,6 @@
     --sage:     #A7B49A;
     --beige:    #F4F0E7;
     --paper:    #FAF8F4;
-    --brown:    #8A6A4A;
     --charcoal: #333333;
     --mid:      #7A7972;
     --hairline: #D8D4CC;
@@ -25,129 +24,144 @@
   body { background: var(--paper); color: var(--charcoal); font-family: var(--sans); font-weight: 300; line-height: 1.8; -webkit-font-smoothing: antialiased; }
 
   /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1.4rem 3rem;
-    background: rgba(250,248,244,0); backdrop-filter: blur(0);
-    border-bottom: 1px solid transparent;
-    transition: background 0.5s, backdrop-filter 0.5s, border-color 0.5s;
-  }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 1.4rem 3rem; background: rgba(250,248,244,0); backdrop-filter: blur(0); border-bottom: 1px solid transparent; transition: background 0.5s, backdrop-filter 0.5s, border-color 0.5s; }
   nav.scrolled { background: rgba(250,248,244,0.93); backdrop-filter: blur(12px); border-color: var(--hairline); }
   .logo-wrap { display: flex; flex-direction: column; gap: 1px; text-decoration: none; }
   .logo-main { font-family: var(--serif); font-size: 0.95rem; letter-spacing: 0.2em; color: #fff; font-weight: 400; transition: color 0.5s; }
-  .logo-sub  { font-size: 0.6rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.55); text-transform: uppercase; transition: color 0.5s; }
+  .logo-sub  { font-size: 0.58rem; letter-spacing: 0.16em; color: rgba(255,255,255,0.5); text-transform: uppercase; transition: color 0.5s; }
   nav.scrolled .logo-main { color: var(--charcoal); }
   nav.scrolled .logo-sub  { color: var(--mid); }
-  .nav-links { display: flex; gap: 2.4rem; list-style: none; }
-  .nav-links a { font-size: 0.72rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.3s; }
+  .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+  .nav-links a { font-size: 0.7rem; letter-spacing: 0.12em; color: rgba(255,255,255,0.65); text-decoration: none; transition: color 0.3s; }
   .nav-links a:hover { color: #fff; }
   nav.scrolled .nav-links a { color: var(--mid); }
   nav.scrolled .nav-links a:hover { color: var(--charcoal); }
 
   /* ── HERO ── */
   .hero { min-height: 100svh; position: relative; display: flex; align-items: flex-end; overflow: hidden; }
-  .hero-bg {
-    position: absolute; inset: 0;
-    background: url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ydgw_3fee1146_99b15c58.jpg') center/cover no-repeat;
-    filter: blur(2px) brightness(0.45) saturate(0.6);
-    transform: scale(1.05);
-  }
-  .hero-tint { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(53,87,67,0.25) 0%, rgba(20,18,16,0.55) 100%); }
-  .hero-content { position: relative; padding: 0 3rem 5.5rem; max-width: 820px; }
-  .hero-brand {
-    font-size: 0.62rem; letter-spacing: 0.3em; color: var(--sage);
-    text-transform: uppercase; margin-bottom: 2rem;
-    display: flex; align-items: center; gap: 1rem;
-  }
-  .hero-brand::before { content: ''; width: 28px; height: 1px; background: var(--sage); opacity: 0.6; }
-  .hero-title { font-family: var(--serif); font-size: clamp(2rem, 3.8vw, 3.6rem); line-height: 1.35; font-weight: 300; color: #fff; margin-bottom: 1.2rem; letter-spacing: 0.01em; word-break: keep-all; }
-  .hero-hand { font-family: var(--hand); font-size: clamp(1.6rem, 3vw, 2.8rem); color: var(--sage); display: block; margin-bottom: 2.4rem; line-height: 1.4; }
-
-  /* 히어로 숫자 — 3개 나란히 */
-  .hero-stats { display: flex; gap: 2.8rem; margin-bottom: 2.8rem; }
-  .hero-stat-num { font-family: var(--serif); font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 300; color: #fff; line-height: 1; margin-bottom: 0.3rem; }
-  .hero-stat-label { font-size: 0.68rem; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; line-height: 1.5; word-break: keep-all; }
-  .hero-stat-div { width: 1px; background: rgba(255,255,255,0.15); align-self: stretch; }
-
-  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
-  .btn-outline { display: inline-block; padding: 0.85rem 2.2rem; border: 1px solid rgba(255,255,255,0.45); font-size: 0.72rem; letter-spacing: 0.18em; color: #fff; text-decoration: none; text-transform: uppercase; transition: background 0.3s, border-color 0.3s; }
-  .btn-outline:hover { background: rgba(255,255,255,0.12); border-color: #fff; }
-  .btn-outline.fill { background: var(--forest); border-color: var(--forest); }
-  .btn-outline.fill:hover { background: #2a4535; border-color: #2a4535; }
+  .hero-bg { position: absolute; inset: 0; background: url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ydgw_3fee1146_99b15c58.jpg') center/cover no-repeat; filter: blur(2px) brightness(0.42) saturate(0.55); transform: scale(1.05); }
+  .hero-tint { position: absolute; inset: 0; background: linear-gradient(160deg, rgba(53,87,67,0.2) 0%, rgba(16,14,12,0.6) 100%); }
+  .hero-content { position: relative; padding: 0 3rem 5.5rem; max-width: 860px; }
+  .hero-eyebrow { font-size: 0.6rem; letter-spacing: 0.28em; color: var(--sage); text-transform: uppercase; margin-bottom: 2rem; display: flex; align-items: center; gap: 1rem; }
+  .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--sage); opacity: 0.6; }
+  .hero-title { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3.8rem); line-height: 1.3; font-weight: 300; color: #fff; margin-bottom: 1rem; letter-spacing: 0.01em; word-break: keep-all; }
+  .hero-hand { font-family: var(--hand); font-size: clamp(1.5rem, 2.8vw, 2.6rem); color: var(--sage); display: block; margin-bottom: 1.2rem; line-height: 1.4; }
+  .hero-sub { font-size: 0.84rem; color: rgba(255,255,255,0.55); max-width: 480px; line-height: 2.3; margin-bottom: 2.8rem; word-break: keep-all; }
+  .hero-stats { display: flex; gap: 2.4rem; margin-bottom: 2.8rem; flex-wrap: wrap; }
+  .hero-stat { }
+  .hero-stat-num { font-family: var(--serif); font-size: clamp(1.5rem, 2.5vw, 2.2rem); font-weight: 300; color: #fff; line-height: 1; margin-bottom: 0.3rem; }
+  .hero-stat-label { font-size: 0.66rem; color: rgba(255,255,255,0.45); letter-spacing: 0.04em; line-height: 1.6; word-break: keep-all; }
+  .hero-div { width: 1px; background: rgba(255,255,255,0.15); align-self: stretch; }
+  .hero-btns { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+  .btn-fill { display: inline-block; padding: 0.85rem 2.2rem; background: var(--forest); border: 1px solid var(--forest); font-size: 0.72rem; letter-spacing: 0.18em; color: #fff; text-decoration: none; text-transform: uppercase; transition: background 0.3s; }
+  .btn-fill:hover { background: #2a4535; border-color: #2a4535; }
+  .btn-line { display: inline-block; padding: 0.85rem 2rem; border: 1px solid rgba(255,255,255,0.4); font-size: 0.72rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.8); text-decoration: none; text-transform: uppercase; transition: background 0.3s, border-color 0.3s; }
+  .btn-line:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
   .btn-ghost { display: inline-block; padding: 0.85rem 2rem; border: 1px solid var(--hairline); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--mid); text-decoration: none; text-transform: uppercase; transition: border-color 0.3s, color 0.3s; }
   .btn-ghost:hover { border-color: var(--charcoal); color: var(--charcoal); }
 
-  /* ── SECTION BASE ── */
+  /* ── SECTION ── */
   section { padding: var(--gap) 3rem; }
   .inner { max-width: 1100px; margin: 0 auto; }
   .label { font-size: 0.6rem; letter-spacing: 0.32em; color: var(--sage); text-transform: uppercase; margin-bottom: 3rem; display: flex; align-items: center; gap: 1rem; }
   .label::after { content: ''; width: 32px; height: 1px; background: var(--sage); }
+  .hand-accent { font-family: var(--hand); color: var(--forest); display: block; }
+
+  /* ── BEFORE / AFTER ── */
+  .ba-section { background: var(--charcoal); color: #fff; padding: var(--gap) 3rem; }
+  .ba-section .label { color: var(--sage); }
+  .ba-section .label::after { background: var(--sage); }
+  .ba-intro { max-width: 600px; margin-bottom: 3.5rem; }
+  .ba-intro h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.8vw, 2.6rem); font-weight: 300; line-height: 1.4; margin-bottom: 1rem; letter-spacing: 0.01em; word-break: keep-all; }
+  .ba-intro p { font-size: 0.84rem; color: rgba(255,255,255,0.5); line-height: 2.2; word-break: keep-all; }
+
+  /* 슬라이더 */
+  .ba-slider-wrap { position: relative; width: 100%; max-width: 900px; margin: 0 auto; user-select: none; }
+  .ba-slider { position: relative; overflow: hidden; border-radius: 2px; cursor: col-resize; }
+  .ba-slider::before { content: ''; display: block; padding-top: 56.25%; }
+  .ba-img { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .ba-after { z-index: 1; }
+  .ba-before { z-index: 2; clip-path: inset(0 50% 0 0); transition: clip-path 0s; }
+  .ba-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: #fff; z-index: 10; transform: translateX(-50%); pointer-events: none; }
+  .ba-handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 50%; background: #fff; z-index: 11; display: flex; align-items: center; justify-content: center; pointer-events: none; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  .ba-handle svg { width: 18px; height: 18px; color: var(--charcoal); }
+  .ba-badge-before { position: absolute; top: 1.2rem; left: 1.2rem; z-index: 12; background: rgba(0,0,0,0.55); color: #fff; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; padding: 0.35rem 0.8rem; pointer-events: none; }
+  .ba-badge-after  { position: absolute; top: 1.2rem; right: 1.2rem; z-index: 3; background: rgba(53,87,67,0.75); color: #fff; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; padding: 0.35rem 0.8rem; }
+  .ba-caption { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; margin-top: 3px; }
+  .ba-caption-item { padding: 1rem 1.2rem; background: rgba(255,255,255,0.04); }
+  .ba-caption-label { font-size: 0.6rem; letter-spacing: 0.2em; color: var(--sage); text-transform: uppercase; margin-bottom: 0.4rem; }
+  .ba-caption-text { font-size: 0.8rem; color: rgba(255,255,255,0.55); line-height: 1.8; word-break: keep-all; }
+
+  /* ── "SAPMANRI가 먼저 보는 것" ── */
+  .sees-section { background: var(--beige); }
+  .sees-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+  .sees-left h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1.5; margin-bottom: 0.4rem; word-break: keep-all; }
+  .sees-left .hand-accent { font-size: clamp(1.3rem, 1.8vw, 1.7rem); margin-bottom: 1.8rem; }
+  .sees-left p { font-size: 0.86rem; color: var(--mid); line-height: 2.3; word-break: keep-all; font-style: italic; }
+  .sees-list { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .sees-item { padding: 1.1rem 1.2rem; border-bottom: 1px solid var(--hairline); display: flex; align-items: flex-start; gap: 0.8rem; }
+  .sees-item:nth-child(odd) { border-right: 1px solid var(--hairline); }
+  .sees-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); flex-shrink: 0; margin-top: 0.55rem; }
+  .sees-text { font-size: 0.82rem; color: var(--charcoal); line-height: 1.7; word-break: keep-all; }
 
   /* ── FOR WHOM ── */
-  .forwhom-section { background: var(--beige); }
-  .forwhom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
-  .forwhom-left h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1.5; margin-bottom: 0.5rem; letter-spacing: 0.01em; word-break: keep-all; }
-  .forwhom-left .hand-accent { font-family: var(--hand); font-size: clamp(1.3rem, 1.8vw, 1.7rem); color: var(--forest); display: block; margin-bottom: 2rem; }
-  .forwhom-list { display: flex; flex-direction: column; gap: 1rem; }
-  .forwhom-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1.2rem 1.4rem; background: var(--paper); border-left: 2px solid var(--sage); }
-  .forwhom-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.1rem; }
-  .forwhom-text { font-size: 0.84rem; color: var(--charcoal); line-height: 1.8; word-break: keep-all; }
-  .forwhom-text strong { display: block; font-weight: 400; color: var(--forest); margin-bottom: 0.2rem; font-size: 0.86rem; }
+  .forwhom-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); }
+  .forwhom-item { background: var(--paper); padding: 1.8rem 2rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .forwhom-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.1rem; }
+  .forwhom-text strong { display: block; font-weight: 400; color: var(--forest); font-size: 0.86rem; margin-bottom: 0.3rem; }
+  .forwhom-text span { font-size: 0.8rem; color: var(--mid); line-height: 1.8; word-break: keep-all; }
+  .forwhom-bottom { margin-top: 3rem; padding: 2rem 2.4rem; background: var(--beige); border-left: 2px solid var(--sage); }
+  .forwhom-bottom p { font-size: 0.88rem; color: var(--charcoal); line-height: 2.2; word-break: keep-all; }
 
   /* ── CORE SERVICE ── */
   .cs-intro { max-width: 580px; margin-bottom: 5rem; }
   .cs-intro h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1.5; margin-bottom: 0.4rem; letter-spacing: 0.01em; word-break: keep-all; }
-  .cs-intro .hand-accent { font-family: var(--hand); font-size: clamp(1.3rem, 1.8vw, 1.7rem); color: var(--forest); display: block; margin-bottom: 1.2rem; }
+  .cs-intro .hand-accent { font-size: clamp(1.3rem, 1.8vw, 1.7rem); margin-bottom: 1.2rem; }
   .cs-intro p { font-size: 0.86rem; color: var(--mid); line-height: 2.2; word-break: keep-all; }
-
   .cs-steps { display: flex; flex-direction: column; }
-  .cs-step { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hairline); min-height: 480px; }
+  .cs-step { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--hairline); min-height: 460px; }
   .cs-step:last-child { border-bottom: 1px solid var(--hairline); }
   .cs-step.rev { direction: rtl; }
   .cs-step.rev > * { direction: ltr; }
   .cs-img { overflow: hidden; position: relative; }
   .cs-img img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(0.78) brightness(0.94); transition: filter 0.7s, transform 0.9s; }
   .cs-step:hover .cs-img img { filter: saturate(0.92) brightness(1); transform: scale(1.04); }
-  .cs-img-badge { position: absolute; bottom: 1.4rem; left: 1.4rem; background: var(--forest); color: #fff; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; padding: 0.4rem 0.9rem; }
+  .cs-img-badge { position: absolute; bottom: 1.4rem; left: 1.4rem; background: var(--forest); color: #fff; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; padding: 0.35rem 0.85rem; }
   .cs-step.rev .cs-img-badge { left: auto; right: 1.4rem; }
-  .cs-body { display: flex; flex-direction: column; justify-content: center; padding: 4rem; background: var(--paper); }
+  .cs-body { display: flex; flex-direction: column; justify-content: center; padding: 3.5rem 4rem; background: var(--paper); }
   .cs-step.rev .cs-body { background: var(--beige); }
-  .cs-num { font-size: 0.58rem; letter-spacing: 0.3em; color: var(--sage); text-transform: uppercase; margin-bottom: 1.4rem; }
-  .cs-title { font-family: var(--serif); font-size: clamp(1.5rem, 2vw, 1.9rem); font-weight: 300; line-height: 1.45; margin-bottom: 1rem; word-break: keep-all; letter-spacing: 0.01em; }
-  .cs-desc { font-size: 0.84rem; color: #5a5652; line-height: 2.3; margin-bottom: 1.6rem; word-break: keep-all; }
-  /* 고객 관점 설명 */
-  .cs-client { font-size: 0.82rem; color: var(--forest); background: rgba(53,87,67,0.07); border-left: 2px solid var(--sage); padding: 0.9rem 1.1rem; margin-bottom: 1.6rem; line-height: 1.9; word-break: keep-all; }
-  .cs-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .cs-tag { font-size: 0.63rem; letter-spacing: 0.1em; color: var(--forest); border: 1px solid var(--sage); padding: 0.26rem 0.72rem; }
+  .cs-num { font-size: 0.56rem; letter-spacing: 0.3em; color: var(--sage); text-transform: uppercase; margin-bottom: 1.4rem; }
+  .cs-title { font-family: var(--serif); font-size: clamp(1.4rem, 1.9vw, 1.8rem); font-weight: 300; line-height: 1.45; margin-bottom: 1rem; word-break: keep-all; }
+  .cs-client { font-size: 0.82rem; color: var(--forest); background: rgba(53,87,67,0.07); border-left: 2px solid var(--sage); padding: 0.9rem 1.1rem; margin-bottom: 1.4rem; line-height: 1.9; word-break: keep-all; }
+  .cs-tags { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .cs-tag { font-size: 0.62rem; letter-spacing: 0.1em; color: var(--forest); border: 1px solid var(--sage); padding: 0.25rem 0.7rem; }
 
   /* ── PACKAGES ── */
   .pkg-section { background: var(--forest); color: #fff; }
   .pkg-section .label { color: var(--sage); }
   .pkg-section .label::after { background: var(--sage); }
-  .pkg-intro { margin-bottom: 3rem; }
-  .pkg-intro h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; line-height: 1.5; letter-spacing: 0.01em; word-break: keep-all; }
-  .pkg-intro .hand-accent { font-family: var(--hand); font-size: clamp(1.3rem, 1.8vw, 1.7rem); color: var(--sage); display: block; margin-top: 0.3rem; }
-  .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.12); }
-  .pkg-card { background: rgba(255,255,255,0.04); padding: 2.6rem 2.2rem; display: flex; flex-direction: column; gap: 0; transition: background 0.3s; }
-  .pkg-card:hover { background: rgba(255,255,255,0.09); }
-  .pkg-badge { font-size: 0.58rem; letter-spacing: 0.22em; color: var(--sage); text-transform: uppercase; margin-bottom: 1.2rem; }
-  .pkg-name { font-family: var(--serif); font-size: 1.5rem; font-weight: 300; letter-spacing: 0.04em; color: #fff; margin-bottom: 1rem; }
-  .pkg-desc { font-size: 0.82rem; color: rgba(255,255,255,0.55); line-height: 2.1; margin-bottom: 1.8rem; word-break: keep-all; }
-  .pkg-includes { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; margin-bottom: 2rem; }
-  .pkg-includes li { font-size: 0.76rem; color: rgba(255,255,255,0.7); padding-left: 1rem; position: relative; line-height: 1.7; word-break: keep-all; }
+  .pkg-intro h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.6vw, 2.4rem); font-weight: 300; margin-bottom: 0.3rem; }
+  .pkg-intro .hand-accent { font-size: clamp(1.3rem, 1.8vw, 1.7rem); color: var(--sage); margin-bottom: 3rem; }
+  .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); }
+  .pkg-card { background: rgba(255,255,255,0.03); padding: 2.4rem 2rem; display: flex; flex-direction: column; transition: background 0.3s; }
+  .pkg-card:hover { background: rgba(255,255,255,0.08); }
+  .pkg-badge { font-size: 0.56rem; letter-spacing: 0.22em; color: var(--sage); text-transform: uppercase; margin-bottom: 1rem; }
+  .pkg-name { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: #fff; margin-bottom: 0.9rem; letter-spacing: 0.04em; }
+  .pkg-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); line-height: 2; margin-bottom: 1.6rem; word-break: keep-all; }
+  .pkg-includes { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+  .pkg-includes li { font-size: 0.75rem; color: rgba(255,255,255,0.65); padding-left: 1rem; position: relative; line-height: 1.7; word-break: keep-all; }
   .pkg-includes li::before { content: '—'; position: absolute; left: 0; color: var(--sage); }
-  .pkg-cta { margin-top: auto; display: inline-block; padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.3); font-size: 0.68rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.6); text-decoration: none; text-transform: uppercase; transition: color 0.3s, border-color 0.3s; }
+  .pkg-cta { margin-top: auto; display: inline-block; padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.25); font-size: 0.66rem; letter-spacing: 0.18em; color: rgba(255,255,255,0.55); text-decoration: none; text-transform: uppercase; transition: color 0.3s, border-color 0.3s; }
   .pkg-cta:hover { color: #fff; border-color: #fff; }
 
   /* ── TOOLS ── */
   .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--hairline); border: 1px solid var(--hairline); }
-  .tool-card { background: var(--paper); padding: 2.2rem 2rem; text-decoration: none; color: var(--charcoal); display: flex; flex-direction: column; gap: 0.6rem; transition: background 0.3s; }
+  .tool-card { background: var(--paper); padding: 2rem 1.8rem; text-decoration: none; color: var(--charcoal); display: flex; flex-direction: column; gap: 0.55rem; transition: background 0.3s; }
   .tool-card:hover { background: var(--beige); }
-  .tool-icon { font-size: 1.1rem; margin-bottom: 0.3rem; }
-  .tool-name { font-family: var(--serif); font-size: 1.05rem; font-weight: 300; letter-spacing: 0.02em; }
-  .tool-desc { font-size: 0.76rem; color: var(--mid); line-height: 1.9; word-break: keep-all; }
-  .tool-link-txt { font-size: 0.62rem; letter-spacing: 0.16em; color: var(--forest); text-transform: uppercase; margin-top: auto; padding-top: 1rem; }
+  .tool-icon { font-size: 1rem; margin-bottom: 0.2rem; }
+  .tool-name { font-family: var(--serif); font-size: 1rem; font-weight: 300; }
+  .tool-desc { font-size: 0.74rem; color: var(--mid); line-height: 1.9; word-break: keep-all; }
+  .tool-link-txt { font-size: 0.6rem; letter-spacing: 0.16em; color: var(--forest); text-transform: uppercase; margin-top: auto; padding-top: 0.9rem; }
 
   /* ── PORTFOLIO ── */
   .portfolio-section { background: var(--beige); }
@@ -156,11 +170,11 @@
   .pf-item::before { content: ''; display: block; padding-top: 70%; }
   .pf-thumb { position: absolute; inset: 0; background-size: cover; background-position: center; filter: saturate(0.8) brightness(0.92); transition: filter 0.5s, transform 0.8s; }
   .pf-item:hover .pf-thumb { filter: saturate(1) brightness(1); transform: scale(1.04); }
-  .pf-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.6rem 1.2rem 1rem; background: linear-gradient(to top, rgba(53,87,67,0.85) 0%, transparent 100%); color: #fff; opacity: 0; transform: translateY(4px); transition: opacity 0.4s, transform 0.4s; }
+  .pf-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.4rem 1.1rem 0.9rem; background: linear-gradient(to top, rgba(53,87,67,0.85) 0%, transparent 100%); color: #fff; opacity: 0; transform: translateY(4px); transition: opacity 0.4s, transform 0.4s; }
   .pf-item:hover .pf-info { opacity: 1; transform: translateY(0); }
-  .pf-type { font-size: 0.58rem; letter-spacing: 0.22em; color: var(--sage); margin-bottom: 0.3rem; text-transform: uppercase; }
-  .pf-title { font-family: var(--serif); font-size: 1rem; font-weight: 300; }
-  .pf-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.9rem; opacity: 0; transition: opacity 0.4s; }
+  .pf-type { font-size: 0.56rem; letter-spacing: 0.22em; color: var(--sage); margin-bottom: 0.3rem; text-transform: uppercase; }
+  .pf-title { font-family: var(--serif); font-size: 0.95rem; font-weight: 300; }
+  .pf-play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; opacity: 0; transition: opacity 0.4s; }
   .pf-item:hover .pf-play { opacity: 1; }
   .pf-item.wide { grid-column: span 2; }
   .pf-item.wide::before { padding-top: 42%; }
@@ -170,39 +184,42 @@
   .contact-section .label { color: var(--sage); }
   .contact-section .label::after { background: var(--sage); }
   .contact-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
-  .contact-left h2 { font-family: var(--serif); font-size: clamp(1.9rem, 3vw, 2.8rem); font-weight: 300; line-height: 1.4; margin-bottom: 0.6rem; letter-spacing: 0.01em; word-break: keep-all; }
-  .contact-left .hand-accent { font-family: var(--hand); font-size: clamp(1.4rem, 2vw, 2rem); color: var(--sage); display: block; margin-bottom: 1.8rem; }
-  .contact-left p { font-size: 0.84rem; color: rgba(255,255,255,0.6); line-height: 2.3; word-break: keep-all; }
+  .contact-left h2 { font-family: var(--serif); font-size: clamp(1.8rem, 2.8vw, 2.6rem); font-weight: 300; line-height: 1.4; margin-bottom: 0.5rem; word-break: keep-all; }
+  .contact-left .hand-accent { font-size: clamp(1.3rem, 1.8vw, 1.9rem); color: var(--sage); margin-bottom: 1.6rem; }
+  .contact-left p { font-size: 0.83rem; color: rgba(255,255,255,0.55); line-height: 2.3; word-break: keep-all; }
   .contact-right { display: flex; flex-direction: column; gap: 0.9rem; }
-  .contact-right a { display: block; padding: 1.1rem 1.8rem; border: 1px solid rgba(255,255,255,0.2); font-size: 0.74rem; letter-spacing: 0.16em; color: rgba(255,255,255,0.72); text-decoration: none; text-transform: uppercase; transition: background 0.3s, border-color 0.3s, color 0.3s; }
-  .contact-right a:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.5); color: #fff; }
+  .contact-right a { display: block; padding: 1.1rem 1.8rem; border: 1px solid rgba(255,255,255,0.18); font-size: 0.72rem; letter-spacing: 0.16em; color: rgba(255,255,255,0.68); text-decoration: none; text-transform: uppercase; transition: background 0.3s, border-color 0.3s, color 0.3s; }
+  .contact-right a:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.45); color: #fff; }
   .contact-right a.primary { background: #fff; color: var(--forest); border-color: #fff; font-weight: 400; }
   .contact-right a.primary:hover { background: var(--beige); }
 
   /* ── FOOTER ── */
   footer { background: var(--charcoal); padding: 2rem 3rem; display: flex; justify-content: space-between; align-items: center; }
-  footer .f-logo { font-family: var(--serif); font-size: 0.9rem; letter-spacing: 0.28em; color: rgba(255,255,255,0.55); }
-  footer .f-sub { font-size: 0.58rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.28); text-transform: uppercase; margin-top: 3px; }
-  footer .f-copy { font-size: 0.62rem; color: rgba(255,255,255,0.25); letter-spacing: 0.06em; }
+  .f-logo { font-family: var(--serif); font-size: 0.88rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.5); }
+  .f-sub { font-size: 0.56rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.25); text-transform: uppercase; margin-top: 3px; }
+  .f-copy { font-size: 0.6rem; color: rgba(255,255,255,0.22); }
 
   /* ── REVEAL ── */
-  .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.9s ease, transform 0.9s ease; }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
-    nav { padding: 1.3rem 1.6rem; }
+    nav { padding: 1.2rem 1.6rem; }
     .nav-links { display: none; }
-    section { padding: var(--gap) 1.6rem; }
+    section, .ba-section { padding: var(--gap) 1.6rem; }
     .hero-content { padding: 0 1.6rem 4rem; }
-    .hero-stats { gap: 1.6rem; flex-wrap: wrap; }
-    .hero-btns { flex-direction: column; }
-    .forwhom-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .hero-stats { gap: 1.6rem; }
+    .hero-btns { flex-direction: column; align-items: flex-start; }
+    .ba-caption { grid-template-columns: 1fr; }
+    .sees-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .sees-list { grid-template-columns: 1fr; }
+    .sees-item:nth-child(odd) { border-right: none; }
+    .forwhom-list { grid-template-columns: 1fr; }
     .cs-step { grid-template-columns: 1fr; min-height: auto; direction: ltr !important; }
-    .cs-img { height: 280px; }
-    .cs-body { padding: 2.6rem 1.6rem; }
-    .pkg-grid { grid-template-columns: 1fr; }
-    .tools-grid { grid-template-columns: 1fr; }
+    .cs-img { height: 260px; }
+    .cs-body { padding: 2.4rem 1.6rem; }
+    .pkg-grid, .tools-grid { grid-template-columns: 1fr; }
     .pf-grid { grid-template-columns: 1fr 1fr; }
     .pf-item.wide { grid-column: span 2; }
     .pf-item.wide::before { padding-top: 52%; }
@@ -212,6 +229,7 @@
   @media (max-width: 480px) {
     .pf-grid { grid-template-columns: 1fr; }
     .pf-item.wide { grid-column: span 1; }
+    .hero-div { display: none; }
   }
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
@@ -227,7 +245,7 @@
     <span class="logo-sub">by MIMESIS · Stories, Objects and Memories</span>
   </a>
   <ul class="nav-links">
-    <li><a href="#forwhom">대상</a></li>
+    <li><a href="#before-after">비포/애프터</a></li>
     <li><a href="#services">서비스</a></li>
     <li><a href="#packages">패키지</a></li>
     <li><a href="#portfolio">포트폴리오</a></li>
@@ -240,73 +258,109 @@
   <div class="hero-bg"></div>
   <div class="hero-tint"></div>
   <div class="hero-content">
-    <div class="hero-brand">SAPMANRI Studio · by MIMESIS</div>
-    <h1 class="hero-title">브랜드의 일상을<br>유튜브 콘텐츠로 만들어드립니다</h1>
+    <div class="hero-eyebrow">SAPMANRI Studio · by MIMESIS</div>
+    <h1 class="hero-title">찍을 수 있는 것과<br>보고 싶게 만드는 것은<br>다릅니다</h1>
     <span class="hero-hand">따뜻하고 담백하게.</span>
+    <p class="hero-sub">SAPMANRI는 공간의 빛, 사물, 손의 움직임, 머문 흔적을 찾아<br>브랜드가 가진 분위기를 영상과 사진으로 남깁니다.</p>
     <div class="hero-stats">
-      <div>
+      <div class="hero-stat">
         <div class="hero-stat-num">3년</div>
         <div class="hero-stat-label">단 한 주도 빠지지 않은<br>주간 업로드</div>
       </div>
-      <div class="hero-stat-div"></div>
-      <div>
+      <div class="hero-div"></div>
+      <div class="hero-stat">
         <div class="hero-stat-num">5만+</div>
         <div class="hero-stat-label">감성찾아삽만리<br>채널 구독자</div>
       </div>
-      <div class="hero-stat-div"></div>
-      <div>
+      <div class="hero-div"></div>
+      <div class="hero-stat">
         <div class="hero-stat-num">150+</div>
         <div class="hero-stat-label">직접 기획·촬영·편집한<br>영상</div>
       </div>
     </div>
     <div class="hero-btns">
-      <a href="#contact" class="btn-outline fill">작업 문의하기</a>
-      <a href="#portfolio" class="btn-outline">포트폴리오 보기</a>
-      <a href="https://www.youtube.com/@sapmanri" target="_blank" class="btn-outline">유튜브 채널 보기</a>
+      <a href="#contact" class="btn-fill">내 공간의 장면 찾기</a>
+      <a href="#before-after" class="btn-line">변화 확인하기</a>
+      <a href="https://www.youtube.com/@sapmanri" target="_blank" class="btn-line">유튜브 채널 보기</a>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER -->
+<section id="before-after" class="ba-section">
+  <div class="inner">
+    <div class="label reveal">Before / After</div>
+    <div class="ba-intro reveal">
+      <h2>같은 공간,<br>다른 시선</h2>
+      <p>스마트폰으로도 찍을 수 있습니다. 차이는 장비가 아니라 — 무엇을 보느냐, 어떻게 기다리느냐에서 납니다. 슬라이더를 드래그해 비교해보세요.</p>
+    </div>
+    <div class="ba-slider-wrap reveal">
+      <div class="ba-slider" id="baSlider">
+        <!-- AFTER (아래) -->
+        <div class="ba-img ba-after" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg')"></div>
+        <!-- BEFORE (위, clip) -->
+        <div class="ba-img ba-before" id="baBefore" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg');filter:saturate(0) brightness(1.1) contrast(0.85);"></div>
+        <div class="ba-line" id="baLine"></div>
+        <div class="ba-handle" id="baHandle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l-6-6 6-6M15 6l6 6-6 6"/>
+          </svg>
+        </div>
+        <div class="ba-badge-before">Before · 원본</div>
+        <div class="ba-badge-after">After · SAPMANRI</div>
+      </div>
+      <div class="ba-caption">
+        <div class="ba-caption-item">
+          <div class="ba-caption-label">Before</div>
+          <div class="ba-caption-text">색보정 없음 · 단순 기록 · 구도 없음 · 빛을 기다리지 않음</div>
+        </div>
+        <div class="ba-caption-item">
+          <div class="ba-caption-label">After · SAPMANRI</div>
+          <div class="ba-caption-text">LUT 색보정 · 빛의 방향 계산 · 사물 배치 · 카메라 무빙 · 사운드 설계</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SAPMANRI가 먼저 보는 것 -->
+<section id="sees" class="sees-section">
+  <div class="inner reveal">
+    <div class="label">SAPMANRI가 먼저 보는 것</div>
+    <div class="sees-grid">
+      <div class="sees-left">
+        <h2>좋은 공간은 이미<br>장면을 가지고 있습니다</h2>
+        <span class="hand-accent" style="font-size:clamp(1.3rem,1.8vw,1.7rem);margin-bottom:1.8rem;">우리는 그것을 찾아<br>카메라 앞에 조용히 놓습니다.</span>
+        <p>"영상을 만드는 것이 아니라,<br>공간 안에 이미 있는 것을 발견합니다."</p>
+      </div>
+      <div class="sees-list">
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">창가의 빛과 그림자가 바뀌는 순간</div></div>
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">테이블 위의 작은 사물 배치</div></div>
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">손이 컵을 놓는 속도</div></div>
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">커피가 올라오는 순간의 김</div></div>
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">문이 열리고 닫히는 리듬</div></div>
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">식물이 만드는 그림자</div></div>
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">사람이 머문 자리의 흔적</div></div>
+        <div class="sees-item"><div class="sees-dot"></div><div class="sees-text">공간의 조용한 리듬과 여백</div></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- FOR WHOM -->
-<section id="forwhom" class="forwhom-section">
-  <div class="inner reveal">
-    <div class="label">이런 분께 맞습니다</div>
-    <div class="forwhom-grid">
-      <div class="forwhom-left">
-        <h2>작은 브랜드도<br>이야기가 있습니다</h2>
-        <span class="hand-accent">기록할 가치가 있는 일상.</span>
-        <p style="font-size:0.86rem;color:var(--mid);line-height:2.3;word-break:keep-all;">유튜브를 시작하고 싶지만 어디서 시작해야 할지 모르는 분, 빠른 광고 영상보다 오래 남는 분위기 있는 기록이 필요한 분께 맞습니다.</p>
-      </div>
-      <div class="forwhom-list">
-        <div class="forwhom-item">
-          <div class="forwhom-icon">🌿</div>
-          <div class="forwhom-text">
-            <strong>전원주택 · 로컬 라이프</strong>
-            시골살이, 자연 속 일상을 기록하고 공유하고 싶은 분
-          </div>
-        </div>
-        <div class="forwhom-item">
-          <div class="forwhom-icon">☕</div>
-          <div class="forwhom-text">
-            <strong>카페 · 로컬 브랜드</strong>
-            우리 공간의 분위기와 이야기를 영상으로 남기고 싶은 분
-          </div>
-        </div>
-        <div class="forwhom-item">
-          <div class="forwhom-icon">🧵</div>
-          <div class="forwhom-text">
-            <strong>공방 · 수작업 브랜드</strong>
-            만드는 과정과 철학을 보여주고 싶은 작가, 장인, 공방 운영자
-          </div>
-        </div>
-        <div class="forwhom-item">
-          <div class="forwhom-icon">✨</div>
-          <div class="forwhom-text">
-            <strong>라이프스타일 브랜드</strong>
-            빠른 광고보다 브랜드 세계관을 천천히 쌓아가고 싶은 분
-          </div>
-        </div>
-      </div>
+<section id="forwhom">
+  <div class="inner">
+    <div class="label reveal">이런 분께 필요합니다</div>
+    <div class="forwhom-list reveal">
+      <div class="forwhom-item"><div class="forwhom-icon">☕</div><div class="forwhom-text"><strong>카페 · 로컬 브랜드</strong><span>우리 공간의 분위기를 영상으로 남기고 싶은 사장님</span></div></div>
+      <div class="forwhom-item"><div class="forwhom-icon">🧵</div><div class="forwhom-text"><strong>공방 · 수작업 브랜드</strong><span>만드는 과정과 철학을 보여주고 싶은 작가, 장인</span></div></div>
+      <div class="forwhom-item"><div class="forwhom-icon">🌿</div><div class="forwhom-text"><strong>전원주택 · 로컬 라이프</strong><span>시골살이, 자연 속 일상을 기록하고 공유하고 싶은 분</span></div></div>
+      <div class="forwhom-item"><div class="forwhom-icon">🏡</div><div class="forwhom-text"><strong>숙소 · 스테이 운영자</strong><span>공간의 감성을 더 많은 사람에게 보여주고 싶은 분</span></div></div>
+      <div class="forwhom-item"><div class="forwhom-icon">✨</div><div class="forwhom-text"><strong>라이프스타일 브랜드</strong><span>빠른 광고보다 브랜드 세계관을 천천히 쌓아가고 싶은 분</span></div></div>
+      <div class="forwhom-item"><div class="forwhom-icon">🎪</div><div class="forwhom-text"><strong>플리마켓 · 팝업 운영자</strong><span>행사와 공간의 분위기를 기록으로 남기고 싶은 분</span></div></div>
+    </div>
+    <div class="forwhom-bottom reveal">
+      <p>직접 찍을 수는 있지만,<br>내 공간이 왜 좋아 보이는지 설명하기 어려운 분께 필요합니다.</p>
     </div>
   </div>
 </section>
@@ -317,80 +371,47 @@
     <div class="label reveal">What We Do</div>
     <div class="cs-intro reveal">
       <h2>기획부터 운영까지</h2>
-      <span class="hand-accent">네 단계 모두 직접 합니다.</span>
+      <span class="hand-accent" style="font-size:clamp(1.3rem,1.8vw,1.7rem);margin-bottom:1.2rem;">네 단계 모두 직접 합니다.</span>
       <p>감성찾아삽만리 채널을 3년간 직접 운영하며 쌓아온 방식 그대로 — 자연스럽고 따뜻한 시선으로 브랜드의 일상을 담아드립니다.</p>
     </div>
   </div>
   <div class="cs-steps">
-
     <div class="cs-step reveal">
-      <div class="cs-img">
-        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/u8es_b948c8ed_bec7d1e7.jpg" alt="기획" loading="lazy"/>
-        <span class="cs-img-badge">Planning</span>
-      </div>
+      <div class="cs-img"><img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/u8es_b948c8ed_bec7d1e7.jpg" alt="기획" loading="lazy"/><span class="cs-img-badge">Planning</span></div>
       <div class="cs-body">
         <div class="cs-num">01 · Planning</div>
         <h3 class="cs-title">브랜드의 이야기를<br>채널로 설계합니다</h3>
-        <p class="cs-desc">어떤 사람에게 닿고 싶은지, 무엇을 보여주고 싶은지 — 방향이 잡혀야 영상이 쌓입니다.</p>
         <div class="cs-client">브랜드 콘셉트, 타깃, 콘텐츠 방향, 월간 업로드 계획을 잡습니다.</div>
-        <div class="cs-tags">
-          <span class="cs-tag">채널 콘셉트</span><span class="cs-tag">타깃 설정</span>
-          <span class="cs-tag">업로드 전략</span><span class="cs-tag">콘텐츠 캘린더</span>
-        </div>
+        <div class="cs-tags"><span class="cs-tag">채널 콘셉트</span><span class="cs-tag">타깃 설정</span><span class="cs-tag">업로드 전략</span><span class="cs-tag">콘텐츠 캘린더</span></div>
       </div>
     </div>
-
     <div class="cs-step rev reveal">
-      <div class="cs-img">
-        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ojgw_ffd43862_cce75ecc.jpg" alt="촬영" loading="lazy"/>
-        <span class="cs-img-badge">Filming</span>
-      </div>
+      <div class="cs-img"><img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/ojgw_ffd43862_cce75ecc.jpg" alt="촬영" loading="lazy"/><span class="cs-img-badge">Filming</span></div>
       <div class="cs-body">
         <div class="cs-num">02 · Filming</div>
         <h3 class="cs-title">장면을 고르는 눈으로<br>직접 현장에 섭니다</h3>
-        <p class="cs-desc">3년간 매주 직접 카메라를 들고 나간 경험이 있습니다. 무엇을 찍을지, 어떻게 담을지 — 현장 디렉팅부터 촬영까지.</p>
         <div class="cs-client">현장 촬영, 장면 구성, 제품 · 공간 · 일상 브이로그 촬영을 진행합니다.</div>
-        <div class="cs-tags">
-          <span class="cs-tag">현장 촬영</span><span class="cs-tag">씬 구성</span>
-          <span class="cs-tag">Sony A7C</span><span class="cs-tag">자연광 활용</span>
-        </div>
+        <div class="cs-tags"><span class="cs-tag">현장 촬영</span><span class="cs-tag">씬 구성</span><span class="cs-tag">Sony A7C</span><span class="cs-tag">자연광 활용</span></div>
       </div>
     </div>
-
     <div class="cs-step reveal">
-      <div class="cs-img">
-        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/zhys_bca05c2d_9693ad5d.jpg" alt="편집" loading="lazy"/>
-        <span class="cs-img-badge">Editing</span>
-      </div>
+      <div class="cs-img"><img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/zhys_bca05c2d_9693ad5d.jpg" alt="편집" loading="lazy"/><span class="cs-img-badge">Editing</span></div>
       <div class="cs-body">
         <div class="cs-num">03 · Editing</div>
         <h3 class="cs-title">색감 하나까지<br>브랜드의 온도로 맞춥니다</h3>
-        <p class="cs-desc">빠른 편집이 아니라 브랜드에 맞는 색감과 리듬으로. 영상이 채널 안에서 일관된 세계관을 갖도록 다듬습니다.</p>
         <div class="cs-client">색보정, 자막, BGM, 썸네일, 쇼츠 · 릴스용 컷다운까지 제작합니다.</div>
-        <div class="cs-tags">
-          <span class="cs-tag">색보정 LUT</span><span class="cs-tag">자막 디자인</span>
-          <span class="cs-tag">BGM 선곡</span><span class="cs-tag">쇼츠 · 릴스</span>
-        </div>
+        <div class="cs-tags"><span class="cs-tag">색보정 LUT</span><span class="cs-tag">자막 디자인</span><span class="cs-tag">BGM 선곡</span><span class="cs-tag">쇼츠 · 릴스</span></div>
       </div>
     </div>
-
     <div class="cs-step rev reveal">
-      <div class="cs-img">
-        <img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/1kptk_b9c1c832_980a58dc.jpg" alt="운영" loading="lazy"/>
-        <span class="cs-img-badge">Publishing</span>
-      </div>
+      <div class="cs-img"><img src="https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/1kptk_b9c1c832_980a58dc.jpg" alt="운영" loading="lazy"/><span class="cs-img-badge">Publishing</span></div>
       <div class="cs-body">
         <div class="cs-num">04 · Publishing</div>
         <h3 class="cs-title">업로드 이후가<br>진짜 운영입니다</h3>
-        <p class="cs-desc">영상 하나가 더 많은 사람에게 닿을 수 있도록 — 업로드 이후도 함께 챙깁니다.</p>
         <div class="cs-client">제목, 설명란, 태그, 타임스탬프, 업로드 일정, 인스타 연계까지 챙깁니다.</div>
-        <div class="cs-tags">
-          <span class="cs-tag">SEO 최적화</span><span class="cs-tag">설명란 작성</span>
-          <span class="cs-tag">인스타 연계</span><span class="cs-tag">성과 분석</span>
-        </div>
+        <div class="cs-tags"><span class="cs-tag">SEO 최적화</span><span class="cs-tag">설명란 작성</span><span class="cs-tag">인스타 연계</span><span class="cs-tag">성과 분석</span></div>
       </div>
     </div>
-
   </div>
 </section>
 
@@ -400,46 +421,46 @@
     <div class="label">Packages</div>
     <div class="pkg-intro">
       <h2>작업 패키지</h2>
-      <span class="hand-accent">브랜드에 맞는 방식으로.</span>
+      <span class="hand-accent" style="font-size:clamp(1.2rem,1.6vw,1.6rem);color:var(--sage);display:block;margin-bottom:3rem;">브랜드에 맞는 방식으로.</span>
     </div>
     <div class="pkg-grid">
       <div class="pkg-card">
-        <div class="pkg-badge">Starter</div>
-        <div class="pkg-name">스타터</div>
-        <div class="pkg-desc">처음 시작하는 분께. 부담 없이 한 번 경험해보고 싶을 때.</div>
+        <div class="pkg-badge">Basic</div>
+        <div class="pkg-name">베이직</div>
+        <div class="pkg-desc">처음 한 번, 내 공간이 어떻게 보이는지 경험해보고 싶을 때.</div>
         <ul class="pkg-includes">
-          <li>1회 현장 촬영</li>
-          <li>영상 1편 편집 완성</li>
+          <li>30초~1분 숏폼 1개</li>
+          <li>세로 사진 5장</li>
           <li>썸네일 제작</li>
-          <li>업로드 패키지 (제목 · 태그 · 설명란)</li>
+          <li>업로드용 소개 문구</li>
         </ul>
-        <a href="#contact" class="pkg-cta">문의하기 →</a>
+        <a href="#contact" class="pkg-cta">상담 문의하기 →</a>
       </div>
       <div class="pkg-card">
-        <div class="pkg-badge">Monthly</div>
-        <div class="pkg-name">먼슬리</div>
-        <div class="pkg-desc">꾸준한 채널 운영이 필요한 분께. 매달 정해진 편수로 함께 쌓아갑니다.</div>
+        <div class="pkg-badge">Standard</div>
+        <div class="pkg-name">스탠다드</div>
+        <div class="pkg-desc">채널을 제대로 시작하고 싶은 분께. 월 정기 제작으로 함께 쌓아갑니다.</div>
         <ul class="pkg-includes">
           <li>월 2~4편 기획 · 촬영 · 편집</li>
-          <li>썸네일 · 쇼츠 컷다운 포함</li>
+          <li>숏폼 3개 컷다운</li>
+          <li>사진 15장</li>
           <li>SEO 최적화 업로드</li>
           <li>인스타그램 릴스 연계</li>
-          <li>월간 성과 리포트</li>
         </ul>
-        <a href="#contact" class="pkg-cta">문의하기 →</a>
+        <a href="#contact" class="pkg-cta">상담 문의하기 →</a>
       </div>
       <div class="pkg-card">
         <div class="pkg-badge">Archive</div>
         <div class="pkg-name">아카이브</div>
-        <div class="pkg-desc">브랜드 전체를 기록하고 싶은 분께. 영상을 넘어 브랜드 아카이브를 함께 만듭니다.</div>
+        <div class="pkg-desc">브랜드 전체를 기록하고 싶은 분께. 영상을 넘어 브랜드 아카이브로 확장합니다.</div>
         <ul class="pkg-includes">
-          <li>먼슬리 전체 포함</li>
-          <li>브랜드 웹 매거진 발행</li>
+          <li>스탠다드 전체 포함</li>
+          <li>브랜드 웹매거진 발행</li>
           <li>인스타그램 캐러샐 제작</li>
-          <li>감성 포스트카드 · 굿즈 연계</li>
-          <li>브랜드 가이드 정리</li>
+          <li>감성 포스트카드 연계</li>
+          <li>브랜드 기록문 · 가이드 정리</li>
         </ul>
-        <a href="#contact" class="pkg-cta">문의하기 →</a>
+        <a href="#contact" class="pkg-cta">상담 문의하기 →</a>
       </div>
     </div>
   </div>
@@ -449,7 +470,7 @@
 <section id="tools">
   <div class="inner">
     <div class="label reveal">Our Tools</div>
-    <p class="reveal" style="font-size:0.86rem;color:var(--mid);max-width:500px;line-height:2.2;margin-bottom:2.5rem;word-break:keep-all;">영상 제작을 넘어 인스타그램, 웹 매거진, 포스트카드까지 — 브랜드 콘텐츠가 모든 채널에서 일관된 목소리를 낼 수 있도록 자체 도구로 함께 운영합니다.</p>
+    <p class="reveal" style="font-size:0.86rem;color:var(--mid);max-width:480px;line-height:2.2;margin-bottom:2.5rem;word-break:keep-all;">영상 제작을 넘어 인스타그램, 웹 매거진, 포스트카드까지 — 브랜드 콘텐츠가 모든 채널에서 일관된 목소리를 낼 수 있도록 자체 도구로 함께 운영합니다.</p>
     <div class="tools-grid reveal">
       <a class="tool-card" href="https://carousel-generator-roan.vercel.app/carousel_ai_generator.html" target="_blank">
         <div class="tool-icon">🎴</div>
@@ -477,7 +498,7 @@
 <section id="portfolio" class="portfolio-section">
   <div class="inner">
     <div class="label reveal">Portfolio</div>
-    <p class="reveal" style="font-size:0.86rem;color:var(--mid);margin-bottom:2rem;">클릭하면 유튜브 영상으로 이동합니다.</p>
+    <p class="reveal" style="font-size:0.84rem;color:var(--mid);margin-bottom:2rem;">클릭하면 유튜브 영상으로 이동합니다.</p>
     <div class="pf-grid reveal">
       <a class="pf-item wide" href="https://www.youtube.com/@sapmanri" target="_blank">
         <div class="pf-thumb" style="background-image:url('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/magazine/images/library/skdk_5d49f053_2bddc7a1.jpg')"></div>
@@ -518,11 +539,11 @@
     <div class="contact-inner">
       <div class="contact-left">
         <h2>지금 브랜드의 이야기를<br>영상으로 남기고 싶다면</h2>
-        <span class="hand-accent">먼저 이야기해주세요.</span>
-        <p>간단한 소개와 함께 문의해주세요. 확인 후 가능한 일정과 작업 방식을 안내드립니다. 규모에 상관없이 진심 있는 브랜드라면 언제든 환영합니다.</p>
+        <span class="hand-accent" style="font-size:clamp(1.3rem,1.8vw,1.9rem);color:var(--sage);display:block;margin-bottom:1.6rem;">먼저 이야기해주세요.</span>
+        <p>간단한 소개와 함께 문의해주세요.<br>확인 후 가능한 일정과 작업 방식을 안내드립니다.<br>규모에 상관없이 진심 있는 브랜드라면 언제든 환영합니다.</p>
       </div>
       <div class="contact-right">
-        <a href="mailto:contact@mimesis.kr" class="primary">작업 문의하기</a>
+        <a href="mailto:contact@mimesis.kr" class="primary">내 공간의 장면 찾기</a>
         <a href="#portfolio">포트폴리오 보기</a>
         <a href="https://www.youtube.com/@sapmanri" target="_blank">유튜브 채널 보기</a>
       </div>
@@ -540,8 +561,34 @@
 </footer>
 
 <script>
+  // NAV
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 60); });
+
+  // BEFORE/AFTER SLIDER
+  const slider = document.getElementById('baSlider');
+  const before = document.getElementById('baBefore');
+  const line   = document.getElementById('baLine');
+  const handle = document.getElementById('baHandle');
+  let dragging = false;
+
+  function setPos(x) {
+    const rect = slider.getBoundingClientRect();
+    let pct = Math.min(Math.max((x - rect.left) / rect.width, 0), 1);
+    const p = (pct * 100).toFixed(2);
+    before.style.clipPath = `inset(0 ${100 - p}% 0 0)`;
+    line.style.left = p + '%';
+    handle.style.left = p + '%';
+  }
+
+  slider.addEventListener('mousedown', e => { dragging = true; setPos(e.clientX); });
+  slider.addEventListener('touchstart', e => { dragging = true; setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('mousemove', e => { if (dragging) setPos(e.clientX); });
+  window.addEventListener('touchmove', e => { if (dragging) setPos(e.touches[0].clientX); }, { passive: true });
+  window.addEventListener('mouseup', () => { dragging = false; });
+  window.addEventListener('touchend', () => { dragging = false; });
+
+  // REVEAL
   const reveals = document.querySelectorAll('.reveal');
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e, i) => {
