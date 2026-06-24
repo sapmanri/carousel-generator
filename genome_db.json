@@ -1,10 +1,50 @@
 {
-  "version": "0.1.7",
-  "schema": "observation_genome_v0.1.7",
+  "version": "0.2.0",
+  "schema": "observation_genome_v0.2",
+  "data_source": {
+    "type": "image_library_analysis",
+    "sample_size": 107,
+    "source": "sapmanri/carousel-generator/image_cache.json",
+    "analyzed_at": "2026-06-24",
+    "note": "캐러셀 생성기용 이미지 라이브러리 107장 분석 기반. 수동 검증 필요."
+  },
   "taxonomy": {
-    "attention_axes": ["person","object","space","light","color","movement","relationship","time","trace","emotion"],
-    "selection_axes": ["center_choice","background_handling","omission","emphasis","distance","repetition","contrast","balance","rhythm","gaze_direction"],
-    "meaning_axes":   ["humor","nostalgia","loneliness","hospitality","anxiety","wonder","irony","loss","contemplation","hope"]
+    "attention_axes": [
+      "person",
+      "object",
+      "space",
+      "light",
+      "color",
+      "movement",
+      "relationship",
+      "time",
+      "trace",
+      "emotion"
+    ],
+    "selection_axes": [
+      "center_choice",
+      "background_handling",
+      "omission",
+      "emphasis",
+      "distance",
+      "repetition",
+      "contrast",
+      "balance",
+      "rhythm",
+      "gaze_direction"
+    ],
+    "meaning_axes": [
+      "humor",
+      "nostalgia",
+      "loneliness",
+      "hospitality",
+      "anxiety",
+      "wonder",
+      "irony",
+      "loss",
+      "contemplation",
+      "hope"
+    ]
   },
   "creators": {
     "vase_sapmanri": {
@@ -13,43 +53,46 @@
       "display_name_en": "Vase / Sapmanri",
       "status": "active",
       "rights_status": "owned",
-      "mediums": ["writing", "photo"],
+      "mediums": [
+        "writing",
+        "photo"
+      ],
       "bio": "빛과 작은 사물, 일상의 물성 안에서 잠깐 멈추는 시선. 슬로우라이프 창작자.",
       "attention": {
-        "person": 0.2,
-        "object": 0.9,
-        "space": 0.55,
-        "light": 0.95,
-        "color": 0.35,
-        "movement": 0.25,
-        "relationship": 0.45,
-        "time": 0.75,
-        "trace": 0.9,
-        "emotion": 0.55
+        "person": 0.15,
+        "object": 0.92,
+        "space": 0.58,
+        "light": 0.93,
+        "color": 0.28,
+        "movement": 0.12,
+        "relationship": 0.38,
+        "time": 0.8,
+        "trace": 0.88,
+        "emotion": 0.5
       },
       "selection": {
-        "center_choice": 0.75,
-        "background_handling": 0.65,
-        "omission": 0.9,
-        "emphasis": 0.35,
-        "distance": 0.7,
-        "repetition": 0.45,
-        "contrast": 0.25,
-        "balance": 0.55,
-        "rhythm": 0.6,
-        "gaze_direction": 0.5
+        "center_choice": 0.82,
+        "background_handling": 0.72,
+        "omission": 0.88,
+        "emphasis": 0.3,
+        "distance": 0.65,
+        "repetition": 0.42,
+        "contrast": 0.28,
+        "balance": 0.6,
+        "rhythm": 0.58,
+        "gaze_direction": 0.48
       },
       "meaning": {
-        "humor": 0.35,
-        "nostalgia": 0.65,
-        "loneliness": 0.55,
-        "hospitality": 0.55,
-        "anxiety": 0.15,
-        "wonder": 0.45,
-        "irony": 0.25,
-        "loss": 0.35,
-        "contemplation": 0.85,
-        "hope": 0.4
+        "humor": 0.18,
+        "nostalgia": 0.68,
+        "loneliness": 0.52,
+        "hospitality": 0.72,
+        "anxiety": 0.1,
+        "wonder": 0.42,
+        "irony": 0.12,
+        "loss": 0.38,
+        "contemplation": 0.9,
+        "hope": 0.48
       },
       "movement_sequence": [
         "장면 전체를 크게 보지 않는다",
@@ -65,14 +108,18 @@
         "빛이 닿은 자리",
         "누군가 머문 흔적",
         "설명되지 않지만 오래 보게 되는 것",
-        "빈 의자나 창가처럼 부재를 암시하는 것"
+        "빈 의자나 창가처럼 부재를 암시하는 것",
+        "중앙에 조용히 놓인 것",
+        "어두운 배경 위의 한 점 빛"
       ],
       "avoid_patterns": [
         "감정을 직접 설명하는 문장",
         "너무 예쁜 감성 묘사",
         "결론을 강조하는 문장",
         "힐링 콘텐츠처럼 보이는 표현",
-        "장면을 과하게 해석하는 태도"
+        "장면을 과하게 해석하는 태도",
+        "움직임이나 행동이 중심인 장면",
+        "사람이 전면에 나서는 구도"
       ],
       "signature_endings": [
         "그 정도면 충분했다.",
@@ -86,13 +133,43 @@
           "감정을 사물과 빛으로 우회한다",
           "짧은 문장과 여백을 사용한다",
           "결론보다 장면을 남긴다",
-          "설명보다 멈춤을 만든다"
+          "설명보다 멈춤을 만든다",
+          "어두운 배경에 작은 빛을 둔다",
+          "중앙에 하나만 남긴다"
         ],
         "dont": [
           "감정을 직접 규정하지 않는다",
           "교훈으로 끝내지 않는다",
           "과장된 형용사를 쓰지 않는다",
-          "너무 아름다운 문장으로 포장하지 않는다"
+          "너무 아름다운 문장으로 포장하지 않는다",
+          "인물을 전면에 세우지 않는다",
+          "움직임을 강조하지 않는다"
+        ]
+      },
+      "photo_signature": {
+        "tone": "mid-to-dark",
+        "light_position": "center or top",
+        "color_palette": [
+          "#8B7355",
+          "#4a4a4a",
+          "#C4B896",
+          "#8B9E7D",
+          "#E8D5C4"
+        ],
+        "composition": "centered single subject",
+        "frequent_subjects": [
+          "작은 사물",
+          "식물",
+          "손끝",
+          "창가",
+          "빛"
+        ],
+        "frequent_moods": [
+          "고요",
+          "여유",
+          "평온",
+          "따스함",
+          "평화로운"
         ]
       }
     }
