@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.4</title>
+<title>MIMESIS Viewfinder v0.1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -202,7 +202,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.4 · 20260624c</span>
+    <span class="ver">v0.1.5 · 20260624d</span>
   </div>
 </header>
 
@@ -329,7 +329,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   </div>
 
   <div class="card" id="photoInputCard">
-    <div class="card-label">사진 업로드</div>
+    <div class="card-label">사진 업로드 (선택)</div>
     <div class="img-dropzone" id="dropzone"
       onclick="document.getElementById('imgFile').click()"
       ondragover="handleDragOver(event)"
@@ -714,12 +714,6 @@ function resizeImage(file, maxSide=1280, quality=0.82) {
 async function analyzeScene() {
   const key = getKey(); if (!key) return;
   state.textInput = document.getElementById('textInput').value.trim();
-  if (state.coachingMode === 'photo' && !state.imageBase64) {
-    return toast('사진을 업로드해주세요.');
-  }
-  if (state.coachingMode === 'writing' && !state.textInput) {
-    return toast('글을 입력해주세요.');
-  }
   if (!state.textInput && !state.imageBase64) {
     return toast('글이나 사진을 입력해주세요.');
   }
@@ -1167,18 +1161,9 @@ function confirmMode() {
 }
 
 function updateStep1UI() {
-  const textCard  = document.getElementById('textInputCard');
-  const photoCard = document.getElementById('photoInputCard');
-  if (state.coachingMode === 'writing') {
-    textCard.style.display  = '';
-    photoCard.style.display = 'none';
-  } else if (state.coachingMode === 'photo') {
-    textCard.style.display  = 'none';
-    photoCard.style.display = '';
-  } else {
-    textCard.style.display  = '';
-    photoCard.style.display = '';
-  }
+  // 코칭 모드와 무관하게 입력은 항상 글·사진 둘 다 가능
+  document.getElementById('textInputCard').style.display  = '';
+  document.getElementById('photoInputCard').style.display = '';
 }
 
 function updateStepLabels() {
