@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.3</title>
+<title>MIMESIS Viewfinder v0.1.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -151,6 +151,17 @@ input[type=file]{display:none}
 .layer-badge.sel{background:rgba(143,188,143,0.1);color:#8fbc8f;border:1px solid rgba(143,188,143,0.2)}
 .layer-badge.mea{background:rgba(184,122,110,0.1);color:var(--accent);border:1px solid var(--accent-dim)}
 
+
+/* ── 코칭 모드 선택 ── */
+.medium-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.medium-btn{border:1px solid var(--border);background:var(--surface);padding:20px 20px 18px;cursor:pointer;border-radius:1px;text-align:left;transition:all 0.2s;position:relative;width:100%}
+.medium-btn:hover:not(:disabled){border-color:var(--border-hover);background:var(--surface2)}
+.medium-btn.selected{border-color:var(--accent);background:var(--accent-glow)}
+.medium-btn:disabled{opacity:0.32;cursor:not-allowed}
+.medium-icon{font-size:22px;margin-bottom:10px;display:block}
+.medium-name{font-family:var(--serif);font-size:17px;font-weight:300;color:var(--text);display:block;margin-bottom:4px}
+.medium-desc{font-size:10px;color:var(--mute);letter-spacing:0.03em;line-height:1.6;display:block}
+.medium-unavail{position:absolute;top:8px;right:10px;font-size:7px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute2)}
 /* ── 로딩 ── */
 .loading{display:none;align-items:center;gap:10px;color:var(--mute);font-size:11px;letter-spacing:0.08em;padding:14px 0}
 .loading.show{display:flex}
@@ -191,7 +202,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.3 · 20260624b</span>
+    <span class="ver">v0.1.4 · 20260624c</span>
   </div>
 </header>
 
@@ -210,37 +221,41 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
     <div class="dot">01</div>
     <div class="dot-label">창작자<br>선택</div>
   </div>
-  <div class="step-dot" data-step="1" onclick="goStep(1)">
+  <div class="step-dot" data-step="05" onclick="goStep(0.5)">
     <div class="dot">02</div>
+    <div class="dot-label">코칭<br>모드</div>
+  </div>
+  <div class="step-dot" data-step="1" onclick="goStep(1)">
+    <div class="dot">03</div>
     <div class="dot-label">장면<br>가져오기</div>
   </div>
   <div class="step-dot" data-step="2" onclick="goStep(2)">
-    <div class="dot">03</div>
+    <div class="dot">04</div>
     <div class="dot-label">현재<br>시선 분석</div>
   </div>
   <div class="step-dot" data-step="3" onclick="goStep(3)">
-    <div class="dot">04</div>
+    <div class="dot">05</div>
     <div class="dot-label">Attention<br>훈련</div>
   </div>
   <div class="step-dot" data-step="4" onclick="goStep(4)">
-    <div class="dot">05</div>
+    <div class="dot">06</div>
     <div class="dot-label">Selection<br>훈련</div>
   </div>
   <div class="step-dot" data-step="5" onclick="goStep(5)">
-    <div class="dot">06</div>
+    <div class="dot">07</div>
     <div class="dot-label">Meaning<br>훈련</div>
   </div>
   <div class="step-dot" data-step="6" onclick="goStep(6)">
-    <div class="dot">07</div>
+    <div class="dot">08</div>
     <div class="dot-label">예시<br>보기</div>
   </div>
   <div class="step-dot" data-step="7" onclick="goStep(7)">
-    <div class="dot">08</div>
-    <div class="dot-label">직접<br>다시 쓰기</div>
+    <div class="dot">09</div>
+    <div class="dot-label" id="step7Label">직접<br>다시 쓰기</div>
   </div>
   <div class="step-dot" data-step="8" onclick="goStep(8)">
-    <div class="dot">09</div>
-    <div class="dot-label">변화<br>비교</div>
+    <div class="dot">10</div>
+    <div class="dot-label" id="step8Label">변화<br>비교</div>
   </div>
 </div>
 
@@ -278,7 +293,22 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
     </div>
   </div>
   <div class="btn-row">
-    <button class="btn-primary" onclick="goStep(1)">이 시선으로 시작하기 →</button>
+    <button class="btn-primary" onclick="goStep(0.5)">이 시선으로 시작하기 →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- STEP 0.5: 코칭 모드 선택 -->
+<!-- ════════════════════════════════ -->
+<div class="panel" id="panel-05">
+  <div>
+    <div class="panel-title">어떤 코칭을<br>받고 싶으신가요?</div>
+    <div class="panel-desc" style="margin-top:8px" id="modeDesc">선택한 창작자가 활동한 분야에서 코칭을 받을 수 있습니다.</div>
+  </div>
+  <div class="medium-grid" id="mediumGrid"></div>
+  <div class="btn-row">
+    <button class="btn-primary" onclick="confirmMode()">선택 →</button>
+    <button class="btn-secondary" onclick="goStep(0)">← 창작자 다시 선택</button>
   </div>
 </div>
 
@@ -291,15 +321,15 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
     <div class="panel-desc" style="margin-top:8px">사진이나 글 — 어느 쪽이든 괜찮습니다.<br>Viewfinder는 항상 당신의 장면에서 출발합니다.</div>
   </div>
 
-  <div class="card">
+  <div class="card" id="textInputCard">
     <div class="card-label">글 · 메모 · 일기</div>
     <div class="input-zone">
       <textarea class="main-input" id="textInput" placeholder="오늘 찍은 사진 설명, 쓰다 만 문장, 기억나는 장면 메모… 무엇이든 괜찮아요." rows="5"></textarea>
     </div>
   </div>
 
-  <div class="card">
-    <div class="card-label">사진 업로드 (선택)</div>
+  <div class="card" id="photoInputCard">
+    <div class="card-label">사진 업로드</div>
     <div class="img-dropzone" id="dropzone"
       onclick="document.getElementById('imgFile').click()"
       ondragover="handleDragOver(event)"
@@ -437,12 +467,12 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 </div>
 
 <!-- ════════════════════════════════ -->
-<!-- STEP 7: 직접 다시 쓰기 -->
+<!-- STEP 7: 직접 다시 쓰기 / 재촬영 가이드 -->
 <!-- ════════════════════════════════ -->
 <div class="panel" id="panel-7">
   <div>
-    <div class="panel-title">이제 당신의 문장으로<br>다시 써보세요</div>
-    <div class="panel-desc" style="margin-top:8px">방금 선택한 Attention · Selection · Meaning을 따라,<br>당신이 직접 이 장면을 다시 씁니다.</div>
+    <div class="panel-title" id="step7Title">이제 당신의 문장으로<br>다시 써보세요</div>
+    <div class="panel-desc" style="margin-top:8px" id="step7Desc">방금 선택한 Attention · Selection · Meaning을 따라,<br>당신이 직접 이 장면을 다시 씁니다.</div>
   </div>
 
   <!-- 선택 요약 -->
@@ -451,14 +481,32 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
     <div id="summaryContent" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
   </div>
 
-  <div class="rewrite-area">
-    <textarea id="rewriteInput" placeholder="지금 당장 완성본이 아니어도 됩니다. 그 시선으로 장면을 보고, 떠오르는 문장부터 써보세요." rows="7" oninput="updateCharCount()"></textarea>
-    <div class="char-count" id="charCount">0자</div>
+  <!-- 글 모드 -->
+  <div id="writingMode">
+    <div class="rewrite-area">
+      <textarea id="rewriteInput" placeholder="지금 당장 완성본이 아니어도 됩니다. 그 시선으로 장면을 보고, 떠오르는 문장부터 써보세요." rows="7" oninput="updateCharCount()"></textarea>
+      <div class="char-count" id="charCount">0자</div>
+    </div>
   </div>
 
-  <div class="loading" id="load-7"><div class="spinner"></div>변화를 비교하는 중…</div>
-  <div class="btn-row">
-    <button class="btn-primary" onclick="compareResult()">변화 확인하기 →</button>
+  <!-- 사진 모드 -->
+  <div id="photoMode" style="display:none">
+    <div class="loading" id="load-guide"><div class="spinner"></div>재촬영 가이드 생성 중…</div>
+    <div id="photoGuideContent" style="display:none;flex-direction:column;gap:14px">
+      <div class="analysis-block">
+        <div class="label">다시 찍는다면</div>
+        <div class="content" id="photoGuideText"></div>
+      </div>
+      <div class="card">
+        <div class="card-label">체크리스트</div>
+        <div class="change-list" id="photoChecklist"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading" id="load-7"><div class="spinner"></div>비교 중…</div>
+  <div class="btn-row" id="step7Btns">
+    <button class="btn-primary" id="step7NextBtn" onclick="handleStep7Next()">변화 확인하기 →</button>
     <button class="btn-secondary" onclick="goStep(6)">← 예시 다시 보기</button>
   </div>
 </div>
@@ -468,8 +516,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <!-- ════════════════════════════════ -->
 <div class="panel" id="panel-8">
   <div>
-    <div class="panel-title">당신의 시선이<br>어떻게 이동했는지</div>
-    <div class="panel-desc" style="margin-top:8px">점수가 아닙니다. 시선의 변화를 봅니다.</div>
+    <div class="panel-title" id="step8Title">당신의 시선이<br>어떻게 이동했는지</div>
+    <div class="panel-desc" style="margin-top:8px" id="step8Desc">점수가 아닙니다. 시선의 변화를 봅니다.</div>
   </div>
 
   <div class="loading" id="load-8"><div class="spinner"></div>분석 중…</div>
@@ -515,11 +563,12 @@ const API_KEY_KEY = 'vf_api_key';
 const GENOME_URL  = 'https://raw.githubusercontent.com/sapmanri/carousel-generator/main/genome_db.json';
 
 let state = {
-  creatorId   : 'vase_sapmanri',
-  genome      : null,
-  textInput   : '',
-  imageBase64 : null,
-  imageType   : null,
+  creatorId    : 'vase_sapmanri',
+  coachingMode : null,  // 'writing' | 'photo'
+  genome       : null,
+  textInput    : '',
+  imageBase64  : null,
+  imageType    : null,
   currentAnalysis : '',
   attChoice   : null,
   keepChoice  : null,
@@ -576,13 +625,14 @@ function getKey() {
 // ══════════════════════════════════════════
 let currentStep = 0;
 function goStep(n) {
-  document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); p.style.display = ''; });
+  document.querySelectorAll('.panel').forEach(p => { p.classList.remove('active'); });
   document.querySelectorAll('.step-dot').forEach(d => {
-    const sn = parseInt(d.dataset.step);
+    const sn = parseFloat(d.dataset.step);
     d.classList.toggle('active', sn === n);
     if (sn < n) d.classList.add('done'); else d.classList.remove('done');
   });
-  const panel = document.getElementById('panel-' + n);
+  const panelId = n === 0.5 ? 'panel-05' : 'panel-' + n;
+  const panel = document.getElementById(panelId);
   if (panel) panel.classList.add('active');
   currentStep = n;
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -664,6 +714,12 @@ function resizeImage(file, maxSide=1280, quality=0.82) {
 async function analyzeScene() {
   const key = getKey(); if (!key) return;
   state.textInput = document.getElementById('textInput').value.trim();
+  if (state.coachingMode === 'photo' && !state.imageBase64) {
+    return toast('사진을 업로드해주세요.');
+  }
+  if (state.coachingMode === 'writing' && !state.textInput) {
+    return toast('글을 입력해주세요.');
+  }
   if (!state.textInput && !state.imageBase64) {
     return toast('글이나 사진을 입력해주세요.');
   }
@@ -976,8 +1032,10 @@ function updateCharCount() {
 // STEP 8: 변화 비교
 // ══════════════════════════════════════════
 async function compareResult() {
-  state.rewrite = document.getElementById('rewriteInput').value.trim();
-  if (!state.rewrite) return toast('다시 쓴 글을 입력해주세요.');
+  state.rewrite = state.coachingMode === 'photo'
+    ? (document.getElementById('photoGuideText').textContent || '')
+    : document.getElementById('rewriteInput').value.trim();
+  if (state.coachingMode !== 'photo' && !state.rewrite) return toast('다시 쓴 글을 입력해주세요.');
   const key = getKey(); if (!key) return;
   const creator = getCreator();
 
@@ -998,25 +1056,38 @@ JSON으로만 응답:
   "next_suggestion": "다음 시도에서 하나만 바꿔본다면 무엇인지 — 구체적이고 실천 가능한 제안 한 문장"
 }`;
 
+  const modeLabel = state.coachingMode === 'photo' ? '사진 재촬영' : '글 재작성';
   const context = `창작자 Genome: ${creator.display_name_ko}
 시선 순서: ${creator.movement_sequence.join(' → ')}
-금지 패턴: ${creator.avoid_patterns.join(', ')}
+코칭 모드: ${modeLabel}
 
-처음 장면: ${state.textInput || '(사진)'}
-다시 쓴 글: ${state.rewrite}
+처음 장면: ${state.textInput || '(사진 입력)'}
 선택한 시선 — Attention: ${state.attChoice?.label}, 남긴 것: ${state.keepChoice?.label}, 버린 것: ${state.dropChoice?.label}, Meaning: ${state.meaChoice?.label}`;
 
   try {
     const raw = await callClaude(key, context, systemPrompt, 600);
     const data = JSON.parse(raw.replace(/```json|```/g,'').trim());
 
-    document.getElementById('beforeText').textContent = state.textInput || '(사진 입력)';
-    document.getElementById('afterText').textContent  = state.rewrite;
-    document.getElementById('changeList').innerHTML   = data.changes.map(c =>
-      `<div class="change-item"><div class="change-arrow">→</div><div>${c}</div></div>`
-    ).join('');
-    document.getElementById('nextSuggestion').textContent = data.next_suggestion;
-    document.getElementById('compareContent').style.display = 'flex';
+    if (state.coachingMode === 'photo') {
+      // 사진 모드: step8을 재촬영 요약으로
+      document.getElementById('step8Title').innerHTML = '이번 훈련<br>요약';
+      document.getElementById('step8Desc').textContent = '선택한 시선과 재촬영 방향을 정리했습니다.';
+      document.getElementById('beforeText').textContent = '(사진 입력)';
+      document.getElementById('afterText').textContent  = document.getElementById('photoGuideText').textContent || '';
+      document.getElementById('changeList').innerHTML = data.changes.map(c =>
+        `<div class="change-item"><div class="change-arrow">→</div><div>${c}</div></div>`
+      ).join('');
+      document.getElementById('nextSuggestion').textContent = data.next_suggestion;
+      document.getElementById('compareContent').style.display = 'flex';
+    } else {
+      document.getElementById('beforeText').textContent = state.textInput || '(사진 입력)';
+      document.getElementById('afterText').textContent  = state.rewrite;
+      document.getElementById('changeList').innerHTML = data.changes.map(c =>
+        `<div class="change-item"><div class="change-arrow">→</div><div>${c}</div></div>`
+      ).join('');
+      document.getElementById('nextSuggestion').textContent = data.next_suggestion;
+      document.getElementById('compareContent').style.display = 'flex';
+    }
 
     showLoading('load-7', false);
     goStep(8);
@@ -1047,22 +1118,172 @@ function selectChoice(type, idx, el) {
   }
 }
 
+
+// ══════════════════════════════════════════
+// STEP 0.5: 코칭 모드 선택
+// ══════════════════════════════════════════
+const MEDIUM_META = {
+  writing : { icon: '✍️', name: '글 코칭',  desc: '글·메모·산문을 가져오면, 이 창작자의 시선으로 다시 씁니다.' },
+  photo   : { icon: '📷', name: '사진 코칭', desc: '사진을 가져오면, 이 창작자의 시선으로 다시 찍는 방법을 배웁니다.' },
+  video   : { icon: '🎬', name: '영상 코칭', desc: '영상 장면을 가져오면, 이 창작자의 시선으로 프레이밍을 훈련합니다.' }
+};
+
+function renderModeSelect() {
+  const creator = getCreator();
+  if (!creator) return;
+
+  const desc = document.getElementById('modeDesc');
+  desc.textContent = creator.display_name_ko + '의 시선으로 코칭받을 분야를 선택하세요.';
+
+  const grid = document.getElementById('mediumGrid');
+  const allMediums = ['writing', 'photo', 'video'];
+  grid.innerHTML = allMediums.map(m => {
+    const available = creator.mediums.includes(m);
+    const meta = MEDIUM_META[m];
+    const selected = state.coachingMode === m ? 'selected' : '';
+    return `<button class="medium-btn ${selected}" ${available ? '' : 'disabled'}
+      onclick="selectMode('${m}',this)">
+      ${!available ? '<span class="medium-unavail">준비 중</span>' : ''}
+      <span class="medium-icon">${meta.icon}</span>
+      <span class="medium-name">${meta.name}</span>
+      <span class="medium-desc">${meta.desc}</span>
+    </button>`;
+  }).join('');
+}
+
+function selectMode(m, el) {
+  document.querySelectorAll('.medium-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.coachingMode = m;
+}
+
+function confirmMode() {
+  if (!state.coachingMode) return toast('코칭 모드를 선택해주세요.');
+  // STEP 1 입력 UI를 모드에 맞게 조정
+  updateStep1UI();
+  // STEP 7, 8 라벨 업데이트
+  updateStepLabels();
+  goStep(1);
+}
+
+function updateStep1UI() {
+  const textCard  = document.getElementById('textInputCard');
+  const photoCard = document.getElementById('photoInputCard');
+  if (state.coachingMode === 'writing') {
+    textCard.style.display  = '';
+    photoCard.style.display = 'none';
+  } else if (state.coachingMode === 'photo') {
+    textCard.style.display  = 'none';
+    photoCard.style.display = '';
+  } else {
+    textCard.style.display  = '';
+    photoCard.style.display = '';
+  }
+}
+
+function updateStepLabels() {
+  const s7 = document.getElementById('step7Label');
+  const s8 = document.getElementById('step8Label');
+  if (state.coachingMode === 'photo') {
+    if (s7) s7.innerHTML = '재촬영<br>가이드';
+    if (s8) s8.innerHTML = '마무리';
+  } else {
+    if (s7) s7.innerHTML = '직접<br>다시 쓰기';
+    if (s8) s8.innerHTML = '변화<br>비교';
+  }
+}
+
+// STEP 7: 모드 분기
+async function handleStep7Next() {
+  if (state.coachingMode === 'photo') {
+    await compareResult();
+  } else {
+    await compareResult();
+  }
+}
+
+// 사진 모드: 재촬영 가이드 생성
+async function generatePhotoGuide() {
+  const key = getKey(); if (!key) return;
+  const creator = getCreator();
+  document.getElementById('load-guide').classList.add('show');
+
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 시선으로 재촬영 가이드를 만듭니다.
+감각적이고 구체적으로, 하지만 짧게 씁니다.
+
+JSON으로만 응답:
+{
+  "guide": "이 장면을 다시 찍는다면 어떻게 할지 2~3문장으로",
+  "checklist": [
+    "체크 항목 1 (구체적인 행동)",
+    "체크 항목 2",
+    "체크 항목 3"
+  ]
+}`;
+
+  const context = `원래 장면: ${state.textInput || '(사진 입력)'}
+분석: ${state.currentAnalysis?.summary || ''}
+Attention: ${state.attChoice?.label || ''}
+남긴 것: ${state.keepChoice?.label || ''}
+버린 것: ${state.dropChoice?.label || ''}
+Meaning: ${state.meaChoice?.label || ''}`;
+
+  try {
+    const raw = await callClaude(key, context, systemPrompt, 500);
+    const data = JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+
+    document.getElementById('photoGuideText').textContent = data.guide;
+    document.getElementById('photoChecklist').innerHTML = data.checklist.map(c =>
+      `<div class="change-item"><div class="change-arrow">→</div><div>${c}</div></div>`
+    ).join('');
+    document.getElementById('photoGuideContent').style.display = 'flex';
+    document.getElementById('load-guide').classList.remove('show');
+  } catch(e) {
+    document.getElementById('load-guide').classList.remove('show');
+    toast('가이드 생성 실패: ' + e.message);
+  }
+}
+
 // ══════════════════════════════════════════
 // 스텝 진입 시 렌더 훅
 // ══════════════════════════════════════════
 const _origGoStep = goStep;
 goStep = function(n) {
   _origGoStep(n);
+  if (n === 0.5) renderModeSelect();
   if (n === 3) renderAttention();
   if (n === 4) renderSelection();
   if (n === 5) renderMeaning();
-  if (n === 7) renderChoiceSummary();
+  if (n === 7) {
+    renderChoiceSummary();
+    renderStep7ByMode();
+  }
 };
+
+function renderStep7ByMode() {
+  const isPhoto = state.coachingMode === 'photo';
+  document.getElementById('writingMode').style.display = isPhoto ? 'none' : 'block';
+  document.getElementById('photoMode').style.display   = isPhoto ? 'block' : 'none';
+  const title = document.getElementById('step7Title');
+  const desc  = document.getElementById('step7Desc');
+  const btn   = document.getElementById('step7NextBtn');
+  if (isPhoto) {
+    title.innerHTML = '이 장면을<br>다시 찍는다면';
+    desc.textContent = '선택한 시선을 바탕으로, 재촬영 가이드를 드립니다.';
+    btn.textContent  = '마무리 →';
+    generatePhotoGuide();
+  } else {
+    title.innerHTML = '이제 당신의 문장으로<br>다시 써보세요';
+    desc.textContent = '방금 선택한 Attention · Selection · Meaning을 따라, 당신이 직접 이 장면을 다시 씁니다.';
+    btn.textContent  = '변화 확인하기 →';
+  }
+}
 
 // ══════════════════════════════════════════
 // 다시 시작
 // ══════════════════════════════════════════
 function restart() {
+  state.coachingMode = null;
   state.textInput = '';
   state.imageBase64 = null;
   state.imageType = null;
