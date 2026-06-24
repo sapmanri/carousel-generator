@@ -1,54 +1,55 @@
 {
-  "version": "0.1",
-  "schema": "observation_genome_v0.1",
-  "layers": {
-    "attention": ["사람","사물","공간","빛","색","움직임","관계","시간","흔적","감정"],
-    "selection": ["중심선택","배경처리","생략","강조","거리","반복","대비","균형","리듬","시선유도"],
-    "meaning": ["유머","향수","외로움","환대","불안","경이","아이러니","상실","관조","희망"]
+  "version": "0.1.7",
+  "schema": "observation_genome_v0.1.7",
+  "taxonomy": {
+    "attention_axes": ["person","object","space","light","color","movement","relationship","time","trace","emotion"],
+    "selection_axes": ["center_choice","background_handling","omission","emphasis","distance","repetition","contrast","balance","rhythm","gaze_direction"],
+    "meaning_axes":   ["humor","nostalgia","loneliness","hospitality","anxiety","wonder","irony","loss","contemplation","hope"]
   },
-  "creators": [
-    {
+  "creators": {
+    "vase_sapmanri": {
       "id": "vase_sapmanri",
-      "display_name": "Vase / Sapmanri",
-      "display_name_ko": "Vase · 감성찾아삽만리",
-      "rights_status": "self_owned",
+      "display_name_ko": "Vase / Sapmanri",
+      "display_name_en": "Vase / Sapmanri",
+      "status": "active",
+      "rights_status": "owned",
       "mediums": ["writing", "photo"],
-      "bio": "슬로우라이프 창작자. 빛과 작은 사물, 일상의 물성 안에서 잠깐 멈추는 시선.",
+      "bio": "빛과 작은 사물, 일상의 물성 안에서 잠깐 멈추는 시선. 슬로우라이프 창작자.",
       "attention": {
-        "빛": 0.92,
-        "사물": 0.88,
-        "흔적": 0.84,
-        "시간": 0.80,
-        "감정": 0.72,
-        "공간": 0.55,
-        "색": 0.50,
-        "관계": 0.40,
-        "사람": 0.35,
-        "움직임": 0.28
+        "person": 0.2,
+        "object": 0.9,
+        "space": 0.55,
+        "light": 0.95,
+        "color": 0.35,
+        "movement": 0.25,
+        "relationship": 0.45,
+        "time": 0.75,
+        "trace": 0.9,
+        "emotion": 0.55
       },
       "selection": {
-        "생략": 0.90,
-        "중심선택": 0.88,
-        "거리": 0.82,
-        "리듬": 0.80,
-        "배경처리": 0.76,
-        "강조": 0.60,
-        "균형": 0.50,
-        "시선유도": 0.44,
-        "대비": 0.38,
-        "반복": 0.30
+        "center_choice": 0.75,
+        "background_handling": 0.65,
+        "omission": 0.9,
+        "emphasis": 0.35,
+        "distance": 0.7,
+        "repetition": 0.45,
+        "contrast": 0.25,
+        "balance": 0.55,
+        "rhythm": 0.6,
+        "gaze_direction": 0.5
       },
       "meaning": {
-        "관조": 0.92,
-        "환대": 0.78,
-        "향수": 0.74,
-        "외로움": 0.70,
-        "희망": 0.62,
-        "경이": 0.55,
-        "상실": 0.48,
-        "불안": 0.20,
-        "유머": 0.18,
-        "아이러니": 0.15
+        "humor": 0.35,
+        "nostalgia": 0.65,
+        "loneliness": 0.55,
+        "hospitality": 0.55,
+        "anxiety": 0.15,
+        "wonder": 0.45,
+        "irony": 0.25,
+        "loss": 0.35,
+        "contemplation": 0.85,
+        "hope": 0.4
       },
       "movement_sequence": [
         "장면 전체를 크게 보지 않는다",
@@ -60,29 +61,40 @@
         "마지막에는 여백을 남긴다"
       ],
       "keep_patterns": [
-        "빛이 닿은 사물",
-        "잠깐 멈춘 순간",
-        "오래된 물건",
-        "손으로 만든 것",
-        "작은 환대의 신호",
-        "별것 아닌데 마음이 멈춘 장면"
+        "작은 사물",
+        "빛이 닿은 자리",
+        "누군가 머문 흔적",
+        "설명되지 않지만 오래 보게 되는 것",
+        "빈 의자나 창가처럼 부재를 암시하는 것"
       ],
       "avoid_patterns": [
-        "사건 설명",
-        "직접적인 교훈",
-        "감정의 이름을 직접 말하기",
-        "화려한 수식어",
-        "결론의 과잉",
-        "선언적 마무리"
+        "감정을 직접 설명하는 문장",
+        "너무 예쁜 감성 묘사",
+        "결론을 강조하는 문장",
+        "힐링 콘텐츠처럼 보이는 표현",
+        "장면을 과하게 해석하는 태도"
       ],
       "signature_endings": [
-        "오늘은 그 정도면 충분했다.",
+        "그 정도면 충분했다.",
         "그런 오후였다.",
-        "그 정도의 속도가 딱 맞았다.",
-        "별것 없어 별것인 날이었다."
+        "그냥, 거기 있었다.",
+        "오늘은 그 정도의 속도가 맞았다.",
+        "이유는 아직 모른다."
       ],
-      "feedback_style": "soft, observational, non-judgmental",
-      "sample_objects": ["커피", "책", "나무", "흙", "고양이", "꽃", "벤치", "창", "바람", "먼지", "그림자"]
+      "output_guidance": {
+        "do": [
+          "감정을 사물과 빛으로 우회한다",
+          "짧은 문장과 여백을 사용한다",
+          "결론보다 장면을 남긴다",
+          "설명보다 멈춤을 만든다"
+        ],
+        "dont": [
+          "감정을 직접 규정하지 않는다",
+          "교훈으로 끝내지 않는다",
+          "과장된 형용사를 쓰지 않는다",
+          "너무 아름다운 문장으로 포장하지 않는다"
+        ]
+      }
     }
-  ]
+  }
 }
