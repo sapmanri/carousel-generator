@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.5</title>
+<title>MIMESIS Viewfinder v0.1.6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -51,6 +51,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding-bot
 .btn-save{background:var(--accent);border:none;color:#fff;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;padding:8px 14px;cursor:pointer;font-family:var(--sans);border-radius:1px}
 
 /* ── STEP 진행바 ── */
+/* 데스크탑: 기존 dot 방식 */
 .progress{display:flex;gap:0;margin-bottom:36px;position:relative}
 .progress::before{content:'';position:absolute;top:14px;left:0;right:0;height:1px;background:var(--border);z-index:0}
 .step-dot{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;z-index:1;cursor:pointer}
@@ -60,6 +61,19 @@ header{display:flex;justify-content:space-between;align-items:center;padding-bot
 .step-dot.active .dot-label{color:var(--accent)}
 .step-dot.done .dot{background:var(--surface2);border-color:var(--mute2);color:var(--mute)}
 .step-dot.done .dot-label{color:var(--mute2)}
+
+/* 모바일: 슬림 바 형태 */
+.progress-mobile{display:none;margin-bottom:28px;flex-direction:column;gap:8px}
+.pmob-bar-wrap{position:relative;height:2px;background:var(--border);border-radius:2px}
+.pmob-bar-fill{height:2px;background:var(--accent);border-radius:2px;transition:width 0.4s ease}
+.pmob-label{display:flex;justify-content:space-between;align-items:center}
+.pmob-step{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:0.1em}
+.pmob-name{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute)}
+
+@media(max-width:600px){
+  .progress{display:none}
+  .progress-mobile{display:flex}
+}
 
 /* ── 패널 공통 ── */
 .panel{display:none;flex-direction:column;gap:20px;animation:fadeIn 0.3s ease}
@@ -202,7 +216,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.5 · 20260624d</span>
+    <span class="ver">v0.1.6 · 20260624e</span>
   </div>
 </header>
 
@@ -256,6 +270,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="step-dot" data-step="8" onclick="goStep(8)">
     <div class="dot">10</div>
     <div class="dot-label" id="step8Label">변화<br>비교</div>
+  </div>
+</div>
+
+<!-- 모바일 진행바 -->
+<div class="progress-mobile" id="progressMobile">
+  <div class="pmob-label">
+    <span class="pmob-step" id="mobStep">01 / 10</span>
+    <span class="pmob-name" id="mobName">창작자 선택</span>
+  </div>
+  <div class="pmob-bar-wrap">
+    <div class="pmob-bar-fill" id="mobFill" style="width:10%"></div>
   </div>
 </div>
 
@@ -556,6 +581,23 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <div class="toast" id="toast"></div>
 
 <script>
+
+// ── 모바일 진행바 업데이트 ──
+const STEP_NAMES = ['창작자 선택','코칭 모드','장면 가져오기','현재 시선 분석',
+  'Attention','Selection','Meaning','예시 보기','다시 쓰기','비교'];
+function updateMobileProgress(n) {
+  // n: 0, 0.5, 1~8 → 인덱스 0~9
+  const idx = n === 0 ? 0 : n === 0.5 ? 1 : n + 1;
+  const total = 10;
+  const pct = Math.round((idx / (total - 1)) * 100);
+  const el = document.getElementById('mobStep');
+  const nm = document.getElementById('mobName');
+  const fill = document.getElementById('mobFill');
+  if (el) el.textContent = String(idx + 1).padStart(2,'0') + ' / ' + total;
+  if (nm) nm.textContent = STEP_NAMES[idx] || '';
+  if (fill) fill.style.width = pct + '%';
+}
+
 // ══════════════════════════════════════════
 // 상수 · 상태
 // ══════════════════════════════════════════
@@ -1235,6 +1277,7 @@ Meaning: ${state.meaChoice?.label || ''}`;
 const _origGoStep = goStep;
 goStep = function(n) {
   _origGoStep(n);
+  updateMobileProgress(n);
   if (n === 0.5) renderModeSelect();
   if (n === 3) renderAttention();
   if (n === 4) renderSelection();
