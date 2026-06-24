@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.6</title>
+<title>MIMESIS Viewfinder v0.1.7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -216,7 +216,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.6 · 20260624e</span>
+    <span class="ver">v0.1.7 · 20260624f</span>
   </div>
 </header>
 
@@ -235,7 +235,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
     <div class="dot">01</div>
     <div class="dot-label">창작자<br>선택</div>
   </div>
-  <div class="step-dot" data-step="05" onclick="goStep(0.5)">
+  <div class="step-dot" data-step="0.5" onclick="goStep(0.5)">
     <div class="dot">02</div>
     <div class="dot-label">코칭<br>모드</div>
   </div>
@@ -474,7 +474,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 <!-- ════════════════════════════════ -->
 <div class="panel" id="panel-6">
   <div>
-    <div class="panel-title">이 선택들을<br><em>Vase의 문법</em>으로 통과시키면</div>
+    <div class="panel-title">이 선택들을<br><em id="step6CreatorName">이 창작자의 문법</em>으로 통과시키면</div>
     <div class="panel-desc" style="margin-top:8px">이건 정답이 아닙니다. 시선이 문장으로 어떻게 이동하는지 보여주는 감각 샘플입니다.</div>
   </div>
 
@@ -1279,6 +1279,7 @@ goStep = function(n) {
   _origGoStep(n);
   updateMobileProgress(n);
   if (n === 0.5) renderModeSelect();
+  if (n === 6) { const c = getCreator(); const el = document.getElementById("step6CreatorName"); if (c && el) el.textContent = c.display_name_ko + "의 문법"; }
   if (n === 3) renderAttention();
   if (n === 4) renderSelection();
   if (n === 5) renderMeaning();
@@ -1371,7 +1372,7 @@ function toast(msg) {
 // ══════════════════════════════════════════
 async function callClaude(key, userMsg, systemMsg='', maxTokens=1000, retryCount=2) {
   const body = {
-    model: 'claude-sonnet-4-6',
+    model: 'claude-sonnet-4-5-20251001',
     max_tokens: maxTokens,
     messages: [{ role:'user', content: userMsg }]
   };
