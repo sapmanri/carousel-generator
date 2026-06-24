@@ -710,7 +710,8 @@ async function analyzeScene() {
     goStep(2);
   } catch(e) {
     showLoading('load-1', false);
-    toast('분석 실패: ' + e.message);
+    console.error('analyzeScene error:', e);
+    toast('분석 실패: ' + (e.message || '알 수 없는 오류'));
   }
 }
 
@@ -1117,7 +1118,7 @@ function toast(msg) {
 // ══════════════════════════════════════════
 // Claude API
 // ══════════════════════════════════════════
-async function callClaude(key, userMsg, systemMsg='', maxTokens=1000, retryCount=3) {
+async function callClaude(key, userMsg, systemMsg='', maxTokens=1000, retryCount=2) {
   const body = {
     model: 'claude-sonnet-4-6',
     max_tokens: maxTokens,
@@ -1129,8 +1130,8 @@ async function callClaude(key, userMsg, systemMsg='', maxTokens=1000, retryCount
   for (let attempt = 0; attempt <= retryCount; attempt++) {
     try {
       if (attempt > 0) {
-        toast(`API 혼잡 — ${attempt}번째 재시도 중…`);
-        await new Promise(r => setTimeout(r, 1200 * attempt));
+        toast(`재시도 중… (${attempt}/${retryCount})`);
+        await new Promise(r => setTimeout(r, 1500 * attempt));
       }
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method:'POST',
@@ -1145,15 +1146,20 @@ async function callClaude(key, userMsg, systemMsg='', maxTokens=1000, retryCount
       const data = await res.json();
       if (data.error) {
         const msg = data.error.message || data.error.type || 'API error';
-        const retryable = res.status===429||res.status===500||res.status===529||/overload|rate|temporarily/i.test(msg);
-        if (retryable && attempt < retryCount) { lastError = new Error(msg); continue; }
-        throw new Error(msg);
+        const isOverload = res.status===429||res.status===529||/overload|rate limit/i.test(msg);
+        if (isOverload && attempt < retryCount) {
+          lastError = new Error(msg);
+          continue;
+        }
+        throw new Error(`[${res.status}] ${msg}`);
       }
       return data.content?.[0]?.text || '';
     } catch(err) {
       lastError = err;
-      const retryable = /overload|rate|temporarily|fetch/i.test(err.message||'');
-      if (!retryable || attempt >= retryCount) break;
+      // network fetch 에러만 재시도, 나머지는 즉시 throw
+      if (!/failed to fetch|network/i.test(err.message||'') || attempt >= retryCount) {
+        throw err;
+      }
     }
   }
   throw lastError || new Error('API 호출 실패');
