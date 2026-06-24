@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIMESIS Viewfinder v0.1.7</title>
+<title>MIMESIS Viewfinder v0.1.8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -216,7 +216,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="header-right">
     <button class="btn-ghost" onclick="toggleKey()">API Key</button>
     <a href="/" class="btn-ghost" style="text-decoration:none">← 홈</a>
-    <span class="ver">v0.1.7 · 20260624f</span>
+    <span class="ver">v0.1.8 · 20260624g</span>
   </div>
 </header>
 
@@ -270,6 +270,10 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
   <div class="step-dot" data-step="8" onclick="goStep(8)">
     <div class="dot">10</div>
     <div class="dot-label" id="step8Label">변화<br>비교</div>
+  </div>
+  <div class="step-dot" data-step="9" id="dot9" onclick="goStep(9)" style="display:none">
+    <div class="dot">11</div>
+    <div class="dot-label">사진<br>비교</div>
   </div>
 </div>
 
@@ -537,7 +541,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 </div>
 
 <!-- ════════════════════════════════ -->
-<!-- STEP 8: 변화 비교 -->
+<!-- STEP 8: 글 모드 비교 / 사진 모드 재촬영 업로드 -->
 <!-- ════════════════════════════════ -->
 <div class="panel" id="panel-8">
   <div>
@@ -545,34 +549,110 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
     <div class="panel-desc" style="margin-top:8px" id="step8Desc">점수가 아닙니다. 시선의 변화를 봅니다.</div>
   </div>
 
-  <div class="loading" id="load-8"><div class="spinner"></div>분석 중…</div>
+  <!-- 글 모드: 기존 비교 -->
+  <div id="writingCompare">
+    <div class="loading" id="load-8"><div class="spinner"></div>분석 중…</div>
+    <div id="compareContent" style="display:none;flex-direction:column;gap:20px">
+      <div class="compare-grid">
+        <div class="compare-col">
+          <div class="col-label">처음 장면</div>
+          <div class="col-text" id="beforeText"></div>
+        </div>
+        <div class="compare-col after">
+          <div class="col-label">다시 쓴 장면</div>
+          <div class="col-text" id="afterText"></div>
+        </div>
+      </div>
+      <div class="analysis-block">
+        <div class="label">시선의 변화</div>
+        <div class="content change-list" id="changeList"></div>
+      </div>
+      <div class="card">
+        <div class="card-label">다음 시도를 위한 제안</div>
+        <div id="nextSuggestion" style="font-size:12px;color:var(--text);line-height:1.8"></div>
+      </div>
+    </div>
+  </div>
 
-  <div id="compareContent" style="display:none;flex-direction:column;gap:20px">
+  <!-- 사진 모드: 재촬영 사진 업로드 -->
+  <div id="photoUploadStep" style="display:none;flex-direction:column;gap:16px">
+    <div class="card">
+      <div class="card-label">재촬영 가이드 요약</div>
+      <div id="guideRecap" style="font-size:12px;color:var(--mute);line-height:1.8"></div>
+    </div>
+    <div class="img-dropzone" id="dropzone2"
+      onclick="document.getElementById('imgFile2').click()"
+      ondragover="handleDragOver2(event)"
+      ondragleave="handleDragLeave2(event)"
+      ondrop="handleDrop2(event)">
+      <img class="img-preview" id="imgPreview2" alt="" style="display:none;max-width:100%;max-height:220px;margin:0 auto">
+      <div class="drop-label" id="dropLabel2">
+        다시 찍은 사진을 여기에 올려주세요
+        <span>jpg · png · webp</span>
+      </div>
+      <button class="img-remove" id="imgRemove2" onclick="removeImg2(event)" style="display:none">✕ 제거</button>
+    </div>
+    <input type="file" id="imgFile2" accept="image/*" onchange="handleFileSelect2(event)">
+  </div>
+
+  <div class="btn-row" style="margin-top:8px">
+    <button class="btn-primary" id="step8NextBtn" onclick="handleStep8Next()">다른 장면으로 다시 →</button>
+    <button class="btn-secondary" onclick="goStep(7)">← 재촬영 가이드</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- STEP 9: 사진 비교 분석 (사진 모드 전용) -->
+<!-- ════════════════════════════════ -->
+<div class="panel" id="panel-9">
+  <div>
+    <div class="panel-title">시선이<br>어떻게 달라졌는지</div>
+    <div class="panel-desc" style="margin-top:8px">처음 사진과 다시 찍은 사진을 창작자의 시선으로 비교합니다.</div>
+  </div>
+
+  <div class="loading" id="load-9"><div class="spinner"></div>두 사진을 비교하는 중…</div>
+
+  <div id="photoCompareContent" style="display:none;flex-direction:column;gap:20px">
+    <!-- 두 사진 나란히 -->
     <div class="compare-grid">
       <div class="compare-col">
-        <div class="col-label">처음 장면</div>
-        <div class="col-text" id="beforeText"></div>
+        <div class="col-label">처음 사진</div>
+        <img id="beforePhoto" style="width:100%;border-radius:1px;border:1px solid var(--border)" alt="">
       </div>
       <div class="compare-col after">
-        <div class="col-label">다시 쓴 장면</div>
-        <div class="col-text" id="afterText"></div>
+        <div class="col-label">다시 찍은 사진</div>
+        <img id="afterPhoto" style="width:100%;border-radius:1px;border:1px solid var(--accent-dim)" alt="">
       </div>
     </div>
 
-    <div class="analysis-block">
-      <div class="label">시선의 변화</div>
-      <div class="content change-list" id="changeList"></div>
+    <!-- Attention 변화 -->
+    <div class="card">
+      <div class="layer-badge att" style="margin-bottom:10px">Attention 변화</div>
+      <div id="compareAtt" style="font-size:12px;color:var(--text);line-height:1.8"></div>
     </div>
 
+    <!-- Selection 변화 -->
     <div class="card">
-      <div class="card-label">다음 시도를 위한 제안</div>
-      <div id="nextSuggestion" style="font-size:12px;color:var(--text);line-height:1.8"></div>
+      <div class="layer-badge sel" style="margin-bottom:10px">Selection 변화</div>
+      <div id="compareSel" style="font-size:12px;color:var(--text);line-height:1.8"></div>
+    </div>
+
+    <!-- Meaning 변화 -->
+    <div class="card">
+      <div class="layer-badge mea" style="margin-bottom:10px">Meaning 변화</div>
+      <div id="compareMea" style="font-size:12px;color:var(--text);line-height:1.8"></div>
+    </div>
+
+    <!-- 다음 제안 -->
+    <div class="analysis-block">
+      <div class="label">다음 촬영을 위한 제안</div>
+      <div class="content" id="photoNextSuggestion"></div>
     </div>
   </div>
 
   <div class="btn-row" style="margin-top:8px">
     <button class="btn-primary" onclick="restart()">다른 장면으로 다시 →</button>
-    <button class="btn-secondary" onclick="goStep(7)">← 다시 쓰기 수정</button>
+    <button class="btn-secondary" onclick="goStep(8)">← 사진 다시 업로드</button>
   </div>
 </div>
 
@@ -584,7 +664,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:4px 0}
 
 // ── 모바일 진행바 업데이트 ──
 const STEP_NAMES = ['창작자 선택','코칭 모드','장면 가져오기','현재 시선 분석',
-  'Attention','Selection','Meaning','예시 보기','다시 쓰기','비교'];
+  'Attention','Selection','Meaning','예시 보기','다시 쓰기','비교','사진 비교'];
 function updateMobileProgress(n) {
   // n: 0, 0.5, 1~8 → 인덱스 0~9
   const idx = n === 0 ? 0 : n === 0.5 ? 1 : n + 1;
@@ -616,8 +696,11 @@ let state = {
   keepChoice  : null,
   dropChoice  : null,
   meaChoice   : null,
-  exampleText : '',
-  rewrite     : ''
+  exampleText  : '',
+  rewrite      : '',
+  retakeBase64 : null,
+  retakeType   : null,
+  retakeDataUrl: null
 };
 
 // ══════════════════════════════════════════
@@ -1064,6 +1147,135 @@ function updateCharCount() {
   document.getElementById('charCount').textContent = v.length + '자';
 }
 
+
+// ══════════════════════════════════════════
+// STEP 8: 모드 분기
+// ══════════════════════════════════════════
+function renderStep8ByMode() {
+  const isPhoto = state.coachingMode === 'photo';
+  document.getElementById('writingCompare').style.display   = isPhoto ? 'none' : 'block';
+  document.getElementById('photoUploadStep').style.display  = isPhoto ? 'flex' : 'none';
+  const title = document.getElementById('step8Title');
+  const desc  = document.getElementById('step8Desc');
+  const btn   = document.getElementById('step8NextBtn');
+  if (isPhoto) {
+    title.innerHTML  = '다시 찍은 사진을<br>올려주세요';
+    desc.textContent = '재촬영 가이드를 따라 찍은 사진을 업로드하면 비교 분석을 시작합니다.';
+    btn.textContent  = '비교 분석 시작 →';
+    // 가이드 요약 채우기
+    const guideText = document.getElementById('photoGuideText')?.textContent || '';
+    document.getElementById('guideRecap').textContent = guideText;
+  } else {
+    title.innerHTML  = '당신의 시선이<br>어떻게 이동했는지';
+    desc.textContent = '점수가 아닙니다. 시선의 변화를 봅니다.';
+    btn.textContent  = '다른 장면으로 다시 →';
+  }
+}
+
+// ══════════════════════════════════════════
+// STEP 8 버튼: 사진 모드면 비교 분석, 글 모드면 restart
+// ══════════════════════════════════════════
+async function handleStep8Next() {
+  if (state.coachingMode === 'photo') {
+    await comparePhotos();
+  } else {
+    restart();
+  }
+}
+
+// ══════════════════════════════════════════
+// 재촬영 사진 이미지 처리
+// ══════════════════════════════════════════
+function handleDragOver2(e)  { e.preventDefault(); document.getElementById('dropzone2').classList.add('drag'); }
+function handleDragLeave2(e) { document.getElementById('dropzone2').classList.remove('drag'); }
+function handleDrop2(e) {
+  e.preventDefault();
+  document.getElementById('dropzone2').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) loadImg2(file);
+}
+function handleFileSelect2(e) {
+  const file = e.target.files[0];
+  if (file) loadImg2(file);
+}
+async function loadImg2(file) {
+  try {
+    toast('이미지 압축 중…');
+    const result = await resizeImage(file);
+    state.retakeBase64  = result.base64;
+    state.retakeType    = result.mediaType;
+    state.retakeDataUrl = result.dataUrl;
+    const preview = document.getElementById('imgPreview2');
+    preview.src = result.dataUrl;
+    preview.style.display = 'block';
+    document.getElementById('dropLabel2').style.display = 'none';
+    document.getElementById('imgRemove2').style.display = 'block';
+    toast('업로드됐어요.');
+  } catch(e) { toast('이미지 로드 실패'); }
+}
+function removeImg2(e) {
+  e.stopPropagation();
+  state.retakeBase64 = null; state.retakeType = null; state.retakeDataUrl = null;
+  document.getElementById('imgPreview2').style.display = 'none';
+  document.getElementById('dropLabel2').style.display = 'block';
+  document.getElementById('imgRemove2').style.display = 'none';
+  document.getElementById('imgFile2').value = '';
+}
+
+// ══════════════════════════════════════════
+// STEP 9: 두 사진 비교 분석
+// ══════════════════════════════════════════
+async function comparePhotos() {
+  if (!state.retakeBase64) return toast('다시 찍은 사진을 업로드해주세요.');
+  const key = getKey(); if (!key) return;
+  const creator = getCreator();
+
+  showLoading('load-9', true);
+  goStep(9);
+
+  // 두 사진 미리보기 세팅
+  if (state.imageBase64) {
+    document.getElementById('beforePhoto').src = 'data:' + state.imageType + ';base64,' + state.imageBase64;
+  }
+  document.getElementById('afterPhoto').src = state.retakeDataUrl;
+
+  const systemPrompt = `당신은 창작자 ${creator.display_name_ko}의 Observation Genome으로 두 사진을 비교합니다.
+Attention → Selection → Meaning 3층 구조로 각각 변화를 설명하세요.
+점수 없이, 시선의 이동 언어로만 씁니다. 따뜻하고 관찰자적 톤으로.
+
+JSON으로만 응답:
+{
+  "attention": "Attention 레이어에서 달라진 것 (2~3문장)",
+  "selection": "Selection 레이어에서 달라진 것 (2~3문장)",
+  "meaning": "Meaning 레이어에서 달라진 것 (2~3문장)",
+  "next_suggestion": "다음 촬영에서 하나만 더 바꿔본다면 — 구체적 제안 한 문장"
+}`;
+
+  const userContent = [
+    { type:'text', text:'처음 사진 (첫 번째 이미지)과 재촬영 사진 (두 번째 이미지)을 비교해주세요.' },
+    { type:'text', text:`선택한 시선 — Attention: ${state.attChoice?.label || ''}, 남긴 것: ${state.keepChoice?.label || ''}, 버린 것: ${state.dropChoice?.label || ''}, Meaning: ${state.meaChoice?.label || ''}` },
+  ];
+  if (state.imageBase64) {
+    userContent.splice(1, 0, { type:'image', source:{ type:'base64', media_type: state.imageType || 'image/jpeg', data: state.imageBase64 }});
+  }
+  userContent.splice(-1, 0, { type:'image', source:{ type:'base64', media_type: state.retakeType || 'image/jpeg', data: state.retakeBase64 }});
+
+  try {
+    const raw = await callClaude(key, userContent, systemPrompt, 800);
+    const data = JSON.parse(raw.replace(/```json|```/g,'').trim());
+
+    document.getElementById('compareAtt').textContent         = data.attention;
+    document.getElementById('compareSel').textContent         = data.selection;
+    document.getElementById('compareMea').textContent         = data.meaning;
+    document.getElementById('photoNextSuggestion').textContent = data.next_suggestion;
+    document.getElementById('photoCompareContent').style.display = 'flex';
+    showLoading('load-9', false);
+  } catch(e) {
+    showLoading('load-9', false);
+    toast('비교 실패: ' + e.message);
+  }
+}
+
 // ══════════════════════════════════════════
 // STEP 8: 변화 비교
 // ══════════════════════════════════════════
@@ -1211,19 +1423,22 @@ function updateStep1UI() {
 function updateStepLabels() {
   const s7 = document.getElementById('step7Label');
   const s8 = document.getElementById('step8Label');
+  const dot9 = document.getElementById('dot9');
   if (state.coachingMode === 'photo') {
     if (s7) s7.innerHTML = '재촬영<br>가이드';
-    if (s8) s8.innerHTML = '마무리';
+    if (s8) s8.innerHTML = '재촬영<br>업로드';
+    if (dot9) dot9.style.display = '';
   } else {
     if (s7) s7.innerHTML = '직접<br>다시 쓰기';
     if (s8) s8.innerHTML = '변화<br>비교';
+    if (dot9) dot9.style.display = 'none';
   }
 }
 
 // STEP 7: 모드 분기
 async function handleStep7Next() {
   if (state.coachingMode === 'photo') {
-    await compareResult();
+    goStep(8);
   } else {
     await compareResult();
   }
@@ -1287,6 +1502,7 @@ goStep = function(n) {
     renderChoiceSummary();
     renderStep7ByMode();
   }
+  if (n === 8) renderStep8ByMode();
 };
 
 function renderStep7ByMode() {
@@ -1297,12 +1513,12 @@ function renderStep7ByMode() {
   const desc  = document.getElementById('step7Desc');
   const btn   = document.getElementById('step7NextBtn');
   if (isPhoto) {
-    title.innerHTML = '이 장면을<br>다시 찍는다면';
+    title.innerHTML  = '이 장면을<br>다시 찍는다면';
     desc.textContent = '선택한 시선을 바탕으로, 재촬영 가이드를 드립니다.';
-    btn.textContent  = '마무리 →';
+    btn.textContent  = '다시 찍은 사진 올리기 →';
     generatePhotoGuide();
   } else {
-    title.innerHTML = '이제 당신의 문장으로<br>다시 써보세요';
+    title.innerHTML  = '이제 당신의 문장으로<br>다시 써보세요';
     desc.textContent = '방금 선택한 Attention · Selection · Meaning을 따라, 당신이 직접 이 장면을 다시 씁니다.';
     btn.textContent  = '변화 확인하기 →';
   }
@@ -1312,7 +1528,10 @@ function renderStep7ByMode() {
 // 다시 시작
 // ══════════════════════════════════════════
 function restart() {
-  state.coachingMode = null;
+  state.coachingMode  = null;
+  state.retakeBase64  = null;
+  state.retakeType    = null;
+  state.retakeDataUrl = null;
   state.textInput = '';
   state.imageBase64 = null;
   state.imageType = null;
