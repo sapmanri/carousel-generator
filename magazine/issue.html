@@ -763,18 +763,25 @@ async function exportPdf() {
       bar.style.width = `${Math.round((i / pages.length) * 80)}%`;
 
       const page = pages[i];
-      const canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: null,
-        scrollX: 0,
-        scrollY: 0,
-        width: page.offsetWidth,
-        height: page.scrollHeight,
-        windowWidth: page.offsetWidth,
-        windowHeight: page.scrollHeight,
-      });
+      let canvas;
+      try {
+        canvas = await html2canvas(page, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          scrollX: 0,
+          scrollY: 0,
+          width: page.offsetWidth,
+          height: page.scrollHeight,
+          windowWidth: page.offsetWidth,
+          windowHeight: page.scrollHeight,
+        });
+      } catch(capErr) {
+        console.warn(`페이지 ${i+1} 캡처 실패, 스킵:`, capErr);
+        canvases.push(null);
+        continue;
+      }
       canvases.push(canvas);
     }
 
@@ -786,8 +793,9 @@ async function exportPdf() {
 
     for (let i = 0; i < canvases.length; i++) {
       const canvas = canvases[i];
+      if (!canvas || !canvas.width || !canvas.height) continue; // 빈 캔버스 스킵
       const ratio = canvas.height / canvas.width;
-      const pageH = Math.round(PDF_W_MM * ratio);
+      const pageH = Math.max(1, Math.round(PDF_W_MM * ratio)); // 최소 1mm 보장
       const orient = ratio > 1 ? 'portrait' : 'landscape';
 
       if (i === 0) {
