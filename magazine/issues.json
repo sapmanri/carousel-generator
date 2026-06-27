@@ -1281,8 +1281,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/bybg_71e490bd_116edb33.jpg",
           "captionLeft": "맨발로 선 나무 바닥",
           "captionRight": "빛이 누워 있는 오후",
-          "focalXLeft": 0,
-          "focalXRight": 0
+          "splitX": 0
         },
         {
           "type": "fullbleed",
@@ -1295,6 +1294,9 @@
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/i6t0_b3bf5921_70f443e1.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "매달린 시간"
         },
         {
@@ -1302,8 +1304,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/smjo_a51c5f55_f8239b97.jpg",
           "captionLeft": "흐릿한 집 안 — 살 만한 곳",
           "captionRight": "",
-          "focalXLeft": 85,
-          "focalXRight": 83
+          "splitX": 84
         },
         {
           "type": "split",
@@ -1317,8 +1318,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lbe4_64f572d3_471e9db7.jpg",
           "captionLeft": "녹차를 천천히 따랐다",
           "captionRight": "우유와 얼음이 조용히 밀려났다",
-          "focalXLeft": 59,
-          "focalXRight": 59
+          "splitX": 59
         },
         {
           "type": "split",
@@ -1331,6 +1331,9 @@
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/kabc_317cde_ff34c0de.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "오후의 작은 휴식"
         },
         {
@@ -1345,13 +1348,15 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/pkes_1fa671c5_12eb16e7.jpg",
           "captionLeft": "오래된 손의 속도로",
           "captionRight": "연습하는 시간",
-          "focalXLeft": 50,
-          "focalXRight": 50
+          "splitX": 50
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/q5f4_82edf1b3_25a04687.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "국수 한 그릇의 온기"
         },
         {
@@ -1359,13 +1364,15 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lufg_e4fc4828_d5479a48.jpg",
           "captionLeft": "숫자 3을 오래 보고 있었다",
           "captionRight": "책장을 넘기지 않았다",
-          "focalXLeft": 38,
-          "focalXRight": 39
+          "splitX": 39
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/oi0c_5bfb8763_90fe657f.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "차를 세우는 시간"
         },
         {
@@ -1373,8 +1380,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/o1zg_2e8a675d_e98c70d.jpg",
           "captionLeft": "피아노를 치는 손",
           "captionRight": "벽은 하얀데 손끝은 조금 어둡다",
-          "focalXLeft": 21,
-          "focalXRight": 21
+          "splitX": 21
         },
         {
           "type": "fullbleed",
@@ -1388,8 +1394,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/su70_8fb30aa9_7570d233.jpg",
           "captionLeft": "손끝에 남은 온도",
           "captionRight": "넘기지 않은 시간",
-          "focalXLeft": 35,
-          "focalXRight": 43
+          "splitX": 39
         },
         {
           "type": "fullbleed",
@@ -1403,8 +1408,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/q9aw_8b6cbccf_f5ab4853.jpg",
           "captionLeft": "젓가락을 들었는데",
           "captionRight": "바로 비비지 않았다.",
-          "focalXLeft": 11,
-          "focalXRight": 10
+          "splitX": 11
         },
         {
           "type": "dialogue",
@@ -1467,13 +1471,15 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tgy8_9cff8bf7_260a5b51.jpg",
           "captionLeft": "손끝에 온기가 남는 시간",
           "captionRight": "그날의 속도로 돌아가는 오후",
-          "focalXLeft": 33,
-          "focalXRight": 35
+          "splitX": 34
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/sqb0_c0f656f5_482e0aa9.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "작은 것들을 모으는 시간"
         },
         {
@@ -1481,19 +1487,24 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/u3j0_918e71d5_5a67b1ed.jpg",
           "captionLeft": "손끝으로 젓는 시간이었다",
           "captionRight": "그날은 책상 위에 빛이 올라왔다.",
-          "focalXLeft": 42,
-          "focalXRight": 44
+          "splitX": 43
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/s6nk_3163c6fa_6b9a0090.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "달콤한 순간의 시작"
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ntb4_34926a51_4c28f71b.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "아침을 깨우는 베리"
         },
         {
@@ -1637,19 +1648,24 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/k5tc_a125e86_ae52801a.jpg",
           "captionLeft": "빛이 들어오는 쪽",
           "captionRight": "그림자가 놓이는 쪽",
-          "focalXLeft": 17,
-          "focalXRight": 14
+          "splitX": 16
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1o8r8_5a6f29fb_275a16d5.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "담장 너머 작은 둥지"
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/o574_99193e58_872e147e.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "오후의 작은 사치"
         },
         {
@@ -1657,8 +1673,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tfd0_bd825853_777ab35.jpg",
           "captionLeft": "문 하나 열면 — 몸은 조금 늦게 따라온다",
           "captionRight": "",
-          "focalXLeft": 58,
-          "focalXRight": 60
+          "splitX": 59
         },
         {
           "type": "split",
@@ -1671,12 +1686,18 @@
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lync_3c685440_635d2894.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "작은 우주를 품은 날"
         },
         {
           "type": "botanical",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/qnlw_d55be189_302f758b.jpg",
           "tag": "Botanical Notes",
+          "number": "",
+          "title": "",
+          "subtitle": "",
           "caption": "초록 우산의 오후"
         },
         {
@@ -1689,8 +1710,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1be6g_8ac83c10_97883efa.jpg",
           "captionLeft": "잔디밭 한가운데 — 고양이가 막 뛰어든 참이다",
           "captionRight": "",
-          "focalXLeft": 22,
-          "focalXRight": 21
+          "splitX": 22
         },
         {
           "type": "split",
@@ -1704,8 +1724,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/wh2g_eda5f82a_776d87f8.jpg",
           "captionLeft": "벽돌을 만지고 있으니",
           "captionRight": "손끝이 까칠했다.",
-          "focalXLeft": 0,
-          "focalXRight": 100
+          "splitX": 50
         },
         {
           "type": "split",
@@ -1719,8 +1738,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/15i5c_f6e5a7fa_f3069a8c.jpg",
           "captionLeft": "손끝에 아직 흙이 남아 있었다",
           "captionRight": "조금 늦어진 오후였다",
-          "focalXLeft": 35,
-          "focalXRight": 65
+          "splitX": 50
         },
         {
           "type": "dialogue",
@@ -1983,8 +2001,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/x9q4_8bdcce79_367883c5.jpg",
           "captionLeft": "불을 피우려고 앉아 있었다",
           "captionRight": "오늘은 마당에 앉아",
-          "focalXLeft": 55,
-          "focalXRight": 63
+          "splitX": 59
         },
         {
           "type": "fullbleed",
@@ -1998,8 +2015,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1awcs_972aeae4_321eb6a4.jpg",
           "captionLeft": "앉아 있는 것만으로도",
           "captionRight": "그날이 조금 느려졌다.",
-          "focalXLeft": 0,
-          "focalXRight": 4
+          "splitX": 2
         },
         {
           "type": "fullbleed",
@@ -2013,8 +2029,7 @@
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/2fywo_d1200ab6_119a3ac4.jpg",
           "captionLeft": "나무 사이로 들어가는 길",
           "captionRight": "조금 서성이다 따라갔다",
-          "focalXLeft": 75,
-          "focalXRight": 76
+          "splitX": 76
         },
         {
           "type": "closing",
