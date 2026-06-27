@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B8B7A",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
-          "suggested_caption": "Ã¬Â°Â¨Ã«Â¥Â¼ Ã¬ÂÂ°Ã«Â¦Â¬Ã«ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
-          "suggested_caption_left": "Ã¬ÂÂÃ¬ÂÂ´ Ã­ÂÂ¼Ã¬ÂÂ´Ã«ÂÂÃ«ÂÂ",
-          "suggested_caption_right": "Ã«ÂÂ°Ã«ÂÂ»Ã­ÂÂ Ã¬ÂÂÃªÂ°Â",
-          "suggested_label": "Ã­ÂÂ°Ã­ÂÂÃ¬ÂÂ",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
+          "suggested_caption": "ÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂ¦ÃÂ¬ÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
+          "suggested_caption_left": "ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ´ ÃÂ­ÃÂÃÂ¼ÃÂ¬ÃÂÃÂ´ÃÂ«ÃÂÃÂÃÂ«ÃÂÃÂ",
+          "suggested_caption_right": "ÃÂ«ÃÂÃÂ°ÃÂ«ÃÂÃÂ»ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
+          "suggested_label": "ÃÂ­ÃÂÃÂ°ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ",
           "suggested_label_en": "Afternoon Tea Ritual",
           "suggested_caption_en": "When tea leaves unfold",
           "aspect_ratio": "wide",
@@ -33,10 +33,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B8B7A",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "Ã¬Â°Â¨Ã«Â¥Â¼ Ã¬ÂÂ°Ã«Â¦Â¬Ã«ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
+          "suggested_copy": "ÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂ¦ÃÂ¬ÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
           "suggested_body": ""
         },
         "ts": 1782540651158
@@ -46,7 +46,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B8B7A",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ"
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ"
         },
         "ts": 1782540651260
       },
@@ -66,22 +66,22 @@
       "season": "summer",
       "time_of_day": "afternoon",
       "location_type": "indoor",
-      "primary_subject": "ì°»ìì ë¬¼ ë¶ê¸°",
+      "primary_subject": "Ã¬Â°Â»Ã¬ÂÂÃ¬ÂÂ Ã«Â¬Â¼ Ã«Â¶ÂÃªÂ¸Â°",
       "secondary_subjects": [
-        "ì ë¦¬ ë¤ê´",
-        "ì°¨ ë³´ê´ ì©ê¸°",
-        "ì±",
-        "ì¼ì£¼",
-        "ì² ì  ë°ì¹¨ë"
+        "Ã¬ÂÂ Ã«Â¦Â¬ Ã«ÂÂ¤ÃªÂ´Â",
+        "Ã¬Â°Â¨ Ã«Â³Â´ÃªÂ´Â Ã¬ÂÂ©ÃªÂ¸Â°",
+        "Ã¬Â±Â",
+        "Ã¬ÂÂ¼Ã¬Â£Â¼",
+        "Ã¬Â²Â Ã¬Â Â Ã«Â°ÂÃ¬Â¹Â¨Ã«ÂÂ"
       ],
       "activity_type": "unknown",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "ì ë¦¬",
-        "ê¸ì",
-        "ëë¬´",
-        "ì¢ì´"
+        "Ã¬ÂÂ Ã«Â¦Â¬",
+        "ÃªÂ¸ÂÃ¬ÂÂ",
+        "Ã«ÂÂÃ«Â¬Â´",
+        "Ã¬Â¢ÂÃ¬ÂÂ´"
       ],
       "has_text": true,
       "text_area_position": "left",
@@ -91,13 +91,13 @@
       "focus_clarity": "soft",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ë¬¼ ë°ë¥´ë ëì  ìê°ê³¼ ì°»ìì´ ì´ì°ë¬ì ¸ ì¬ë¡ì°ë¼ì´í ê°ì±ì ì§ê´ì ì¼ë¡ ì ë¬í¨",
-      "mood": "ê³ ìí¨",
-      "suggested_caption": "ì²ì²í, ì°¨ í ì",
+      "thumbnail_reason": "Ã«Â¬Â¼ Ã«ÂÂ°Ã«Â¥Â´Ã«ÂÂ Ã«ÂÂÃ¬Â Â Ã¬ÂÂÃªÂ°ÂÃªÂ³Â¼ Ã¬Â°Â»Ã¬ÂÂÃ¬ÂÂ´ Ã¬ÂÂ´Ã¬ÂÂ°Ã«ÂÂ¬Ã¬Â Â¸ Ã¬ÂÂ¬Ã«Â¡ÂÃ¬ÂÂ°Ã«ÂÂ¼Ã¬ÂÂ´Ã­ÂÂ ÃªÂ°ÂÃ¬ÂÂ±Ã¬ÂÂ Ã¬Â§ÂÃªÂ´ÂÃ¬Â ÂÃ¬ÂÂ¼Ã«Â¡Â Ã¬Â ÂÃ«ÂÂ¬Ã­ÂÂ¨",
+      "mood": "ÃªÂ³Â Ã¬ÂÂÃ­ÂÂ¨",
+      "suggested_caption": "Ã¬Â²ÂÃ¬Â²ÂÃ­ÂÂ, Ã¬Â°Â¨ Ã­ÂÂ Ã¬ÂÂ",
       "suggested_caption_en": "Slow water, quiet leaves",
-      "suggested_caption_left": "ì±ê³¼ ì¼ì£¼ ê³ì",
-      "suggested_caption_right": "ì°¨ í ìì ìê°",
-      "suggested_label": "ì¤íì ë¤ë¡",
+      "suggested_caption_left": "Ã¬Â±ÂÃªÂ³Â¼ Ã¬ÂÂ¼Ã¬Â£Â¼ ÃªÂ³ÂÃ¬ÂÂ",
+      "suggested_caption_right": "Ã¬Â°Â¨ Ã­ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
+      "suggested_label": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ Ã«ÂÂ¤Ã«Â¡Â",
       "suggested_label_en": "afternoon tea",
       "domesticity_score": 4,
       "rurality_score": 3,
@@ -118,11 +118,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B6F47",
-          "mood": "ìë°",
-          "suggested_caption": "ì¤ëì ë¹ë¹êµ­ì",
-          "suggested_caption_left": "ì ì¬ì ì¨ê¸°",
-          "suggested_caption_right": "í ê·¸ë¦ì ìê°",
-          "suggested_label": "ìíì íê²½",
+          "mood": "Ã¬ÂÂÃ«Â°Â",
+          "suggested_caption": "Ã¬ÂÂ¤Ã«ÂÂÃ¬ÂÂ Ã«Â¹ÂÃ«Â¹ÂÃªÂµÂ­Ã¬ÂÂ",
+          "suggested_caption_left": "Ã¬Â ÂÃ¬ÂÂ¬Ã¬ÂÂ Ã¬ÂÂ¨ÃªÂ¸Â°",
+          "suggested_caption_right": "Ã­ÂÂ ÃªÂ·Â¸Ã«Â¦ÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "suggested_label": "Ã¬ÂÂÃ­ÂÂÃ¬ÂÂ Ã­ÂÂÃªÂ²Â½",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": "50",
@@ -137,10 +137,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B6F47",
-          "mood": "ìë°",
+          "mood": "Ã¬ÂÂÃ«Â°Â",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ì¤ëì ë¹ë¹êµ­ì",
+          "suggested_copy": "Ã¬ÂÂ¤Ã«ÂÂÃ¬ÂÂ Ã«Â¹ÂÃ«Â¹ÂÃªÂµÂ­Ã¬ÂÂ",
           "suggested_body": ""
         },
         "ts": 1782487519117
@@ -150,7 +150,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B6F47",
-          "mood": "ìë°"
+          "mood": "Ã¬ÂÂÃ«Â°Â"
         },
         "ts": 1782487519308
       },
@@ -170,22 +170,22 @@
       "season": "unknown",
       "time_of_day": "unknown",
       "location_type": "cafe",
-      "primary_subject": "비빔국수",
+      "primary_subject": "ë¹ë¹êµ­ì",
       "secondary_subjects": [
-        "반찬",
-        "깍두기",
-        "나물",
-        "젓가락",
-        "손"
+        "ë°ì°¬",
+        "ê¹ëê¸°",
+        "ëë¬¼",
+        "ì ê°ë½",
+        "ì"
       ],
       "activity_type": "cooking",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "세라믹",
-        "금속",
-        "면발",
-        "고추장"
+        "ì¸ë¼ë¯¹",
+        "ê¸ì",
+        "ë©´ë°",
+        "ê³ ì¶ì¥"
       ],
       "has_text": true,
       "text_area_position": "top",
@@ -195,19 +195,123 @@
       "focus_clarity": "clear",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "강렬한 붉은색 비빔국수와 손동작이 시선을 즉시 끌며 음식 콘텐츠 썸네일로 높은 클릭 유인",
-      "mood": "식욕",
-      "suggested_caption": "손끝의 빨간 맛",
+      "thumbnail_reason": "ê°ë ¬í ë¶ìì ë¹ë¹êµ­ìì ìëìì´ ìì ì ì¦ì ëë©° ìì ì½íì¸  ì¸ë¤ì¼ë¡ ëì í´ë¦­ ì ì¸",
+      "mood": "ìì",
+      "suggested_caption": "ìëì ë¹¨ê° ë§",
       "suggested_caption_en": "Red bowl, deep hunger.",
-      "suggested_caption_left": "비빔의 시작",
-      "suggested_caption_right": "붉고 깊은 맛",
-      "suggested_label": "시골 별미",
+      "suggested_caption_left": "ë¹ë¹ì ìì",
+      "suggested_caption_right": "ë¶ê³  ê¹ì ë§",
+      "suggested_label": "ìê³¨ ë³ë¯¸",
       "suggested_label_en": "Country Table",
       "domesticity_score": 3,
       "rurality_score": 2,
       "craft_score": 2,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:34:54.526Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "qnlw_d55be189_302f758b": {
+      "name": "qnlw_d55be189_302f758b.jpg",
+      "path": "library/qnlw_d55be189_302f758b.jpg",
+      "hash": "qnlw_d55be189_302f758b",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/qnlw_d55be189_302f758b.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/qnlw_d55be189_302f758b.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B7355",
+          "mood": "ë¬ì½¤í",
+          "suggested_caption": "ì´ë¡ ì°ì°ì ì¤í",
+          "suggested_caption_left": "ì´ì½ë¦¿ êµ¬ì²´",
+          "suggested_caption_right": "ì´ë¡ ì°ì°",
+          "suggested_label": "ëì í¸ ìê°",
+          "aspect_ratio": "wide",
+          "best_page_type": "botanical",
+          "focal_x": "50",
+          "focal_y": "45",
+          "spread_focal_left": "30",
+          "spread_focal_right": "70"
+        },
+        "ts": 1782487441355
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B7355",
+          "mood": "ë¬ì½¤í",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ì´ë¡ ì°ì°ì ì¤í",
+          "suggested_body": ""
+        },
+        "ts": 1782487441364
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B7355",
+          "mood": "ë¬ì½¤í"
+        },
+        "ts": 1782487441556
+      },
+      "subject_position": "center",
+      "focal_x": 50,
+      "focal_y": 55,
+      "aspect_ratio": "wide",
+      "best_page_type": "split",
+      "spread_focal_left": 25,
+      "spread_focal_right": 75,
+      "overall_brightness": "mid",
+      "dominant_color": "#8B4513",
+      "color_temperature": "warm",
+      "contrast_level": "medium",
+      "visual_density": "medium",
+      "negative_space": "low",
+      "season": "unknown",
+      "time_of_day": "afternoon",
+      "location_type": "cafe",
+      "primary_subject": "구형 디저트 두 개",
+      "secondary_subjects": [
+        "초콜릿 무스볼",
+        "그린 무스볼",
+        "스푼",
+        "흰색 플레이트",
+        "검정 접시"
+      ],
+      "activity_type": "object",
+      "human_presence": "none",
+      "animal_presence": "none",
+      "material_texture": [
+        "벨벳 파우더 코팅",
+        "매트 세라믹",
+        "금속 스푼",
+        "나무 테이블"
+      ],
+      "has_text": false,
+      "text_area_position": "none",
+      "camera_distance": "closeup",
+      "camera_angle": "eye_level",
+      "motion_implied": "still",
+      "focus_clarity": "soft",
+      "text_safe_area": "bottom",
+      "thumbnail_potential": "high",
+      "thumbnail_reason": "두 색감의 대비가 강렬하고 벨벳 질감이 시각적 호기심을 자극함",
+      "mood": "감각적",
+      "suggested_caption": "두 개의 달콤한 구",
+      "suggested_caption_en": "Two spheres, soft and sweet",
+      "suggested_caption_left": "초콜릿의 속",
+      "suggested_caption_right": "초록의 달콤함",
+      "suggested_label": "달콤한 순간",
+      "suggested_label_en": "Sweet Indulgence",
+      "domesticity_score": 1,
+      "rurality_score": 0,
+      "craft_score": 3,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:35:07.788Z",
       "model": "claude-sonnet-4-6"
     }
   }
