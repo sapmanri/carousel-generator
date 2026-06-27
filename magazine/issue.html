@@ -31,7 +31,9 @@ img{max-width:100%;display:block}
   padding:14px 20px;background:rgba(250,245,238,0.9);backdrop-filter:blur(6px);
   border-bottom:1px solid var(--hairline-light);
   font-size:11px;letter-spacing:0.08em;
+  transition:transform .28s cubic-bezier(.4,0,.2,1), opacity .28s;
 }
+.topbar.hidden{transform:translateY(-110%);opacity:0;pointer-events:none}
 .topbar.on-dark{background:rgba(18,14,12,0.85);border-bottom:1px solid var(--hairline-dark);color:var(--cream)}
 .topbar .back{color:var(--orange);font-weight:500;display:flex;flex-direction:column;gap:2px}
 .topbar .back .build-tag{font-family:var(--mono,monospace);font-weight:300;font-size:8px;letter-spacing:0.05em;color:rgba(255,255,255,0.22)}
@@ -311,7 +313,7 @@ img{max-width:100%;display:block}
 .page-essay .essay-inner{width:100%;max-width:640px}
 .page-essay .essay-label{font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--orange);margin-bottom:24px}
 .page-essay .essay-title{font-family:var(--serif);font-size:28px;line-height:1.4;margin-bottom:28px}
-.page-essay .essay-body{font-family:var(--serif);font-size:17px;line-height:2.1;white-space:pre-line;color:rgba(26,26,26,0.85)}
+.page-essay .essay-body{font-family:var(--serif);font-size:17px;line-height:2.1;white-space:pre-line;color:rgba(26,26,26,0.85)word-break:keep-all;overflow-wrap:break-word;}
 .page-essay.dark{background:var(--dark);color:var(--cream)}
 .page-essay.dark .essay-body{color:rgba(250,245,238,0.8)}
 @media(min-width:768px){.page-essay .essay-title{font-size:36px}.page-essay .essay-body{font-size:19px}}
@@ -421,7 +423,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-27 13:10 KST</span></a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-27 14:00 KST</span></a>
   <div class="topbar-right">
     <div class="indicator" id="indicator"></div>
     <div class="lang-toggle">
@@ -526,6 +528,25 @@ async function load() {
   function visiblePageEls() {
     return pageEls.filter(el => getComputedStyle(el).display !== 'none');
   }
+
+  // ── 탑바 자동 숨김: 스크롤 다운 → 숨김 / 업 → 표시 ──
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const currentY = window.scrollY;
+      const diff = currentY - lastScrollY;
+      if (diff > 8 && currentY > 80) {
+        topbar.classList.add('hidden');
+      } else if (diff < -8 || currentY < 60) {
+        topbar.classList.remove('hidden');
+      }
+      lastScrollY = currentY;
+      ticking = false;
+    });
+  }, { passive: true });
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
