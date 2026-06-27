@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.3.3</title>
+<title>감성찾아삽만리 · Writing Studio v3.3.4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -329,7 +329,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.3.3</span>
+    <span class="ver">v3.3.4</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -928,12 +928,18 @@ const WATCH_PHRASES = [
   '문득','어쩌면','어느새','조용히','따뜻하게',
   '작은 행복','소소한 행복','위로','힐링',
   '그 정도면 충분했다','대단한 일은 아니었다',
-  '괜찮다','잘하고 있다','삶은','우리는','소중함','마음 한켠'
+  '괜찮다','잘하고 있다','삶은','우리는','소중함','마음 한켠',
+  // v3.3.4 — 삽만리 자동 생성에서 자주 도망가는 안전한 결말/설명 패턴
+  '한참 보고 있었다','그 손이 좋았다','서두르지 않았다','그런 오후였다','마음이 늦어졌다',
+  '빠르지도 느리지도','그냥 걷고 있었다','조금 남아 있었다','방향보다','보여준다','알게 되는','알게 된다',
+  '볼 때는','것 같았다','것이었다','하는 일도 있었다'
 ];
 
 const LESSON_PATTERNS = [
   '그래서 우리는','삶은 결국','행복이란',
-  '소중함을 알게','괜찮아도 된다','그것만으로 충분','작은 위로가'
+  '소중함을 알게','괜찮아도 된다','그것만으로 충분','작은 위로가',
+  '앞모습은','뒷모습은','방향보다','속도가 먼저 보인다','스스로를 어떻게',
+  '모르는 것과','이름과','다르다는 걸','지금에서야 생각했다'
 ];
 
 const OPEN_OPTIONS  = ['사물','행동','소리','빛','대화','상태'];
@@ -985,14 +991,14 @@ let githubFileSha = null;
 // v3.3 — Runtime / Perception / Image Library Bridge
 // ══════════════════════════════════════════
 const RUNTIME_RULES = [
-  '삽만리 문체는 시가 아니라 생활 산문이다.',
-  '입력에서 하나의 소재만 중심으로 고른다.',
-  '한 글에는 하나의 마음만 둔다.',
-  '사진이나 메모를 설명하지 말고, 거기서 잠깐 멈춘 이유를 쓴다.',
-  '감정은 직접 말하지 않고 행동, 감각, 물성으로 남긴다.',
-  '삶의 교훈이나 큰 결론으로 확장하지 않는다.',
-  '마지막 문장은 의미 정리가 아니라 장면 안에 남긴다.',
-  '최근 반복된 표현은 사용하지 않는다.'
+  '삽만리 문체는 시가 아니라 생활 산문이다. 시처럼 꾸미지 않는다.',
+  '입력에서 하나의 소재만 중심으로 고르고, 나머지는 배경으로만 둔다.',
+  '한 글에는 하나의 마음만 둔다. 마음을 설명하지 말고 장면의 물성으로 남긴다.',
+  '사진이나 메모를 해설하지 말고, 그 앞에서 손·빛·거리·온도·소리 중 하나가 달라진 순간만 쓴다.',
+  'A는 B지만 C는 D다 같은 설명형 비교문을 피한다.',
+  '보여준다, 알게 된다, 의미한다, 생각했다 같은 해석 동사를 줄인다.',
+  '마지막 문장은 정리나 교훈이 아니라 아직 장면 안에 남아 있는 사물/행동으로 끝낸다.',
+  '최근 반복된 표현과 안전한 결말은 사용하지 않는다.'
 ];
 const OBSERVATION_AXES = ['시간','습관','온도','거리','손의 움직임','사용감','기다림','남은 것','사라진 것','소리','무게','빛','반복','어긋남','흔적','빈자리'];
 const VIEWPOINTS = ['기록','관찰','발견','질문','회상','메모','혼잣말'];
@@ -1295,6 +1301,71 @@ function planToText(plan) {
   return `선택 소재: ${plan.selected_material || ''}\n선택 이유: ${plan.focus_reason || ''}\n관찰 축: ${plan.observation_axis || ''}\n관점: ${plan.viewpoint || ''}\n작은 변화: ${plan.small_shift || ''}\n금지: ${safeArray(plan.do_not_write).join(', ')}\n피할 표현: ${safeArray(plan.avoid_phrases).join(', ')}`;
 }
 
+
+// v3.3.4 — 자동 생성 후 설명문/교훈문을 한 번 더 잡는 후처리 QC
+function detectSapmanriIssues(text) {
+  const t = String(text || '');
+  const issues = [];
+  const explanationPatterns = [
+    /앞모습은[\s\S]{0,80}뒷모습은/g,
+    /방향보다[\s\S]{0,40}속도/g,
+    /보여준다/g,
+    /알게 (되는|된다)/g,
+    /의미한다/g,
+    /생각했다/g,
+    /빠르지도 느리지도/g,
+    /그냥\s*
+?\s*걷고 있었다/g,
+    /나는 그 자리에\s*
+?\s*조금 남아 있었다/g,
+    /하는 일도\s*
+?\s*있었다/g
+  ];
+  explanationPatterns.forEach(re => { if (re.test(t)) issues.push('설명형/정리형 문장'); });
+  WATCH_PHRASES.forEach(p => { if (p && t.includes(p)) issues.push(`반복 위험 표현: ${p}`); });
+  const last = t.split('
+').filter(x=>x.trim()).slice(-3).join(' ');
+  if (/(있었다|생각했다|알게 됐다|알게 된다|보인다|보여준다|충분했다|괜찮다)$/.test(last.trim())) {
+    issues.push('마지막 문장이 의미 정리로 끝남');
+  }
+  return [...new Set(issues)].slice(0, 8);
+}
+
+async function enforceSapmanriQC(key, draft, context) {
+  const issues = detectSapmanriIssues(draft);
+  if (!issues.length) return draft;
+  const system = `너는 삽만리 Writing Studio의 QC 편집자다. 새 글을 만들지 말고, 초안의 시선과 장면은 유지한 채 설명형 문장과 안전한 결말만 덜어낸다.`;
+  const user = `아래 초안을 삽만리 문체로 한 번만 정리한다.
+
+수정 원칙:
+- 내용과 장면은 유지한다.
+- 설명형 비교문을 줄인다. 예: "앞모습은... 뒷모습은..." 같은 문장을 피한다.
+- "보여준다/알게 된다/생각했다/의미한다" 같은 해석 동사를 줄인다.
+- 마지막은 의미 정리가 아니라 장면 안의 물성, 움직임, 거리, 빛, 손, 옷자락 중 하나로 끝낸다.
+- 더 예쁘게 만들려고 하지 말고 덜어낸다.
+- 제목 포함, 본문만 출력한다. 설명 금지.
+
+감지된 문제:
+${issues.map((x,i)=>`${i+1}. ${x}`).join('
+')}
+
+Perception Plan:
+${context?.planText || ''}
+
+이미지 메타 요약:
+${context?.metaText || ''}
+
+초안:
+${draft}`;
+  try {
+    const fixed = await callClaude(key, user, system, 1400, 1);
+    return fixed && fixed.trim() ? fixed.trim() : draft;
+  } catch(e) {
+    console.warn('QC rewrite failed', e);
+    return draft;
+  }
+}
+
 // ══════════════════════════════════════════
 // GitHub / API Key
 // ══════════════════════════════════════════
@@ -1366,7 +1437,7 @@ async function saveDB() {
   setDbStatus('저장 중…', 'load');
   try {
     const enc = new TextEncoder().encode(JSON.stringify(db, null, 2));
-    const bin = Array.from(enc).map(b => String.fromCharCode(b)).join('\n');
+    const bin = Array.from(enc).map(b => String.fromCharCode(b)).join('');
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
       method: 'PUT',
       headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
@@ -2616,6 +2687,12 @@ ${planToText(perceptionPlan)}
 ## 생성 원칙
 선택 소재 하나 → 작은 관찰 → 마음의 미세한 변화 → 장면 안에서 멈춤
 
+## 특히 피할 문장
+- "앞모습은 ... 뒷모습은 ..."처럼 뜻을 정리하는 비교문
+- "방향보다 속도가 먼저 보인다"처럼 해석을 정리하는 문장
+- "보여준다 / 알게 된다 / 생각했다"로 끝나는 설명문
+- "빠르지도 느리지도 않았다 / 그냥 걷고 있었다 / 조금 남아 있었다" 같은 안전한 리듬
+
 ${TYPE_INSTRUCTION[autoType]}`;
 
     if (examples.length) {
@@ -2655,15 +2732,19 @@ ${compactImageMeta(imageMeta) || '(없음)'}
 Perception Plan:
 ${planToText(perceptionPlan)}
 
-위 계획을 기준으로 글을 써주세요. 메타데이터를 설명하지 말고, 선택된 소재 하나와 작은 변화만 남겨주세요.`;
+위 계획을 기준으로 글을 써주세요. 메타데이터를 설명하지 말고, 선택된 소재 하나와 작은 변화만 남겨주세요. 마지막은 의미 정리가 아니라 장면 안의 사물/움직임으로 남겨주세요.`;
 
     const raw = await callClaude(key, userContent, system, 1500);
-    document.getElementById('autoEditor').value = raw;
-    document.getElementById('autoCharCount').textContent = raw.length.toLocaleString() + '자';
+    const finalText = await enforceSapmanriQC(key, raw, {
+      planText: planToText(perceptionPlan),
+      metaText: imageMeta ? imageMetaSummary(imageMeta) : ''
+    });
+    document.getElementById('autoEditor').value = finalText;
+    document.getElementById('autoCharCount').textContent = finalText.length.toLocaleString() + '자';
 
-    state.generationHistory.push(raw);
+    state.generationHistory.push(finalText);
     if (state.generationHistory.length > 50) state.generationHistory.shift();
-    checkAutoQuality(raw);
+    checkAutoQuality(finalText);
     toast('생성 완료');
   } catch(e) {
     toast('생성 실패: ' + e.message);
