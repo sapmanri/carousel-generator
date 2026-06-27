@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B8B7A",
-          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
-          "suggested_caption": "ÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂ¦ÃÂ¬ÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
-          "suggested_caption_left": "ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ´ ÃÂ­ÃÂÃÂ¼ÃÂ¬ÃÂÃÂ´ÃÂ«ÃÂÃÂÃÂ«ÃÂÃÂ",
-          "suggested_caption_right": "ÃÂ«ÃÂÃÂ°ÃÂ«ÃÂÃÂ»ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
-          "suggested_label": "ÃÂ­ÃÂÃÂ°ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ",
+          "mood": "ÃÂÃÂªÃÂÃÂ³ÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ",
+          "suggested_caption": "ÃÂÃÂ¬ÃÂÃÂ°ÃÂÃÂ¨ÃÂÃÂ«ÃÂÃÂ¥ÃÂÃÂ¼ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ°ÃÂÃÂ«ÃÂÃÂ¦ÃÂÃÂ¬ÃÂÃÂ«ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂ",
+          "suggested_caption_left": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ´ ÃÂÃÂ­ÃÂÃÂÃÂÃÂ¼ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ´ÃÂÃÂ«ÃÂÃÂÃÂÃÂÃÂÃÂ«ÃÂÃÂÃÂÃÂ",
+          "suggested_caption_right": "ÃÂÃÂ«ÃÂÃÂÃÂÃÂ°ÃÂÃÂ«ÃÂÃÂÃÂÃÂ»ÃÂÃÂ­ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂªÃÂÃÂ°ÃÂÃÂ",
+          "suggested_label": "ÃÂÃÂ­ÃÂÃÂÃÂÃÂ°ÃÂÃÂ­ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ",
           "suggested_label_en": "Afternoon Tea Ritual",
           "suggested_caption_en": "When tea leaves unfold",
           "aspect_ratio": "wide",
@@ -33,10 +33,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B8B7A",
-          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
+          "mood": "ÃÂÃÂªÃÂÃÂ³ÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂ¦ÃÂ¬ÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
+          "suggested_copy": "ÃÂÃÂ¬ÃÂÃÂ°ÃÂÃÂ¨ÃÂÃÂ«ÃÂÃÂ¥ÃÂÃÂ¼ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ°ÃÂÃÂ«ÃÂÃÂ¦ÃÂÃÂ¬ÃÂÃÂ«ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂ",
           "suggested_body": ""
         },
         "ts": 1782540651158
@@ -46,7 +46,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B8B7A",
-          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ"
+          "mood": "ÃÂÃÂªÃÂÃÂ³ÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ"
         },
         "ts": 1782540651260
       },
@@ -66,22 +66,22 @@
       "season": "summer",
       "time_of_day": "afternoon",
       "location_type": "indoor",
-      "primary_subject": "Ã¬Â°Â»Ã¬ÂÂÃ¬ÂÂ Ã«Â¬Â¼ Ã«Â¶ÂÃªÂ¸Â°",
+      "primary_subject": "ÃÂ¬ÃÂ°ÃÂ»ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ¬ÃÂ¼ ÃÂ«ÃÂ¶ÃÂÃÂªÃÂ¸ÃÂ°",
       "secondary_subjects": [
-        "Ã¬ÂÂ Ã«Â¦Â¬ Ã«ÂÂ¤ÃªÂ´Â",
-        "Ã¬Â°Â¨ Ã«Â³Â´ÃªÂ´Â Ã¬ÂÂ©ÃªÂ¸Â°",
-        "Ã¬Â±Â",
-        "Ã¬ÂÂ¼Ã¬Â£Â¼",
-        "Ã¬Â²Â Ã¬Â Â Ã«Â°ÂÃ¬Â¹Â¨Ã«ÂÂ"
+        "ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ¦ÃÂ¬ ÃÂ«ÃÂÃÂ¤ÃÂªÃÂ´ÃÂ",
+        "ÃÂ¬ÃÂ°ÃÂ¨ ÃÂ«ÃÂ³ÃÂ´ÃÂªÃÂ´ÃÂ ÃÂ¬ÃÂÃÂ©ÃÂªÃÂ¸ÃÂ°",
+        "ÃÂ¬ÃÂ±ÃÂ",
+        "ÃÂ¬ÃÂÃÂ¼ÃÂ¬ÃÂ£ÃÂ¼",
+        "ÃÂ¬ÃÂ²ÃÂ ÃÂ¬ÃÂ ÃÂ ÃÂ«ÃÂ°ÃÂÃÂ¬ÃÂ¹ÃÂ¨ÃÂ«ÃÂÃÂ"
       ],
       "activity_type": "unknown",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "Ã¬ÂÂ Ã«Â¦Â¬",
-        "ÃªÂ¸ÂÃ¬ÂÂ",
-        "Ã«ÂÂÃ«Â¬Â´",
-        "Ã¬Â¢ÂÃ¬ÂÂ´"
+        "ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ¦ÃÂ¬",
+        "ÃÂªÃÂ¸ÃÂÃÂ¬ÃÂÃÂ",
+        "ÃÂ«ÃÂÃÂÃÂ«ÃÂ¬ÃÂ´",
+        "ÃÂ¬ÃÂ¢ÃÂÃÂ¬ÃÂÃÂ´"
       ],
       "has_text": true,
       "text_area_position": "left",
@@ -91,13 +91,13 @@
       "focus_clarity": "soft",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "Ã«Â¬Â¼ Ã«ÂÂ°Ã«Â¥Â´Ã«ÂÂ Ã«ÂÂÃ¬Â Â Ã¬ÂÂÃªÂ°ÂÃªÂ³Â¼ Ã¬Â°Â»Ã¬ÂÂÃ¬ÂÂ´ Ã¬ÂÂ´Ã¬ÂÂ°Ã«ÂÂ¬Ã¬Â Â¸ Ã¬ÂÂ¬Ã«Â¡ÂÃ¬ÂÂ°Ã«ÂÂ¼Ã¬ÂÂ´Ã­ÂÂ ÃªÂ°ÂÃ¬ÂÂ±Ã¬ÂÂ Ã¬Â§ÂÃªÂ´ÂÃ¬Â ÂÃ¬ÂÂ¼Ã«Â¡Â Ã¬Â ÂÃ«ÂÂ¬Ã­ÂÂ¨",
-      "mood": "ÃªÂ³Â Ã¬ÂÂÃ­ÂÂ¨",
-      "suggested_caption": "Ã¬Â²ÂÃ¬Â²ÂÃ­ÂÂ, Ã¬Â°Â¨ Ã­ÂÂ Ã¬ÂÂ",
+      "thumbnail_reason": "ÃÂ«ÃÂ¬ÃÂ¼ ÃÂ«ÃÂÃÂ°ÃÂ«ÃÂ¥ÃÂ´ÃÂ«ÃÂÃÂ ÃÂ«ÃÂÃÂÃÂ¬ÃÂ ÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂÃÂªÃÂ³ÃÂ¼ ÃÂ¬ÃÂ°ÃÂ»ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ´ ÃÂ¬ÃÂÃÂ´ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ ÃÂ¸ ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¡ÃÂÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ¼ÃÂ¬ÃÂÃÂ´ÃÂ­ÃÂÃÂ ÃÂªÃÂ°ÃÂÃÂ¬ÃÂÃÂ±ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂ§ÃÂÃÂªÃÂ´ÃÂÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂ¼ÃÂ«ÃÂ¡ÃÂ ÃÂ¬ÃÂ ÃÂÃÂ«ÃÂÃÂ¬ÃÂ­ÃÂÃÂ¨",
+      "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ¨",
+      "suggested_caption": "ÃÂ¬ÃÂ²ÃÂÃÂ¬ÃÂ²ÃÂÃÂ­ÃÂÃÂ, ÃÂ¬ÃÂ°ÃÂ¨ ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂ",
       "suggested_caption_en": "Slow water, quiet leaves",
-      "suggested_caption_left": "Ã¬Â±ÂÃªÂ³Â¼ Ã¬ÂÂ¼Ã¬Â£Â¼ ÃªÂ³ÂÃ¬ÂÂ",
-      "suggested_caption_right": "Ã¬Â°Â¨ Ã­ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
-      "suggested_label": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ Ã«ÂÂ¤Ã«Â¡Â",
+      "suggested_caption_left": "ÃÂ¬ÃÂ±ÃÂÃÂªÃÂ³ÃÂ¼ ÃÂ¬ÃÂÃÂ¼ÃÂ¬ÃÂ£ÃÂ¼ ÃÂªÃÂ³ÃÂÃÂ¬ÃÂÃÂ",
+      "suggested_caption_right": "ÃÂ¬ÃÂ°ÃÂ¨ ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
+      "suggested_label": "ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂÃÂ¤ÃÂ«ÃÂ¡ÃÂ",
       "suggested_label_en": "afternoon tea",
       "domesticity_score": 4,
       "rurality_score": 3,
@@ -118,11 +118,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B6F47",
-          "mood": "Ã¬ÂÂÃ«Â°Â",
-          "suggested_caption": "Ã¬ÂÂ¤Ã«ÂÂÃ¬ÂÂ Ã«Â¹ÂÃ«Â¹ÂÃªÂµÂ­Ã¬ÂÂ",
-          "suggested_caption_left": "Ã¬Â ÂÃ¬ÂÂ¬Ã¬ÂÂ Ã¬ÂÂ¨ÃªÂ¸Â°",
-          "suggested_caption_right": "Ã­ÂÂ ÃªÂ·Â¸Ã«Â¦ÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
-          "suggested_label": "Ã¬ÂÂÃ­ÂÂÃ¬ÂÂ Ã­ÂÂÃªÂ²Â½",
+          "mood": "ÃÂ¬ÃÂÃÂÃÂ«ÃÂ°ÃÂ",
+          "suggested_caption": "ÃÂ¬ÃÂÃÂ¤ÃÂ«ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ¹ÃÂÃÂ«ÃÂ¹ÃÂÃÂªÃÂµÃÂ­ÃÂ¬ÃÂÃÂ",
+          "suggested_caption_left": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂ¬ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¨ÃÂªÃÂ¸ÃÂ°",
+          "suggested_caption_right": "ÃÂ­ÃÂÃÂ ÃÂªÃÂ·ÃÂ¸ÃÂ«ÃÂ¦ÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
+          "suggested_label": "ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ­ÃÂÃÂÃÂªÃÂ²ÃÂ½",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": "50",
@@ -137,10 +137,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B6F47",
-          "mood": "Ã¬ÂÂÃ«Â°Â",
+          "mood": "ÃÂ¬ÃÂÃÂÃÂ«ÃÂ°ÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "Ã¬ÂÂ¤Ã«ÂÂÃ¬ÂÂ Ã«Â¹ÂÃ«Â¹ÂÃªÂµÂ­Ã¬ÂÂ",
+          "suggested_copy": "ÃÂ¬ÃÂÃÂ¤ÃÂ«ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ¹ÃÂÃÂ«ÃÂ¹ÃÂÃÂªÃÂµÃÂ­ÃÂ¬ÃÂÃÂ",
           "suggested_body": ""
         },
         "ts": 1782487519117
@@ -150,7 +150,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B6F47",
-          "mood": "Ã¬ÂÂÃ«Â°Â"
+          "mood": "ÃÂ¬ÃÂÃÂÃÂ«ÃÂ°ÃÂ"
         },
         "ts": 1782487519308
       },
@@ -170,22 +170,22 @@
       "season": "unknown",
       "time_of_day": "unknown",
       "location_type": "cafe",
-      "primary_subject": "ë¹ë¹êµ­ì",
+      "primary_subject": "Ã«Â¹ÂÃ«Â¹ÂÃªÂµÂ­Ã¬ÂÂ",
       "secondary_subjects": [
-        "ë°ì°¬",
-        "ê¹ëê¸°",
-        "ëë¬¼",
-        "ì ê°ë½",
-        "ì"
+        "Ã«Â°ÂÃ¬Â°Â¬",
+        "ÃªÂ¹ÂÃ«ÂÂÃªÂ¸Â°",
+        "Ã«ÂÂÃ«Â¬Â¼",
+        "Ã¬Â ÂÃªÂ°ÂÃ«ÂÂ½",
+        "Ã¬ÂÂ"
       ],
       "activity_type": "cooking",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "ì¸ë¼ë¯¹",
-        "ê¸ì",
-        "ë©´ë°",
-        "ê³ ì¶ì¥"
+        "Ã¬ÂÂ¸Ã«ÂÂ¼Ã«Â¯Â¹",
+        "ÃªÂ¸ÂÃ¬ÂÂ",
+        "Ã«Â©Â´Ã«Â°Â",
+        "ÃªÂ³Â Ã¬Â¶ÂÃ¬ÂÂ¥"
       ],
       "has_text": true,
       "text_area_position": "top",
@@ -195,13 +195,13 @@
       "focus_clarity": "clear",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ê°ë ¬í ë¶ìì ë¹ë¹êµ­ìì ìëìì´ ìì ì ì¦ì ëë©° ìì ì½íì¸  ì¸ë¤ì¼ë¡ ëì í´ë¦­ ì ì¸",
-      "mood": "ìì",
-      "suggested_caption": "ìëì ë¹¨ê° ë§",
+      "thumbnail_reason": "ÃªÂ°ÂÃ«Â Â¬Ã­ÂÂ Ã«Â¶ÂÃ¬ÂÂÃ¬ÂÂ Ã«Â¹ÂÃ«Â¹ÂÃªÂµÂ­Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂÃ«ÂÂÃ¬ÂÂÃ¬ÂÂ´ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ Ã¬Â¦ÂÃ¬ÂÂ Ã«ÂÂÃ«Â©Â° Ã¬ÂÂÃ¬ÂÂ Ã¬Â½ÂÃ­ÂÂÃ¬Â¸Â  Ã¬ÂÂ¸Ã«ÂÂ¤Ã¬ÂÂ¼Ã«Â¡Â Ã«ÂÂÃ¬ÂÂ Ã­ÂÂ´Ã«Â¦Â­ Ã¬ÂÂ Ã¬ÂÂ¸",
+      "mood": "Ã¬ÂÂÃ¬ÂÂ",
+      "suggested_caption": "Ã¬ÂÂÃ«ÂÂÃ¬ÂÂ Ã«Â¹Â¨ÃªÂ°Â Ã«Â§Â",
       "suggested_caption_en": "Red bowl, deep hunger.",
-      "suggested_caption_left": "ë¹ë¹ì ìì",
-      "suggested_caption_right": "ë¶ê³  ê¹ì ë§",
-      "suggested_label": "ìê³¨ ë³ë¯¸",
+      "suggested_caption_left": "Ã«Â¹ÂÃ«Â¹ÂÃ¬ÂÂ Ã¬ÂÂÃ¬ÂÂ",
+      "suggested_caption_right": "Ã«Â¶ÂÃªÂ³Â  ÃªÂ¹ÂÃ¬ÂÂ Ã«Â§Â",
+      "suggested_label": "Ã¬ÂÂÃªÂ³Â¨ Ã«Â³ÂÃ«Â¯Â¸",
       "suggested_label_en": "Country Table",
       "domesticity_score": 3,
       "rurality_score": 2,
@@ -222,11 +222,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ë¬ì½¤í",
-          "suggested_caption": "ì´ë¡ ì°ì°ì ì¤í",
-          "suggested_caption_left": "ì´ì½ë¦¿ êµ¬ì²´",
-          "suggested_caption_right": "ì´ë¡ ì°ì°",
-          "suggested_label": "ëì í¸ ìê°",
+          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ",
+          "suggested_caption": "Ã¬Â´ÂÃ«Â¡Â Ã¬ÂÂ°Ã¬ÂÂ°Ã¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
+          "suggested_caption_left": "Ã¬Â´ÂÃ¬Â½ÂÃ«Â¦Â¿ ÃªÂµÂ¬Ã¬Â²Â´",
+          "suggested_caption_right": "Ã¬Â´ÂÃ«Â¡Â Ã¬ÂÂ°Ã¬ÂÂ°",
+          "suggested_label": "Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸ Ã¬ÂÂÃªÂ°Â",
           "aspect_ratio": "wide",
           "best_page_type": "botanical",
           "focal_x": "50",
@@ -241,10 +241,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ë¬ì½¤í",
+          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ì´ë¡ ì°ì°ì ì¤í",
+          "suggested_copy": "Ã¬Â´ÂÃ«Â¡Â Ã¬ÂÂ°Ã¬ÂÂ°Ã¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
           "suggested_body": ""
         },
         "ts": 1782487441364
@@ -254,7 +254,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ë¬ì½¤í"
+          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ"
         },
         "ts": 1782487441556
       },
@@ -274,22 +274,22 @@
       "season": "unknown",
       "time_of_day": "afternoon",
       "location_type": "cafe",
-      "primary_subject": "구형 디저트 두 개",
+      "primary_subject": "êµ¬í ëì í¸ ë ê°",
       "secondary_subjects": [
-        "초콜릿 무스볼",
-        "그린 무스볼",
-        "스푼",
-        "흰색 플레이트",
-        "검정 접시"
+        "ì´ì½ë¦¿ ë¬´ì¤ë³¼",
+        "ê·¸ë¦° ë¬´ì¤ë³¼",
+        "ì¤í¼",
+        "í°ì íë ì´í¸",
+        "ê²ì  ì ì"
       ],
       "activity_type": "object",
       "human_presence": "none",
       "animal_presence": "none",
       "material_texture": [
-        "벨벳 파우더 코팅",
-        "매트 세라믹",
-        "금속 스푼",
-        "나무 테이블"
+        "ë²¨ë²³ íì°ë ì½í",
+        "ë§¤í¸ ì¸ë¼ë¯¹",
+        "ê¸ì ì¤í¼",
+        "ëë¬´ íì´ë¸"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -299,19 +299,123 @@
       "focus_clarity": "soft",
       "text_safe_area": "bottom",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "두 색감의 대비가 강렬하고 벨벳 질감이 시각적 호기심을 자극함",
-      "mood": "감각적",
-      "suggested_caption": "두 개의 달콤한 구",
+      "thumbnail_reason": "ë ìê°ì ëë¹ê° ê°ë ¬íê³  ë²¨ë²³ ì§ê°ì´ ìê°ì  í¸ê¸°ì¬ì ìê·¹í¨",
+      "mood": "ê°ê°ì ",
+      "suggested_caption": "ë ê°ì ë¬ì½¤í êµ¬",
       "suggested_caption_en": "Two spheres, soft and sweet",
-      "suggested_caption_left": "초콜릿의 속",
-      "suggested_caption_right": "초록의 달콤함",
-      "suggested_label": "달콤한 순간",
+      "suggested_caption_left": "ì´ì½ë¦¿ì ì",
+      "suggested_caption_right": "ì´ë¡ì ë¬ì½¤í¨",
+      "suggested_label": "ë¬ì½¤í ìê°",
       "suggested_label_en": "Sweet Indulgence",
       "domesticity_score": 1,
       "rurality_score": 0,
       "craft_score": 3,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:35:07.788Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "qszk_4687ff8a_a96c45ca": {
+      "name": "qszk_4687ff8a_a96c45ca.jpg",
+      "path": "library/qszk_4687ff8a_a96c45ca.jpg",
+      "hash": "qszk_4687ff8a_a96c45ca",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/qszk_4687ff8a_a96c45ca.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/qszk_4687ff8a_a96c45ca.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "left|center",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B9B8E",
+          "mood": "ë¤ì í¨",
+          "suggested_caption": "í¨ê»íë ìê°ì ì¨ê¸°",
+          "suggested_caption_left": "ìì ìëìì",
+          "suggested_caption_right": "ììëë ì´ì¼ê¸°",
+          "suggested_label": "ì¼ìì ëí",
+          "suggested_label_en": "Gentle Companionship",
+          "suggested_caption_en": "warmth in small moments together",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": "35",
+          "focal_y": "45",
+          "spread_focal_left": "25",
+          "spread_focal_right": "65"
+        },
+        "ts": 1782540616559
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "left|center",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B9B8E",
+          "mood": "ë¤ì í¨",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "í¨ê»íë ìê°ì ì¨ê¸°",
+          "suggested_body": ""
+        },
+        "ts": 1782540616570
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "left|center",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B9B8E",
+          "mood": "ë¤ì í¨"
+        },
+        "ts": 1782540616672
+      },
+      "subject_position": "center",
+      "focal_x": 55,
+      "focal_y": 45,
+      "aspect_ratio": "wide",
+      "best_page_type": "split",
+      "spread_focal_left": 40,
+      "spread_focal_right": 65,
+      "overall_brightness": "mid",
+      "dominant_color": "#c4785a",
+      "color_temperature": "warm",
+      "contrast_level": "medium",
+      "visual_density": "high",
+      "negative_space": "low",
+      "season": "unknown",
+      "time_of_day": "day",
+      "location_type": "indoor",
+      "primary_subject": "강아지 발에 붕대 감기",
+      "secondary_subjects": [
+        "어미 개",
+        "천 붕대",
+        "나무 바닥",
+        "실뭉치"
+      ],
+      "activity_type": "animal",
+      "human_presence": "hands",
+      "animal_presence": "dog",
+      "material_texture": [
+        "면 천",
+        "나무 바닥",
+        "니트 실"
+      ],
+      "has_text": false,
+      "text_area_position": "none",
+      "camera_distance": "medium",
+      "camera_angle": "top_down",
+      "motion_implied": "hand_action",
+      "focus_clarity": "soft",
+      "text_safe_area": "left",
+      "thumbnail_potential": "high",
+      "thumbnail_reason": "아기 강아지 발에 손수 붕대 감는 장면이 정서적 몰입도 높고 농촌 슬로우라이프 감성과 잘 어울림",
+      "mood": "다정함",
+      "suggested_caption": "작은 발을 감싸다",
+      "suggested_caption_en": "tiny paws, tender hands",
+      "suggested_caption_left": "손수 만든 붕대",
+      "suggested_caption_right": "괜찮아, 다 나을 거야",
+      "suggested_label": "강아지 간호",
+      "suggested_label_en": "gentle healing",
+      "domesticity_score": 5,
+      "rurality_score": 3,
+      "craft_score": 4,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:35:20.411Z",
       "model": "claude-sonnet-4-6"
     }
   }
