@@ -272,9 +272,13 @@ img{max-width:100%;display:block}
 .page-spread .spread-img-wrap img{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
 }
-/* 모바일: 좌/우 절반만 보여줌 */
-.page-spread.half-left .spread-img-wrap img{ width:200%; max-width:200%; object-position:left center; }
-.page-spread.half-right .spread-img-wrap img{ width:200%; max-width:200%; object-position:right center; transform:translateX(-50%); }
+/* 모바일: 좌/우 절반 — background-image로 크롭 (img 충돌 없음) */
+.page-spread.half-left .spread-img-wrap,
+.page-spread.half-right .spread-img-wrap {
+  background-repeat: no-repeat;
+}
+.page-spread.half-left .spread-img-wrap img,
+.page-spread.half-right .spread-img-wrap img { display:none; }
 .page-spread .spread-caption{
   position:absolute;left:20px;top:50%;transform:translateY(-50%);z-index:2;
   font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--cream);
@@ -423,7 +427,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-27 17:30 KST</span></a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-28 10:10 KST</span></a>
   <div class="topbar-right">
     <div class="indicator" id="indicator"></div>
     <div class="lang-toggle">
@@ -737,29 +741,35 @@ function renderSpread(p) {
   const leftCaption = p.captionLeft || p.caption || '';
   const rightCaption = p.captionRight || '';
 
-  // splitX: 단일 슬라이더 기반 (신규). focalXLeft/Right: 기존 방식 (하위호환)
-  let leftStyle = '', rightStyle = '';
-  if (typeof p.splitX === 'number') {
-    const sx = p.splitX;
-    const leftW  = sx > 0       ? `${(100/sx)*100}%`       : '200%';
-    const rightW = (100-sx) > 0 ? `${(100/(100-sx))*100}%` : '200%';
-    leftStyle  = `width:${leftW};max-width:none;height:100%;position:absolute;top:0;left:0;object-fit:cover;object-position:left center;`;
-    rightStyle = `width:${rightW};max-width:none;height:100%;position:absolute;top:0;right:0;object-fit:cover;object-position:right center;`;
-  } else {
-    const focalXLeft  = (typeof p.focalXLeft  === 'number') ? p.focalXLeft  : 0;
-    const focalXRight = (typeof p.focalXRight === 'number') ? p.focalXRight : 100;
-    leftStyle  = `object-position:${focalXLeft}% center`;
-    rightStyle = `object-position:${focalXRight}% center`;
+  // splitX: 단일 슬라이더 기반. focalXLeft/Right: 하위호환
+  // 모바일 반쪽은 background-image로 크롭 — CSS/인라인 width 충돌 없음
+  let leftBg = '', rightBg = '';
+  if (img) {
+    const sx = typeof p.splitX === 'number' ? Math.max(5, Math.min(95, p.splitX)) : 50;
+    const fL  = typeof p.focalXLeft  === 'number' ? p.focalXLeft  : 0;
+    const fR  = typeof p.focalXRight === 'number' ? p.focalXRight : 100;
+
+    if (typeof p.splitX === 'number') {
+      // splitX 방식: 이미지를 배율 조정해서 해당 부분만 보이게
+      const leftW  = `${(100/sx)*100}%`;
+      const rightW = `${(100/(100-sx))*100}%`;
+      leftBg  = `background:url('${img}') 0% 50% / ${leftW} auto no-repeat #000;`;
+      rightBg = `background:url('${img}') 100% 50% / ${rightW} auto no-repeat #000;`;
+    } else {
+      // 기존 focalX 방식: object-position 대응 background-position
+      leftBg  = `background:url('${img}') ${fL}% 50% / cover no-repeat #000;`;
+      rightBg = `background:url('${img}') ${fR}% 50% / cover no-repeat #000;`;
+    }
   }
 
   const mobileLeft = `
   <section class="page page-spread half-left">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${leftStyle}">` : ''}</div>
+    <div class="spread-img-wrap" style="${leftBg}"></div>
     ${leftCaption ? `<div class="spread-caption">${nl(t(leftCaption, p.captionLeft_en))}</div>` : ''}
   </section>`;
   const mobileRight = `
   <section class="page page-spread half-right">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${rightStyle}">` : ''}</div>
+    <div class="spread-img-wrap" style="${rightBg}"></div>
     ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
   </section>`;
 
