@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "bright",
           "dominant_color": "#b8d4a8",
-          "mood": "Ã¬ÂÂÃ­ÂÂ",
-          "suggested_caption": "Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã«Â¦Â",
-          "suggested_caption_left": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂÃ¬ÂÂ",
-          "suggested_caption_right": "Ã«Â¶ÂÃ¬ÂÂ Ã¬ÂÂ´Ã«Â§Â¤",
-          "suggested_label": "Ã«Â²Â Ã«Â¦Â¬ Ã­ÂÂ¼Ã­ÂÂ¹",
+          "mood": "ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ",
+          "suggested_caption": "ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¦ÃÂ",
+          "suggested_caption_left": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ",
+          "suggested_caption_right": "ÃÂ«ÃÂ¶ÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ´ÃÂ«ÃÂ§ÃÂ¤",
+          "suggested_label": "ÃÂ«ÃÂ²ÃÂ ÃÂ«ÃÂ¦ÃÂ¬ ÃÂ­ÃÂÃÂ¼ÃÂ­ÃÂÃÂ¹",
           "suggested_label_en": "Berry Picking",
           "suggested_caption_en": "summer in your hands",
           "aspect_ratio": "wide",
@@ -33,10 +33,10 @@
           "subject_position": "center",
           "overall_brightness": "bright",
           "dominant_color": "#b8d4a8",
-          "mood": "Ã¬ÂÂÃ­ÂÂ",
+          "mood": "ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã«Â¦Â",
+          "suggested_copy": "ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¦ÃÂ",
           "suggested_body": ""
         },
         "ts": 1782540635755
@@ -46,7 +46,7 @@
           "subject_position": "center",
           "overall_brightness": "bright",
           "dominant_color": "#b8d4a8",
-          "mood": "Ã¬ÂÂÃ­ÂÂ"
+          "mood": "ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ"
         },
         "ts": 1782540635857
       },
@@ -58,7 +58,7 @@
       "spread_focal_left": 20,
       "spread_focal_right": 65,
       "overall_brightness": "mid",
-      "dominant_color": "#6aÐ°552",
+      "dominant_color": "#6aÃÂ°552",
       "color_temperature": "warm",
       "contrast_level": "high",
       "visual_density": "medium",
@@ -66,19 +66,19 @@
       "season": "summer",
       "time_of_day": "day",
       "location_type": "garden",
-      "primary_subject": "ì°ë¸ê¸°",
+      "primary_subject": "Ã¬ÂÂ°Ã«ÂÂ¸ÃªÂ¸Â°",
       "secondary_subjects": [
-        "ì´ë¡ ê·¸ë¦",
-        "ì",
-        "ëë­ì"
+        "Ã¬Â´ÂÃ«Â¡Â ÃªÂ·Â¸Ã«Â¦Â",
+        "Ã¬ÂÂ",
+        "Ã«ÂÂÃ«Â­ÂÃ¬ÂÂ"
       ],
       "activity_type": "gardening",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "ì¸ë¼ë¯¹",
-        "ì´ë§¤ íë©´",
-        "ìì¬ê·"
+        "Ã¬ÂÂ¸Ã«ÂÂ¼Ã«Â¯Â¹",
+        "Ã¬ÂÂ´Ã«Â§Â¤ Ã­ÂÂÃ«Â©Â´",
+        "Ã¬ÂÂÃ¬ÂÂ¬ÃªÂ·Â"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -88,13 +88,13 @@
       "focus_clarity": "clear",
       "text_safe_area": "top",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ì ëªí ë¹¨ê° ì´ë§¤ì ì´ë¡ ê·¸ë¦ì ì ëë¹ê° ê°ë ¬íê³  ê³ì ê°ê³¼ ìíì ê¸°ì¨ì´ ì§ê´ì ì¼ë¡ ì ë¬ë¨",
-      "mood": "íìë¡ì",
-      "suggested_caption": "ì¬ë¦ ì°ë¸ê¸° í ì¤",
+      "thumbnail_reason": "Ã¬ÂÂ Ã«ÂªÂÃ­ÂÂ Ã«Â¹Â¨ÃªÂ°Â Ã¬ÂÂ´Ã«Â§Â¤Ã¬ÂÂ Ã¬Â´ÂÃ«Â¡Â ÃªÂ·Â¸Ã«Â¦ÂÃ¬ÂÂ Ã¬ÂÂ Ã«ÂÂÃ«Â¹ÂÃªÂ°Â ÃªÂ°ÂÃ«Â Â¬Ã­ÂÂÃªÂ³Â  ÃªÂ³ÂÃ¬Â ÂÃªÂ°ÂÃªÂ³Â¼ Ã¬ÂÂÃ­ÂÂÃ¬ÂÂ ÃªÂ¸Â°Ã¬ÂÂ¨Ã¬ÂÂ´ Ã¬Â§ÂÃªÂ´ÂÃ¬Â ÂÃ¬ÂÂ¼Ã«Â¡Â Ã¬Â ÂÃ«ÂÂ¬Ã«ÂÂ¨",
+      "mood": "Ã­ÂÂÃ¬ÂÂÃ«Â¡ÂÃ¬ÂÂ",
+      "suggested_caption": "Ã¬ÂÂ¬Ã«Â¦Â Ã¬ÂÂ°Ã«ÂÂ¸ÃªÂ¸Â° Ã­ÂÂ Ã¬Â¤Â",
       "suggested_caption_en": "summer berries, cupped in green",
-      "suggested_caption_left": "íë°­ìì ë´",
-      "suggested_caption_right": "ë¶ì ì¬ë¦ í ì¤",
-      "suggested_label": "ì°ë¸ê¸° ìí",
+      "suggested_caption_left": "Ã­ÂÂÃ«Â°Â­Ã¬ÂÂÃ¬ÂÂ Ã«ÂÂ´",
+      "suggested_caption_right": "Ã«Â¶ÂÃ¬ÂÂ Ã¬ÂÂ¬Ã«Â¦Â Ã­ÂÂ Ã¬Â¤Â",
+      "suggested_label": "Ã¬ÂÂ°Ã«ÂÂ¸ÃªÂ¸Â° Ã¬ÂÂÃ­ÂÂ",
       "suggested_label_en": "Berry Harvest",
       "domesticity_score": 3,
       "rurality_score": 5,
@@ -115,11 +115,11 @@
           "subject_position": "left|center",
           "overall_brightness": "mid",
           "dominant_color": "#D4C9B8",
-          "mood": "ê³ ì",
-          "suggested_caption": "ê²ì ê³ ìì´ì ì¤í",
-          "suggested_caption_left": "ê³ ìì´ì ê·¸ë¦¼",
-          "suggested_caption_right": "ì¡°ì©í ìì ",
-          "suggested_label": "ì¼ìì ì ë¬¼",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "suggested_caption": "ÃªÂ²ÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
+          "suggested_caption_left": "ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ ÃªÂ·Â¸Ã«Â¦Â¼",
+          "suggested_caption_right": "Ã¬Â¡Â°Ã¬ÂÂ©Ã­ÂÂ Ã¬ÂÂÃ¬ÂÂ ",
+          "suggested_label": "Ã¬ÂÂ¼Ã¬ÂÂÃ¬ÂÂ Ã¬Â ÂÃ«Â¬Â¼",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": "35",
@@ -134,10 +134,10 @@
           "subject_position": "left|center",
           "overall_brightness": "mid",
           "dominant_color": "#D4C9B8",
-          "mood": "ê³ ì",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ê²ì ê³ ìì´ì ì¤í",
+          "suggested_copy": "ÃªÂ²ÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
           "suggested_body": ""
         },
         "ts": 1782487396102
@@ -147,7 +147,7 @@
           "subject_position": "left|center",
           "overall_brightness": "mid",
           "dominant_color": "#D4C9B8",
-          "mood": "ê³ ì"
+          "mood": "ÃªÂ³Â Ã¬ÂÂ"
         },
         "ts": 1782487396290
       },
@@ -167,20 +167,20 @@
       "season": "unknown",
       "time_of_day": "indoor",
       "location_type": "cafe",
-      "primary_subject": "검은 고양이",
+      "primary_subject": "ê²ì ê³ ìì´",
       "secondary_subjects": [
-        "추상화",
-        "피아노",
-        "책장",
-        "일본 서적"
+        "ì¶ìí",
+        "í¼ìë¸",
+        "ì±ì¥",
+        "ì¼ë³¸ ìì "
       ],
       "activity_type": "animal",
       "human_presence": "none",
       "animal_presence": "cat",
       "material_texture": [
-        "목재",
-        "캔버스",
-        "페인트"
+        "ëª©ì¬",
+        "ìºë²ì¤",
+        "íì¸í¸"
       ],
       "has_text": true,
       "text_area_position": "right",
@@ -190,19 +190,124 @@
       "focus_clarity": "soft",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "검은 고양이와 컬러풀한 추상화의 대비가 강렬하고 시선을 끄는 구도",
-      "mood": "신비",
-      "suggested_caption": "고양이의 갤러리",
+      "thumbnail_reason": "ê²ì ê³ ìì´ì ì»¬ë¬íí ì¶ìíì ëë¹ê° ê°ë ¬íê³  ìì ì ëë êµ¬ë",
+      "mood": "ì ë¹",
+      "suggested_caption": "ê³ ìì´ì ê°¤ë¬ë¦¬",
       "suggested_caption_en": "Black cat guards the art",
-      "suggested_caption_left": "검은 고양이",
-      "suggested_caption_right": "그림 옆에서",
-      "suggested_label": "고양이 카페",
+      "suggested_caption_left": "ê²ì ê³ ìì´",
+      "suggested_caption_right": "ê·¸ë¦¼ ììì",
+      "suggested_label": "ê³ ìì´ ì¹´í",
       "suggested_label_en": "Cat & Canvas",
       "domesticity_score": 4,
       "rurality_score": 1,
       "craft_score": 3,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:29:58.616Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "l3m4_be446fcc_9777a204": {
+      "name": "l3m4_be446fcc_9777a204.jpg",
+      "path": "library/l3m4_be446fcc_9777a204.jpg",
+      "hash": "l3m4_be446fcc_9777a204",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l3m4_be446fcc_9777a204.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l3m4_be446fcc_9777a204.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "right",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B9B7A",
+          "mood": "ë°ì¤í¨",
+          "suggested_caption": "ì¤ëë ìì ìë¡",
+          "suggested_caption_left": "ì ëì ë¿ë",
+          "suggested_caption_right": "ìì ì¨ê¸°",
+          "suggested_label": "ì¼ìì ì¼í",
+          "suggested_label_en": "Pause in Daily Life",
+          "suggested_caption_en": "small comfort for today",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": 75,
+          "focal_y": 45,
+          "spread_focal_left": 35,
+          "spread_focal_right": 75
+        },
+        "ts": 1782540672676
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "right",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B9B7A",
+          "mood": "ë°ì¤í¨",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ì¤ëë ìì ìë¡",
+          "suggested_body": ""
+        },
+        "ts": 1782540672689
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "right",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B9B7A",
+          "mood": "ë°ì¤í¨"
+        },
+        "ts": 1782540672790
+      },
+      "subject_position": "center",
+      "focal_x": 55,
+      "focal_y": 50,
+      "aspect_ratio": "wide",
+      "best_page_type": "quote",
+      "spread_focal_left": 30,
+      "spread_focal_right": 70,
+      "overall_brightness": "mid",
+      "dominant_color": "#d4c9b0",
+      "color_temperature": "warm",
+      "contrast_level": "medium",
+      "visual_density": "high",
+      "negative_space": "low",
+      "season": "unknown",
+      "time_of_day": "unknown",
+      "location_type": "indoor",
+      "primary_subject": "라이트박스 채널 사인",
+      "secondary_subjects": [
+        "손",
+        "소품들",
+        "모래시계",
+        "피규어",
+        "창문"
+      ],
+      "activity_type": "craft",
+      "human_presence": "hands",
+      "animal_presence": "none",
+      "material_texture": [
+        "플라스틱",
+        "나무",
+        "유리"
+      ],
+      "has_text": true,
+      "text_area_position": "center",
+      "camera_distance": "medium",
+      "camera_angle": "eye_level",
+      "motion_implied": "hand_action",
+      "focus_clarity": "clear",
+      "text_safe_area": "left",
+      "thumbnail_potential": "high",
+      "thumbnail_reason": "#SAPMANRI 채널명이 라이트박스에 선명하게 표시되어 채널 소개 썸네일로 높은 적합도",
+      "mood": "아늑함",
+      "suggested_caption": "삽만리의 하루",
+      "suggested_caption_en": "slow days, lit with love",
+      "suggested_caption_left": "작은 불빛 하나",
+      "suggested_caption_right": "삽만리의 이야기",
+      "suggested_label": "채널 소개",
+      "suggested_label_en": "Our Little Sign",
+      "domesticity_score": 5,
+      "rurality_score": 3,
+      "craft_score": 4,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:30:13.407Z",
       "model": "claude-sonnet-4-6"
     }
   }
