@@ -12,11 +12,11 @@
           "subject_position": "left",
           "overall_brightness": "bright",
           "dominant_color": "#8b9e7d",
-          "mood": "Ã­ÂÂÃ¬Â Â",
-          "suggested_caption": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂÃ¬ÂÂ Ã«Â³Â´Ã«ÂÂ¸ Ã¬ÂÂ¤Ã­ÂÂ",
-          "suggested_caption_left": "ÃªÂ³Â Ã¬ÂÂÃ­ÂÂ Ã¬ÂÂÃªÂ°Â",
-          "suggested_caption_right": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¼Ã­ÂÂ",
-          "suggested_label": "Ã¬Â ÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "mood": "ÃÂ­ÃÂÃÂÃÂ¬ÃÂ ÃÂ",
+          "suggested_caption": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ³ÃÂ´ÃÂ«ÃÂÃÂ¸ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
+          "suggested_caption_left": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
+          "suggested_caption_right": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¼ÃÂ­ÃÂÃÂ",
+          "suggested_label": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": "30",
@@ -31,10 +31,10 @@
           "subject_position": "left",
           "overall_brightness": "bright",
           "dominant_color": "#8b9e7d",
-          "mood": "Ã­ÂÂÃ¬Â Â",
+          "mood": "ÃÂ­ÃÂÃÂÃÂ¬ÃÂ ÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂÃ¬ÂÂ Ã«Â³Â´Ã«ÂÂ¸ Ã¬ÂÂ¤Ã­ÂÂ",
+          "suggested_copy": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ³ÃÂ´ÃÂ«ÃÂÃÂ¸ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
           "suggested_body": ""
         },
         "ts": 1782487570783
@@ -44,7 +44,7 @@
           "subject_position": "left",
           "overall_brightness": "bright",
           "dominant_color": "#8b9e7d",
-          "mood": "Ã­ÂÂÃ¬Â Â"
+          "mood": "ÃÂ­ÃÂÃÂÃÂ¬ÃÂ ÃÂ"
         },
         "ts": 1782487570977
       },
@@ -64,21 +64,21 @@
       "season": "summer",
       "time_of_day": "afternoon",
       "location_type": "garden",
-      "primary_subject": "ì ìì ìì ì¬ì¸",
+      "primary_subject": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã¬ÂÂ¸",
       "secondary_subjects": [
-        "ë²½ë íë",
-        "ìë¬¼ íë¶",
-        "ììë",
-        "ëë¬´ ë±"
+        "Ã«Â²Â½Ã«ÂÂ Ã­ÂÂÃ«ÂÂ",
+        "Ã¬ÂÂÃ«Â¬Â¼ Ã­ÂÂÃ«Â¶Â",
+        "Ã¬ÂÂÃ¬ÂÂÃ«ÂÂ",
+        "Ã«ÂÂÃ«Â¬Â´ Ã«ÂÂ±"
       ],
       "activity_type": "resting",
       "human_presence": "back",
       "animal_presence": "none",
       "material_texture": [
-        "ë¦°ë¨",
-        "ë²½ë",
-        "ëª©ì¬",
-        "ê¸ì"
+        "Ã«Â¦Â°Ã«ÂÂ¨",
+        "Ã«Â²Â½Ã«ÂÂ",
+        "Ã«ÂªÂ©Ã¬ÂÂ¬",
+        "ÃªÂ¸ÂÃ¬ÂÂ"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -88,13 +88,13 @@
       "focus_clarity": "soft",
       "text_safe_area": "right",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ì´ë¡ ì ìì ë°ë¼ë³´ë ë·ëª¨ìµì´ ì¬ë¡ì°ë¼ì´í ê°ì±ì ê°íê² ì ë¬íë©° ìì ì ëì´ë¹ê¹",
-      "mood": "ê³ ìí¨",
-      "suggested_caption": "ì ìì´ ë§ì ê±¸ì´ì¤ë ì¤í",
+      "thumbnail_reason": "Ã¬Â´ÂÃ«Â¡Â Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂ Ã«Â°ÂÃ«ÂÂ¼Ã«Â³Â´Ã«ÂÂ Ã«ÂÂ·Ã«ÂªÂ¨Ã¬ÂÂµÃ¬ÂÂ´ Ã¬ÂÂ¬Ã«Â¡ÂÃ¬ÂÂ°Ã«ÂÂ¼Ã¬ÂÂ´Ã­ÂÂ ÃªÂ°ÂÃ¬ÂÂ±Ã¬ÂÂ ÃªÂ°ÂÃ­ÂÂÃªÂ²Â Ã¬Â ÂÃ«ÂÂ¬Ã­ÂÂÃ«Â©Â° Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ Ã«ÂÂÃ¬ÂÂ´Ã«ÂÂ¹ÃªÂ¹Â",
+      "mood": "ÃªÂ³Â Ã¬ÂÂÃ­ÂÂ¨",
+      "suggested_caption": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂ´ Ã«Â§ÂÃ¬ÂÂ ÃªÂ±Â¸Ã¬ÂÂ´Ã¬ÂÂ¤Ã«ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
       "suggested_caption_en": "Stillness in the summer green",
-      "suggested_caption_left": "ì´ë¡ì´ ë¨¸ë¬´ë",
-      "suggested_caption_right": "ê·¸ ìë¦¬ì ìì",
-      "suggested_label": "ì ìì ì¤í",
+      "suggested_caption_left": "Ã¬Â´ÂÃ«Â¡ÂÃ¬ÂÂ´ Ã«Â¨Â¸Ã«Â¬Â´Ã«ÂÂ",
+      "suggested_caption_right": "ÃªÂ·Â¸ Ã¬ÂÂÃ«Â¦Â¬Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ",
+      "suggested_label": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
       "suggested_label_en": "Garden Pause",
       "domesticity_score": 4,
       "rurality_score": 4,
@@ -115,11 +115,11 @@
           "subject_position": "left|center",
           "overall_brightness": "bright",
           "dominant_color": "#7FAC5C",
-          "mood": "íì¨",
-          "suggested_caption": "í° ê¼¬ë¦¬ íë¤ë©°",
-          "suggested_caption_left": "íë°­ ì ì°ì±",
-          "suggested_caption_right": "ê¼¬ë¦¬ íëë ì¤í",
-          "suggested_label": "ì ìì ìê°",
+          "mood": "Ã­ÂÂÃ¬ÂÂ¨",
+          "suggested_caption": "Ã­ÂÂ° ÃªÂ¼Â¬Ã«Â¦Â¬ Ã­ÂÂÃ«ÂÂ¤Ã«Â©Â°",
+          "suggested_caption_left": "Ã­ÂÂÃ«Â°Â­ Ã¬ÂÂ Ã¬ÂÂ°Ã¬Â±Â",
+          "suggested_caption_right": "ÃªÂ¼Â¬Ã«Â¦Â¬ Ã­ÂÂÃ«ÂÂÃ«ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
+          "suggested_label": "Ã¬Â ÂÃ¬ÂÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": "30",
@@ -134,10 +134,10 @@
           "subject_position": "left|center",
           "overall_brightness": "bright",
           "dominant_color": "#7FAC5C",
-          "mood": "íì¨",
+          "mood": "Ã­ÂÂÃ¬ÂÂ¨",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "í° ê¼¬ë¦¬ íë¤ë©°",
+          "suggested_copy": "Ã­ÂÂ° ÃªÂ¼Â¬Ã«Â¦Â¬ Ã­ÂÂÃ«ÂÂ¤Ã«Â©Â°",
           "suggested_body": ""
         },
         "ts": 1782487593365
@@ -147,7 +147,7 @@
           "subject_position": "left|center",
           "overall_brightness": "bright",
           "dominant_color": "#7FAC5C",
-          "mood": "íì¨"
+          "mood": "Ã­ÂÂÃ¬ÂÂ¨"
         },
         "ts": 1782487593558
       },
@@ -167,20 +167,20 @@
       "season": "summer",
       "time_of_day": "day",
       "location_type": "countryside",
-      "primary_subject": "백로 비상",
+      "primary_subject": "ë°±ë¡ ë¹ì",
       "secondary_subjects": [
-        "논",
-        "모",
-        "돌담",
-        "나뭇잎"
+        "ë¼",
+        "ëª¨",
+        "ëë´",
+        "ëë­ì"
       ],
       "activity_type": "animal",
       "human_presence": "none",
       "animal_presence": "bird",
       "material_texture": [
-        "풀잎",
-        "돌",
-        "흙"
+        "íì",
+        "ë",
+        "í"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -190,19 +190,122 @@
       "focus_clarity": "soft",
       "text_safe_area": "bottom",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "날갯짓하는 백로와 초록 논의 대비가 강렬하여 시선을 즉시 끌어당김",
-      "mood": "생동감",
-      "suggested_caption": "논 위를 날다",
+      "thumbnail_reason": "ë ê°¯ì§íë ë°±ë¡ì ì´ë¡ ë¼ì ëë¹ê° ê°ë ¬íì¬ ìì ì ì¦ì ëì´ë¹ê¹",
+      "mood": "ìëê°",
+      "suggested_caption": "ë¼ ìë¥¼ ë ë¤",
       "suggested_caption_en": "White wings over summer rice",
-      "suggested_caption_left": "백로가 날고",
-      "suggested_caption_right": "논은 푸르다",
-      "suggested_label": "여름 논의 손님",
+      "suggested_caption_left": "ë°±ë¡ê° ë ê³ ",
+      "suggested_caption_right": "ë¼ì í¸ë¥´ë¤",
+      "suggested_label": "ì¬ë¦ ë¼ì ìë",
       "suggested_label_en": "Summer Field Guest",
       "domesticity_score": 1,
       "rurality_score": 5,
       "craft_score": 0,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:27:39.192Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "1dxlk_8cbffd98_dfc4a18a": {
+      "name": "1dxlk_8cbffd98_dfc4a18a.jpg",
+      "path": "library/1dxlk_8cbffd98_dfc4a18a.jpg",
+      "hash": "1dxlk_8cbffd98_dfc4a18a",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1dxlk_8cbffd98_dfc4a18a.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1dxlk_8cbffd98_dfc4a18a.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "bright",
+          "dominant_color": "#7ab8e8",
+          "mood": "íì¨",
+          "suggested_caption": "ë°ë ë¶ë ì¤í",
+          "suggested_caption_left": "ëë¬´ ì¬ì´ë¡",
+          "suggested_caption_right": "ì¤ì¹ë ë°ë",
+          "suggested_label": "í´ìì íê²½",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": "50",
+          "focal_y": "40",
+          "spread_focal_left": "35",
+          "spread_focal_right": "65"
+        },
+        "ts": 1782487576562
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "bright",
+          "dominant_color": "#7ab8e8",
+          "mood": "íì¨",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ë°ë ë¶ë ì¤í",
+          "suggested_body": ""
+        },
+        "ts": 1782487576573
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "bright",
+          "dominant_color": "#7ab8e8",
+          "mood": "íì¨"
+        },
+        "ts": 1782487576767
+      },
+      "subject_position": "center",
+      "focal_x": 50,
+      "focal_y": 45,
+      "aspect_ratio": "wide",
+      "best_page_type": "fullbleed",
+      "spread_focal_left": 25,
+      "spread_focal_right": 75,
+      "overall_brightness": "bright",
+      "dominant_color": "#4a7c3f",
+      "color_temperature": "cool",
+      "contrast_level": "medium",
+      "visual_density": "high",
+      "negative_space": "medium",
+      "season": "summer",
+      "time_of_day": "day",
+      "location_type": "countryside",
+      "primary_subject": "포플러 나무 군락",
+      "secondary_subjects": [
+        "캠핑파크 간판",
+        "산림",
+        "건조한 하천변",
+        "푸른 하늘"
+      ],
+      "activity_type": "unknown",
+      "human_presence": "none",
+      "animal_presence": "none",
+      "material_texture": [
+        "나뭇잎",
+        "흙",
+        "자갈",
+        "벽돌"
+      ],
+      "has_text": true,
+      "text_area_position": "left",
+      "camera_distance": "wide",
+      "camera_angle": "eye_level",
+      "motion_implied": "still",
+      "focus_clarity": "clear",
+      "text_safe_area": "top",
+      "thumbnail_potential": "medium",
+      "thumbnail_reason": "웅장한 포플러 군락이 시선을 끌지만 주제가 분산되어 썸네일 집중도는 보통",
+      "mood": "여유",
+      "suggested_caption": "나무들 사이, 여름",
+      "suggested_caption_en": "Tall trees standing in summer stillness",
+      "suggested_caption_left": "포플러 숲 아래",
+      "suggested_caption_right": "바람이 머무는 곳",
+      "suggested_label": "여름 나무그늘",
+      "suggested_label_en": "Summer Poplar Grove",
+      "domesticity_score": 1,
+      "rurality_score": 4,
+      "craft_score": 0,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:27:50.442Z",
       "model": "claude-sonnet-4-6"
     }
   }
