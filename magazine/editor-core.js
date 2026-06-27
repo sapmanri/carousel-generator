@@ -1197,8 +1197,9 @@ function updateSpreadSplitPreview(idx, splitX) {
   if (imgSrc) {
     const leftW  = `${(100/splitVal)*100}%`;
     const rightW = `${(100/(100-splitVal))*100}%`;
-    if (leftDiv)  leftDiv.style.background  = `url('${imgSrc.startsWith('data:') ? imgSrc : `'${imgSrc}'`}') 0% 50% / ${leftW} auto`;
-    if (rightDiv) rightDiv.style.background = `url('${imgSrc.startsWith('data:') ? imgSrc : `'${imgSrc}'`}') 100% 50% / ${rightW} auto`;
+    const safeUrl = imgSrc.startsWith('data:') ? `url('${imgSrc.slice(0,30)}...')` : `url('${imgSrc}')`;
+    if (leftDiv)  leftDiv.style.cssText  += `;background:url('${imgSrc}') 0% 50% / ${leftW} auto no-repeat;`;
+    if (rightDiv) rightDiv.style.cssText += `;background:url('${imgSrc}') 100% 50% / ${rightW} auto no-repeat;`;
   }
   if (label) label.textContent = `자르는 지점: ${splitVal}%`;
 }
@@ -1288,8 +1289,8 @@ function renderPageCard(pg, idx) {
       const leftW  = sx > 0   ? `${(100/sx)*100}%`       : '200%';
       const rightW = (100-sx) > 0 ? `${(100/(100-sx))*100}%` : '200%';
       // spread 프리뷰: background-image 방식으로 초기 렌더부터 정확한 크롭 표시
-      const leftBg  = src ? `url('${src}') 0% 50% / ${leftW} auto` : '#111';
-      const rightBg = src ? `url('${src}') 100% 50% / ${rightW} auto` : '#111';
+      const leftBg  = src ? `url('${src}') 0% 50% / ${leftW} auto no-repeat #111` : '#111';
+      const rightBg = src ? `url('${src}') 100% 50% / ${rightW} auto no-repeat #111` : '#111';
       body = `
         <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
         <div class="hint">와이드 사진 1장을 2페이지에 걸쳐 보여줍니다. PC/패드는 한 화면, 모바일은 좌/우로 나눠서 순서대로 표시됩니다.</div>
