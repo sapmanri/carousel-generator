@@ -102,6 +102,8 @@ header{
 .grid-item{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--s2);border:1px solid var(--border)}
 .grid-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
 .grid-item:hover img{transform:scale(1.04)}
+.grid-item.selected{outline:2px solid var(--orange);outline-offset:-2px}
+.grid-item.selected::after{content:'✓';position:absolute;top:6px;left:6px;background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 .grid-item-meta{
   position:absolute;inset:auto 0 0;
   background:linear-gradient(transparent,rgba(0,0,0,0.75));
@@ -178,7 +180,7 @@ header{
       <span class="progress-label" id="progressLabel"></span>
     </div>
     <div class="hint" style="margin-top:8px">
-      R2에 업로드하고 Claude Vision으로 분석합니다. 분석 결과(캡션·라벨·분위기·EXIF·날짜)는 <code>image_cache.json</code>에 저장됩니다.
+      R2에 업로드하고 Claude Vision으로 분석합니다. 분석 결과(캡션·라벨·분위기·EXIF·날짜)는 <code>image_cache.json</code>에 저장됩니다.<br>갤러리에서 <strong>Shift+클릭</strong>으로 이미지를 선택하고 "선택 재분석"으로 특정 이미지만 새 스키마로 재분석할 수 있습니다.
     </div>
   </div>
 
@@ -194,6 +196,8 @@ header{
         <option value="mood">분위기별</option>
       </select>
       <button class="btn-ghost" onclick="loadGallery()">↻ 새로고침</button>
+      <button class="btn-ghost" id="reanalyzeSel" onclick="reanalyzeSelected()" style="display:none">✦ 선택 재분석</button>
+      <button class="btn-ghost" onclick="reanalyzeAll()">⟳ 전체 재분석</button>
       <span class="count-label" id="countLabel"></span>
     </div>
     <div class="grid" id="gallery">
@@ -470,7 +474,11 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
   if (data.error) throw new Error(data.error.message);
   const text = data.content?.[0]?.text || '{}';
   const s = text.indexOf('{'), e = text.lastIndexOf('}');
-  return JSON.parse(text.slice(s, e + 1));
+  const result = JSON.parse(text.slice(s, e + 1));
+  result.schema_version = 'image-analysis-v2';
+  result.analyzed_at    = new Date().toISOString();
+  result.model          = 'claude-sonnet-4-6';
+  return result;
 }
 
 // ── image_cache.json 저장 ───────────────────────────────────────
@@ -602,7 +610,7 @@ function renderGallery(items) {
     return;
   }
   el.innerHTML = items.map((item, i) => `
-    <div class="grid-item" onclick="openDetail(${allItems.indexOf(item)})">
+    <div class="grid-item" onclick="event.shiftKey ? toggleSelect(${allItems.indexOf(item)}) : openDetail(${allItems.indexOf(item)})">
       <img src="${item.download_url || item.url || ''}" alt="" loading="lazy" onerror="this.style.opacity=0.2">
       <div class="grid-item-meta">
         ${item.suggested_caption || item.filename || ''}
@@ -611,6 +619,114 @@ function renderGallery(items) {
       </div>
     </div>
   `).join('');
+}
+
+// ── 선택 관리 ─────────────────────────────────────────────────
+const selectedHashes = new Set();
+
+function toggleSelect(idx) {
+  const item = allItems[idx];
+  if (!item) return;
+  const key = item.hash || item.path;
+  const el = document.querySelectorAll('.grid-item')[idx];
+  if (selectedHashes.has(key)) {
+    selectedHashes.delete(key);
+    el?.classList.remove('selected');
+  } else {
+    selectedHashes.add(key);
+    el?.classList.add('selected');
+  }
+  document.getElementById('reanalyzeSel').style.display = selectedHashes.size ? 'block' : 'none';
+}
+
+// ── 재분석 ─────────────────────────────────────────────────────
+async function reanalyzeSelected() {
+  const apiKey = window.SapConfig.getAnthropicKey();
+  if (!apiKey) { alert('API Key가 필요합니다. 설정에서 입력해주세요.'); return; }
+  const targets = allItems.filter(item => selectedHashes.has(item.hash || item.path));
+  if (!targets.length) return;
+  await doReanalyze(targets, apiKey);
+  selectedHashes.clear();
+  document.getElementById('reanalyzeSel').style.display = 'none';
+}
+
+async function reanalyzeAll() {
+  const apiKey = window.SapConfig.getAnthropicKey();
+  if (!apiKey) { alert('API Key가 필요합니다. 설정에서 입력해주세요.'); return; }
+  const v1Items = allItems.filter(item => !item.schema_version || item.schema_version !== 'image-analysis-v2');
+  const msg = v1Items.length
+    ? `구 스키마 이미지 ${v1Items.length}장을 재분석합니다. (v2 이미 완료된 ${allItems.length - v1Items.length}장은 스킵)`
+    : `전체 ${allItems.length}장을 재분석합니다.`;
+  if (!confirm(msg + '\n계속할까요?')) return;
+  await doReanalyze(v1Items.length ? v1Items : allItems, apiKey);
+}
+
+async function doReanalyze(targets, apiKey) {
+  const btn = document.getElementById('reanalyzeSel');
+  const countEl = document.getElementById('countLabel');
+  const orig = countEl.textContent;
+
+  for (let i = 0; i < targets.length; i++) {
+    const item = targets[i];
+    countEl.textContent = `재분석 중 ${i + 1}/${targets.length}…`;
+    try {
+      const imgUrl = item.r2_url || item.download_url || item.url;
+      if (!imgUrl) continue;
+      // 이미지 → base64
+      const dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
+      const ext = imgUrl.split('.').pop().toLowerCase();
+      const mediaType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+      // 재분석
+      const analysis = await analyzeImage(dataUrl, mediaType, apiKey);
+      // 캐시 갱신
+      const hash = item.hash;
+      if (hash) {
+        // 기존 캐시 항목에 분석 결과 머지
+        const merged = { ...item, ...analysis };
+        await updateCacheEntry(hash, merged);
+        // allItems도 갱신
+        const idx = allItems.findIndex(x => x.hash === hash);
+        if (idx >= 0) allItems[idx] = { ...allItems[idx], ...analysis };
+      }
+    } catch(e) {
+      console.warn('재분석 실패:', item.filename, e.message);
+    }
+  }
+
+  countEl.textContent = `재분석 완료 (${targets.length}장)`;
+  setTimeout(() => { countEl.textContent = orig; }, 3000);
+  applyFilter();
+}
+
+async function updateCacheEntry(hash, data) {
+  const token = window.SapConfig.getGithubToken();
+  if (!token) return;
+  const REPO = 'sapmanri/carousel-generator';
+  const FILE = 'image_cache.json';
+  const API  = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+
+  let cache = { entries: {} }, sha = null;
+  try {
+    const res = await fetch(API, { headers: { Authorization: `token ${token}` } });
+    if (res.ok) {
+      const json = await res.json();
+      sha = json.sha;
+      cache = JSON.parse(atob(json.content.replace(/\n/g, '')));
+    }
+  } catch(e) {}
+
+  cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
+
+  const jsonStr = JSON.stringify(cache, null, 2);
+  const bytes   = new TextEncoder().encode(jsonStr);
+  const binStr  = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+  const body    = { message: `Library: reanalyze ${hash}`, content: btoa(binStr) };
+  if (sha) body.sha = sha;
+  await fetch(API, {
+    method: 'PUT',
+    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
 }
 
 function openDetail(idx) {
