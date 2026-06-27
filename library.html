@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-27b</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-27c</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -214,6 +214,7 @@ header{
       <button class="btn-ghost" onclick="loadGallery()">↻ 새로고침</button>
       <button class="btn-ghost" id="reanalyzeSel" onclick="reanalyzeSelected()" style="display:none">✦ 선택 재분석</button>
       <button class="btn-ghost" onclick="reanalyzeAll()">⟳ 전체 재분석</button>
+      <button class="btn-ghost" onclick="generateAllThumbnails()" id="thumbGenBtn">🖼 썸네일 일괄 생성</button>
       <span style="font-size:10px;color:var(--dim);align-self:center">Shift+클릭으로 선택 후 선택 재분석</span>
     </div>
     <div class="grid" id="gallery"></div>
@@ -480,7 +481,9 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
   "suggested_label_en": "English sublabel (2-4 words)",
   "domesticity_score": 0~5,
   "rurality_score": 0~5,
-  "craft_score": 0~5
+  "craft_score": 0~5,
+  "visual_dna_tags": ["이 이미지를 대표하는 키워드 태그 3~6개 (한국어, 예: 흙손, 오후빛, 화로불, 면직물)"],
+  "sapmanri_score": 0~10 (삽만리 채널 세계관 부합도: 슬로우라이프/농촌/일상공예/자연 감수성 기준)
 }`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -812,6 +815,69 @@ async function doReanalyze(targets, apiKey) {
   applyFilter(true);
 }
 
+// ── 기존 이미지 썸네일 일괄 생성 ───────────────────────────────
+async function generateAllThumbnails() {
+  const btn = document.getElementById('thumbGenBtn');
+  const countEl = document.getElementById('countLabel');
+
+  // thumbnail_url 없는 항목만 대상
+  const targets = allItems.filter(item => !item.thumbnail_url && (item.r2_url || item.download_url || item.url));
+  if (!targets.length) {
+    alert('썸네일이 필요한 이미지가 없습니다. 모두 완료 상태입니다.');
+    return;
+  }
+  if (!confirm(`썸네일 없는 이미지 ${targets.length}장을 생성합니다.
+R2 인증 정보가 필요합니다. 계속할까요?`)) return;
+
+  btn.disabled = true;
+  const orig = countEl.textContent;
+  let done = 0, failed = 0;
+
+  for (let i = 0; i < targets.length; i++) {
+    const item = targets[i];
+    countEl.textContent = `썸네일 생성 중 ${i + 1}/${targets.length}…`;
+
+    try {
+      // 1. 원본 이미지 fetch → dataUrl
+      const srcUrl = item.r2_url || item.download_url || item.url;
+      const dataUrl = await window.ImageLibrary.fetchAsDataUrl(srcUrl);
+
+      // 2. 썸네일 생성 (400px)
+      const thumbDataUrl = await generateThumbnail(dataUrl, 400);
+      const thumbMediaType = thumbDataUrl.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+
+      // 3. R2에 thumb_ prefix로 업로드
+      const thumbResult = await window.ImageLibrary.uploadIfNeeded(
+        thumbDataUrl, thumbMediaType, item.hash ? `thumb_${item.hash}` : null
+      );
+      const thumbUrl = thumbResult.url || thumbResult.path || null;
+      if (!thumbUrl) throw new Error('썸네일 URL 없음');
+
+      // 4. cache 업데이트
+      item.thumbnail_url = thumbUrl;
+      if (item.hash) {
+        await updateCacheEntry(item.hash, { thumbnail_url: thumbUrl, r2_url: item.r2_url || srcUrl });
+      }
+
+      // 갤러리 DOM에서 해당 이미지 src도 즉시 교체
+      const idx = allItems.indexOf(item);
+      const imgEl = document.querySelectorAll('#gallery .grid-item img')[
+        filteredItems.indexOf(item)
+      ];
+      if (imgEl) imgEl.src = thumbUrl;
+
+      done++;
+    } catch(e) {
+      console.warn('썸네일 생성 실패:', item.hash, e.message);
+      failed++;
+    }
+  }
+
+  btn.disabled = false;
+  countEl.textContent = `썸네일 완료 ${done}장${failed ? ` / 실패 ${failed}장` : ''}`;
+  setTimeout(() => { countEl.textContent = orig; }, 4000);
+}
+
 async function updateCacheEntry(hash, data) {
   const token = window.SapConfig.getGithubToken();
   if (!token) return;
@@ -896,6 +962,9 @@ function openDetail(idx) {
     ['셔터', item.exif_exposure],
     ['해상도', item.exif_width ? `${item.exif_width}×${item.exif_height}` : null],
     // 기타
+    ['Visual DNA', Array.isArray(item.visual_dna_tags) ? item.visual_dna_tags.join(', ') : item.visual_dna_tags],
+    ['삽만리 점수', item.sapmanri_score != null ? `${item.sapmanri_score}/10` : null],
+    ['Image ID', item.image_id],
     ['업로드일', item.uploaded_at],
     ['파일명', item.filename],
   ].filter(([, v]) => v != null && v !== '' && v !== 'unknown' && v !== 'none');
