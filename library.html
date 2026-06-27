@@ -634,17 +634,51 @@ function isThumbnailItem(item) {
 }
 
 function getOriginalUrl(item) {
-  return item.r2_url || item.download_url || item.url || '';
+  // 상세 보기/다운로드는 항상 원본 우선
+  return item.r2_url || item.original_url || item.download_url || item.url || '';
 }
 
 function getThumbUrl(item) {
-  return item.thumbnail_url || getOriginalUrl(item);
+  // 그리드에서는 썸네일 우선. 단, thumb 항목 자체가 메인으로 들어온 경우는 위에서 필터링됨.
+  const thumb = item.thumbnail_url || item.thumb_url || '';
+  return thumb || getOriginalUrl(item);
 }
 
 function escapeHtml(v) {
   return String(v ?? '').replace(/[&<>"']/g, ch => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[ch]));
+}
+
+
+// Claude/GitHub 저장 과정에서 일부 구형 항목이 UTF-8 mojibake로 저장된 경우 화면 표시만 복구한다.
+// 예: ì²­ì ë¤ì → 청자 다완
+function repairMojibakeText(v) {
+  if (typeof v !== 'string' || !v) return v;
+  if (!/[ÃÂ]|[ìíëêð]/.test(v)) return v;
+  try {
+    const bytes = Uint8Array.from(Array.from(v).map(ch => ch.charCodeAt(0) & 0xff));
+    const decoded = new TextDecoder('utf-8', { fatal:false }).decode(bytes);
+    // 한글이 살아나거나, 원문보다 깨진 제어문자가 줄어들면 복구값 사용
+    const badBefore = (v.match(/[-]/g) || []).length;
+    const badAfter  = (decoded.match(/[-]/g) || []).length;
+    if (/[가-힣]/.test(decoded) || badAfter < badBefore) return decoded;
+  } catch(e) {}
+  return v;
+}
+
+function repairMojibakeDeep(v) {
+  if (typeof v === 'string') return repairMojibakeText(v);
+  if (Array.isArray(v)) return v.map(repairMojibakeDeep);
+  if (v && typeof v === 'object') {
+    Object.keys(v).forEach(k => { v[k] = repairMojibakeDeep(v[k]); });
+  }
+  return v;
+}
+
+function displayText(v) {
+  if (Array.isArray(v)) return v.map(displayText).filter(Boolean).join(', ');
+  return repairMojibakeText(v ?? '');
 }
 
 async function loadGallery() {
@@ -697,7 +731,7 @@ async function loadCache() {
       if (res.ok) {
         const json = await res.json();
         const data = JSON.parse(decodeGithubContent(json.content));
-        return data.entries || {};
+        return repairMojibakeDeep(data.entries || {});
       }
     } catch(e) {
       console.warn('GitHub cache load failed, trying local file:', e.message);
@@ -709,7 +743,7 @@ async function loadCache() {
     const res = await fetch(`/image_cache.json?ts=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) return {};
     const data = await res.json();
-    return data.entries || {};
+    return repairMojibakeDeep(data.entries || {});
   } catch(e) {
     console.warn('local cache load failed:', e.message);
     return {};
@@ -740,7 +774,7 @@ function applyFilter(resetPage = true) {
         item.season, item.time_of_day, item.filename, item.exif_date,
         item.sapmanri_score, item.best_page_type, item.human_presence,
         item.animal_presence, item.image_id, item.hash
-      ].flat().filter(Boolean).join(' ').toLowerCase();
+      ].flat().filter(Boolean).map(displayText).join(' ').toLowerCase();
 
       if (!searchable.includes(query)) return false;
     }
@@ -791,9 +825,9 @@ function renderGallery() {
     <div class="grid-item${selectedClass}" data-hash="${escapeHtml(key)}" onclick="event.shiftKey ? toggleSelect('${escapeHtml(key)}') : openDetail(${absIdx})">
       <img data-src="${escapeHtml(thumbSrc)}" alt="" onerror="this.style.opacity=0.2" class="lazy-img">
       <div class="grid-item-meta">
-        ${escapeHtml(item.suggested_caption || item.filename || key || '')}
+        ${escapeHtml(displayText(item.suggested_caption || item.filename || key || ''))}
         ${item.exif_date ? `<div class="grid-item-date">${escapeHtml(item.exif_date)}</div>` : ''}
-        ${item.mood ? `<div class="grid-item-mood">${escapeHtml(item.mood)}</div>` : ''}
+        ${item.mood ? `<div class="grid-item-mood">${escapeHtml(displayText(item.mood))}</div>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1088,7 +1122,7 @@ function openDetail(idx) {
       ${metaRows.map(([label, val]) => `
         <div class="meta-row">
           <div class="meta-label">${label}</div>
-          <div class="meta-value ${label==='분위기'?'mood-tag':''}">${escapeHtml(val)}</div>
+          <div class="meta-value ${label==='분위기'?'mood-tag':''}">${escapeHtml(displayText(val))}</div>
         </div>
       `).join('')}
       <div style="margin-top:16px">
