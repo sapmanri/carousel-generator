@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.3.4</title>
+<title>감성찾아삽만리 · Writing Studio v4.0.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -329,7 +329,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.3.4</span>
+    <span class="ver">v4.0.0</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -928,18 +928,12 @@ const WATCH_PHRASES = [
   '문득','어쩌면','어느새','조용히','따뜻하게',
   '작은 행복','소소한 행복','위로','힐링',
   '그 정도면 충분했다','대단한 일은 아니었다',
-  '괜찮다','잘하고 있다','삶은','우리는','소중함','마음 한켠',
-  // v3.3.4 — 삽만리 자동 생성에서 자주 도망가는 안전한 결말/설명 패턴
-  '한참 보고 있었다','그 손이 좋았다','서두르지 않았다','그런 오후였다','마음이 늦어졌다',
-  '빠르지도 느리지도','그냥 걷고 있었다','조금 남아 있었다','방향보다','보여준다','알게 되는','알게 된다',
-  '볼 때는','것 같았다','것이었다','하는 일도 있었다'
+  '괜찮다','잘하고 있다','삶은','우리는','소중함','마음 한켠'
 ];
 
 const LESSON_PATTERNS = [
   '그래서 우리는','삶은 결국','행복이란',
-  '소중함을 알게','괜찮아도 된다','그것만으로 충분','작은 위로가',
-  '앞모습은','뒷모습은','방향보다','속도가 먼저 보인다','스스로를 어떻게',
-  '모르는 것과','이름과','다르다는 걸','지금에서야 생각했다'
+  '소중함을 알게','괜찮아도 된다','그것만으로 충분','작은 위로가'
 ];
 
 const OPEN_OPTIONS  = ['사물','행동','소리','빛','대화','상태'];
@@ -988,20 +982,57 @@ let db = { examples: [], pairs: [], rules: [] };
 let githubFileSha = null;
 
 // ══════════════════════════════════════════
-// v3.3 — Runtime / Perception / Image Library Bridge
+// v4.0 — Sapmanri Constitution / Perception / Thinking / QC Bridge
 // ══════════════════════════════════════════
+const SAPMANRI_CONSTITUTION = {
+  philosophy: [
+    '글은 감정을 설명하는 것이 아니라, 익숙한 장면에서 처음 보는 틈을 발견하는 일이다.',
+    '잘 쓰는 것보다 잘 멈추는 것이 먼저다.',
+    '장면은 배경이 아니라 생각보다 먼저 독자를 세워두는 자리다.',
+    '하나의 글에는 하나의 발견만 남긴다.',
+    '독자를 설득하지 않는다. 장면 앞에 같이 세워둔다.'
+  ],
+  observation: [
+    '가장 눈에 띄는 것보다 오래 보게 된 것을 고른다.',
+    '사람의 감정보다 손, 빛, 거리, 천, 바람, 그림자, 표면, 온도 같은 물성을 먼저 본다.',
+    '사진이 이미 말하고 있는 것을 다시 설명하지 않는다.',
+    '속도를 설명하지 말고 속도가 보이게 한다.',
+    '예쁜 풍경보다 생활의 작은 어긋남, 늦게 알아차린 것, 이름과 몸의 차이를 본다.'
+  ],
+  thinking: [
+    '이 장면 앞에서 왜 멈췄는지 한 줄만 남긴다.',
+    '감정의 이름보다 인식의 변화를 우선한다.',
+    '큰 결론으로 확장하지 않는다. 그날의 작은 오류와 발견 안에서 끝낸다.',
+    '질문이 생기면 답하지 말고 질문 가까이에 둔다.'
+  ],
+  sentence: [
+    '짧은 행갈이를 쓰되, 리듬을 꾸미기 위해 억지로 끊지 않는다.',
+    '좋은 문장은 예쁜 문장이 아니라 독자가 한 번 멈추게 만드는 문장이다.',
+    '마지막 문장은 의미 정리가 아니라 장면 안에 아직 남아 있는 사물, 움직임, 빛, 거리 중 하나로 둔다.',
+    '설명형 비교문(A는 B지만 C는 D다)을 기본적으로 피한다.'
+  ],
+  avoid: [
+    '좋았다, 충분했다, 괜찮다, 조용히, 천천히 같은 안전한 결말로 도망가지 않는다.',
+    '보여준다, 알게 된다, 의미한다, 생각했다 같은 해석 동사를 남발하지 않는다.',
+    '우리는, 삶은, 결국, 소중함, 위로처럼 큰 말로 확장하지 않는다.',
+    '최근 글과 같은 시작 방식, 같은 결말 구조, 같은 감정 처리 방식을 반복하지 않는다.'
+  ],
+  evolution: [
+    '최근 문체는 감정보다 인지에 가깝다.',
+    '사물을 오래 보는 것보다, 알고 있다고 생각한 것의 틈을 다시 보는 쪽으로 진화했다.',
+    '사진 산문은 예쁜 묘사보다 생활 속 발견의 기록에 가깝다.'
+  ]
+};
 const RUNTIME_RULES = [
-  '삽만리 문체는 시가 아니라 생활 산문이다. 시처럼 꾸미지 않는다.',
-  '입력에서 하나의 소재만 중심으로 고르고, 나머지는 배경으로만 둔다.',
-  '한 글에는 하나의 마음만 둔다. 마음을 설명하지 말고 장면의 물성으로 남긴다.',
-  '사진이나 메모를 해설하지 말고, 그 앞에서 손·빛·거리·온도·소리 중 하나가 달라진 순간만 쓴다.',
-  'A는 B지만 C는 D다 같은 설명형 비교문을 피한다.',
-  '보여준다, 알게 된다, 의미한다, 생각했다 같은 해석 동사를 줄인다.',
-  '마지막 문장은 정리나 교훈이 아니라 아직 장면 안에 남아 있는 사물/행동으로 끝낸다.',
-  '최근 반복된 표현과 안전한 결말은 사용하지 않는다.'
+  ...SAPMANRI_CONSTITUTION.philosophy.slice(0, 3),
+  ...SAPMANRI_CONSTITUTION.observation.slice(0, 4),
+  ...SAPMANRI_CONSTITUTION.thinking.slice(0, 3),
+  ...SAPMANRI_CONSTITUTION.sentence.slice(1, 4),
+  ...SAPMANRI_CONSTITUTION.avoid.slice(0, 3)
 ];
-const OBSERVATION_AXES = ['시간','습관','온도','거리','손의 움직임','사용감','기다림','남은 것','사라진 것','소리','무게','빛','반복','어긋남','흔적','빈자리'];
-const VIEWPOINTS = ['기록','관찰','발견','질문','회상','메모','혼잣말'];
+const OBSERVATION_AXES = ['시간','습관','온도','거리','손의 움직임','사용감','기다림','남은 것','사라진 것','소리','무게','빛','반복','어긋남','흔적','빈자리','인지의 차이','이름과 몸','늦게 본 것','작은 오류'];
+const VIEWPOINTS = ['기록','관찰','발견','질문','회상','메모','혼잣말','인지','생활 기록'];
+const THINKING_AXES = ['발견','인지의 균열','이름과 실제의 차이','늦게 알아차림','사라진 것','남은 것','거리감','속도감','몸의 방향','생활의 작은 오류'];
 const IMAGE_CACHE_FILE = 'image_cache.json';
 let libraryCacheEntries = {};
 let libraryPickerTarget = 'auto';
@@ -1034,10 +1065,26 @@ function updateImageMetaStatus() {
 function buildRuntimeRulesText() {
   return RUNTIME_RULES.map((r,i)=>`${i+1}. ${r}`).join('\n');
 }
+function buildConstitutionText() {
+  const sections = [
+    ['Philosophy', SAPMANRI_CONSTITUTION.philosophy],
+    ['Observation', SAPMANRI_CONSTITUTION.observation],
+    ['Thinking', SAPMANRI_CONSTITUTION.thinking],
+    ['Sentence', SAPMANRI_CONSTITUTION.sentence],
+    ['Avoid', SAPMANRI_CONSTITUTION.avoid],
+    ['Evolution', SAPMANRI_CONSTITUTION.evolution],
+  ];
+  return sections.map(([title, arr]) => `## ${title}\n` + arr.map((r,i)=>`${i+1}. ${r}`).join('\n')).join('\n\n');
+}
+function buildRecentStyleMemoryText() {
+  const recent = state.generationHistory.slice(-12).join('\n---\n');
+  if (!recent.trim()) return '최근 생성 기록 없음';
+  return recent.slice(-3000);
+}
 function buildAvoidPhraseText() {
   const recentText = state.generationHistory.slice(-30).join('\n');
   const overused = WATCH_PHRASES.filter(p => (recentText.match(new RegExp(p,'g'))||[]).length >= 2);
-  const base = ['한참 보고 있었다','그 손이 좋았다','서두르지 않았다','그 정도면 충분했다','그런 오후였다','마음이 늦어졌다'];
+  const base = ['한참 보고 있었다','그 손이 좋았다','서두르지 않았다','그 정도면 충분했다','그런 오후였다','마음이 늦어졌다','좋았다','충분했다','괜찮았다','조용히','천천히','보여준다','알게 된다','생각했다','의미한다'];
   return [...new Set([...base, ...overused])];
 }
 function metaToMaterialData(meta) {
@@ -1268,8 +1315,11 @@ async function ensureManualImageMeta(key, text='') {
 }
 async function buildPerceptionPlan(key, payload) {
   const avoid = buildAvoidPhraseText();
-  const system = `너는 MIMESIS Writing Studio의 Perception Engine이다. 글을 쓰지 않는다. 입력에서 무엇을 볼지, 왜 멈출지, 어떤 축으로 쓸지만 정한다. JSON만 출력한다.`;
+  const system = `너는 MIMESIS Writing Studio v4의 Perception + Thinking Engine이다. 글을 쓰지 않는다. 입력에서 무엇을 볼지, 왜 멈출지, 무엇을 버릴지만 정한다. JSON만 출력한다.`;
   const user = `입력 정보를 보고 글쓰기 전 사고 계획을 만든다.
+
+Sapmanri Writing Constitution:
+${buildConstitutionText()}
 
 입력 타입: ${payload.input_type}
 원문/메모: ${payload.text || ''}
@@ -1277,95 +1327,111 @@ async function buildPerceptionPlan(key, payload) {
 이미지 메타 JSON:
 ${payload.image_meta || ''}
 
+최근 생성 기록 일부:
+${buildRecentStyleMemoryText()}
+
 선택 가능한 observation_axis: ${OBSERVATION_AXES.join(', ')}
+선택 가능한 thinking_axis: ${THINKING_AXES.join(', ')}
 선택 가능한 viewpoint: ${VIEWPOINTS.join(', ')}
 피해야 할 표현: ${avoid.join(', ')}
+
+중요:
+- 글을 쓰지 말 것.
+- 예쁜 소재를 고르지 말고, 사용자가 멈출 만한 작은 틈을 고를 것.
+- 사진/메모에 보이는 것을 전부 쓰려 하지 말고 하나를 버리고 하나만 남길 것.
+- small_shift는 감정 이름이 아니라 인식의 변화여야 한다.
 
 반드시 아래 JSON만 출력:
 {
   "selected_material": "오늘 중심으로 볼 소재 하나",
+  "discarded_materials": ["이번 글에서 일부러 버릴 소재 2~4개"],
   "focus_reason": "왜 그것을 골랐는지 한 문장",
   "observation_axis": "${OBSERVATION_AXES.join('|')}",
+  "thinking_axis": "${THINKING_AXES.join('|')}",
   "viewpoint": "${VIEWPOINTS.join('|')}",
-  "small_shift": "장면 앞에서 생긴 작은 마음의 변화 한 줄",
+  "small_shift": "장면 앞에서 생긴 작은 인식 변화 한 줄",
+  "final_image": "마지막에 남길 수 있는 장면/물성 후보 하나",
   "do_not_write": ["이번 글에서 쓰지 말아야 할 것 2~4개"],
   "avoid_phrases": []
 }`;
-  const raw = await callClaude(key, user, system, 900, 2);
+  const raw = await callClaude(key, user, system, 1000, 2);
   const plan = safeJsonFromText(raw);
   plan.avoid_phrases = [...new Set([...(plan.avoid_phrases||[]), ...avoid])];
   return plan;
 }
 function planToText(plan) {
   if (!plan) return '';
-  return `선택 소재: ${plan.selected_material || ''}\n선택 이유: ${plan.focus_reason || ''}\n관찰 축: ${plan.observation_axis || ''}\n관점: ${plan.viewpoint || ''}\n작은 변화: ${plan.small_shift || ''}\n금지: ${safeArray(plan.do_not_write).join(', ')}\n피할 표현: ${safeArray(plan.avoid_phrases).join(', ')}`;
+  return `선택 소재: ${plan.selected_material || ''}\n버린 소재: ${safeArray(plan.discarded_materials).join(', ')}\n선택 이유: ${plan.focus_reason || ''}\n관찰 축: ${plan.observation_axis || ''}\n사고 축: ${plan.thinking_axis || ''}\n관점: ${plan.viewpoint || ''}\n작은 변화: ${plan.small_shift || ''}\n마지막 이미지: ${plan.final_image || ''}\n금지: ${safeArray(plan.do_not_write).join(', ')}\n피할 표현: ${safeArray(plan.avoid_phrases).join(', ')}`;
 }
-
-
-// v3.3.4 — 자동 생성 후 설명문/교훈문을 한 번 더 잡는 후처리 QC
 function detectSapmanriIssues(text) {
   const t = String(text || '');
   const issues = [];
-  const explanationPatterns = [
-    /앞모습은[\s\S]{0,80}뒷모습은/g,
-    /방향보다[\s\S]{0,40}속도/g,
-    /보여준다/g,
-    /알게 (되는|된다)/g,
-    /의미한다/g,
-    /생각했다/g,
-    /빠르지도 느리지도/g,
-    /그냥\s*
-?\s*걷고 있었다/g,
-    /나는 그 자리에\s*
-?\s*조금 남아 있었다/g,
-    /하는 일도\s*
-?\s*있었다/g
+  const patterns = [
+    [/앞모습은[\s\S]{0,100}뒷모습은/g, '개념 비교문이 장면보다 앞섬'],
+    [/방향보다[\s\S]{0,60}속도/g, '해석을 법칙처럼 정리함'],
+    [/보여준다|알게 된다|알게 되는|의미한다/g, '해석 동사가 많음'],
+    [/그래서 우리는|삶은 결국|행복이란|소중함을 알게|위로가 된다/g, '교훈형 문장'],
+    [/빠르지도 느리지도 않았다|그냥\s*걷고 있었다|조금 남아 있었다/g, '안전한 관찰 리듬 반복'],
+    [/좋았다|충분했다|괜찮았다|그런 오후였다|마음이 늦어졌다/g, '익숙한 결말로 수렴']
   ];
-  explanationPatterns.forEach(re => { if (re.test(t)) issues.push('설명형/정리형 문장'); });
-  WATCH_PHRASES.forEach(p => { if (p && t.includes(p)) issues.push(`반복 위험 표현: ${p}`); });
-  const last = t.split('
-').filter(x=>x.trim()).slice(-3).join(' ');
-  if (/(있었다|생각했다|알게 됐다|알게 된다|보인다|보여준다|충분했다|괜찮다)$/.test(last.trim())) {
-    issues.push('마지막 문장이 의미 정리로 끝남');
-  }
-  return [...new Set(issues)].slice(0, 8);
+  patterns.forEach(([re, label]) => { if (re.test(t)) issues.push(label); });
+  const lines = t.split('\n').map(x=>x.trim()).filter(Boolean);
+  const last = lines.slice(-3).join(' ');
+  if (/(있었다|생각했다|알게 됐다|알게 된다|보인다|보여준다|충분했다|괜찮다)$/.test(last.trim())) issues.push('마지막이 의미 정리로 끝남');
+  if ((t.match(/\b(것|일|마음|생각)\b/g)||[]).length >= 8) issues.push('추상 명사가 많음');
+  const sentenceLike = t.split(/[.!?。]|\n\n/).filter(x=>x.trim().length>10);
+  if (sentenceLike.length && sentenceLike.filter(x=>/은|는/.test(x) && /다$/.test(x.trim())).length >= 4) issues.push('설명문 리듬이 강함');
+  return [...new Set(issues)].slice(0, 10);
 }
+function scoreSapmanriWriting(text) {
+  const issues = detectSapmanriIssues(text);
+  const t = String(text || '');
+  const hasScene = /(빛|손|바람|그림자|천|옷자락|흙|창|나무|커피|발|거리|온도|소리|표면|색|냄새)/.test(t);
+  const hasDiscovery = /(몰랐다|처음|이상했다|다르다|알고 있었다|본 적|이름|몸|늦게|문득|깨달았다|생각했다)/.test(t);
+  const explanation = Math.min(100, issues.length * 14);
+  const scene = hasScene ? 85 : 55;
+  const discovery = hasDiscovery ? 88 : 58;
+  const aiSmell = Math.min(100, (t.match(/좋았다|충분했다|소중|위로|힐링|괜찮/g)||[]).length * 20 + issues.length * 5);
+  const sapmanri = Math.max(0, Math.min(100, Math.round((scene + discovery + (100-explanation) + (100-aiSmell)) / 4)));
+  return { scene, discovery, explanation, ai_smell: aiSmell, sapmanri_score: sapmanri, issues };
+}
+async function enforceSapmanriQC(key, draft, context={}) {
+  const score = scoreSapmanriWriting(draft);
+  if (score.issues.length === 0 && score.sapmanri_score >= 82) return draft;
+  const system = `너는 삽만리 Writing Studio v4의 Sapmanri QC + Rewrite Engine이다. 새 글을 만들지 말고, 초안의 시선과 장면은 유지한 채 설명, 교훈, 반복, 안전한 결말만 덜어낸다.`;
+  const user = `아래 초안을 Sapmanri Writing Constitution 기준으로 한 번만 정리한다.
 
-async function enforceSapmanriQC(key, draft, context) {
-  const issues = detectSapmanriIssues(draft);
-  if (!issues.length) return draft;
-  const system = `너는 삽만리 Writing Studio의 QC 편집자다. 새 글을 만들지 말고, 초안의 시선과 장면은 유지한 채 설명형 문장과 안전한 결말만 덜어낸다.`;
-  const user = `아래 초안을 삽만리 문체로 한 번만 정리한다.
+Sapmanri Writing Constitution:
+${buildConstitutionText()}
 
 수정 원칙:
 - 내용과 장면은 유지한다.
-- 설명형 비교문을 줄인다. 예: "앞모습은... 뒷모습은..." 같은 문장을 피한다.
+- 초안이 선택한 소재와 Perception Plan을 벗어나지 않는다.
+- 설명형 비교문과 일반 법칙 문장을 줄인다.
 - "보여준다/알게 된다/생각했다/의미한다" 같은 해석 동사를 줄인다.
 - 마지막은 의미 정리가 아니라 장면 안의 물성, 움직임, 거리, 빛, 손, 옷자락 중 하나로 끝낸다.
-- 더 예쁘게 만들려고 하지 말고 덜어낸다.
+- 더 예쁘게 만들지 말고 덜어낸다.
 - 제목 포함, 본문만 출력한다. 설명 금지.
 
-감지된 문제:
-${issues.map((x,i)=>`${i+1}. ${x}`).join('
-')}
+Writing DNA 점수:
+${JSON.stringify(score, null, 2)}
 
-Perception Plan:
-${context?.planText || ''}
+Perception/Thinking Plan:
+${context.planText || ''}
 
 이미지 메타 요약:
-${context?.metaText || ''}
+${context.metaText || ''}
 
 초안:
 ${draft}`;
   try {
-    const fixed = await callClaude(key, user, system, 1400, 1);
+    const fixed = await callClaude(key, user, system, 1600, 1);
     return fixed && fixed.trim() ? fixed.trim() : draft;
   } catch(e) {
-    console.warn('QC rewrite failed', e);
+    console.warn('Sapmanri QC rewrite failed', e);
     return draft;
   }
 }
-
 // ══════════════════════════════════════════
 // GitHub / API Key
 // ══════════════════════════════════════════
@@ -1721,10 +1787,13 @@ async function generateCandidates() {
 
 우선순위: 관찰 선택 > 장면 > 사실 > 리듬 > 감정 > 의미
 
+Sapmanri Writing Constitution:
+${buildConstitutionText()}
+
 Runtime Rules:
 ${buildRuntimeRulesText()}
 
-Perception Plan — 반드시 이 계획 안에서만 쓸 것:
+Perception + Thinking Plan — 반드시 이 계획 안에서만 쓸 것:
 ${planToText(perceptionPlan)}
 
 절대 금지:
@@ -2671,10 +2740,13 @@ async function autoGenerate() {
     let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 Writing Studio입니다.
 이번 버전은 바로 글을 쓰지 않고 Perception Plan을 따른 뒤 글을 씁니다.
 
+## Sapmanri Writing Constitution
+${buildConstitutionText()}
+
 ## Runtime Rules
 ${buildRuntimeRulesText()}
 
-## Perception Plan
+## Perception + Thinking Plan
 ${planToText(perceptionPlan)}
 
 ## 절대 금지
@@ -2685,13 +2757,13 @@ ${planToText(perceptionPlan)}
 - 이미지 메타 전체를 설명문처럼 나열하지 말 것
 
 ## 생성 원칙
-선택 소재 하나 → 작은 관찰 → 마음의 미세한 변화 → 장면 안에서 멈춤
+선택 소재 하나 → 작은 관찰 → 인식의 미세한 변화 → 장면 안에서 멈춤
 
-## 특히 피할 문장
-- "앞모습은 ... 뒷모습은 ..."처럼 뜻을 정리하는 비교문
-- "방향보다 속도가 먼저 보인다"처럼 해석을 정리하는 문장
-- "보여준다 / 알게 된다 / 생각했다"로 끝나는 설명문
-- "빠르지도 느리지도 않았다 / 그냥 걷고 있었다 / 조금 남아 있었다" 같은 안전한 리듬
+## Sapmanri QC를 미리 통과할 것
+- 발견이 있어야 한다. 예쁜 묘사만 있으면 실패.
+- 생각보다 장면이 먼저 와야 한다.
+- 사진이 이미 말한 것을 다시 설명하면 실패.
+- 마지막 문장이 정리문이면 실패.
 
 ${TYPE_INSTRUCTION[autoType]}`;
 
@@ -2732,9 +2804,10 @@ ${compactImageMeta(imageMeta) || '(없음)'}
 Perception Plan:
 ${planToText(perceptionPlan)}
 
-위 계획을 기준으로 글을 써주세요. 메타데이터를 설명하지 말고, 선택된 소재 하나와 작은 변화만 남겨주세요. 마지막은 의미 정리가 아니라 장면 안의 사물/움직임으로 남겨주세요.`;
+위 계획을 기준으로 글을 써주세요. 메타데이터를 설명하지 말고, 선택된 소재 하나와 작은 인식 변화만 남겨주세요. 초안은 70점이면 됩니다. 마지막은 의미 정리가 아니라 장면 안의 사물/움직임으로 남겨주세요.`;
 
     const raw = await callClaude(key, userContent, system, 1500);
+    toast('Sapmanri QC 적용 중…');
     const finalText = await enforceSapmanriQC(key, raw, {
       planText: planToText(perceptionPlan),
       metaText: imageMeta ? imageMetaSummary(imageMeta) : ''
@@ -2745,7 +2818,7 @@ ${planToText(perceptionPlan)}
     state.generationHistory.push(finalText);
     if (state.generationHistory.length > 50) state.generationHistory.shift();
     checkAutoQuality(finalText);
-    toast('생성 완료');
+    toast('생성 + Sapmanri QC 완료');
   } catch(e) {
     toast('생성 실패: ' + e.message);
   } finally {
