@@ -27,6 +27,14 @@
             "작업의 순간",
             "디지털 여정",
             "오후의 여유"
+          ],
+          "items_en": [
+            "Everyday Moments",
+            "A Weaving Moment",
+            "An Afternoon in the Garden",
+            "작업의 순간",
+            "A Digital Journey",
+            "오후의 여유"
           ]
         },
         {
@@ -197,6 +205,14 @@
             "오후의 정적",
             "디지털 작업",
             "수변풍경"
+          ],
+          "items_en": [
+            "A Gift from the Garden",
+            "A Weaving Moment",
+            "Warmth of Home",
+            "Afternoon Stillness",
+            "Digital Work",
+            "수변풍경"
           ]
         },
         {
@@ -282,6 +298,14 @@
             "오후의 정적",
             "함께 짓는 시간",
             "직조의 순간",
+            "그림자의 시간"
+          ],
+          "items_en": [
+            "A Gift from the Garden",
+            "Digital Work",
+            "Afternoon Stillness",
+            "함께 짓는 시간",
+            "A Weaving Moment",
             "그림자의 시간"
           ]
         },
@@ -380,6 +404,14 @@
             "정적의 풍경",
             "호숫가 풍경",
             "호반의 오후",
+            "호숫가 산책",
+            "호수의 산책",
+            "여름의 풍경"
+          ],
+          "items_en": [
+            "A Still Landscape",
+            "By the Lake",
+            "Lakeside Afternoon",
             "호숫가 산책",
             "호수의 산책",
             "여름의 풍경"
@@ -531,6 +563,14 @@
             "오후의 여유",
             "오후의 독서",
             "디지털 작업"
+          ],
+          "items_en": [
+            "A Digital Journey",
+            "An Afternoon in the Garden",
+            "Daily Care",
+            "오후의 여유",
+            "오후의 독서",
+            "Digital Work"
           ]
         },
         {
@@ -581,7 +621,7 @@
           "lines": [
             {
               "speaker": "",
-              "text": "# 직조 전등과 산딸기, 느린 6월",
+              "text": "직조 전등과 산딸기, 느린 6월",
               "side": "left"
             },
             {
@@ -986,6 +1026,14 @@
             "프리퀄 000",
             "고요함",
             "일상의 메시지"
+          ],
+          "items_en": [
+            "A Daily Gift",
+            "A Desk Moment",
+            "Above the Sink",
+            "프리퀄 000",
+            "고요함",
+            "일상의 메시지"
           ]
         },
         {
@@ -1281,7 +1329,14 @@
             "일상의 풍경",
             "차 한 잔"
           ],
-          "items_en": []
+          "items_en": [
+            "A Time of Silence",
+            "Small Everyday Things",
+            "A Paused Space",
+            "An Ordered Day",
+            "Everyday Scenery",
+            "A Cup of Tea"
+          ]
         },
         {
           "type": "spread",
@@ -1449,56 +1504,56 @@
         },
         {
           "type": "dialogue",
-          "label": "참고 컨텍스트에 내용이 입력되지 않았습니다.\n\n어떤 장면, 사물, 상황, 또는 사진에 대해 쓰고 싶으신지 알려주시면 글을 써드리겠습니다.",
+          "label": "",
           "label_en": "",
           "lines": [
             {
               "side": "left",
               "speaker": "빼빼",
               "text": "오늘도 거기 있네",
-              "text_en": "오늘도 거기 있네\n\nYou're still there today"
+              "text_en": "You're still there today"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "고양이는 늘 같은 자리에 앉아 있다",
-              "text_en": "# 고양이는 늘 같은 자리에 앉아 있다\n# The cat always sits in the same spot"
+              "text_en": "The cat always sits in the same spot"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "나는 지나가다 멈췄다",
-              "text_en": "잠깐 멈추는 것에 대하여\n\nSome things only arrive when you stop"
+              "text_en": "Some things only arrive when you stop"
             },
             {
               "side": "right",
               "speaker": "콩이",
               "text": "형 또 졸고 있어",
-              "text_en": "형 또 졸고 있어\n\n*My brother is dozing off again*"
+              "text_en": "My brother is dozing off again"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "오후는 조용했다",
-              "text_en": "오후는 조용했다\nThe afternoon was quiet"
+              "text_en": "The afternoon was quiet"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "아무도 서두르지 않는 시간",
-              "text_en": "아무도 서두르지 않는 시간\n\nWhen No One Is in a Hurry"
+              "text_en": "When No One Is in a Hurry"
             },
             {
               "side": "left",
               "speaker": "빼빼",
               "text": "여기 앉으면 따뜻해",
-              "text_en": "**Sitting here,**\n**you'll feel the warmth.**"
+              "text_en": "Sitting here, you'll feel the warmth."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "햇빛이 조금 남아 있는 곳",
-              "text_en": "햇빛이 조금 남아 있는 곳\nWhere a Little Sunlight Remains"
+              "text_en": "Where a Little Sunlight Remains"
             },
             {
               "side": "left",
@@ -1510,7 +1565,7 @@
               "side": "right",
               "speaker": "",
               "text": "오늘은 그 정도면 충분했다",
-              "text_en": "# 오늘은\n그 정도면 충분했다"
+              "text_en": ""
             }
           ]
         },
@@ -1564,20 +1619,20 @@
         },
         {
           "type": "dialogue",
-          "label": "내용을 입력해주세요",
+          "label": "",
           "label_en": "",
           "lines": [
             {
               "side": "left",
               "speaker": "",
               "text": "아침 — 먼저 일어난 빛",
-              "text_en": "아침 — 먼저 일어난 빛"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "창문을 열었더니",
-              "text_en": "열면 이미 시작된다\n\n창문 너머에서 오는 것들"
+              "text_en": ""
             },
             {
               "side": "left",
@@ -1589,139 +1644,139 @@
               "side": "right",
               "speaker": "",
               "text": "어제까지",
-              "text_en": "어제까지\n\nUntil Yesterday"
+              "text_en": "Until Yesterday"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "어둠이 가득 채워두었던 자리를",
-              "text_en": "어둠이 머물던 자리,\n빛이 천천히 들어서는 법"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "조용히 비워둔 채.",
-              "text_en": "# 조용히 비워둔 채.\n*Left quietly empty.*"
+              "text_en": "Left quietly empty."
             },
             {
               "side": "left",
               "speaker": "",
               "text": "빛은",
-              "text_en": "빛은\nLight is"
+              "text_en": "Light is"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "소리 없이 들어와",
-              "text_en": "# 소리 없이 들어와\n*Come in without a sound*"
+              "text_en": "Come in without a sound"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "가장 낮은 곳부터 채운다.",
-              "text_en": "가장 낮은 곳부터 채운다.\n\nIt fills from the lowest place first."
+              "text_en": "It fills from the lowest place first."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "마루 한쪽,",
-              "text_en": "마루 한쪽,\n한 귀퉁이의 언어"
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "벽 아래,",
-              "text_en": "벽 아래,\n그 아래부터 시작되는 것들"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "고양이가 자던 방석 끝.",
-              "text_en": "고양이가 자던 방석 끝.\n\nThe edge of the cushion\nwhere the cat used to sleep."
+              "text_en": "The edge of the cushion where the cat used to sleep."
             },
             {
               "side": "left",
               "speaker": "",
               "text": "급하게 밀어내지 않고",
-              "text_en": "급하지 않게\n밀어내지 않는 법"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "천천히 스며들듯",
-              "text_en": "천천히 스며들듯\nLike something slowly seeping in"
+              "text_en": "Like something slowly seeping in"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "어둠을 바래게 한다.",
-              "text_en": "# 어둠을 바래게 한다\n**It Fades the Dark**"
+              "text_en": "It Fades the Dark"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "아직 시작하지 않아도 되는데",
-              "text_en": "# 아직 시작하지 않아도 되는데\n\nYou don't have to start just yet"
+              "text_en": "You don't have to start just yet"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "뭔가를 해야 할 것 같던 마음이",
-              "text_en": "# 무언가를 해야 할 것 같던 마음이\n# Something That Felt Like It Had to Be Done"
+              "text_en": "Something That Felt Like It Had to Be Done"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "조금 늦게 따라온다.",
-              "text_en": "두 줄 헤드라인을 써드리겠습니다.\n\n---\n\n**번역은 의미가 아니라**\n**마음이 옮겨지는 일이다**\n\n---\n\n혹은:\n\n---\n\n**말은 먼저 건너가고**\n**뜻은 조금 늦게 따라온다**\n\n---\n\n두 번째 안이 컨텍스트의 뉘앙스(\"조금 늦게 따라온다\")를 더 자연스럽게 담고 있습니다. 원하시는 방향이 있으면 말씀해주세요."
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "괜찮다.",
-              "text_en": "괜찮다.\n그 말을 영어로 옮기려다 잠깐 멈췄다.\n\n\"I'm fine.\"\n\"It's okay.\"\n\"Don't worry.\"\n\n어떤 것도\n딱 맞지 않는다.\n\n괜찮다는\n괜찮지 않을 수도 있다는 걸\n모두 알면서 하는 말인데,\n\n영어는 그 안을\n조금 더 환하게 들여다보려 한다.\n\n\"It's alright\"이라고 쓰면\n너무 가볍고,\n\n\"I'll be okay\"라고 쓰면\n아직 괜찮지 않다는 쪽에\n더 기운다.\n\n그냥\n\"It's okay\"가\n그나마 가장 가깝지 않을까.\n\n말하는 사람이\n조금 참으면서 내뱉는 말.\n듣는 사람이\n그냥 받아들이기로 하는 말.\n\n괜찮다.\n\n번역은 됐는데\n그 온도는\n좀 남았다."
+              "text_en": "\"I'm fine.\" \"It's okay.\" \"Don't worry.\""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "오늘은",
-              "text_en": "오늘은,\n어디까지 번역해드릴까요."
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "빛이 먼저 깨웠으니까.",
-              "text_en": "빛이 먼저 깨웠으니까\n\nLight woke me first."
+              "text_en": "Light woke me first."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "그런 아침이었다",
-              "text_en": "그런 아침이었다\nIt was that kind of morning"
+              "text_en": "It was that kind of morning"
             },
             {
               "side": "left",
               "speaker": "빼빼",
               "text": "아직 안 일어났어?",
-              "text_en": "아직 안 일어난 사람에게\n어떤 말이 더 맞는 말일까"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "창가에 앉아 있었다",
-              "text_en": "잠깐 멈췄다가\n다시 적었다\n\n---\n\nBy the window, just sitting"
+              "text_en": "By the window, just sitting"
             },
             {
               "side": "left",
               "speaker": "콩이",
               "text": "...",
-              "text_en": "# 번역이 머뭇거리는 자리\n\n말은 옮겨지는데,\n마음은 조금 늦게 따라온다"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "빛이 먼저 깨워서",
-              "text_en": "빛이 먼저 깨워서\n*The light woke me before I did*"
+              "text_en": "The light woke me before I did"
             }
           ]
         },
@@ -1845,116 +1900,116 @@
         },
         {
           "type": "dialogue",
-          "label": "내용이 입력되지 않았습니다. 장면이나 상황을 알려주세요.",
+          "label": "",
           "label_en": "",
           "lines": [
             {
               "side": "left",
               "speaker": "",
               "text": "바람이 부는 날이었다.",
-              "text_en": "두 줄짜리 표지 헤드라인으로 쓰겠습니다.\n\n---\n\n바람이 불었다\n그 말 하나를 영어로 옮기던 오후\n\n---"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "마당 한쪽에",
-              "text_en": "마당 한쪽에\nIn a corner of the yard"
+              "text_en": "In a corner of the yard"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "깔아둔 화로 앞에 앉아",
-              "text_en": "깔아둔 화로 앞에 앉아\n\nSeated before the ember-laid hearth"
+              "text_en": "Seated before the ember-laid hearth"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "불씨를 피우려 했다.",
-              "text_en": "표지 헤드라인 — 2줄, 명조체\n\n---\n\n불씨를 피우려 했다\nI was trying to start a fire."
+              "text_en": "I was trying to start a fire."
             },
             {
               "side": "left",
               "speaker": "",
               "text": "장작은 마르고,",
-              "text_en": "장작은 마르고,\n불은 늦게 붙는다"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "종이는 구겨져 있고,",
-              "text_en": "종이는 구겨져 있고,\nStill, the words stay."
+              "text_en": "Still, the words stay."
             },
             {
               "side": "left",
               "speaker": "",
               "text": "손에는 라이터 하나.",
-              "text_en": "손에는 라이터 하나.\nOne lighter in hand."
+              "text_en": "One lighter in hand."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "그런데 이상하게",
-              "text_en": "그런데 이상하게\n\nBut somehow"
+              "text_en": "But somehow"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "불이 붙지 않았다.",
-              "text_en": "표지 헤드라인 2줄, 명조체 감각으로 씁니다.\n\n---\n\n불이 붙지 않았다\nThe fire didn't catch."
+              "text_en": "The fire didn't catch."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "불꽃이 일어나도",
-              "text_en": "**Even if a flame rises**\n\n**불꽃이 일어나도**"
+              "text_en": "Even if a flame rises"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "바람에 금방 꺼지고,",
-              "text_en": "바람에 지지 않는 말"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "다시 붙여도",
-              "text_en": "다시 붙여도\n\n*Even if you piece it back together*"
+              "text_en": "Even if you piece it back together"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "또 사라지고.",
-              "text_en": "또 사라지고\nAnd again, gone."
+              "text_en": "And again, gone."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "손끝이 까맣게 그을렸다.",
-              "text_en": "표지 헤드라인 (2줄, 명조체):\n\n---\n\n손끝이 까맣게 그을렸다\nFingertips, Burned Black"
+              "text_en": "Fingertips, Burned Black"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "서두르지 않으려 했는데",
-              "text_en": "서두르지 않으려 했는데\n마음은 이미 앞서 있었다"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "자꾸 손이 빨라졌다.",
-              "text_en": "내 손은 자꾸 앞서 나갔다."
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "몇 번째였을까.",
-              "text_en": "몇 번째였을까\n\nHow many times has it been"
+              "text_en": "How many times has it been"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "라이터를 내려놓고",
-              "text_en": "라이터를 내려놓고\n— Put the lighter down"
+              "text_en": "— Put the lighter down"
             },
             {
               "side": "left",
@@ -1966,61 +2021,61 @@
               "side": "right",
               "speaker": "",
               "text": "바람은",
-              "text_en": "바람은\n— 시작되는 것들에 대하여"
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "멈출 생각이 없었고,",
-              "text_en": "멈출 생각이 없었고,\n그게 문제였는지도 모른다"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "나는",
-              "text_en": "표지 헤드라인 2줄, 명조체 기준으로 씁니다.\n\n---\n\n말이 멈추는 자리에서\n나는, 라고 시작했다"
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "불씨를 기다리는 것 말고는",
-              "text_en": "불씨를 기다리는 것 말고는\nThere Was Nothing Left But Waiting for a Spark"
+              "text_en": "There Was Nothing Left But Waiting for a Spark"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "할 수 있는 게 없었다.",
-              "text_en": "표지 헤드라인 두 줄입니다.\n\n---\n\n할 수 있는 게 없었다\nThere was nothing I could do."
+              "text_en": "There was nothing I could do."
             },
             {
               "side": "left",
               "speaker": "",
               "text": "조금 천천히 해보기로 했다.",
-              "text_en": "표지 헤드라인 (2줄, 명조체):\n\n---\n\n조금 천천히 해보기로 했다\n*I decided to take it a little slower.*"
+              "text_en": "I decided to take it a little slower."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "장작 사이에",
-              "text_en": "장작 사이에\nBetween the Logs"
+              "text_en": "Between the Logs"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "바람이 지나갈 자리를 조금 더 두고,",
-              "text_en": "바람이 지나갈 자리를\n조금 더 두고,"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "종이를 너무 꽉 눌러 담지 않고,",
-              "text_en": "종이를 꽉 쥐지 않는 일\n\n힘을 빼는 것도\n연습이 필요하다"
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "불꽃이 일어나면",
-              "text_en": "불꽃이 일어나면\nWhen the flame rises"
+              "text_en": "When the flame rises"
             },
             {
               "side": "right",
@@ -2032,97 +2087,97 @@
               "side": "left",
               "speaker": "",
               "text": "그러자",
-              "text_en": "그러자\n\nThen."
+              "text_en": "Then."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "이상하게",
-              "text_en": "이상하게,\n라는 말이 필요한 순간들이 있다"
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "불씨가 조금씩",
-              "text_en": "불씨가 조금씩\n\n*An Ember, Slowly*"
+              "text_en": "An Ember, Slowly"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "남기 시작했다.",
-              "text_en": "표지 헤드라인 2줄, 명조체:\n\n---\n\n말이 먼저 사라지고\n흔적이 남기 시작했다"
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "빨리 피워야 한다는 마음보다",
-              "text_en": "빨리 피워야 한다는 마음보다\n\n---\n\n**보다 천천히,**\n**그래도 괜찮은 계절에 대하여**"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "천천히 남겨두려는 마음이",
-              "text_en": "천천히, 남겨두는 일\n\nLeaving Things Slowly Behind"
+              "text_en": "Leaving Things Slowly Behind"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "더 오래 가는 불을 만들었다.",
-              "text_en": "더 오래 가는 불을 만들었다.\nWe made a fire that lasts."
+              "text_en": "We made a fire that lasts."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "불씨는",
-              "text_en": "불씨는\n꺼진 것이 아니다"
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "서두른다고 빨리 커지는 게 아니었다.",
-              "text_en": "Growing up doesn't get faster\njust because you rush it."
+              "text_en": "Growing up doesn't get faster just because you rush it."
             },
             {
               "side": "right",
               "speaker": "",
               "text": "바람이 부는 날에는",
-              "text_en": "바람이 부는 날에는\n— On Windy Days"
+              "text_en": "— On Windy Days"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "바람을 이기려 하지 말고,",
-              "text_en": "바람과 싸우지 않는 법\n\nDon't try to beat the wind,"
+              "text_en": "Don't try to beat the wind,"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "바람이 지나갈 자리를",
-              "text_en": "바람이 지나갈 자리를\nLeaving Room for the Wind"
+              "text_en": "Leaving Room for the Wind"
             },
             {
               "side": "left",
               "speaker": "",
               "text": "조금 남겨두는 것.",
-              "text_en": "표지 헤드라인 2줄, 명조체 스타일로:\n\n---\n\n다 말하지 않아도 되는 것들이 있다\n조금 남겨두는 것"
+              "text_en": ""
             },
             {
               "side": "right",
               "speaker": "",
               "text": "그게",
-              "text_en": "그게\n\n——\n\n번역이 아니라\n기다림이 필요한 말이 있다."
+              "text_en": ""
             },
             {
               "side": "left",
               "speaker": "",
               "text": "불을 피우는 방법이었다.",
-              "text_en": "표지 헤드라인 2줄, 명조체 기준:\n\n---\n\n불을 피우는 방법이었다\nHow to Start a Fire\n\n---"
+              "text_en": "How to Start a Fire"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "손끝에는 아직",
-              "text_en": "손끝에는 아직\n\nFingertips still holding on"
+              "text_en": "Fingertips still holding on"
             },
             {
               "side": "left",
@@ -2140,13 +2195,13 @@
               "side": "left",
               "speaker": "",
               "text": "불씨는 지금",
-              "text_en": "불씨는 지금\nStill Burning"
+              "text_en": "Still Burning"
             },
             {
               "side": "right",
               "speaker": "",
               "text": "천천히 번지고 있었다.",
-              "text_en": "# It was spreading, slowly."
+              "text_en": "It was spreading, slowly."
             }
           ]
         },
