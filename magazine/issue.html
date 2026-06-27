@@ -747,70 +747,90 @@ load();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 async function exportPdf() {
-  const pages = document.querySelectorAll('.pages .page');
-  if (!pages.length) { alert('페이지를 먼저 불러오세요.'); return; }
-
-  const btn = document.getElementById('pdfBtn');
+  const btn     = document.getElementById('pdfBtn');
   const overlay = document.getElementById('pdfOverlay');
-  const bar = document.getElementById('pdfBar');
-  const sub = document.getElementById('pdfSub');
+  const bar     = document.getElementById('pdfBar');
+  const sub     = document.getElementById('pdfSub');
+  const topbar  = document.getElementById('topbar');
 
   btn.disabled = true;
   overlay.classList.add('active');
-
-  const topbar = document.getElementById('topbar');
   topbar.style.display = 'none';
+
+  // ── 모바일 레이아웃 강제 (화면 크기 무관하게 항상 1페이지씩) ──
+  const PDF_MOBILE_W = 390;  // 고정 캡처 너비 (px)
+  const PDF_W_MM     = 105;  // PDF 출력 너비 (mm) — A6 폭 기준, 소장용에 적합
+
+  const forceStyle = document.createElement('style');
+  forceStyle.id    = 'pdf-force-mobile';
+  forceStyle.textContent = `
+    .page.page-spread-desktop { display: none !important; }
+    .page.page-spread          { display: flex !important; }
+    #pages { max-width: ${PDF_MOBILE_W}px !important; }
+  `;
+  document.head.appendChild(forceStyle);
+
+  // 레이아웃 재계산 대기
+  await new Promise(r => setTimeout(r, 120));
+
+  // desktop spread 제외하고 모든 페이지 수집
+  const pages = [...document.querySelectorAll('.pages .page:not(.page-spread-desktop)')];
+
+  if (!pages.length) {
+    alert('페이지를 먼저 불러오세요.');
+    forceStyle.remove();
+    topbar.style.display = '';
+    btn.disabled = false;
+    overlay.classList.remove('active');
+    return;
+  }
 
   try {
     const { jsPDF } = window.jspdf;
-    const PDF_W_MM = 210; // A4 너비 기준
-    const canvases = [];
+    const canvases  = [];
 
-    // 1단계: 전체 캡처
+    // 1단계: 전체 캡처 (고정 390px 너비 기준)
     for (let i = 0; i < pages.length; i++) {
       sub.textContent = `캡처 중… (${i + 1} / ${pages.length})`;
       bar.style.width = `${Math.round((i / pages.length) * 80)}%`;
 
       const page = pages[i];
       const canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
+        scale        : 2,
+        useCORS      : true,
+        allowTaint   : true,
         backgroundColor: null,
-        scrollX: 0,
-        scrollY: 0,
-        width: page.offsetWidth,
-        height: page.scrollHeight,
-        windowWidth: page.offsetWidth,
-        windowHeight: page.scrollHeight,
+        scrollX      : 0,
+        scrollY      : 0,
+        width        : PDF_MOBILE_W,
+        height       : page.scrollHeight,
+        windowWidth  : PDF_MOBILE_W,      // 미디어쿼리도 모바일 기준 적용
+        windowHeight : page.scrollHeight,
       });
       canvases.push(canvas);
     }
 
-    // 2단계: PDF 생성
+    // 2단계: PDF 조합
     sub.textContent = 'PDF 조합 중…';
     bar.style.width = '85%';
 
     let pdf = null;
-
     for (let i = 0; i < canvases.length; i++) {
-      const canvas = canvases[i];
-      const ratio = canvas.height / canvas.width;
-      const pageH = Math.round(PDF_W_MM * ratio);
-      const orient = ratio > 1 ? 'portrait' : 'landscape';
+      const canvas  = canvases[i];
+      const ratio   = canvas.height / canvas.width;
+      const pageH   = Math.round(PDF_W_MM * ratio);
 
       if (i === 0) {
-        pdf = new jsPDF({ orientation: orient, unit: 'mm', format: [PDF_W_MM, pageH] });
+        pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [PDF_W_MM, pageH] });
       } else {
-        pdf.addPage([PDF_W_MM, pageH], orient);
+        pdf.addPage([PDF_W_MM, pageH], 'portrait');
       }
-
       const imgData = canvas.toDataURL('image/jpeg', 0.92);
       pdf.addImage(imgData, 'JPEG', 0, 0, PDF_W_MM, pageH);
     }
 
-    bar.style.width = '100%';
-    sub.textContent = '저장 중…';
+    bar.style.width  = '100%';
+    sub.textContent  = '저장 중…';
 
     const issueId = new URLSearchParams(location.search).get('id') || 'magazine';
     pdf.save(`SAPMANRI_${issueId}.pdf`);
@@ -819,6 +839,7 @@ async function exportPdf() {
     alert('PDF 생성 중 오류가 발생했습니다: ' + e.message);
     console.error(e);
   } finally {
+    forceStyle.remove();       // 모바일 강제 스타일 제거
     topbar.style.display = '';
     btn.disabled = false;
     overlay.classList.remove('active');
