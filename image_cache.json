@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "bright",
           "dominant_color": "#b8d4a8",
-          "mood": "ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ",
-          "suggested_caption": "ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¦ÃÂ",
-          "suggested_caption_left": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ",
-          "suggested_caption_right": "ÃÂ«ÃÂ¶ÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ´ÃÂ«ÃÂ§ÃÂ¤",
-          "suggested_label": "ÃÂ«ÃÂ²ÃÂ ÃÂ«ÃÂ¦ÃÂ¬ ÃÂ­ÃÂÃÂ¼ÃÂ­ÃÂÃÂ¹",
+          "mood": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂ",
+          "suggested_caption": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ«ÃÂÃÂ¦ÃÂÃÂ",
+          "suggested_caption_left": "ÃÂÃÂ¬ÃÂÃÂ ÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ",
+          "suggested_caption_right": "ÃÂÃÂ«ÃÂÃÂ¶ÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ´ÃÂÃÂ«ÃÂÃÂ§ÃÂÃÂ¤",
+          "suggested_label": "ÃÂÃÂ«ÃÂÃÂ²ÃÂÃÂ ÃÂÃÂ«ÃÂÃÂ¦ÃÂÃÂ¬ ÃÂÃÂ­ÃÂÃÂÃÂÃÂ¼ÃÂÃÂ­ÃÂÃÂÃÂÃÂ¹",
           "suggested_label_en": "Berry Picking",
           "suggested_caption_en": "summer in your hands",
           "aspect_ratio": "wide",
@@ -33,10 +33,10 @@
           "subject_position": "center",
           "overall_brightness": "bright",
           "dominant_color": "#b8d4a8",
-          "mood": "ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ",
+          "mood": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¦ÃÂ",
+          "suggested_copy": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ«ÃÂÃÂ¦ÃÂÃÂ",
           "suggested_body": ""
         },
         "ts": 1782540635755
@@ -46,7 +46,7 @@
           "subject_position": "center",
           "overall_brightness": "bright",
           "dominant_color": "#b8d4a8",
-          "mood": "ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ"
+          "mood": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂ"
         },
         "ts": 1782540635857
       },
@@ -58,7 +58,7 @@
       "spread_focal_left": 20,
       "spread_focal_right": 65,
       "overall_brightness": "mid",
-      "dominant_color": "#6aÃÂ°552",
+      "dominant_color": "#6aÃÂÃÂ°552",
       "color_temperature": "warm",
       "contrast_level": "high",
       "visual_density": "medium",
@@ -66,19 +66,19 @@
       "season": "summer",
       "time_of_day": "day",
       "location_type": "garden",
-      "primary_subject": "Ã¬ÂÂ°Ã«ÂÂ¸ÃªÂ¸Â°",
+      "primary_subject": "ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ¸ÃÂªÃÂ¸ÃÂ°",
       "secondary_subjects": [
-        "Ã¬Â´ÂÃ«Â¡Â ÃªÂ·Â¸Ã«Â¦Â",
-        "Ã¬ÂÂ",
-        "Ã«ÂÂÃ«Â­ÂÃ¬ÂÂ"
+        "ÃÂ¬ÃÂ´ÃÂÃÂ«ÃÂ¡ÃÂ ÃÂªÃÂ·ÃÂ¸ÃÂ«ÃÂ¦ÃÂ",
+        "ÃÂ¬ÃÂÃÂ",
+        "ÃÂ«ÃÂÃÂÃÂ«ÃÂ­ÃÂÃÂ¬ÃÂÃÂ"
       ],
       "activity_type": "gardening",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "Ã¬ÂÂ¸Ã«ÂÂ¼Ã«Â¯Â¹",
-        "Ã¬ÂÂ´Ã«Â§Â¤ Ã­ÂÂÃ«Â©Â´",
-        "Ã¬ÂÂÃ¬ÂÂ¬ÃªÂ·Â"
+        "ÃÂ¬ÃÂÃÂ¸ÃÂ«ÃÂÃÂ¼ÃÂ«ÃÂ¯ÃÂ¹",
+        "ÃÂ¬ÃÂÃÂ´ÃÂ«ÃÂ§ÃÂ¤ ÃÂ­ÃÂÃÂÃÂ«ÃÂ©ÃÂ´",
+        "ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ¬ÃÂªÃÂ·ÃÂ"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -88,13 +88,13 @@
       "focus_clarity": "clear",
       "text_safe_area": "top",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "Ã¬ÂÂ Ã«ÂªÂÃ­ÂÂ Ã«Â¹Â¨ÃªÂ°Â Ã¬ÂÂ´Ã«Â§Â¤Ã¬ÂÂ Ã¬Â´ÂÃ«Â¡Â ÃªÂ·Â¸Ã«Â¦ÂÃ¬ÂÂ Ã¬ÂÂ Ã«ÂÂÃ«Â¹ÂÃªÂ°Â ÃªÂ°ÂÃ«Â Â¬Ã­ÂÂÃªÂ³Â  ÃªÂ³ÂÃ¬Â ÂÃªÂ°ÂÃªÂ³Â¼ Ã¬ÂÂÃ­ÂÂÃ¬ÂÂ ÃªÂ¸Â°Ã¬ÂÂ¨Ã¬ÂÂ´ Ã¬Â§ÂÃªÂ´ÂÃ¬Â ÂÃ¬ÂÂ¼Ã«Â¡Â Ã¬Â ÂÃ«ÂÂ¬Ã«ÂÂ¨",
-      "mood": "Ã­ÂÂÃ¬ÂÂÃ«Â¡ÂÃ¬ÂÂ",
-      "suggested_caption": "Ã¬ÂÂ¬Ã«Â¦Â Ã¬ÂÂ°Ã«ÂÂ¸ÃªÂ¸Â° Ã­ÂÂ Ã¬Â¤Â",
+      "thumbnail_reason": "ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂªÃÂÃÂ­ÃÂÃÂ ÃÂ«ÃÂ¹ÃÂ¨ÃÂªÃÂ°ÃÂ ÃÂ¬ÃÂÃÂ´ÃÂ«ÃÂ§ÃÂ¤ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂ´ÃÂÃÂ«ÃÂ¡ÃÂ ÃÂªÃÂ·ÃÂ¸ÃÂ«ÃÂ¦ÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂÃÂÃÂ«ÃÂ¹ÃÂÃÂªÃÂ°ÃÂ ÃÂªÃÂ°ÃÂÃÂ«ÃÂ ÃÂ¬ÃÂ­ÃÂÃÂÃÂªÃÂ³ÃÂ  ÃÂªÃÂ³ÃÂÃÂ¬ÃÂ ÃÂÃÂªÃÂ°ÃÂÃÂªÃÂ³ÃÂ¼ ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂªÃÂ¸ÃÂ°ÃÂ¬ÃÂÃÂ¨ÃÂ¬ÃÂÃÂ´ ÃÂ¬ÃÂ§ÃÂÃÂªÃÂ´ÃÂÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂ¼ÃÂ«ÃÂ¡ÃÂ ÃÂ¬ÃÂ ÃÂÃÂ«ÃÂÃÂ¬ÃÂ«ÃÂÃÂ¨",
+      "mood": "ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂÃÂ«ÃÂ¡ÃÂÃÂ¬ÃÂÃÂ",
+      "suggested_caption": "ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¦ÃÂ ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ¸ÃÂªÃÂ¸ÃÂ° ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂ¤ÃÂ",
       "suggested_caption_en": "summer berries, cupped in green",
-      "suggested_caption_left": "Ã­ÂÂÃ«Â°Â­Ã¬ÂÂÃ¬ÂÂ Ã«ÂÂ´",
-      "suggested_caption_right": "Ã«Â¶ÂÃ¬ÂÂ Ã¬ÂÂ¬Ã«Â¦Â Ã­ÂÂ Ã¬Â¤Â",
-      "suggested_label": "Ã¬ÂÂ°Ã«ÂÂ¸ÃªÂ¸Â° Ã¬ÂÂÃ­ÂÂ",
+      "suggested_caption_left": "ÃÂ­ÃÂÃÂÃÂ«ÃÂ°ÃÂ­ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂÃÂ´",
+      "suggested_caption_right": "ÃÂ«ÃÂ¶ÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¦ÃÂ ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂ¤ÃÂ",
+      "suggested_label": "ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ¸ÃÂªÃÂ¸ÃÂ° ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ",
       "suggested_label_en": "Berry Harvest",
       "domesticity_score": 3,
       "rurality_score": 5,
@@ -115,11 +115,11 @@
           "subject_position": "left|center",
           "overall_brightness": "mid",
           "dominant_color": "#D4C9B8",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
-          "suggested_caption": "ÃªÂ²ÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
-          "suggested_caption_left": "ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ ÃªÂ·Â¸Ã«Â¦Â¼",
-          "suggested_caption_right": "Ã¬Â¡Â°Ã¬ÂÂ©Ã­ÂÂ Ã¬ÂÂÃ¬ÂÂ ",
-          "suggested_label": "Ã¬ÂÂ¼Ã¬ÂÂÃ¬ÂÂ Ã¬Â ÂÃ«Â¬Â¼",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
+          "suggested_caption": "ÃÂªÃÂ²ÃÂÃÂ¬ÃÂÃÂ ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ´ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
+          "suggested_caption_left": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ´ÃÂ¬ÃÂÃÂ ÃÂªÃÂ·ÃÂ¸ÃÂ«ÃÂ¦ÃÂ¼",
+          "suggested_caption_right": "ÃÂ¬ÃÂ¡ÃÂ°ÃÂ¬ÃÂÃÂ©ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ",
+          "suggested_label": "ÃÂ¬ÃÂÃÂ¼ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂ ÃÂÃÂ«ÃÂ¬ÃÂ¼",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": "35",
@@ -134,10 +134,10 @@
           "subject_position": "left|center",
           "overall_brightness": "mid",
           "dominant_color": "#D4C9B8",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ÃªÂ²ÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ",
+          "suggested_copy": "ÃÂªÃÂ²ÃÂÃÂ¬ÃÂÃÂ ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ´ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ",
           "suggested_body": ""
         },
         "ts": 1782487396102
@@ -147,7 +147,7 @@
           "subject_position": "left|center",
           "overall_brightness": "mid",
           "dominant_color": "#D4C9B8",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ"
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ"
         },
         "ts": 1782487396290
       },
@@ -167,20 +167,20 @@
       "season": "unknown",
       "time_of_day": "indoor",
       "location_type": "cafe",
-      "primary_subject": "ê²ì ê³ ìì´",
+      "primary_subject": "ÃªÂ²ÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´",
       "secondary_subjects": [
-        "ì¶ìí",
-        "í¼ìë¸",
-        "ì±ì¥",
-        "ì¼ë³¸ ìì "
+        "Ã¬Â¶ÂÃ¬ÂÂÃ­ÂÂ",
+        "Ã­ÂÂ¼Ã¬ÂÂÃ«ÂÂ¸",
+        "Ã¬Â±ÂÃ¬ÂÂ¥",
+        "Ã¬ÂÂ¼Ã«Â³Â¸ Ã¬ÂÂÃ¬Â Â"
       ],
       "activity_type": "animal",
       "human_presence": "none",
       "animal_presence": "cat",
       "material_texture": [
-        "ëª©ì¬",
-        "ìºë²ì¤",
-        "íì¸í¸"
+        "Ã«ÂªÂ©Ã¬ÂÂ¬",
+        "Ã¬ÂºÂÃ«Â²ÂÃ¬ÂÂ¤",
+        "Ã­ÂÂÃ¬ÂÂ¸Ã­ÂÂ¸"
       ],
       "has_text": true,
       "text_area_position": "right",
@@ -190,13 +190,13 @@
       "focus_clarity": "soft",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ê²ì ê³ ìì´ì ì»¬ë¬íí ì¶ìíì ëë¹ê° ê°ë ¬íê³  ìì ì ëë êµ¬ë",
-      "mood": "ì ë¹",
-      "suggested_caption": "ê³ ìì´ì ê°¤ë¬ë¦¬",
+      "thumbnail_reason": "ÃªÂ²ÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ Ã¬Â»Â¬Ã«ÂÂ¬Ã­ÂÂÃ­ÂÂ Ã¬Â¶ÂÃ¬ÂÂÃ­ÂÂÃ¬ÂÂ Ã«ÂÂÃ«Â¹ÂÃªÂ°Â ÃªÂ°ÂÃ«Â Â¬Ã­ÂÂÃªÂ³Â  Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ Ã«ÂÂÃ«ÂÂ ÃªÂµÂ¬Ã«ÂÂ",
+      "mood": "Ã¬ÂÂ Ã«Â¹Â",
+      "suggested_caption": "ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´Ã¬ÂÂ ÃªÂ°Â¤Ã«ÂÂ¬Ã«Â¦Â¬",
       "suggested_caption_en": "Black cat guards the art",
-      "suggested_caption_left": "ê²ì ê³ ìì´",
-      "suggested_caption_right": "ê·¸ë¦¼ ììì",
-      "suggested_label": "ê³ ìì´ ì¹´í",
+      "suggested_caption_left": "ÃªÂ²ÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´",
+      "suggested_caption_right": "ÃªÂ·Â¸Ã«Â¦Â¼ Ã¬ÂÂÃ¬ÂÂÃ¬ÂÂ",
+      "suggested_label": "ÃªÂ³Â Ã¬ÂÂÃ¬ÂÂ´ Ã¬Â¹Â´Ã­ÂÂ",
       "suggested_label_en": "Cat & Canvas",
       "domesticity_score": 4,
       "rurality_score": 1,
@@ -217,11 +217,11 @@
           "subject_position": "right",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ë°ì¤í¨",
-          "suggested_caption": "ì¤ëë ìì ìë¡",
-          "suggested_caption_left": "ì ëì ë¿ë",
-          "suggested_caption_right": "ìì ì¨ê¸°",
-          "suggested_label": "ì¼ìì ì¼í",
+          "mood": "Ã«ÂÂ°Ã¬ÂÂ¤Ã­ÂÂ¨",
+          "suggested_caption": "Ã¬ÂÂ¤Ã«ÂÂÃ«ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂÃ«Â¡Â",
+          "suggested_caption_left": "Ã¬ÂÂ Ã«ÂÂÃ¬ÂÂ Ã«ÂÂ¿Ã«ÂÂ",
+          "suggested_caption_right": "Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¨ÃªÂ¸Â°",
+          "suggested_label": "Ã¬ÂÂ¼Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¼Ã­ÂÂ",
           "suggested_label_en": "Pause in Daily Life",
           "suggested_caption_en": "small comfort for today",
           "aspect_ratio": "wide",
@@ -238,10 +238,10 @@
           "subject_position": "right",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ë°ì¤í¨",
+          "mood": "Ã«ÂÂ°Ã¬ÂÂ¤Ã­ÂÂ¨",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ì¤ëë ìì ìë¡",
+          "suggested_copy": "Ã¬ÂÂ¤Ã«ÂÂÃ«ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂÃ«Â¡Â",
           "suggested_body": ""
         },
         "ts": 1782540672689
@@ -251,7 +251,7 @@
           "subject_position": "right",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ë°ì¤í¨"
+          "mood": "Ã«ÂÂ°Ã¬ÂÂ¤Ã­ÂÂ¨"
         },
         "ts": 1782540672790
       },
@@ -271,21 +271,21 @@
       "season": "unknown",
       "time_of_day": "unknown",
       "location_type": "indoor",
-      "primary_subject": "라이트박스 채널 사인",
+      "primary_subject": "ë¼ì´í¸ë°ì¤ ì±ë ì¬ì¸",
       "secondary_subjects": [
-        "손",
-        "소품들",
-        "모래시계",
-        "피규어",
-        "창문"
+        "ì",
+        "ìíë¤",
+        "ëª¨ëìê³",
+        "í¼ê·ì´",
+        "ì°½ë¬¸"
       ],
       "activity_type": "craft",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "플라스틱",
-        "나무",
-        "유리"
+        "íë¼ì¤í±",
+        "ëë¬´",
+        "ì ë¦¬"
       ],
       "has_text": true,
       "text_area_position": "center",
@@ -295,19 +295,121 @@
       "focus_clarity": "clear",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "#SAPMANRI 채널명이 라이트박스에 선명하게 표시되어 채널 소개 썸네일로 높은 적합도",
-      "mood": "아늑함",
-      "suggested_caption": "삽만리의 하루",
+      "thumbnail_reason": "#SAPMANRI ì±ëëªì´ ë¼ì´í¸ë°ì¤ì ì ëªíê² íìëì´ ì±ë ìê° ì¸ë¤ì¼ë¡ ëì ì í©ë",
+      "mood": "ìëí¨",
+      "suggested_caption": "ì½ë§ë¦¬ì íë£¨",
       "suggested_caption_en": "slow days, lit with love",
-      "suggested_caption_left": "작은 불빛 하나",
-      "suggested_caption_right": "삽만리의 이야기",
-      "suggested_label": "채널 소개",
+      "suggested_caption_left": "ìì ë¶ë¹ íë",
+      "suggested_caption_right": "ì½ë§ë¦¬ì ì´ì¼ê¸°",
+      "suggested_label": "ì±ë ìê°",
       "suggested_label_en": "Our Little Sign",
       "domesticity_score": 5,
       "rurality_score": 3,
       "craft_score": 4,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:30:13.407Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "l9ys_77e67197_b9fb2321": {
+      "name": "l9ys_77e67197_b9fb2321.jpg",
+      "path": "library/l9ys_77e67197_b9fb2321.jpg",
+      "hash": "l9ys_77e67197_b9fb2321",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l9ys_77e67197_b9fb2321.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l9ys_77e67197_b9fb2321.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "bright",
+          "dominant_color": "#F5E6D3",
+          "mood": "ë°ì¤í¨",
+          "suggested_caption": "ì¼ìì ë°íë ìì ë¬¸êµ¬",
+          "suggested_caption_left": "ë¼ì´í¸ë°ì¤ê°",
+          "suggested_caption_right": "ì íë ë©ìì§",
+          "suggested_label": "ììí ì¼ì",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": 50,
+          "focal_y": 45,
+          "spread_focal_left": 50,
+          "spread_focal_right": 50
+        },
+        "ts": 1782487458284
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "bright",
+          "dominant_color": "#F5E6D3",
+          "mood": "ë°ì¤í¨",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ì¼ìì ë°íë ìì ë¬¸êµ¬",
+          "suggested_body": ""
+        },
+        "ts": 1782487458293
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "bright",
+          "dominant_color": "#F5E6D3",
+          "mood": "ë°ì¤í¨"
+        },
+        "ts": 1782487458487
+      },
+      "subject_position": "center",
+      "focal_x": 50,
+      "focal_y": 45,
+      "aspect_ratio": "wide",
+      "best_page_type": "quote",
+      "spread_focal_left": 35,
+      "spread_focal_right": 65,
+      "overall_brightness": "bright",
+      "dominant_color": "#f5e9d0",
+      "color_temperature": "warm",
+      "contrast_level": "medium",
+      "visual_density": "medium",
+      "negative_space": "low",
+      "season": "unknown",
+      "time_of_day": "day",
+      "location_type": "indoor",
+      "primary_subject": "라이트박스 해시태그 삽만리",
+      "secondary_subjects": [
+        "손",
+        "소품 장식장",
+        "모래시계",
+        "피규어"
+      ],
+      "activity_type": "object",
+      "human_presence": "hands",
+      "animal_presence": "none",
+      "material_texture": [
+        "플라스틱",
+        "목재",
+        "패브릭"
+      ],
+      "has_text": true,
+      "text_area_position": "center",
+      "camera_distance": "medium",
+      "camera_angle": "eye_level",
+      "motion_implied": "hand_action",
+      "focus_clarity": "clear",
+      "text_safe_area": "bottom",
+      "thumbnail_potential": "high",
+      "thumbnail_reason": "채널명 해시태그가 명확히 노출되고 밝은 라이트박스가 시선을 끌어 채널 소개·오프닝 썸네일로 최적",
+      "mood": "설렘",
+      "suggested_caption": "여기, 삽만리입니다",
+      "suggested_caption_en": "welcome to our slow life",
+      "suggested_caption_left": "소박한 일상",
+      "suggested_caption_right": "삽만리의 빛",
+      "suggested_label": "채널 소개",
+      "suggested_label_en": "Our Little Place",
+      "domesticity_score": 4,
+      "rurality_score": 3,
+      "craft_score": 2,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:30:24.782Z",
       "model": "claude-sonnet-4-6"
     }
   }
