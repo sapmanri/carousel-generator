@@ -1409,23 +1409,24 @@ function mapExistingPageToEditable(pg) {
 // 같은 사진(같은 해시)이 이미 라이브러리에 있으면 업로드 없이 그 경로를 재사용한다.
 // ImageLibrary.uploadIfNeeded에 위임 (carousel/skyline과 로직 통일).
 async function commitPhoto(photo, issueId, index) {
-  // 라이브러리 피커로 선택된 사진은 이미 라이브러리 경로를 알고 있으므로 그대로 사용
-  if (photo._libraryPath) {
-    return photo._libraryPath;
-  }
+  // 라이브러리 피커로 선택된 사진: 이미 URL/경로를 알고 있으므로 그대로 사용
+  if (photo._libraryPath) return photo._libraryPath;
 
-  // 기존(_existing) 사진이고 이미 경로(데이터URL 아님)면 그대로 사용
+  // 기존(_existing) 사진이고 이미 URL/경로(data: 아님)면 그대로 사용
   if (photo._existing && typeof photo.dataUrl === 'string' && !photo.dataUrl.startsWith('data:')) {
     return photo.dataUrl;
   }
 
+  // R2 또는 GitHub에 업로드 — url 반환 (R2: https://..., GitHub: repo-relative path)
   const result = await window.ImageLibrary.uploadIfNeeded(photo.dataUrl, photo.mediaType);
-  return result.path;
+  return result.url;
 }
 
-// magazine/images/... → ./images/... (issue.html은 magazine/ 폴더 안에서 동작)
+// R2 URL은 그대로, GitHub repo-relative 경로만 issue.html 기준으로 변환
 function toRelativePath(repoPath) {
-  return repoPath.replace(/^magazine\//, './');
+  if (!repoPath) return repoPath;
+  if (repoPath.startsWith('http')) return repoPath; // R2 URL — 변환 없음
+  return repoPath.replace(/^magazine\//, './');      // GitHub 경로
 }
 
 async function publish() {
