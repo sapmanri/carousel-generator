@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ¨",
-          "suggested_caption": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã¬Â¹Â",
-          "suggested_caption_left": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ Ã¬ÂÂÃªÂ°Â",
-          "suggested_caption_right": "Ã¬ÂÂÃ¬ÂÂ Ã­ÂÂÃ«Â³Âµ",
-          "suggested_label": "Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸ Ã­ÂÂÃ¬ÂÂ",
+          "mood": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ¨",
+          "suggested_caption": "ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ¬ÃÂ¹ÃÂ",
+          "suggested_caption_left": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
+          "suggested_caption_right": "ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ­ÃÂÃÂÃÂ«ÃÂ³ÃÂµ",
+          "suggested_label": "ÃÂ«ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ­ÃÂÃÂ¸ ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ",
           "aspect_ratio": "wide",
           "best_page_type": "botanical",
           "focal_x": "35",
@@ -31,10 +31,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ¨",
+          "mood": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ¨",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã¬Â¹Â",
+          "suggested_copy": "ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ¬ÃÂ¹ÃÂ",
           "suggested_body": ""
         },
         "ts": 1782487480396
@@ -44,7 +44,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ¨"
+          "mood": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ¨"
         },
         "ts": 1782487480585
       },
@@ -64,20 +64,20 @@
       "season": "summer",
       "time_of_day": "unknown",
       "location_type": "cafe",
-      "primary_subject": "êµ¬í ëì í¸ ë ê°",
+      "primary_subject": "ÃªÂµÂ¬Ã­ÂÂ Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸ Ã«ÂÂ ÃªÂ°Â",
       "secondary_subjects": [
-        "ê¸ì ì¤í¼",
-        "ì",
-        "í°ì íë ì´í¸",
-        "ê²ì  ìí í¸ë ì´"
+        "ÃªÂ¸ÂÃ¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ¼",
+        "Ã¬ÂÂ",
+        "Ã­ÂÂ°Ã¬ÂÂ Ã­ÂÂÃ«Â ÂÃ¬ÂÂ´Ã­ÂÂ¸",
+        "ÃªÂ²ÂÃ¬Â Â Ã¬ÂÂÃ­ÂÂ Ã­ÂÂ¸Ã«Â ÂÃ¬ÂÂ´"
       ],
       "activity_type": "cooking",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "ë²¨ë²³ íì°ë",
-        "ì¸ë¼ë¯¹",
-        "ê¸ì"
+        "Ã«Â²Â¨Ã«Â²Â³ Ã­ÂÂÃ¬ÂÂ°Ã«ÂÂ",
+        "Ã¬ÂÂ¸Ã«ÂÂ¼Ã«Â¯Â¹",
+        "ÃªÂ¸ÂÃ¬ÂÂ"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -87,13 +87,13 @@
       "focus_clarity": "soft",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ì´ìì ì¸ êµ¬í ëì í¸ì ì ëªí ì ëë¹ê° ìì ì ê°íê² ëì´ í´ë¦­ ì ëë ¥ ëì",
-      "mood": "ì¬ì¸í¨",
-      "suggested_caption": "ë¥ê·¼ ê³ì ì ë§",
+      "thumbnail_reason": "Ã¬ÂÂ´Ã¬ÂÂÃ¬Â ÂÃ¬ÂÂ¸ ÃªÂµÂ¬Ã­ÂÂ Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸Ã¬ÂÂ Ã¬ÂÂ Ã«ÂªÂÃ­ÂÂ Ã¬ÂÂ Ã«ÂÂÃ«Â¹ÂÃªÂ°Â Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ ÃªÂ°ÂÃ­ÂÂÃªÂ²Â Ã«ÂÂÃ¬ÂÂ´ Ã­ÂÂ´Ã«Â¦Â­ Ã¬ÂÂ Ã«ÂÂÃ«Â Â¥ Ã«ÂÂÃ¬ÂÂ",
+      "mood": "Ã¬ÂÂ¬Ã¬ÂÂ¸Ã­ÂÂ¨",
+      "suggested_caption": "Ã«ÂÂ¥ÃªÂ·Â¼ ÃªÂ³ÂÃ¬Â ÂÃ¬ÂÂ Ã«Â§Â",
       "suggested_caption_en": "Two seasons on a plate",
-      "suggested_caption_left": "ë¶ì ë¬ì ë¨ë©´",
-      "suggested_caption_right": "ì´ë¡ ì¬ë¦ í ì",
-      "suggested_label": "ê³ì  ëì í¸",
+      "suggested_caption_left": "Ã«Â¶ÂÃ¬ÂÂ Ã«ÂÂ¬Ã¬ÂÂ Ã«ÂÂ¨Ã«Â©Â´",
+      "suggested_caption_right": "Ã¬Â´ÂÃ«Â¡Â Ã¬ÂÂ¬Ã«Â¦Â Ã­ÂÂ Ã¬ÂÂ",
+      "suggested_label": "ÃªÂ³ÂÃ¬Â Â Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸",
       "suggested_label_en": "Season's Sweet",
       "domesticity_score": 2,
       "rurality_score": 1,
@@ -114,11 +114,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#5a6b4a",
-          "mood": "ê³ ì",
-          "suggested_caption": "ì°¨ë¥¼ ì¸ì°ë ìê°",
-          "suggested_caption_left": "ì°»ì ìì",
-          "suggested_caption_right": "ì ì±ê³¼ ê³ ì",
-          "suggested_label": "ë¤ëì ìê°",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "suggested_caption": "Ã¬Â°Â¨Ã«Â¥Â¼ Ã¬ÂÂ¸Ã¬ÂÂ°Ã«ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "suggested_caption_left": "Ã¬Â°Â»Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ",
+          "suggested_caption_right": "Ã¬Â ÂÃ¬ÂÂ±ÃªÂ³Â¼ ÃªÂ³Â Ã¬ÂÂ",
+          "suggested_label": "Ã«ÂÂ¤Ã«ÂÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
           "aspect_ratio": "wide",
           "best_page_type": "botanical",
           "focal_x": "55",
@@ -133,10 +133,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#5a6b4a",
-          "mood": "ê³ ì",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ì°¨ë¥¼ ì¸ì°ë ìê°",
+          "suggested_copy": "Ã¬Â°Â¨Ã«Â¥Â¼ Ã¬ÂÂ¸Ã¬ÂÂ°Ã«ÂÂ Ã¬ÂÂÃªÂ°Â",
           "suggested_body": ""
         },
         "ts": 1782487476109
@@ -146,7 +146,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#5a6b4a",
-          "mood": "ê³ ì"
+          "mood": "ÃªÂ³Â Ã¬ÂÂ"
         },
         "ts": 1782487476300
       },
@@ -166,19 +166,19 @@
       "season": "winter",
       "time_of_day": "day",
       "location_type": "cafe",
-      "primary_subject": "말차 휘핑",
+      "primary_subject": "ë§ì°¨ íí",
       "secondary_subjects": [
-        "차선",
-        "말차완",
-        "책"
+        "ì°¨ì ",
+        "ë§ì°¨ì",
+        "ì±"
       ],
       "activity_type": "craft",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "대나무",
-        "도자기",
-        "원목"
+        "ëëë¬´",
+        "ëìê¸°",
+        "ìëª©"
       ],
       "has_text": true,
       "text_area_position": "left",
@@ -188,19 +188,120 @@
       "focus_clarity": "clear",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "녹색 말차와 손의 대비가 뚜렷하고 슬로우라이프 감성을 직관적으로 전달함",
-      "mood": "고요함",
-      "suggested_caption": "천천히, 한 잔",
+      "thumbnail_reason": "ë¹ì ë§ì°¨ì ìì ëë¹ê° ëë ·íê³  ì¬ë¡ì°ë¼ì´í ê°ì±ì ì§ê´ì ì¼ë¡ ì ë¬í¨",
+      "mood": "ê³ ìí¨",
+      "suggested_caption": "ì²ì²í, í ì",
       "suggested_caption_en": "slow hands, quiet green",
-      "suggested_caption_left": "차 한 잔의 여유",
-      "suggested_caption_right": "손끝의 고요",
-      "suggested_label": "말차 한 잔",
+      "suggested_caption_left": "ì°¨ í ìì ì¬ì ",
+      "suggested_caption_right": "ìëì ê³ ì",
+      "suggested_label": "ë§ì°¨ í ì",
       "suggested_label_en": "Whisked Still",
       "domesticity_score": 4,
       "rurality_score": 2,
       "craft_score": 5,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:32:21.649Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "ovfk_ced42342_5762bd5c": {
+      "name": "ovfk_ced42342_5762bd5c.jpg",
+      "path": "library/ovfk_ced42342_5762bd5c.jpg",
+      "hash": "ovfk_ced42342_5762bd5c",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ovfk_ced42342_5762bd5c.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ovfk_ced42342_5762bd5c.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B7355",
+          "mood": "ê³ ì",
+          "suggested_caption": "ë¹ì´ ë§ë  ê·¸ë¦¼ì",
+          "suggested_caption_left": "íì´ ìë",
+          "suggested_caption_right": "ê·¸ë¦¼ìì ì¶¤",
+          "suggested_label": "ì¤íì ì ì ",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": "30",
+          "focal_y": "40",
+          "spread_focal_left": "25",
+          "spread_focal_right": "75"
+        },
+        "ts": 1782487499017
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B7355",
+          "mood": "ê³ ì",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ë¹ì´ ë§ë  ê·¸ë¦¼ì",
+          "suggested_body": ""
+        },
+        "ts": 1782487499024
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#8B7355",
+          "mood": "ê³ ì"
+        },
+        "ts": 1782487499213
+      },
+      "subject_position": "left",
+      "focal_x": 22,
+      "focal_y": 60,
+      "aspect_ratio": "wide",
+      "best_page_type": "fullbleed",
+      "spread_focal_left": 20,
+      "spread_focal_right": 75,
+      "overall_brightness": "dark",
+      "dominant_color": "#6b4f35",
+      "color_temperature": "warm",
+      "contrast_level": "high",
+      "visual_density": "low",
+      "negative_space": "high",
+      "season": "unknown",
+      "time_of_day": "afternoon",
+      "location_type": "indoor",
+      "primary_subject": "맨발과 그림자",
+      "secondary_subjects": [
+        "원목 바닥",
+        "햇살",
+        "긴 그림자"
+      ],
+      "activity_type": "walking",
+      "human_presence": "side",
+      "animal_presence": "none",
+      "material_texture": [
+        "원목",
+        "나무결",
+        "광택"
+      ],
+      "has_text": false,
+      "text_area_position": "right",
+      "camera_distance": "closeup",
+      "camera_angle": "top_down",
+      "motion_implied": "walking",
+      "focus_clarity": "soft",
+      "text_safe_area": "right",
+      "thumbnail_potential": "medium",
+      "thumbnail_reason": "강한 명암 대비와 그림자가 인상적이나 피사체가 부분적으로만 보여 맥락 전달이 약함",
+      "mood": "고요함",
+      "suggested_caption": "빛이 머문 자리",
+      "suggested_caption_en": "barefoot on quiet wood",
+      "suggested_caption_left": "볕 드는 오후",
+      "suggested_caption_right": "그림자의 무게",
+      "suggested_label": "맨발의 하루",
+      "suggested_label_en": "Barefoot Hours",
+      "domesticity_score": 4,
+      "rurality_score": 2,
+      "craft_score": 1,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:32:33.217Z",
       "model": "claude-sonnet-4-6"
     }
   }
