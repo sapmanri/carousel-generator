@@ -102,6 +102,9 @@ header{
 .grid-item{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--s2);border:1px solid var(--border)}
 .grid-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
 .grid-item:hover img{transform:scale(1.04)}
+.lazy-img{opacity:0;transition:opacity .3s}
+.lazy-img[src]{opacity:1}
+.grid-item img:not(.lazy-img){opacity:1}
 .grid-item.selected{outline:2px solid var(--orange);outline-offset:-2px}
 .grid-item.selected::after{content:'✓';position:absolute;top:6px;left:6px;background:var(--orange);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
 .grid-item-meta{
@@ -150,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-27a</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-27b</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -195,6 +198,16 @@ header{
         <option value="upload_desc">업로드 최신순</option>
         <option value="mood">분위기별</option>
       </select>
+      <select class="sort-select" id="filterType" onchange="applyFilter()">
+        <option value="">전체</option>
+        <option value="thumbnail_high">썸네일 적합 high</option>
+        <option value="human_none">사람 없음</option>
+        <option value="human_hands">손만</option>
+        <option value="outdoor">실외</option>
+        <option value="indoor">실내</option>
+        <option value="botanical">botanical 추천</option>
+        <option value="spread">spread 추천</option>
+      </select>
       <span class="count-label" id="countLabel"></span>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
@@ -203,10 +216,11 @@ header{
       <button class="btn-ghost" onclick="reanalyzeAll()">⟳ 전체 재분석</button>
       <span style="font-size:10px;color:var(--dim);align-self:center">Shift+클릭으로 선택 후 선택 재분석</span>
     </div>
-    <div class="grid" id="gallery">
-      <div class="empty"><div>📷</div>라이브러리가 비어있습니다<br>이미지를 업로드해보세요</div>
+    <div class="grid" id="gallery"></div>
+    <div id="paginationBar" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:16px;padding-bottom:40px;"></div>
+    <div id="gallery_orig_empty" style="display:none"><div class="empty"><div>📷</div>라이브러리가 비어있습니다<br>이미지를 업로드해보세요</div>
     </div>
-  </div>
+  </div></div>
 
 </div>
 
@@ -375,9 +389,22 @@ async function startProcess() {
         reader.readAsDataURL(item.file);
       });
 
-      // 2. R2 업로드
+      // 2. R2 업로드 (원본)
       updateItemStatus(i, 'uploading');
       const uploadResult = await window.ImageLibrary.uploadIfNeeded(dataUrl, item.file.type);
+
+      // 2b. 썸네일 생성 + R2 업로드 (thumb_ prefix)
+      let thumbUrl = null;
+      try {
+        const thumbDataUrl  = await generateThumbnail(dataUrl, 400);
+        const thumbMediaType = thumbDataUrl.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+        const hash_pre = await window.ImageLibrary.hashImage(dataUrl);
+        // 썸네일은 library/thumb_<hash>.webp 경로로
+        const thumbResult = await window.ImageLibrary.uploadIfNeeded(
+          thumbDataUrl, thumbMediaType, hash_pre ? `thumb_${hash_pre}` : null
+        );
+        thumbUrl = thumbResult.url || thumbResult.path || null;
+      } catch(e) { thumbUrl = uploadResult.url || null; }
 
       // 3. AI 분석 (API 키 있을 때만)
       let analysis = null;
@@ -386,10 +413,10 @@ async function startProcess() {
         analysis = await analyzeImage(dataUrl, item.file.type, apiKey);
       }
 
-      // 4. 캐시에 저장 (EXIF 포함)
+      // 4. 캐시에 저장 (EXIF + 썸네일 URL 포함)
       const hash = await window.ImageLibrary.hashImage(dataUrl);
       if (hash) {
-        await saveToCache(hash, uploadResult.url || uploadResult.path, item, analysis);
+        await saveToCache(hash, uploadResult.url || uploadResult.path, item, analysis, thumbUrl);
       }
 
       updateItemStatus(i, 'done');
@@ -484,8 +511,31 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
   return result;
 }
 
+// ── 썸네일 생성 (캔버스로 400px 리사이즈) ─────────────────────
+async function generateThumbnail(dataUrl, maxSize = 400) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const ratio  = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const w = Math.round(img.width  * ratio);
+      const h = Math.round(img.height * ratio);
+      const canvas  = document.createElement('canvas');
+      canvas.width  = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      // WebP 우선, fallback JPEG
+      const thumbUrl = canvas.toDataURL('image/webp', 0.82) ||
+                       canvas.toDataURL('image/jpeg', 0.85);
+      resolve(thumbUrl);
+    };
+    img.onerror = () => resolve(dataUrl); // 실패 시 원본
+    img.src = dataUrl;
+  });
+}
+
 // ── image_cache.json 저장 ───────────────────────────────────────
-async function saveToCache(hash, r2Url, queueItem, analysis) {
+async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl) {
   const token = window.SapConfig.getGithubToken();
   if (!token) return; // 토큰 없으면 캐시 저장 스킵
 
@@ -509,6 +559,7 @@ async function saveToCache(hash, r2Url, queueItem, analysis) {
   const exif = queueItem.exif || {};
   cache.entries[hash] = {
     r2_url         : r2Url,
+    thumbnail_url  : thumbUrl || r2Url,
     uploaded_at    : new Date().toISOString().slice(0, 10),
     // EXIF
     exif_date      : queueItem.shotDate || null,
@@ -560,7 +611,7 @@ async function loadGallery() {
       return { ...item, ...meta };
     });
 
-    applyFilter();
+    applyFilter(true);
   } catch(e) {
     galleryEl.innerHTML = `<div class="empty"><div>⚠️</div>${e.message}</div>`;
   }
@@ -581,47 +632,107 @@ async function loadCache() {
   } catch(e) { return {}; }
 }
 
-function applyFilter() {
-  const query = document.getElementById('filterInput').value.toLowerCase().trim();
-  const sort  = document.getElementById('sortSelect').value;
+// ── 페이지네이션 ──────────────────────────────────────────────
+const PAGE_SIZE = 60;
+let currentPage = 0;
+let filteredItems = [];
 
-  let filtered = allItems.filter(item => {
-    if (!query) return true;
-    const searchable = [
-      item.suggested_caption, item.suggested_label, item.mood,
-      item.subject, item.exif_date, item.filename
-    ].filter(Boolean).join(' ').toLowerCase();
-    return searchable.includes(query);
+function applyFilter(resetPage = true) {
+  const query      = document.getElementById('filterInput').value.toLowerCase().trim();
+  const sort       = document.getElementById('sortSelect').value;
+  const filterType = document.getElementById('filterType')?.value || '';
+
+  filteredItems = allItems.filter(item => {
+    // 텍스트 검색
+    if (query) {
+      const searchable = [
+        item.suggested_caption, item.suggested_label, item.mood,
+        item.primary_subject, item.exif_date, item.filename, item.location_type
+      ].filter(Boolean).join(' ').toLowerCase();
+      if (!searchable.includes(query)) return false;
+    }
+    // 타입 필터
+    if (filterType === 'thumbnail_high' && item.thumbnail_potential !== 'high') return false;
+    if (filterType === 'human_none'     && item.human_presence !== 'none') return false;
+    if (filterType === 'human_hands'    && item.human_presence !== 'hands') return false;
+    if (filterType === 'outdoor'        && item.location_type === 'indoor') return false;
+    if (filterType === 'indoor'         && item.location_type !== 'indoor') return false;
+    if (filterType === 'botanical'      && item.best_page_type !== 'botanical') return false;
+    if (filterType === 'spread'         && item.best_page_type !== 'spread') return false;
+    return true;
   });
 
-  filtered.sort((a, b) => {
-    if (sort === 'date_desc') return (b.exif_date || b.uploaded_at || '').localeCompare(a.exif_date || a.uploaded_at || '');
-    if (sort === 'date_asc')  return (a.exif_date || a.uploaded_at || '').localeCompare(b.exif_date || b.uploaded_at || '');
+  filteredItems.sort((a, b) => {
+    if (sort === 'date_desc')   return (b.exif_date || b.uploaded_at || '').localeCompare(a.exif_date || a.uploaded_at || '');
+    if (sort === 'date_asc')    return (a.exif_date || a.uploaded_at || '').localeCompare(b.exif_date || b.uploaded_at || '');
     if (sort === 'upload_desc') return (b.uploaded_at || '').localeCompare(a.uploaded_at || '');
-    if (sort === 'mood') return (a.mood || '').localeCompare(b.mood || '');
+    if (sort === 'mood')        return (a.mood || '').localeCompare(b.mood || '');
     return 0;
   });
 
-  document.getElementById('countLabel').textContent = `${filtered.length}장`;
-  renderGallery(filtered);
+  if (resetPage) currentPage = 0;
+  document.getElementById('countLabel').textContent = `${filteredItems.length}장`;
+  renderGallery();
 }
 
-function renderGallery(items) {
+function renderGallery() {
   const el = document.getElementById('gallery');
-  if (!items.length) {
+  if (!filteredItems.length) {
     el.innerHTML = '<div class="empty"><div>📷</div>이미지가 없습니다</div>';
+    document.getElementById('paginationBar').innerHTML = '';
     return;
   }
-  el.innerHTML = items.map((item, i) => `
-    <div class="grid-item" onclick="event.shiftKey ? toggleSelect(${allItems.indexOf(item)}) : openDetail(${allItems.indexOf(item)})">
-      <img src="${item.download_url || item.url || ''}" alt="" loading="lazy" onerror="this.style.opacity=0.2">
+
+  const totalPages = Math.ceil(filteredItems.length / PAGE_SIZE);
+  const start = currentPage * PAGE_SIZE;
+  const pageItems = filteredItems.slice(start, start + PAGE_SIZE);
+
+  // 그리드 렌더 — 썸네일 우선, IntersectionObserver로 지연 로드
+  el.innerHTML = pageItems.map((item, i) => {
+    const absIdx   = allItems.indexOf(item);
+    const thumbSrc = item.thumbnail_url || item.download_url || item.url || '';
+    return `
+    <div class="grid-item" onclick="event.shiftKey ? toggleSelect(${absIdx}) : openDetail(${absIdx})">
+      <img data-src="${thumbSrc}" alt="" onerror="this.style.opacity=0.2" class="lazy-img">
       <div class="grid-item-meta">
         ${item.suggested_caption || item.filename || ''}
         ${item.exif_date ? `<div class="grid-item-date">${item.exif_date}</div>` : ''}
         ${item.mood ? `<div class="grid-item-mood">${item.mood}</div>` : ''}
       </div>
-    </div>
+    </div>`;
+  }).join('');
+
+  // IntersectionObserver lazy loading
+  const imgs = el.querySelectorAll('img.lazy-img');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.classList.remove('lazy-img');
+          obs.unobserve(img);
+        }
+      });
+    }, { rootMargin: '200px' });
+    imgs.forEach(img => io.observe(img));
+  } else {
+    // fallback
+    imgs.forEach(img => { img.src = img.dataset.src; });
+  }
+
+  // 페이지네이션 바
+  const bar = document.getElementById('paginationBar');
+  if (totalPages <= 1) { bar.innerHTML = ''; return; }
+  bar.innerHTML = Array.from({ length: totalPages }, (_, p) => `
+    <button onclick="goPage(${p})" style="background:${p===currentPage?'var(--orange)':'var(--s2)'};border:1px solid var(--border);color:${p===currentPage?'#fff':'var(--muted)'};padding:5px 11px;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:11px;">${p + 1}</button>
   `).join('');
+}
+
+function goPage(p) {
+  currentPage = p;
+  renderGallery();
+  document.getElementById('gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── 선택 관리 ─────────────────────────────────────────────────
@@ -698,7 +809,7 @@ async function doReanalyze(targets, apiKey) {
 
   countEl.textContent = `재분석 완료 (${targets.length}장)`;
   setTimeout(() => { countEl.textContent = orig; }, 3000);
-  applyFilter();
+  applyFilter(true);
 }
 
 async function updateCacheEntry(hash, data) {
