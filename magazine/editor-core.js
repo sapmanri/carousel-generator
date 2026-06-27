@@ -483,7 +483,7 @@ async function generateMagazineText(pageType, photo, extraContext, options) {
     fullbleed : '{"ko_caption":"한 줄 캡션","en_caption":"one line caption"}',
     split     : '{"ko_label":"라벨","ko_text":"본문 (문단 구분은 \\n\\n 사용)","en_label":"label","en_text":"body text"}',
     grid      : '{"ko_label":"라벨","ko_caption":"캡션","en_label":"label","en_caption":"caption"}',
-    quote     : '{"ko_text":"인용 문장 (줄바꿈 없이 한 문장)","en_text":"quote sentence"}',
+    quote     : null,  // 직접 텍스트 구분자 방식
     spread    : '{"ko_left":"왼쪽 캡션","ko_right":"오른쪽 캡션","en_left":"left caption","en_right":"right caption"}',
     // 에세이: 본문이 길어 JSON 파싱 실패 위험 → ko/en 본문을 ===KO=== / ===EN=== 구분자로 받음
     // 단, 라벨/제목만 JSON으로 먼저 받고, 본문은 별도 처리
@@ -496,9 +496,15 @@ async function generateMagazineText(pageType, photo, extraContext, options) {
   };
   const schema = BILINGUAL_SCHEMA[pageType];
   // essay는 구분자 방식으로 따로 처리
-  const useDelimiter = (schema === null && pageType === 'essay');
+  const useDelimiter = (schema === null && (pageType === 'essay' || pageType === 'quote'));
   const bilingualNote = useDelimiter
-    ? `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):
+    ? pageType === 'quote'
+      ? `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):
+===KO===
+한국어 인용 문장 한 줄 (Vase 문체, 명조체 어울리는 한 문장)
+===EN===
+English quote sentence (one line, poetic)`
+      : `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):
 ===LABEL===
 라벨|영문라벨
 ===TITLE===
@@ -590,17 +596,24 @@ ${instruction}${bilingualNote}`;
   // essay: 구분자 방식 파싱
   if (useDelimiter) {
     try {
-      const labelMatch = raw.match(/===LABEL===\s*([\s\S]*?)===TITLE===/);
-      const titleMatch = raw.match(/===TITLE===\s*([\s\S]*?)===KO===/);
-      const koMatch    = raw.match(/===KO===\s*([\s\S]*?)===EN===/);
-      const enMatch    = raw.match(/===EN===\s*([\s\S]*?)(?:$|===)/);
-
-      const [ko_label, en_label] = (labelMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
-      const [ko_title, en_title] = (titleMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
-      const ko_text = koMatch?.[1]?.trim() || '';
-      const en_text = enMatch?.[1]?.trim() || '';
-
-      if (ko_text) return { ko_label, en_label, ko_title, en_title, ko_text, en_text };
+      if (pageType === 'essay') {
+        const labelMatch = raw.match(/===LABEL===\s*([\s\S]*?)===TITLE===/);
+        const titleMatch = raw.match(/===TITLE===\s*([\s\S]*?)===KO===/);
+        const koMatch    = raw.match(/===KO===\s*([\s\S]*?)===EN===/);
+        const enMatch    = raw.match(/===EN===\s*([\s\S]*?)(?:$|===)/);
+        const [ko_label, en_label] = (labelMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
+        const [ko_title, en_title] = (titleMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
+        const ko_text = koMatch?.[1]?.trim() || '';
+        const en_text = enMatch?.[1]?.trim() || '';
+        if (ko_text) return { ko_label, en_label, ko_title, en_title, ko_text, en_text };
+      } else if (pageType === 'quote') {
+        // quote: ===KO=== 한 문장 ===EN=== English sentence
+        const koMatch = raw.match(/===KO===\s*([\s\S]*?)(?:===EN===|$)/);
+        const enMatch = raw.match(/===EN===\s*([\s\S]*?)(?:$|===)/);
+        const ko_text = koMatch?.[1]?.trim() || raw.trim();
+        const en_text = enMatch?.[1]?.trim() || '';
+        if (ko_text) return { ko_text, en_text };
+      }
     } catch(err) {}
     return { _raw: raw, _parseError: true };
   }
