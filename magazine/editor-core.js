@@ -208,7 +208,7 @@ async function analyzeImage(dataUrl, hints) {
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
         { type: 'text', text: `이 이미지를 분석해서 웹매거진 페이지 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread|botanical 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것. 식물, 꽃, 작은 정물, 디테일 클로즈업처럼 여백 있는 카드형 프레임에 단아하게 어울리는 사진은 botanical을 선택할 것.","focal_x":"이 사진에서 가장 중요한 피사체(인물, 얼굴, 핵심 사물 등)의 가로 위치를 0~100 사이 숫자로 (좌측=0, 중앙=50, 우측=100). 풀블리드로 세로 화면에 꽉 채울 때 이 지점이 잘리지 않도록 기준점이 됨.","focal_y":"같은 피사체의 세로 위치를 0~100 사이 숫자로 (상단=0, 중앙=50, 하단=100).","spread_focal_left":"이 사진을 스프레드(2페이지로 나눠 보여주는 형태)로 쓸 때, 모바일 첫 페이지(왼쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 0=이미지 좌측 끝). 핵심 피사체가 이미지 중앙~우측에 있다면 이 값을 높여서 첫 페이지에도 보이게 할 것.","spread_focal_right":"같은 사진을 모바일 둘째 페이지(오른쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 100=이미지 우측 끝). 핵심 피사체가 이미지 중앙~좌측에 있다면 이 값을 낮춰서 둘째 페이지에도 보이게 할 것."}${hintText}` }
+{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","suggested_label_en":"Short English sublabel for botanical card (3-5 words, poetic)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread|botanical 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것. 식물, 꽃, 작은 정물, 디테일 클로즈업처럼 여백 있는 카드형 프레임에 단아하게 어울리는 사진은 botanical을 선택할 것.","focal_x":"이 사진에서 가장 중요한 피사체(인물, 얼굴, 핵심 사물 등)의 가로 위치를 0~100 사이 숫자로 (좌측=0, 중앙=50, 우측=100). 풀블리드로 세로 화면에 꽉 채울 때 이 지점이 잘리지 않도록 기준점이 됨.","focal_y":"같은 피사체의 세로 위치를 0~100 사이 숫자로 (상단=0, 중앙=50, 하단=100).","spread_focal_left":"이 사진을 스프레드(2페이지로 나눠 보여주는 형태)로 쓸 때, 모바일 첫 페이지(왼쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 0=이미지 좌측 끝). 핵심 피사체가 이미지 중앙~우측에 있다면 이 값을 높여서 첫 페이지에도 보이게 할 것.","spread_focal_right":"같은 사진을 모바일 둘째 페이지(오른쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 100=이미지 우측 끝). 핵심 피사체가 이미지 중앙~좌측에 있다면 이 값을 낮춰서 둘째 페이지에도 보이게 할 것."}${hintText}` }
       ]}]
     })
   });
@@ -792,7 +792,12 @@ async function autoBuildPages(status) {
       const pg = PAGE_DEFAULTS.botanical();
       pg.number = String(pages.filter(x => x.type === 'botanical').length + 1);
       pg.imageId = p.id;
-      pg.caption = (p.analysis && p.analysis.suggested_caption) || '';
+      pg.caption  = (p.analysis && p.analysis.suggested_caption) || '';
+      pg.title    = (p.analysis && p.analysis.suggested_caption) || '';  // 캡션을 제목으로 자동
+      // subtitle: "한국어/English" 형식으로 조합 (둘 다 있을 때)
+      const subKo = (p.analysis && p.analysis.suggested_label) || '';
+      const subEn = (p.analysis && p.analysis.suggested_label_en) || '';
+      pg.subtitle = subKo && subEn ? `${subKo}/${subEn}` : (subKo || subEn);
       newPages.push(pg);
     } else if (best === 'grid') {
       consecutiveFullbleed = 0;
@@ -1240,7 +1245,10 @@ async function genPageText(idx, extraContext) {
         pg.text = text;
       }
     }
-    else if (pg.type === 'botanical') pg.caption = text;
+    else if (pg.type === 'botanical') {
+      pg.caption = text;
+      if (!pg.title) pg.title = text;  // 제목도 비어있으면 같이 채우기
+    }
     else if (pg.type === 'spread') {
       const lines = text.split('\n').filter(Boolean);
       pg.captionLeft = lines[0] || '';
