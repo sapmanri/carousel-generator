@@ -1,0 +1,2 @@
+# 이미지 캐시는 Vercel 배포 트리거 제외
+image_cache.json
