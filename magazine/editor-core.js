@@ -480,24 +480,38 @@ async function generateMagazineText(pageType, photo, extraContext, options) {
 
   // bilingual JSON 스키마 (페이지 타입별)
   const BILINGUAL_SCHEMA = {
-    fullbleed : '{"ko_caption":"...","en_caption":"..."}',
-    split     : '{"ko_label":"...","ko_text":"...","en_label":"...","en_text":"..."}',
-    grid      : '{"ko_label":"...","ko_caption":"...","en_label":"...","en_caption":"..."}',
-    quote     : '{"ko_text":"...","en_text":"..."}',
-    spread    : '{"ko_left":"...","ko_right":"...","en_left":"...","en_right":"..."}',
-    essay     : '{"ko_label":"...","ko_title":"...","ko_text":"...","en_label":"...","en_title":"...","en_text":"..."}',
-    dialogue  : '{"ko_label":"...","en_label":"..."}',
-    list      : '{"ko_label":"...","ko_title":"...","en_label":"...","en_title":"..."}',
-    milestone : '{"ko_label":"...","ko_text":"...","en_label":"...","en_text":"..."}',
-    botanical : '{"ko_caption":"...","en_caption":"..."}',
-    closing   : '{"ko_text":"...","en_text":"..."}',
+    fullbleed : '{"ko_caption":"한 줄 캡션","en_caption":"one line caption"}',
+    split     : '{"ko_label":"라벨","ko_text":"본문 (문단 구분은 \\n\\n 사용)","en_label":"label","en_text":"body text"}',
+    grid      : '{"ko_label":"라벨","ko_caption":"캡션","en_label":"label","en_caption":"caption"}',
+    quote     : '{"ko_text":"인용 문장 (줄바꿈 없이 한 문장)","en_text":"quote sentence"}',
+    spread    : '{"ko_left":"왼쪽 캡션","ko_right":"오른쪽 캡션","en_left":"left caption","en_right":"right caption"}',
+    // 에세이: 본문이 길어 JSON 파싱 실패 위험 → ko/en 본문을 ===KO=== / ===EN=== 구분자로 받음
+    // 단, 라벨/제목만 JSON으로 먼저 받고, 본문은 별도 처리
+    essay     : null,  // 별도 2-step 처리
+    dialogue  : '{"ko_label":"라벨","en_label":"label"}',
+    list      : '{"ko_label":"라벨","ko_title":"제목","en_label":"label","en_title":"title"}',
+    milestone : '{"ko_label":"라벨","ko_text":"한 줄 문장","en_label":"label","en_text":"one sentence"}',
+    botanical : '{"ko_caption":"캡션 (12자 이내)","en_caption":"caption (under 8 words)"}',
+    closing   : '{"ko_text":"클로징 문장","en_text":"closing sentence"}',
   };
   const schema = BILINGUAL_SCHEMA[pageType];
-  const bilingualNote = schema
-    ? `\n\n반드시 아래 JSON 형식으로만 반환하세요 (다른 텍스트 없이):
+  // essay는 구분자 방식으로 따로 처리
+  const useDelimiter = (schema === null && pageType === 'essay');
+  const bilingualNote = useDelimiter
+    ? `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):
+===LABEL===
+라벨|영문라벨
+===TITLE===
+제목|영문제목
+===KO===
+한국어 본문 (Vase 문체, 여러 문단 가능)
+===EN===
+English body (poetic, natural, multiple paragraphs ok)`
+    : schema
+      ? `\n\n반드시 아래 JSON 형식으로만 반환하세요 (다른 텍스트 없이, JSON 값 안에서 줄바꿈은 반드시 \\n으로 이스케이프):
 ${schema}
 한국어는 Vase 문체로, 영어는 poetic하고 자연스러운 영문으로.`
-    : '';
+      : '';
 
   let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 웹매거진 글쓰기 도구입니다.
 Vase의 문체로 글을 씁니다. 아래 규칙과 예시를 철저히 따르세요.
@@ -564,7 +578,7 @@ ${instruction}${bilingualNote}`;
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: pageType === 'botanical' ? 80 : (schema ? 1600 : 1200),
+      max_tokens: pageType === 'botanical' ? 80 : (pageType === 'essay' ? 2000 : schema ? 1600 : 1200),
       system,
       messages: [{ role: 'user', content: userContent }],
     }),
@@ -573,13 +587,30 @@ ${instruction}${bilingualNote}`;
   if (data.error) throw new Error(data.error.message);
   const raw = data.content?.[0]?.text?.trim() || '';
 
-  // bilingual JSON 파싱
+  // essay: 구분자 방식 파싱
+  if (useDelimiter) {
+    try {
+      const labelMatch = raw.match(/===LABEL===\s*([\s\S]*?)===TITLE===/);
+      const titleMatch = raw.match(/===TITLE===\s*([\s\S]*?)===KO===/);
+      const koMatch    = raw.match(/===KO===\s*([\s\S]*?)===EN===/);
+      const enMatch    = raw.match(/===EN===\s*([\s\S]*?)(?:$|===)/);
+
+      const [ko_label, en_label] = (labelMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
+      const [ko_title, en_title] = (titleMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
+      const ko_text = koMatch?.[1]?.trim() || '';
+      const en_text = enMatch?.[1]?.trim() || '';
+
+      if (ko_text) return { ko_label, en_label, ko_title, en_title, ko_text, en_text };
+    } catch(err) {}
+    return { _raw: raw, _parseError: true };
+  }
+
+  // 일반 bilingual JSON 파싱
   if (schema) {
     try {
       const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
       return JSON.parse(raw.slice(s, e + 1));
     } catch(err) {
-      // 파싱 실패 시 한국어만 반환 (EN은 빈 값)
       return { _raw: raw, _parseError: true };
     }
   }
@@ -1331,12 +1362,18 @@ async function genPageText(idx, extraContext) {
     // 기존 텍스트(pg.text, pg.label, pg.title)를 컨텍스트로 전달해서 AI가 작업할 내용을 알게 함
     let effectiveContext = extraContext || '';
     if (!photo && pg.type !== 'fullbleed' && pg.type !== 'spread') {
+      // 플레이스홀더 텍스트 감지 (AI가 컨텍스트 없을 때 뱉는 메타 발화)
+      const PLACEHOLDER_MARKERS = ['내용이 전달되지 않았습니다', '주제나 컨텍스트를 입력', '어떤 장면, 사진'];
+      const isPlaceholder = (t) => t && PLACEHOLDER_MARKERS.some(m => t.includes(m));
+
       const existingBits = [
-        pg.label && `라벨: ${pg.label}`,
-        pg.title && `제목: ${pg.title}`,
-        pg.text  && pg.text.length > 10 && `기존 본문 (다시 쓰되 같은 주제): ${pg.text.slice(0, 200)}`,
-        pg.caption && `캡션: ${pg.caption}`,
-        pg.context && `맥락: ${pg.context}`,
+        pg.label   && `라벨: ${pg.label}`,
+        pg.title   && `제목: ${pg.title}`,
+        // 에세이 본문은 플레이스홀더가 아닐 때만, 그리고 처음 50자만 (주제 파악용)
+        !isPlaceholder(pg.text) && pg.text && pg.text.length > 10 && pg.type !== 'essay'
+          && `기존 본문 참고: ${pg.text.slice(0, 100)}`,
+        !isPlaceholder(pg.caption) && pg.caption && `캡션: ${pg.caption}`,
+        !isPlaceholder(pg.context) && pg.context && `맥락: ${pg.context}`,
       ].filter(Boolean);
       if (existingBits.length) {
         effectiveContext = existingBits.join(' / ') + (extraContext ? ` / ${extraContext}` : '');
