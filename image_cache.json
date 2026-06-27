@@ -194,7 +194,9 @@
       "analyzed_at": "2026-06-27T14:48:16.811Z",
       "model": "claude-sonnet-4-6",
       "filename": "01.jpg",
-      "filesize": 902561
+      "filesize": 902561,
+      "deleted": true,
+      "deleted_at": "2026-06-27T15:23:29.751Z"
     },
     "pu64_e6c16eda_12c7b558": {
       "thumbnail_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_pu64_e6c16eda_12c7b558.webp",
