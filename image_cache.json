@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ë¬ì½¤í¨",
-          "suggested_caption": "ì¤íì ìì ì¬ì¹",
-          "suggested_caption_left": "ë¬ì½¤í ìê°",
-          "suggested_caption_right": "ìì íë³µ",
-          "suggested_label": "ëì í¸ íì",
+          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ¨",
+          "suggested_caption": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã¬Â¹Â",
+          "suggested_caption_left": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "suggested_caption_right": "Ã¬ÂÂÃ¬ÂÂ Ã­ÂÂÃ«Â³Âµ",
+          "suggested_label": "Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸ Ã­ÂÂÃ¬ÂÂ",
           "aspect_ratio": "wide",
           "best_page_type": "botanical",
           "focal_x": "35",
@@ -31,10 +31,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ë¬ì½¤í¨",
+          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ¨",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ì¤íì ìì ì¬ì¹",
+          "suggested_copy": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã¬Â¹Â",
           "suggested_body": ""
         },
         "ts": 1782487480396
@@ -44,7 +44,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ë¬ì½¤í¨"
+          "mood": "Ã«ÂÂ¬Ã¬Â½Â¤Ã­ÂÂ¨"
         },
         "ts": 1782487480585
       },
@@ -64,20 +64,20 @@
       "season": "summer",
       "time_of_day": "unknown",
       "location_type": "cafe",
-      "primary_subject": "구형 디저트 두 개",
+      "primary_subject": "êµ¬í ëì í¸ ë ê°",
       "secondary_subjects": [
-        "금색 스푼",
-        "손",
-        "흰색 플레이트",
-        "검정 원형 트레이"
+        "ê¸ì ì¤í¼",
+        "ì",
+        "í°ì íë ì´í¸",
+        "ê²ì  ìí í¸ë ì´"
       ],
       "activity_type": "cooking",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "벨벳 파우더",
-        "세라믹",
-        "금속"
+        "ë²¨ë²³ íì°ë",
+        "ì¸ë¼ë¯¹",
+        "ê¸ì"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -87,19 +87,120 @@
       "focus_clarity": "soft",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "이색적인 구형 디저트와 선명한 색 대비가 시선을 강하게 끌어 클릭 유도력 높음",
-      "mood": "섬세함",
-      "suggested_caption": "둥근 계절의 맛",
+      "thumbnail_reason": "ì´ìì ì¸ êµ¬í ëì í¸ì ì ëªí ì ëë¹ê° ìì ì ê°íê² ëì´ í´ë¦­ ì ëë ¥ ëì",
+      "mood": "ì¬ì¸í¨",
+      "suggested_caption": "ë¥ê·¼ ê³ì ì ë§",
       "suggested_caption_en": "Two seasons on a plate",
-      "suggested_caption_left": "붉은 달의 단면",
-      "suggested_caption_right": "초록 여름 한 입",
-      "suggested_label": "계절 디저트",
+      "suggested_caption_left": "ë¶ì ë¬ì ë¨ë©´",
+      "suggested_caption_right": "ì´ë¡ ì¬ë¦ í ì",
+      "suggested_label": "ê³ì  ëì í¸",
       "suggested_label_en": "Season's Sweet",
       "domesticity_score": 2,
       "rurality_score": 1,
       "craft_score": 4,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:32:10.726Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "oi0c_5bfb8763_90fe657f": {
+      "name": "oi0c_5bfb8763_90fe657f.jpg",
+      "path": "library/oi0c_5bfb8763_90fe657f.jpg",
+      "hash": "oi0c_5bfb8763_90fe657f",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/oi0c_5bfb8763_90fe657f.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/oi0c_5bfb8763_90fe657f.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "mid",
+          "dominant_color": "#5a6b4a",
+          "mood": "ê³ ì",
+          "suggested_caption": "ì°¨ë¥¼ ì¸ì°ë ìê°",
+          "suggested_caption_left": "ì°»ì ìì",
+          "suggested_caption_right": "ì ì±ê³¼ ê³ ì",
+          "suggested_label": "ë¤ëì ìê°",
+          "aspect_ratio": "wide",
+          "best_page_type": "botanical",
+          "focal_x": "55",
+          "focal_y": "45",
+          "spread_focal_left": "35",
+          "spread_focal_right": "65"
+        },
+        "ts": 1782487476099
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "mid",
+          "dominant_color": "#5a6b4a",
+          "mood": "ê³ ì",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ì°¨ë¥¼ ì¸ì°ë ìê°",
+          "suggested_body": ""
+        },
+        "ts": 1782487476109
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "mid",
+          "dominant_color": "#5a6b4a",
+          "mood": "ê³ ì"
+        },
+        "ts": 1782487476300
+      },
+      "subject_position": "center",
+      "focal_x": 55,
+      "focal_y": 50,
+      "aspect_ratio": "wide",
+      "best_page_type": "fullbleed",
+      "spread_focal_left": 30,
+      "spread_focal_right": 65,
+      "overall_brightness": "mid",
+      "dominant_color": "#4a7c59",
+      "color_temperature": "cool",
+      "contrast_level": "medium",
+      "visual_density": "medium",
+      "negative_space": "medium",
+      "season": "winter",
+      "time_of_day": "day",
+      "location_type": "cafe",
+      "primary_subject": "말차 휘핑",
+      "secondary_subjects": [
+        "차선",
+        "말차완",
+        "책"
+      ],
+      "activity_type": "craft",
+      "human_presence": "hands",
+      "animal_presence": "none",
+      "material_texture": [
+        "대나무",
+        "도자기",
+        "원목"
+      ],
+      "has_text": true,
+      "text_area_position": "left",
+      "camera_distance": "closeup",
+      "camera_angle": "top_down",
+      "motion_implied": "hand_action",
+      "focus_clarity": "clear",
+      "text_safe_area": "left",
+      "thumbnail_potential": "high",
+      "thumbnail_reason": "녹색 말차와 손의 대비가 뚜렷하고 슬로우라이프 감성을 직관적으로 전달함",
+      "mood": "고요함",
+      "suggested_caption": "천천히, 한 잔",
+      "suggested_caption_en": "slow hands, quiet green",
+      "suggested_caption_left": "차 한 잔의 여유",
+      "suggested_caption_right": "손끝의 고요",
+      "suggested_label": "말차 한 잔",
+      "suggested_label_en": "Whisked Still",
+      "domesticity_score": 4,
+      "rurality_score": 2,
+      "craft_score": 5,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:32:21.649Z",
       "model": "claude-sonnet-4-6"
     }
   }
