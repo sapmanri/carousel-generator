@@ -997,7 +997,30 @@ async function autoBuildPages(status) {
     if (!['cover','fullbleed','split','grid','quote','spread','essay','dialogue','list','closing'].includes(pg.type)) continue;
     status.innerHTML = `<span class="spinner"></span>페이지 글 생성 중 (${textPages.indexOf(pg)+1}/${textPages.length})…`;
     try {
-      if (pg.type === 'cover') {
+      if (pg.type === 'index') {
+        // index items_en: 현재 items를 영문 번역
+        if ((pg.items || []).length && !pg.items_en?.length) {
+          try {
+            const itemsKo = pg.items.join('\n');
+            const enRes = await generateMagazineText('cover', null,
+              `이 목차 항목들을 영문으로 번역해줘 (각 항목은 줄바꿈으로 구분, 번역본만 반환): ${itemsKo}`);
+            const enLines = (typeof enRes === 'string' ? enRes : enRes?._raw || '').split('\n').filter(Boolean);
+            pg.items_en = enLines;
+          } catch(e) {}
+        }
+      } else if (pg.type === 'dialogue') {
+        // dialogue 각 라인 text_en 번역
+        const lines = pg.lines || [];
+        for (let li = 0; li < lines.length; li++) {
+          if (!lines[li].text_en && lines[li].text) {
+            try {
+              const enRes = await generateMagazineText('cover', null,
+                `이 한국어 대화 한 줄을 영문으로 자연스럽게 번역해줘 (번역본만): ${lines[li].text}`);
+              lines[li].text_en = (typeof enRes === 'string' ? enRes : enRes?._raw || '').trim();
+            } catch(e) {}
+          }
+        }
+      } else if (pg.type === 'cover') {
         await genCoverHeadline(i);
       } else if (pg.type === 'essay' || pg.type === 'dialogue' || pg.type === 'quote' || pg.type === 'list') {
         // 사진 없는 텍스트 페이지 — 주변 페이지들의 분위기를 컨텍스트로 전달
@@ -1496,11 +1519,27 @@ async function genCoverHeadline(idx) {
   const photo = photos.find(p => p.id === photoId);
   try {
     toast('생성 중…');
-    const text = await generateMagazineText('cover', photo, '두 줄로 줄바꿈하여 작성');
-    const lines = text.split('\n').filter(Boolean);
-    pg.headline = [lines[0] || '', lines[1] || ''];
+    // KO headline
+    const koText = await generateMagazineText('cover', photo, '두 줄로 줄바꿈하여 작성. 한국어로만.');
+    const koLines = (typeof koText === 'string' ? koText : koText?._raw || '').split('\n').filter(Boolean);
+    pg.headline = [koLines[0] || '', koLines[1] || ''];
+
+    // EN headline (별도 호출)
+    const enText = await generateMagazineText('cover', photo, 'Write 2 lines in English only. Poetic, short. Newline between lines. No Korean.');
+    const enLines = (typeof enText === 'string' ? enText : enText?._raw || '').split('\n').filter(Boolean);
+    pg.headline_en = [enLines[0] || '', enLines[1] || ''];
+
+    // TOC도 EN으로 자동 번역
+    if ((pg.toc || []).length) {
+      const tocKo = pg.toc.join('\n');
+      const tocEnText = await generateMagazineText('cover', null,
+        `이 목차 항목들을 영문으로 번역해줘 (각 항목은 줄바꿈으로 구분, 번역본만 반환): ${tocKo}`);
+      const tocEnLines = (typeof tocEnText === 'string' ? tocEnText : tocEnText?._raw || '').split('\n').filter(Boolean);
+      pg.toc_en = tocEnLines;
+    }
+
     renderPageList();
-    toast('생성 완료');
+    toast('헤드라인 생성 완료 ✓');
   } catch (e) {
     toast('오류: ' + e.message);
   }
@@ -1695,7 +1734,30 @@ async function regenAllAndPublish() {
     statusEl.className = 'publish-status';
     statusEl.innerHTML = `<span class="spinner"></span>텍스트 재생성 중 (${done}/${textPages.length}) — ${PAGE_TYPE_LABEL[pg.type] || pg.type}…`;
     try {
-      if (pg.type === 'cover') {
+      if (pg.type === 'index') {
+        // index items_en: 현재 items를 영문 번역
+        if ((pg.items || []).length && !pg.items_en?.length) {
+          try {
+            const itemsKo = pg.items.join('\n');
+            const enRes = await generateMagazineText('cover', null,
+              `이 목차 항목들을 영문으로 번역해줘 (각 항목은 줄바꿈으로 구분, 번역본만 반환): ${itemsKo}`);
+            const enLines = (typeof enRes === 'string' ? enRes : enRes?._raw || '').split('\n').filter(Boolean);
+            pg.items_en = enLines;
+          } catch(e) {}
+        }
+      } else if (pg.type === 'dialogue') {
+        // dialogue 각 라인 text_en 번역
+        const lines = pg.lines || [];
+        for (let li = 0; li < lines.length; li++) {
+          if (!lines[li].text_en && lines[li].text) {
+            try {
+              const enRes = await generateMagazineText('cover', null,
+                `이 한국어 대화 한 줄을 영문으로 자연스럽게 번역해줘 (번역본만): ${lines[li].text}`);
+              lines[li].text_en = (typeof enRes === 'string' ? enRes : enRes?._raw || '').trim();
+            } catch(e) {}
+          }
+        }
+      } else if (pg.type === 'cover') {
         await genCoverHeadline(i);
       } else if (['essay','dialogue','quote','list'].includes(pg.type)) {
         // 텍스트 전용 페이지: 주변 사진 분위기 컨텍스트
@@ -1794,9 +1856,11 @@ async function publish() {
       const out = { type: pg.type };
       switch (pg.type) {
         case 'cover':
-          out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
-          out.headline = pg.headline || [];
-          out.toc = pg.toc || [];
+          out.image       = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.headline    = pg.headline    || [];
+          out.headline_en = pg.headline_en || [];
+          out.toc         = pg.toc         || [];
+          out.toc_en      = pg.toc_en      || [];
           break;
         case 'fullbleed':
           out.image      = pg.imageId ? photoPathMap[pg.imageId] : '';
@@ -1806,8 +1870,9 @@ async function publish() {
           if (typeof pg.focalY === 'number') out.focalY = pg.focalY;
           break;
         case 'index':
-          out.label = pg.label || '';
-          out.items = pg.items || [];
+          out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
+          out.items    = pg.items    || [];
+          out.items_en = pg.items_en || [];
           break;
         case 'split':
           out.image    = pg.imageId ? photoPathMap[pg.imageId] : '';
@@ -1842,13 +1907,20 @@ async function publish() {
           out.dark = !!pg.dark;
           break;
         case 'dialogue':
-          out.label = pg.label || '';
-          out.lines = (pg.lines || []).filter(l => l.text);
+          out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
+          out.lines    = (pg.lines || []).filter(l => l.text).map(l => ({
+            side: l.side, speaker: l.speaker || '',
+            text: l.text || '', text_en: l.text_en || ''
+          }));
           break;
         case 'list':
-          out.label = pg.label || '';
-          out.title = pg.title || '';
-          out.items = (pg.items || []).filter(it => it.name);
+          out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
+          out.title    = pg.title    || ''; out.title_en = pg.title_en || '';
+          out.items    = (pg.items || []).filter(it => it.name).map(it => ({
+            name: it.name, name_en: it.name_en || '',
+            desc: it.desc || '', desc_en: it.desc_en || '',
+            note: it.note || '', note_en: it.note_en || ''
+          }));
           break;
         case 'milestone':
           out.number   = pg.number   || '';
