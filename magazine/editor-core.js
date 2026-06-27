@@ -208,7 +208,7 @@ async function analyzeImage(dataUrl, hints) {
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
         { type: 'text', text: `이 이미지를 분석해서 웹매거진 페이지 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","suggested_label_en":"Short English sublabel for botanical card (3-5 words, poetic)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread|botanical 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것. 식물, 꽃, 작은 정물, 디테일 클로즈업처럼 여백 있는 카드형 프레임에 단아하게 어울리는 사진은 botanical을 선택할 것.","focal_x":"이 사진에서 가장 중요한 피사체(인물, 얼굴, 핵심 사물 등)의 가로 위치를 0~100 사이 숫자로 (좌측=0, 중앙=50, 우측=100). 풀블리드로 세로 화면에 꽉 채울 때 이 지점이 잘리지 않도록 기준점이 됨.","focal_y":"같은 피사체의 세로 위치를 0~100 사이 숫자로 (상단=0, 중앙=50, 하단=100).","spread_focal_left":"이 사진을 스프레드(2페이지로 나눠 보여주는 형태)로 쓸 때, 모바일 첫 페이지(왼쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 0=이미지 좌측 끝). 핵심 피사체가 이미지 중앙~우측에 있다면 이 값을 높여서 첫 페이지에도 보이게 할 것.","spread_focal_right":"같은 사진을 모바일 둘째 페이지(오른쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 100=이미지 우측 끝). 핵심 피사체가 이미지 중앙~좌측에 있다면 이 값을 낮춰서 둘째 페이지에도 보이게 할 것."}${hintText}` }
+{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","suggested_label_en":"Short English sublabel (3-5 words, poetic mood)","suggested_caption_en":"English caption one line matching the Korean caption (poetic, under 8 words)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread|botanical 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것. 식물, 꽃, 작은 정물, 디테일 클로즈업처럼 여백 있는 카드형 프레임에 단아하게 어울리는 사진은 botanical을 선택할 것.","focal_x":"이 사진에서 가장 중요한 피사체(인물, 얼굴, 핵심 사물 등)의 가로 위치를 0~100 사이 숫자로 (좌측=0, 중앙=50, 우측=100). 풀블리드로 세로 화면에 꽉 채울 때 이 지점이 잘리지 않도록 기준점이 됨.","focal_y":"같은 피사체의 세로 위치를 0~100 사이 숫자로 (상단=0, 중앙=50, 하단=100).","spread_focal_left":"이 사진을 스프레드(2페이지로 나눠 보여주는 형태)로 쓸 때, 모바일 첫 페이지(왼쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 0=이미지 좌측 끝). 핵심 피사체가 이미지 중앙~우측에 있다면 이 값을 높여서 첫 페이지에도 보이게 할 것.","spread_focal_right":"같은 사진을 모바일 둘째 페이지(오른쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 100=이미지 우측 끝). 핵심 피사체가 이미지 중앙~좌측에 있다면 이 값을 낮춰서 둘째 페이지에도 보이게 할 것."}${hintText}` }
       ]}]
     })
   });
@@ -408,7 +408,6 @@ async function generateMagazineText(pageType, photo, extraContext, options) {
   const key = getApiKey();
   if (!key) throw new Error('API Key가 필요합니다.');
   const profile = await loadProfile();
-  const typeExamples = profile.examples.slice(-3);
 
   let instruction = PAGE_TEXT_INSTRUCTION[pageType] || '';
   if (pageType === 'essay') {
@@ -419,6 +418,27 @@ async function generateMagazineText(pageType, photo, extraContext, options) {
         : ''
     );
   }
+
+  // bilingual JSON 스키마 (페이지 타입별)
+  const BILINGUAL_SCHEMA = {
+    fullbleed : '{"ko_caption":"...","en_caption":"..."}',
+    split     : '{"ko_label":"...","ko_text":"...","en_label":"...","en_text":"..."}',
+    grid      : '{"ko_label":"...","ko_caption":"...","en_label":"...","en_caption":"..."}',
+    quote     : '{"ko_text":"...","en_text":"..."}',
+    spread    : '{"ko_left":"...","ko_right":"...","en_left":"...","en_right":"..."}',
+    essay     : '{"ko_label":"...","ko_title":"...","ko_text":"...","en_label":"...","en_title":"...","en_text":"..."}',
+    dialogue  : '{"ko_label":"...","en_label":"..."}',
+    list      : '{"ko_label":"...","ko_title":"...","en_label":"...","en_title":"..."}',
+    milestone : '{"ko_label":"...","ko_text":"...","en_label":"...","en_text":"..."}',
+    botanical : '{"ko_caption":"...","en_caption":"..."}',
+    closing   : '{"ko_text":"...","en_text":"..."}',
+  };
+  const schema = BILINGUAL_SCHEMA[pageType];
+  const bilingualNote = schema
+    ? `\n\n반드시 아래 JSON 형식으로만 반환하세요 (다른 텍스트 없이):
+${schema}
+한국어는 Vase 문체로, 영어는 poetic하고 자연스러운 영문으로.`
+    : '';
 
   let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 웹매거진 글쓰기 도구입니다.
 Vase의 문체로 글을 씁니다. 아래 규칙과 예시를 철저히 따르세요.
@@ -438,11 +458,8 @@ ${profile.rules.map((r, i) => `${i+1}. ${r}`).join('\n')}
 예쁜 글 ❌ / 실제 같은 글 ⭕
 
 ## 이번 글 지시
-${instruction}
+${instruction}${bilingualNote}`;
 
-결과는 텍스트만 반환하세요. 따옴표, 설명, 마크다운 기호 없이 순수한 글만 반환합니다.`;
-
-  // botanical은 짧은 캡션만 생성 — 예시글 불필요
   if (pageType !== 'botanical') {
     const filteredExamples = profile.examples
       .filter(e => e.type === 'poem' || e.type === 'blog')
@@ -461,14 +478,9 @@ ${instruction}
   let userContent;
   const ctxText = extraContext ? `\n\n참고 컨텍스트: ${extraContext}` : '';
   if (photo && photo.dataUrl) {
-    // R2/외부 URL인 경우 fetchAsDataUrl로 base64 변환
     let imgDataUrl = photo.dataUrl;
     if (imgDataUrl.startsWith('http') || imgDataUrl.startsWith('./')) {
-      try {
-        imgDataUrl = await window.ImageLibrary.fetchAsDataUrl(imgDataUrl);
-      } catch (e) {
-        imgDataUrl = null;
-      }
+      try { imgDataUrl = await window.ImageLibrary.fetchAsDataUrl(imgDataUrl); } catch (e) { imgDataUrl = null; }
     }
     if (imgDataUrl && imgDataUrl.startsWith('data:')) {
       const mediaType = imgDataUrl.match(/data:([^;]+)/)?.[1] || photo.mediaType || 'image/jpeg';
@@ -492,17 +504,28 @@ ${instruction}
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: pageType === 'botanical' ? 80 : 1200,
+      model: 'claude-sonnet-4-6',
+      max_tokens: pageType === 'botanical' ? 80 : (schema ? 1600 : 1200),
       system,
       messages: [{ role: 'user', content: userContent }],
     }),
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
-  return data.content?.[0]?.text?.trim() || '';
-}
+  const raw = data.content?.[0]?.text?.trim() || '';
 
+  // bilingual JSON 파싱
+  if (schema) {
+    try {
+      const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
+      return JSON.parse(raw.slice(s, e + 1));
+    } catch(err) {
+      // 파싱 실패 시 한국어만 반환 (EN은 빈 값)
+      return { _raw: raw, _parseError: true };
+    }
+  }
+  return raw;
+}
 
 // ══════════════════════════════════════════════════════════════
 // 상태
@@ -809,8 +832,9 @@ async function autoBuildPages(status) {
       const pg = PAGE_DEFAULTS.botanical();
       pg.number = String(pages.filter(x => x.type === 'botanical').length + 1);
       pg.imageId = p.id;
-      pg.caption  = (p.analysis && p.analysis.suggested_caption) || '';
-      pg.title    = (p.analysis && p.analysis.suggested_caption) || '';  // 캡션을 제목으로 자동
+      pg.caption    = (p.analysis && p.analysis.suggested_caption)    || '';
+      pg.caption_en = (p.analysis && p.analysis.suggested_caption_en) || '';
+      pg.title      = pg.caption;  // 캡션을 제목으로 자동
       // subtitle: "한국어/English" 형식으로 조합 (둘 다 있을 때)
       const subKo = (p.analysis && p.analysis.suggested_label) || '';
       const subEn = (p.analysis && p.analysis.suggested_label_en) || '';
@@ -825,7 +849,8 @@ async function autoBuildPages(status) {
       consecutiveFullbleed = 0;
       const pg = PAGE_DEFAULTS.split();
       pg.imageId = p.id;
-      pg.label = (p.analysis && p.analysis.suggested_label) || '';
+      pg.label    = (p.analysis && p.analysis.suggested_label)    || '';
+      pg.label_en = (p.analysis && p.analysis.suggested_label_en) || '';
       pg.darkText = (p.analysis && p.analysis.overall_brightness === 'dark');
       newPages.push(pg);
     } else if (best === 'quote') {
@@ -1239,68 +1264,100 @@ async function genPageText(idx, extraContext) {
   try {
     toast('생성 중…');
     const needsTitle = pg.type === 'essay' && !(pg.label || '').trim() && !(pg.title || '').trim();
-    const text = await generateMagazineText(pg.type, photo, extraContext, { needsTitle });
-    if (pg.type === 'fullbleed' || pg.type === 'grid') pg.caption = text;
-    else if (pg.type === 'split') pg.text = text;
-    else if (pg.type === 'quote' || pg.type === 'closing' || pg.type === 'milestone') pg.text = text;
-    else if (pg.type === 'essay') {
-      if (needsTitle) {
-        const lines = text.split('\n');
-        const headerLine = (lines[0] || '').trim();
-        const m = headerLine.match(/^(.*?)\|(.*)$/);
-        if (m) {
-          pg.label = m[1].trim();
-          pg.title = m[2].trim();
-          // 첫 줄(헤더) + 그 다음 빈 줄을 제거하고 나머지를 본문으로
-          let rest = lines.slice(1);
-          if (rest[0] !== undefined && rest[0].trim() === '') rest = rest.slice(1);
-          pg.text = rest.join('\n').replace(/^\n+/, '');
-        } else {
-          pg.text = text;
-        }
-      } else {
-        pg.text = text;
+    const result = await generateMagazineText(pg.type, photo, extraContext, { needsTitle });
+
+    // bilingual JSON 결과 처리
+    if (result && typeof result === 'object' && !result._parseError) {
+      // 각 페이지 타입별로 ko/en 필드 매핑
+      switch (pg.type) {
+        case 'fullbleed':
+        case 'grid':
+          pg.caption    = result.ko_caption || pg.caption;
+          pg.caption_en = result.en_caption || '';
+          if (result.ko_label !== undefined) { pg.label    = result.ko_label; pg.label_en = result.en_label || ''; }
+          break;
+        case 'split':
+          pg.label    = result.ko_label || pg.label;
+          pg.label_en = result.en_label || '';
+          pg.text     = result.ko_text  || pg.text;
+          pg.text_en  = result.en_text  || '';
+          break;
+        case 'quote':
+          pg.text    = result.ko_text || pg.text;
+          pg.text_en = result.en_text || '';
+          break;
+        case 'spread':
+          pg.captionLeft     = result.ko_left  || pg.captionLeft;
+          pg.captionLeft_en  = result.en_left  || '';
+          pg.captionRight    = result.ko_right || pg.captionRight;
+          pg.captionRight_en = result.en_right || '';
+          break;
+        case 'essay':
+          if (needsTitle) {
+            pg.label    = result.ko_label || pg.label;
+            pg.label_en = result.en_label || '';
+            pg.title    = result.ko_title || pg.title;
+            pg.title_en = result.en_title || '';
+          }
+          pg.text    = result.ko_text || pg.text;
+          pg.text_en = result.en_text || '';
+          break;
+        case 'dialogue':
+          pg.label    = result.ko_label || pg.label;
+          pg.label_en = result.en_label || '';
+          break;
+        case 'list':
+          pg.label    = result.ko_label || pg.label;
+          pg.label_en = result.en_label || '';
+          pg.title    = result.ko_title || pg.title;
+          pg.title_en = result.en_title || '';
+          break;
+        case 'milestone':
+          pg.label    = result.ko_label || pg.label;
+          pg.label_en = result.en_label || '';
+          pg.text     = result.ko_text  || pg.text;
+          pg.text_en  = result.en_text  || '';
+          break;
+        case 'botanical':
+          pg.caption    = result.ko_caption || result._raw || pg.caption;
+          pg.caption_en = result.en_caption || '';
+          if (!pg.title) pg.title = pg.caption;
+          break;
+        case 'closing':
+          pg.text    = result.ko_text || pg.text;
+          pg.text_en = result.en_text || '';
+          break;
+      }
+    } else {
+      // fallback: 파싱 실패 또는 구조 없는 경우 기존 방식
+      const text = result?._raw || result || '';
+      if (pg.type === 'fullbleed' || pg.type === 'grid') pg.caption = text;
+      else if (pg.type === 'split') pg.text = text;
+      else if (pg.type === 'quote' || pg.type === 'closing' || pg.type === 'milestone') pg.text = text;
+      else if (pg.type === 'essay') {
+        if (needsTitle) {
+          const lines = text.split('\n');
+          const m = (lines[0]||'').trim().match(/^(.*?)\|(.*)$/);
+          if (m) { pg.label = m[1].trim(); pg.title = m[2].trim(); }
+          pg.text = lines.slice(m?2:0).join('\n').trim();
+        } else { pg.text = text; }
+      }
+      else if (pg.type === 'spread') {
+        const parts = text.split('\n').filter(Boolean);
+        pg.captionLeft = parts[0] || ''; pg.captionRight = parts[1] || '';
+      }
+      else if (pg.type === 'dialogue') pg.label = text;
+      else if (pg.type === 'botanical') {
+        pg.caption = text;
+        if (!pg.title) pg.title = text;
       }
     }
-    else if (pg.type === 'botanical') {
-      pg.caption = text;
-      if (!pg.title) pg.title = text;  // 제목도 비어있으면 같이 채우기
-    }
-    else if (pg.type === 'spread') {
-      const lines = text.split('\n').filter(Boolean);
-      pg.captionLeft = lines[0] || '';
-      pg.captionRight = lines[1] || '';
-    } else if (pg.type === 'dialogue') {
-      let lines = text.split('\n').filter(Boolean);
-      // 첫 줄이 "# 제목" 형식이면 대화 항목이 아닌 라벨로 분리
-      if (lines.length && /^#\s+/.test(lines[0].trim())) {
-        if (!pg.label) pg.label = lines[0].trim().replace(/^#\s+/, '');
-        lines = lines.slice(1);
-      }
-      pg.lines = lines.map((l, i) => {
-        const [speaker, ...rest] = l.split('|');
-        const content = rest.length ? rest.join('|') : speaker;
-        const hasSpeaker = rest.length > 0 && speaker.trim();
-        return { speaker: hasSpeaker ? speaker.trim() : '', text: content.trim(), side: i % 2 === 0 ? 'left' : 'right' };
-      }).filter(l => l.text);
-    } else if (pg.type === 'list') {
-      let lines = text.split('\n').filter(Boolean);
-      const parsed = lines.map(l => {
-        const [name, ...rest] = l.split('|');
-        return { name: (name||'').trim(), desc: rest.join('|').trim() };
-      }).filter(it => it.name);
-      // 첫 항목이 설명 없이 제목 역할이면 items가 아닌 title로 분리
-      if (parsed.length > 1 && !parsed[0].desc) {
-        if (!pg.title) pg.title = parsed[0].name;
-        pg.items = parsed.slice(1);
-      } else {
-        pg.items = parsed;
-      }
-    }
+
+    toast('생성 완료 ✓');
     renderPageList();
-    toast('생성 완료');
   } catch (e) {
-    toast('오류: ' + e.message);
+    toast('생성 실패: ' + e.message);
+    console.error(e);
   }
 }
 
@@ -1555,8 +1612,9 @@ async function publish() {
           out.toc = pg.toc || [];
           break;
         case 'fullbleed':
-          out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
-          out.caption = pg.caption || '';
+          out.image      = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.caption    = pg.caption    || '';
+          out.caption_en = pg.caption_en || '';
           if (typeof pg.focalX === 'number') out.focalX = pg.focalX;
           if (typeof pg.focalY === 'number') out.focalY = pg.focalY;
           break;
@@ -1565,24 +1623,24 @@ async function publish() {
           out.items = pg.items || [];
           break;
         case 'split':
-          out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
-          out.label = pg.label || '';
-          out.text = pg.text || '';
+          out.image    = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
+          out.text     = pg.text     || ''; out.text_en  = pg.text_en  || '';
           out.darkText = !!pg.darkText;
           break;
         case 'grid':
-          out.images = (pg.imageIds || []).filter(Boolean).map(id => photoPathMap[id]).filter(Boolean);
-          out.label = pg.label || '';
-          out.caption = pg.caption || '';
+          out.images     = (pg.imageIds || []).filter(Boolean).map(id => photoPathMap[id]).filter(Boolean);
+          out.label      = pg.label      || ''; out.label_en   = pg.label_en   || '';
+          out.caption    = pg.caption    || ''; out.caption_en = pg.caption_en || '';
           break;
         case 'quote':
-          out.text = pg.text || '';
+          out.text    = pg.text    || ''; out.text_en = pg.text_en || '';
           out.context = pg.context || '';
           break;
         case 'spread':
-          out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
-          out.captionLeft = pg.captionLeft || '';
-          out.captionRight = pg.captionRight || '';
+          out.image            = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.captionLeft      = pg.captionLeft      || ''; out.captionLeft_en  = pg.captionLeft_en  || '';
+          out.captionRight     = pg.captionRight     || ''; out.captionRight_en = pg.captionRight_en || '';
           if (typeof pg.splitX === 'number') out.splitX = pg.splitX;
           // 하위호환: 기존 focalXLeft/Right도 유지
           else {
@@ -1591,9 +1649,9 @@ async function publish() {
           }
           break;
         case 'essay':
-          out.label = pg.label || '';
-          out.title = pg.title || '';
-          out.text = pg.text || '';
+          out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
+          out.title    = pg.title    || ''; out.title_en = pg.title_en || '';
+          out.text     = pg.text     || ''; out.text_en  = pg.text_en  || '';
           out.dark = !!pg.dark;
           break;
         case 'dialogue':
@@ -1606,21 +1664,21 @@ async function publish() {
           out.items = (pg.items || []).filter(it => it.name);
           break;
         case 'milestone':
-          out.number = pg.number || '';
-          out.label = pg.label || '';
-          out.text = pg.text || '';
+          out.number   = pg.number   || '';
+          out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
+          out.text     = pg.text     || ''; out.text_en  = pg.text_en  || '';
           break;
         case 'botanical':
-          out.image    = pg.imageId ? photoPathMap[pg.imageId] : '';
-          out.tag      = pg.tag      || '';
-          out.number   = pg.number   || '';
-          out.title    = pg.title    || '';
-          out.subtitle = pg.subtitle || '';
-          out.caption  = pg.caption  || '';
+          out.image      = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.tag        = pg.tag        || '';
+          out.number     = pg.number     || '';
+          out.title      = pg.title      || '';
+          out.subtitle   = pg.subtitle   || '';
+          out.caption    = pg.caption    || ''; out.caption_en = pg.caption_en || '';
           break;
         case 'closing':
-          out.text = pg.text || '';
-          out.cta = pg.cta || '';
+          out.text    = pg.text    || ''; out.text_en = pg.text_en || '';
+          out.cta     = pg.cta     || '';
           break;
       }
       return out;
