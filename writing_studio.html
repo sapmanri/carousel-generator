@@ -1120,8 +1120,7 @@ function renderLibraryPicker(resetPage=false) {
       item.filename,item.primary_subject,item.mood,item.suggested_caption,item.suggested_label,
       item.thumbnail_reason,item.location_type,item.activity_type,item.human_presence,item.season,item.time_of_day,
       ...safeArray(item.secondary_subjects),...safeArray(item.material_texture),...safeArray(item.visual_dna_tags)
-    ].filter(Boolean).join('
-').toLowerCase();
+    ].filter(Boolean).join('\n').toLowerCase();
     return hay.includes(q);
   });
   const total = libraryPickerFiltered.length;
@@ -1140,8 +1139,7 @@ function renderLibraryPicker(resetPage=false) {
     <div class="library-card" onclick="chooseLibraryImage('${libraryPickerTarget}','${String(item.id).replace(/'/g,"\'")}')" title="${escHtml(item.primary_subject || item.suggested_label || item.filename || item.id)}">
       <img src="${escHtml(item.thumbnail_url || item.r2_url)}" loading="lazy" alt="">
       <div class="library-card-meta">${escHtml(item.primary_subject || item.suggested_label || item.filename || item.id)}<br>${escHtml([item.mood,item.location_type,item.activity_type].filter(Boolean).join(' · '))}</div>
-    </div>`).join('
-');
+    </div>`).join('\n');
 }
 function changeLibraryPage(delta) {
   libraryPickerPage += delta;
