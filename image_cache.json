@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
-          "suggested_caption": "Ã«Â§ÂÃ¬Â°Â¨Ã«Â¥Â¼ Ã­ÂÂÃ¬Â ÂÃ«ÂÂ Ã¬ÂÂÃªÂ°Â",
-          "suggested_caption_left": "Ã«ÂÂ¹Ã¬ÂÂ Ã¬Â°Â»Ã¬ÂÂÃªÂ³Â¼",
-          "suggested_caption_right": "Ã«ÂÂÃ«ÂÂÃ«Â¬Â´ Ã«ÂÂ¤Ã¬ÂÂ ",
-          "suggested_label": "Ã¬Â°Â¨Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
+          "suggested_caption": "ÃÂ«ÃÂ§ÃÂÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ­ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
+          "suggested_caption_left": "ÃÂ«ÃÂÃÂ¹ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂ°ÃÂ»ÃÂ¬ÃÂÃÂÃÂªÃÂ³ÃÂ¼",
+          "suggested_caption_right": "ÃÂ«ÃÂÃÂÃÂ«ÃÂÃÂÃÂ«ÃÂ¬ÃÂ´ ÃÂ«ÃÂÃÂ¤ÃÂ¬ÃÂÃÂ ",
+          "suggested_label": "ÃÂ¬ÃÂ°ÃÂ¨ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": 50,
@@ -31,10 +31,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "Ã«Â§ÂÃ¬Â°Â¨Ã«Â¥Â¼ Ã­ÂÂÃ¬Â ÂÃ«ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "suggested_copy": "ÃÂ«ÃÂ§ÃÂÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ­ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
           "suggested_body": ""
         },
         "ts": 1782487545251
@@ -44,7 +44,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ"
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ"
         },
         "ts": 1782487545445
       },
@@ -64,20 +64,20 @@
       "season": "winter",
       "time_of_day": "day",
       "location_type": "indoor",
-      "primary_subject": "ë§ì°¨ ì ë¤",
+      "primary_subject": "Ã«Â§ÂÃ¬Â°Â¨ Ã¬Â ÂÃ«ÂÂ¤",
       "secondary_subjects": [
-        "ì°¨ì ",
-        "ì°¨ì",
-        "ì°¨ì ë°ì¹¨",
-        "ì±"
+        "Ã¬Â°Â¨Ã¬ÂÂ ",
+        "Ã¬Â°Â¨Ã¬ÂÂ",
+        "Ã¬Â°Â¨Ã¬ÂÂ Ã«Â°ÂÃ¬Â¹Â¨",
+        "Ã¬Â±Â"
       ],
       "activity_type": "cooking",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "ì¸ë¼ë¯¹",
-        "ëëë¬´",
-        "ìëª©"
+        "Ã¬ÂÂ¸Ã«ÂÂ¼Ã«Â¯Â¹",
+        "Ã«ÂÂÃ«ÂÂÃ«Â¬Â´",
+        "Ã¬ÂÂÃ«ÂªÂ©"
       ],
       "has_text": true,
       "text_area_position": "right",
@@ -87,13 +87,13 @@
       "focus_clarity": "clear",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ë§ì°¨ ì ë¤ ìëìê³¼ ë¯¼í¸ ìê°ì´ ìê°ì ì¼ë¡ ì ëªíê³  ì¬ë¡ì°ë¼ì´í ê°ì±ê³¼ ì ë§ì",
-      "mood": "ê³ ìí¨",
-      "suggested_caption": "ì²ì²í, ë§ì°¨ í ì",
+      "thumbnail_reason": "Ã«Â§ÂÃ¬Â°Â¨ Ã¬Â ÂÃ«ÂÂ¤ Ã¬ÂÂÃ«ÂÂÃ¬ÂÂÃªÂ³Â¼ Ã«Â¯Â¼Ã­ÂÂ¸ Ã¬ÂÂÃªÂ°ÂÃ¬ÂÂ´ Ã¬ÂÂÃªÂ°ÂÃ¬Â ÂÃ¬ÂÂ¼Ã«Â¡Â Ã¬ÂÂ Ã«ÂªÂÃ­ÂÂÃªÂ³Â  Ã¬ÂÂ¬Ã«Â¡ÂÃ¬ÂÂ°Ã«ÂÂ¼Ã¬ÂÂ´Ã­ÂÂ ÃªÂ°ÂÃ¬ÂÂ±ÃªÂ³Â¼ Ã¬ÂÂ Ã«Â§ÂÃ¬ÂÂ",
+      "mood": "ÃªÂ³Â Ã¬ÂÂÃ­ÂÂ¨",
+      "suggested_caption": "Ã¬Â²ÂÃ¬Â²ÂÃ­ÂÂ, Ã«Â§ÂÃ¬Â°Â¨ Ã­ÂÂ Ã¬ÂÂ",
       "suggested_caption_en": "still mornings, one bowl at a time",
-      "suggested_caption_left": "ìëì ì¨ê¸°",
-      "suggested_caption_right": "ë§ì°¨, ì¤ëë",
-      "suggested_label": "ë§ì°¨ ì ë¤",
+      "suggested_caption_left": "Ã¬ÂÂÃ«ÂÂÃ¬ÂÂ Ã¬ÂÂ¨ÃªÂ¸Â°",
+      "suggested_caption_right": "Ã«Â§ÂÃ¬Â°Â¨, Ã¬ÂÂ¤Ã«ÂÂÃ«ÂÂ",
+      "suggested_label": "Ã«Â§ÂÃ¬Â°Â¨ Ã¬Â ÂÃ«ÂÂ¤",
       "suggested_label_en": "morning matcha",
       "domesticity_score": 4,
       "rurality_score": 2,
@@ -114,11 +114,11 @@
           "subject_position": "left",
           "overall_brightness": "mid",
           "dominant_color": "#c8a88f",
-          "mood": "ì§ì¤",
-          "suggested_caption": "ì¤ê³¼ ìë ì¬ì´",
-          "suggested_caption_left": "ì²ì²í ì®ë",
-          "suggested_caption_right": "ì¤íì ê²°",
-          "suggested_label": "ìëì ìê°",
+          "mood": "Ã¬Â§ÂÃ¬Â¤Â",
+          "suggested_caption": "Ã¬ÂÂ¤ÃªÂ³Â¼ Ã¬ÂÂÃ«ÂÂ Ã¬ÂÂ¬Ã¬ÂÂ´",
+          "suggested_caption_left": "Ã¬Â²ÂÃ¬Â²ÂÃ­ÂÂ Ã¬ÂÂ®Ã«ÂÂ",
+          "suggested_caption_right": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ ÃªÂ²Â°",
+          "suggested_label": "Ã¬ÂÂÃ«ÂÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
           "suggested_label_en": "Threads of Time",
           "suggested_caption_en": "Between thread and fingertips",
           "aspect_ratio": "wide",
@@ -135,10 +135,10 @@
           "subject_position": "left",
           "overall_brightness": "mid",
           "dominant_color": "#c8a88f",
-          "mood": "ì§ì¤",
+          "mood": "Ã¬Â§ÂÃ¬Â¤Â",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ì¤ê³¼ ìë ì¬ì´",
+          "suggested_copy": "Ã¬ÂÂ¤ÃªÂ³Â¼ Ã¬ÂÂÃ«ÂÂ Ã¬ÂÂ¬Ã¬ÂÂ´",
           "suggested_body": ""
         },
         "ts": 1782540660805
@@ -148,7 +148,7 @@
           "subject_position": "left",
           "overall_brightness": "mid",
           "dominant_color": "#c8a88f",
-          "mood": "ì§ì¤"
+          "mood": "Ã¬Â§ÂÃ¬Â¤Â"
         },
         "ts": 1782540660907
       },
@@ -168,12 +168,12 @@
       "season": "unknown",
       "time_of_day": "unknown",
       "location_type": "workshop",
-      "primary_subject": "베틀 직조 작업",
+      "primary_subject": "ë² í ì§ì¡° ìì",
       "secondary_subjects": [
-        "손",
-        "색실 뭉치",
-        "흰 날실",
-        "씨실"
+        "ì",
+        "ìì¤ ë­ì¹",
+        "í° ë ì¤",
+        "ì¨ì¤"
       ],
       "activity_type": "craft",
       "human_presence": "hands",
@@ -192,19 +192,123 @@
       "focus_clarity": "soft",
       "text_safe_area": "top",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "손과 색실의 대비가 선명하고 전통 직조 공예의 생동감이 시선을 끔",
-      "mood": "정성스러움",
-      "suggested_caption": "실 한 올씩, 천이 된다",
+      "thumbnail_reason": "ìê³¼ ìì¤ì ëë¹ê° ì ëªíê³  ì íµ ì§ì¡° ê³µìì ìëê°ì´ ìì ì ë",
+      "mood": "ì ì±ì¤ë¬ì",
+      "suggested_caption": "ì¤ í ì¬ì©, ì²ì´ ëë¤",
       "suggested_caption_en": "Weaving color into quiet cloth",
-      "suggested_caption_left": "날실 위로",
-      "suggested_caption_right": "색이 스민다",
-      "suggested_label": "손으로 짜다",
+      "suggested_caption_left": "ë ì¤ ìë¡",
+      "suggested_caption_right": "ìì´ ì¤ë¯¼ë¤",
+      "suggested_label": "ìì¼ë¡ ì§ë¤",
       "suggested_label_en": "Hand Weaving",
       "domesticity_score": 4,
       "rurality_score": 3,
       "craft_score": 5,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:37:42.171Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "wh2g_eda5f82a_776d87f8": {
+      "name": "wh2g_eda5f82a_776d87f8.jpg",
+      "path": "library/wh2g_eda5f82a_776d87f8.jpg",
+      "hash": "wh2g_eda5f82a_776d87f8",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/wh2g_eda5f82a_776d87f8.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/wh2g_eda5f82a_776d87f8.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#8b9a8e",
+          "mood": "ê³ ì",
+          "suggested_caption": "ìëìì ìì´ë ìê°",
+          "suggested_caption_left": "ë²½ëì ìë",
+          "suggested_caption_right": "ì¤íì ìì",
+          "suggested_label": "ìì¼ë¡ ì§ê¸°",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": "35",
+          "focal_y": "45",
+          "spread_focal_left": "25",
+          "spread_focal_right": "65"
+        },
+        "ts": 1782487524947
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#8b9a8e",
+          "mood": "ê³ ì",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ìëìì ìì´ë ìê°",
+          "suggested_body": ""
+        },
+        "ts": 1782487524958
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#8b9a8e",
+          "mood": "ê³ ì"
+        },
+        "ts": 1782487525149
+      },
+      "subject_position": "left",
+      "focal_x": 30,
+      "focal_y": 55,
+      "aspect_ratio": "wide",
+      "best_page_type": "split",
+      "spread_focal_left": 25,
+      "spread_focal_right": 65,
+      "overall_brightness": "mid",
+      "dominant_color": "#8aab96",
+      "color_temperature": "cool",
+      "contrast_level": "medium",
+      "visual_density": "high",
+      "negative_space": "low",
+      "season": "spring",
+      "time_of_day": "day",
+      "location_type": "garden",
+      "primary_subject": "벽돌 쌓기",
+      "secondary_subjects": [
+        "장갑 낀 손",
+        "목재",
+        "철제 도구",
+        "초록 식물"
+      ],
+      "activity_type": "craft",
+      "human_presence": "side",
+      "animal_presence": "none",
+      "material_texture": [
+        "벽돌",
+        "목재",
+        "금속",
+        "면직물",
+        "흙"
+      ],
+      "has_text": false,
+      "text_area_position": "none",
+      "camera_distance": "medium",
+      "camera_angle": "eye_level",
+      "motion_implied": "making",
+      "focus_clarity": "soft",
+      "text_safe_area": "right",
+      "thumbnail_potential": "medium",
+      "thumbnail_reason": "농촌 셀프 시공 감성은 명확하나 피사체 분산으로 시선 집중도 낮음",
+      "mood": "부지런함",
+      "suggested_caption": "손으로 짓는 집",
+      "suggested_caption_en": "Building slow, brick by brick",
+      "suggested_caption_left": "벽돌과 손",
+      "suggested_caption_right": "짓는 시간",
+      "suggested_label": "셀프 시공",
+      "suggested_label_en": "Hands-on Build",
+      "domesticity_score": 3,
+      "rurality_score": 4,
+      "craft_score": 5,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:37:54.449Z",
       "model": "claude-sonnet-4-6"
     }
   }
