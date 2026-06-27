@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ê³ ì",
-          "suggested_caption": "ë§ì°¨ë¥¼ íì ë ìê°",
-          "suggested_caption_left": "ë¹ì ì°»ìê³¼",
-          "suggested_caption_right": "ëëë¬´ ë¤ì ",
-          "suggested_label": "ì°¨ì ìì",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "suggested_caption": "Ã«Â§ÂÃ¬Â°Â¨Ã«Â¥Â¼ Ã­ÂÂÃ¬Â ÂÃ«ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "suggested_caption_left": "Ã«ÂÂ¹Ã¬ÂÂ Ã¬Â°Â»Ã¬ÂÂÃªÂ³Â¼",
+          "suggested_caption_right": "Ã«ÂÂÃ«ÂÂÃ«Â¬Â´ Ã«ÂÂ¤Ã¬ÂÂ ",
+          "suggested_label": "Ã¬Â°Â¨Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": 50,
@@ -31,10 +31,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ê³ ì",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ë§ì°¨ë¥¼ íì ë ìê°",
+          "suggested_copy": "Ã«Â§ÂÃ¬Â°Â¨Ã«Â¥Â¼ Ã­ÂÂÃ¬Â ÂÃ«ÂÂ Ã¬ÂÂÃªÂ°Â",
           "suggested_body": ""
         },
         "ts": 1782487545251
@@ -44,7 +44,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B9B7A",
-          "mood": "ê³ ì"
+          "mood": "ÃªÂ³Â Ã¬ÂÂ"
         },
         "ts": 1782487545445
       },
@@ -64,20 +64,20 @@
       "season": "winter",
       "time_of_day": "day",
       "location_type": "indoor",
-      "primary_subject": "말차 점다",
+      "primary_subject": "ë§ì°¨ ì ë¤",
       "secondary_subjects": [
-        "차선",
-        "차완",
-        "차선받침",
-        "책"
+        "ì°¨ì ",
+        "ì°¨ì",
+        "ì°¨ì ë°ì¹¨",
+        "ì±"
       ],
       "activity_type": "cooking",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "세라믹",
-        "대나무",
-        "원목"
+        "ì¸ë¼ë¯¹",
+        "ëëë¬´",
+        "ìëª©"
       ],
       "has_text": true,
       "text_area_position": "right",
@@ -87,19 +87,124 @@
       "focus_clarity": "clear",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "말차 점다 손동작과 민트 색감이 시각적으로 선명하고 슬로우라이프 감성과 잘 맞음",
-      "mood": "고요함",
-      "suggested_caption": "천천히, 말차 한 잔",
+      "thumbnail_reason": "ë§ì°¨ ì ë¤ ìëìê³¼ ë¯¼í¸ ìê°ì´ ìê°ì ì¼ë¡ ì ëªíê³  ì¬ë¡ì°ë¼ì´í ê°ì±ê³¼ ì ë§ì",
+      "mood": "ê³ ìí¨",
+      "suggested_caption": "ì²ì²í, ë§ì°¨ í ì",
       "suggested_caption_en": "still mornings, one bowl at a time",
-      "suggested_caption_left": "손끝의 온기",
-      "suggested_caption_right": "말차, 오늘도",
-      "suggested_label": "말차 점다",
+      "suggested_caption_left": "ìëì ì¨ê¸°",
+      "suggested_caption_right": "ë§ì°¨, ì¤ëë",
+      "suggested_label": "ë§ì°¨ ì ë¤",
       "suggested_label_en": "morning matcha",
       "domesticity_score": 4,
       "rurality_score": 2,
       "craft_score": 4,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:37:29.086Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "w48g_f0b56991_a2b92765": {
+      "name": "w48g_f0b56991_a2b92765.jpg",
+      "path": "library/w48g_f0b56991_a2b92765.jpg",
+      "hash": "w48g_f0b56991_a2b92765",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/w48g_f0b56991_a2b92765.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/w48g_f0b56991_a2b92765.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#c8a88f",
+          "mood": "ì§ì¤",
+          "suggested_caption": "ì¤ê³¼ ìë ì¬ì´",
+          "suggested_caption_left": "ì²ì²í ì®ë",
+          "suggested_caption_right": "ì¤íì ê²°",
+          "suggested_label": "ìëì ìê°",
+          "suggested_label_en": "Threads of Time",
+          "suggested_caption_en": "Between thread and fingertips",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": 35,
+          "focal_y": 45,
+          "spread_focal_left": 25,
+          "spread_focal_right": 65
+        },
+        "ts": 1782540660793
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#c8a88f",
+          "mood": "ì§ì¤",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ì¤ê³¼ ìë ì¬ì´",
+          "suggested_body": ""
+        },
+        "ts": 1782540660805
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "left",
+          "overall_brightness": "mid",
+          "dominant_color": "#c8a88f",
+          "mood": "ì§ì¤"
+        },
+        "ts": 1782540660907
+      },
+      "subject_position": "right",
+      "focal_x": 78,
+      "focal_y": 48,
+      "aspect_ratio": "wide",
+      "best_page_type": "split",
+      "spread_focal_left": 30,
+      "spread_focal_right": 78,
+      "overall_brightness": "mid",
+      "dominant_color": "#d4c4b0",
+      "color_temperature": "warm",
+      "contrast_level": "high",
+      "visual_density": "high",
+      "negative_space": "low",
+      "season": "unknown",
+      "time_of_day": "unknown",
+      "location_type": "workshop",
+      "primary_subject": "베틀 직조 작업",
+      "secondary_subjects": [
+        "손",
+        "색실 뭉치",
+        "흰 날실",
+        "씨실"
+      ],
+      "activity_type": "craft",
+      "human_presence": "hands",
+      "animal_presence": "none",
+      "material_texture": [
+        "wool",
+        "textile",
+        "woven_fabric",
+        "yarn"
+      ],
+      "has_text": false,
+      "text_area_position": "none",
+      "camera_distance": "closeup",
+      "camera_angle": "eye_level",
+      "motion_implied": "making",
+      "focus_clarity": "soft",
+      "text_safe_area": "top",
+      "thumbnail_potential": "high",
+      "thumbnail_reason": "손과 색실의 대비가 선명하고 전통 직조 공예의 생동감이 시선을 끔",
+      "mood": "정성스러움",
+      "suggested_caption": "실 한 올씩, 천이 된다",
+      "suggested_caption_en": "Weaving color into quiet cloth",
+      "suggested_caption_left": "날실 위로",
+      "suggested_caption_right": "색이 스민다",
+      "suggested_label": "손으로 짜다",
+      "suggested_label_en": "Hand Weaving",
+      "domesticity_score": 4,
+      "rurality_score": 3,
+      "craft_score": 5,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:37:42.171Z",
       "model": "claude-sonnet-4-6"
     }
   }
