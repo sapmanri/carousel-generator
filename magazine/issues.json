@@ -1259,8 +1259,8 @@
           "type": "cover",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/jf8s_e11f64ea_1f1d9af0.jpg",
           "headline": [
-            "먼저 살아보고 있습니다",
-            "27번, 손때 묻은 달력 앞에서"
+            "6월 27일,",
+            "날짜를 넘기는 손"
           ],
           "toc": []
         },
@@ -1279,14 +1279,17 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/bybg_71e490bd_116edb33.jpg",
-          "captionLeft": "맨발로 선 나무 바닥",
-          "captionRight": "빛이 누워 있는 오후",
+          "captionLeft": "발은 바닥에 있었다",
+          "captionLeft_en": "feet still on the floor",
+          "captionRight": "그림자만 더 멀리 갔다",
+          "captionRight_en": "the shadow went further",
           "splitX": 0
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l9ys_77e67197_b9fb2321.jpg",
-          "caption": "라이트박스 — 이름을 켜두는 밤\n\n밤이 되면\n켜두는 불이 있다.\n\n천장의 조명도 아니고\n책상 위 스탠드도 아닌\n\n이름을 적어\n불을 밝히는 작은 상자.\n\n#SAPMANRI\n\n손으로 글자를 끼워 넣고\n스위치를 올리면\n\n조용히\n이름이 빛난다.\n\n누군가에게 보여주려고\n켜둔 것은 아닌데,\n\n어둠 속에서\n제 이름을 부르고 있는\n작은 목소리 같다.\n\n여기 있다고.\n아직 깨어 있다고.\n\n오늘도 조금 늦게까지\n무언가를 만들고 있다고.\n\n라이트박스는\n그렇게\n혼자 있는 밤을\n조금 덜 혼자로 만든다.",
+          "caption": "불을 켜두면 이름이 된다",
+          "caption_en": "lit up, it becomes a name",
           "focalX": 50,
           "focalY": 45
         },
@@ -1297,34 +1300,43 @@
           "number": "1",
           "title": "매달린 시간",
           "subtitle": "매달린 시간/A moment suspended",
-          "caption": "# 나비 — 가장 가벼운 무게\n\n나비 하나\n천장에 매달려 있다.\n\n날개를 접은 채로,\n줄 끝에 걸려\n조용히 흔들린다.\n\n바람도 불지 않는 방 안에서\n그렇게 혼자\n조금씩 움직인다.\n\n나비는 날아다니는 것인데,\n\n이 나비는\n매달려 있다.\n\n날개를 펼칠 수 없어도,\n어디로도 갈 수 없어도,\n\n그래도\n나비는\n나비처럼 보인다.\n\n예전에는\n멈춰 있는 것들을\n쓸모없다고 생각했다.\n\n날지 못하는 나비,\n피지 못하는 꽃,\n자라지 못하는 나무.\n\n무언가가 되지 못하면\n의미도 없어지는 줄 알았다.\n\n그런데\n이 나비를 보고 있으면\n조금 다른 생각이 든다.\n\n멈춘 게 아니라\n머물고 있는 것.\n\n날지 않아도\n여전히 가벼운 것.\n\n천장에서\n작게 흔들리는 나비를\n한참 올려다본다.\n\n아주 느리게,\n거의 눈에 띄지 않을 만큼\n조용히 움직인다.\n\n그 정도의 움직임이면\n\n충분한 날도 있다."
+          "caption": "실에 묶인 채 멈춰 있었다",
+          "caption_en": "still on a thread, wings that never left"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/smjo_a51c5f55_f8239b97.jpg",
-          "captionLeft": "흐릿한 집 안 — 살 만한 곳",
-          "captionRight": "",
+          "captionLeft": "지나가는 중이었다",
+          "captionLeft_en": "mid-passing through",
+          "captionRight": "멈추지 않고도 거기 있는",
+          "captionRight_en": "still there, without stopping",
           "splitX": 84
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/svag_2a889a64_68b5f82a.jpg",
-          "label": "일상의 풍경",
-          "text": "장 보고 돌아온 뒤\n\n장을 보고 돌아왔다.\n천 가방 하나\n손목에 걸려 있고,\n\n안에는 뭔가\n조금 무겁다.\n\n현관에 들어서면\n늘 먼저 하는 일이 있다.\n\n가방을 내려놓기 전에\n커피 머신을 켠다.\n\n물이 데워지는 소리가\n조용히 방 안을 채우면\n\n그제야\n가방을 내려놓는다.\n\n오늘도 그랬다.\n\n의자 등받이에\n가방을 걸어두고,\n\n커피 한 잔을\n조용히 내렸다.\n\n집에 돌아와서\n가장 먼저 마시는 물 한 모금이\n아니라\n\n가장 먼저 내리는\n커피 한 잔.\n\n그게 내 집의\n첫 번째 온도다.\n\n짐을 풀기 전에도,\n옷을 벗기 전에도,\n\n나는 커피를 먼저 마신다.\n\n아직 해야 할 일이\n조금 남아 있어도,\n\n그 한 잔만큼은\n먼저 마셔도 된다고\n\n이 집이 말해주는 것 같다.",
+          "label": "아직 내려놓지 않은 가방",
+          "label_en": "Bag Still on the Hand",
+          "text": "들어서자마자\n내려놓지 않았다.\n\n토트백은 아직 손에 걸려 있고,\n몸은 방 안에 있는데\n마음은 어디쯤 오고 있는 건지.\n\n창밖으로 초록이 보이고,\n원두 통 옆에\n커피 머신이 서 있다.\n\n테이블 위에는\n누군가 쓰다 만 컵 하나.\n\n들어온 건지\n아직 나가지 않은 건지\n모를 그 잠깐.\n\n그런 자리에\n오래 서 있어본 적 있다.",
+          "text_en": "Stepped inside\nbut hadn't set the bag down yet.\n\nIt was still hanging there,\nbody in the room,\nmind somewhere behind.\n\nGreen outside the window.\nA coffee machine beside the bean jars.\nA half-used cup on the table.\n\nNot quite arrived,\nnot quite gone.\n\nThat kind of in-between.\nI've stood there before.",
           "darkText": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lbe4_64f572d3_471e9db7.jpg",
-          "captionLeft": "녹차를 천천히 따랐다",
-          "captionRight": "우유와 얼음이 조용히 밀려났다",
+          "captionLeft": "붓는 손, 잠깐",
+          "captionLeft_en": "a hand, briefly",
+          "captionRight": "섞이기 전의 색",
+          "captionRight_en": "before it all blurs",
           "splitX": 59
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ljug_a0331a7b_3cdbb9a5.jpg",
-          "label": "음악의 의식",
-          "text": "손끝에 남은 것들\n\n턴테이블 위에\n흰 레코드판이 놓여 있다.\n\n레이블은 빨갛고,\n표면은 조용하다.\n\n누군가의 손이\n방금 바늘을 내려놓으려는 참이거나,\n막 들어 올린 참이다.\n\n음악이 시작되기 직전의 순간인지,\n끝난 직후의 순간인지는\n알 수 없다.\n\n다만\n그 사이 어딘가에\n손이 있다.\n\n레코드를 듣는다는 건\n조금 번거로운 일이다.\n\n판을 꺼내고,\n먼지를 털고,\n바늘을 내려놓고,\n\n한 면이 끝나면\n다시 뒤집어야 한다.\n\n재생 버튼 하나로\n모든 음악이 흐르는 시대에\n\n굳이 이렇게\n손을 쓰는 이유는 뭘까.\n\n어쩌면\n그 번거로움이\n음악을 조금 더 가까이 두는 방법인지도 모른다.\n\n손으로 만지고,\n귀로 듣고,\n눈으로 보는 음악.\n\n화면을 켜지 않아도\n거기 있는 음악.\n\n오늘은\n흰 레코드판을\n한참 들여다봤다.\n\n무슨 곡이 담겨 있는지,\n누가 불렀는지보다\n\n이 판을 손에 올려놓았을 때의\n무게가 먼저 느껴졌다.\n\n음악은\n때로 손끝에서 시작된다.",
+          "label": "바늘을 내려놓기 전",
+          "label_en": "Before Setting the Needle",
+          "text": "톤암을 잡은 손이\n잠깐 멈췄다.\n\n레코드는 이미 돌고 있었고,\n손은 아직 내려놓지 않았다.\n\n그 사이 어딘가에\n소리가 시작되기 직전의 시간이 있었다.\n\n빛이 옆에서 들어오고 있었다.\n흰 레코드 위로 납작하게 깔리는 종류의 빛.\n\n내려놓으면 음악이 되고,\n들고 있으면 아직 아무것도 아닌 상태.\n\n그 순간을 조금 더 두고 싶었던 걸까.",
+          "text_en": "The hand was holding the tonearm,\nbut hadn't let it down yet.\n\nThe record was already turning.\nThe hand was still.\n\nSomewhere in between,\nthere was a moment just before sound begins.\n\nLight came in from the side—\nthe kind that lies flat across a white surface.\n\nLower it and it becomes music.\nHold it and it's still nothing.\n\nMaybe that was the part worth staying in\na little longer.",
           "darkText": false
         },
         {
@@ -1334,20 +1346,26 @@
           "number": "2",
           "title": "오후의 작은 휴식",
           "subtitle": "오후의 작은 휴식/A quiet afternoon pause",
-          "caption": "오후의 작은 휴식"
+          "caption": "붓는 동안만큼은 서두르지 않았다",
+          "caption_en": "unhurried, just for the pouring"
         },
         {
           "type": "essay",
           "label": "회전",
+          "label_en": "",
           "title": "시간의 속도를 바꾸는 법",
-          "text": "아날로그 시계는\n초침이 돌아간다.\n\n똑.\n똑.\n똑.\n\n디지털 시계처럼\n숫자가 뛰어넘는 것이 아니라\n\n작은 바늘이\n조금씩 원을 그린다.\n\n같은 시간인데\n덜 급해 보이는 건\n왜일까.\n\n시간은 똑같이 흐르는데,\n\n원 안을 도는 바늘을 보면\n시간이 뛰어가는 것이 아니라\n\n천천히\n돌아가는 것처럼 보인다.\n\n차를 한 잔 내렸다.\n\n물이 끓는 동안\n시계를 보았다.\n\n초침이 원을 따라\n한 바퀴 돌아간다.\n\n1분.\n\n찻물을 따르는 동안\n또 한 바퀴.\n\n컵을 손에 쥐고\n창가에 앉았다.\n\n고요했다.\n\n오후였다.\n\n시계는 여전히\n조용히 돌아가고 있었다.\n\n누군가는\n시간을 재촉하지만,\n\n누군가는\n시간을 회전시킨다.\n\n재촉하면\n시간은 빨리 지나가는 것 같고,\n\n회전시키면\n시간은 천천히 돌아가는 것 같다.\n\n같은 60초인데\n초침을 따라 돌면\n\n60초가\n덜 짧게 느껴진다.\n\n시간의 속도를\n바꾸는 법은\n간단하다.\n\n숫자를 보지 말고\n원을 보는 것.\n\n뛰어넘지 말고\n따라가는 것.\n\n오후는\n그렇게 조금 길어진다.\n\n차 한 잔이\n식기 전까지.\n\n시계 바늘이\n한 바퀴 더 돌아갈 때까지.\n\n그 정도의 여유가\n하루에 한 번쯤은\n남아 있어도 괜찮다.\n\n아날로그 시계 앞에서\n나는 오늘\n조금 덜 서둘렀다.",
+          "title_en": "",
+          "text": "내용이 전달되지 않았습니다.\n\n주제나 컨텍스트를 입력해 주시면 바로 시작하겠습니다.",
+          "text_en": "",
           "dark": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/pkes_1fa671c5_12eb16e7.jpg",
-          "captionLeft": "오래된 손의 속도로",
-          "captionRight": "연습하는 시간",
+          "captionLeft": "차를 젓는 오전",
+          "captionLeft_en": "a morning still unhurried",
+          "captionRight": "아직 서두르지 않는",
+          "captionRight_en": "hands that know the pace",
           "splitX": 50
         },
         {
@@ -1357,13 +1375,16 @@
           "number": "3",
           "title": "국수 한 그릇의 온기",
           "subtitle": "국수 한 그릇의 온기/Warmth in a bowl",
-          "caption": "국수 한 그릇의 온기"
+          "caption": "국물이 먼저 식는다",
+          "caption_en": "the broth cools before anything else"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lufg_e4fc4828_d5479a48.jpg",
-          "captionLeft": "숫자 3을 오래 보고 있었다",
-          "captionRight": "책장을 넘기지 않았다",
+          "captionLeft": "펼쳐두고 오래 앉아 있었다",
+          "captionLeft_en": "opened it, and stayed a while",
+          "captionRight": "마차 한 잔, 아직 다 마시지 않은",
+          "captionRight_en": "the matcha still half-full beside me",
           "splitX": 39
         },
         {
@@ -1373,46 +1394,55 @@
           "number": "4",
           "title": "차를 세우는 시간",
           "subtitle": "차를 세우는 시간/A ritual with tea",
-          "caption": "차를 세우는 시간"
+          "caption": "손끝이 잠깐 느려졌다",
+          "caption_en": "hands slowed, just briefly"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/o1zg_2e8a675d_e98c70d.jpg",
-          "captionLeft": "피아노를 치는 손",
-          "captionRight": "벽은 하얀데 손끝은 조금 어둡다",
+          "captionLeft": "액자 앞에 손을 뻗었다",
+          "captionLeft_en": "a hand reaching toward the frame",
+          "captionRight": "닿을 듯 닿지 않는 쪽",
+          "captionRight_en": "almost, but not quite",
           "splitX": 21
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ra0w_1ea03cd8_3f59e236.jpg",
-          "caption": "손끝이 먼저 닿는다\n\n빨강과 남색이\n한 접시 안에 섞여 있었다.\n\n마당 한쪽에서\n따온 것들.\n\n산딸기는\n손에 닿으면\n살짝 무너질 것 같아서\n\n조금 조심스럽게\n들어 올렸다.\n\n블루베리는\n둥글고 단단해서\n손바닥에 굴러도\n제 모양을 잃지 않았다.\n\n먹으려고 딴 건데\n왜인지 바로 입에 넣기가\n아까웠다.\n\n그냥 한참\n내려다보고 있었다.\n\n빨강은\n햇볕을 받은 쪽이고,\n\n남색은\n그늘에서도 익은 쪽.\n\n둘 다\n여름이 남긴 온도였다.\n\n손끝에 남은\n흙과 풀냄새.\n\n여기선\n과일도\n사러 가는 게 아니라\n걸어 나가 따오는 것이었다.\n\n그 정도의 거리가\n좋았다.",
+          "caption": "손끝에 라즈베리 몇 알이 남아 있었다",
+          "caption_en": "A few raspberries still left on the fingertips",
           "focalX": 50,
           "focalY": 50
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/su70_8fb30aa9_7570d233.jpg",
-          "captionLeft": "손끝에 남은 온도",
-          "captionRight": "넘기지 않은 시간",
+          "captionLeft": "손에 쥔 채로 잠깐",
+          "captionLeft_en": "held still for a moment",
+          "captionRight": "페이지는 반쯤 넘겼다",
+          "captionRight_en": "the page, only halfway turned",
           "splitX": 39
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l2js_587398bd_cf80e02b.jpg",
-          "caption": "고양이는 그림 옆에 앉아 있었다",
+          "caption": "검은 고양이, 그림 옆에 그냥 있다",
+          "caption_en": "the black cat, just there beside the painting",
           "focalX": 50,
           "focalY": 50
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/q9aw_8b6cbccf_f5ab4853.jpg",
-          "captionLeft": "젓가락을 들었는데",
-          "captionRight": "바로 비비지 않았다.",
+          "captionLeft": "젓가락을 들기 전에",
+          "captionLeft_en": "before the first bite",
+          "captionRight": "먼저 한참 봤다",
+          "captionRight_en": "I looked a little too long",
           "splitX": 11
         },
         {
           "type": "dialogue",
-          "label": "",
+          "label": "내용을 입력해 주세요. 어떤 장면, 사물, 상황, 혹은 사진에 대해 쓰고 싶으신가요?",
           "lines": [
             {
               "speaker": "빼빼",
@@ -1469,8 +1499,10 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tgy8_9cff8bf7_260a5b51.jpg",
-          "captionLeft": "손끝에 온기가 남는 시간",
-          "captionRight": "그날의 속도로 돌아가는 오후",
+          "captionLeft": "손이 먼저 닿았다",
+          "captionLeft_en": "hands before thought",
+          "captionRight": "기다린 자리",
+          "captionRight_en": "a place held quiet",
           "splitX": 34
         },
         {
@@ -1480,13 +1512,16 @@
           "number": "5",
           "title": "작은 것들을 모으는 시간",
           "subtitle": "작은 것들을 모으는 시간/Gathering small things",
-          "caption": "작은 것들을 모으는 시간"
+          "caption": "닿을 듯 말 듯 멈췄다",
+          "caption_en": "a hand, almost touching"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/u3j0_918e71d5_5a67b1ed.jpg",
-          "captionLeft": "손끝으로 젓는 시간이었다",
-          "captionRight": "그날은 책상 위에 빛이 올라왔다.",
+          "captionLeft": "차선을 긋듯 젓는다",
+          "captionLeft_en": "stirring without hurry",
+          "captionRight": "책은 아직 덮여 있고",
+          "captionRight_en": "the book still closed",
           "splitX": 43
         },
         {
@@ -1496,7 +1531,8 @@
           "number": "6",
           "title": "달콤한 순간의 시작",
           "subtitle": "달콤한 순간의 시작/The start of something sweet",
-          "caption": "달콤한 순간의 시작"
+          "caption": "부서진 쪽이 더 맛있었다",
+          "caption_en": "the broken side tasted better"
         },
         {
           "type": "botanical",
@@ -1505,11 +1541,12 @@
           "number": "7",
           "title": "아침을 깨우는 베리",
           "subtitle": "아침을 깨우는 베리/Berries that wake the morning",
-          "caption": "아침을 깨우는 베리"
+          "caption": "씻어두고 한참 그냥 뒀다",
+          "caption_en": "washed, and left there for a while"
         },
         {
           "type": "dialogue",
-          "label": "",
+          "label": "내용을 입력해주시면 글을 써드리겠습니다. 어떤 장면이나 상황을 담으셨나요?",
           "lines": [
             {
               "speaker": "",
@@ -1646,8 +1683,10 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/k5tc_a125e86_ae52801a.jpg",
-          "captionLeft": "빛이 들어오는 쪽",
-          "captionRight": "그림자가 놓이는 쪽",
+          "captionLeft": "앉아 있었다, 빛 쪽으로",
+          "captionLeft_en": "sitting toward the light",
+          "captionRight": "그림자만 벽에 남아",
+          "captionRight_en": "only the shadow stayed",
           "splitX": 16
         },
         {
@@ -1657,7 +1696,8 @@
           "number": "8",
           "title": "담장 너머 작은 둥지",
           "subtitle": "담장 너머 작은 둥지/A nest beyond the fence",
-          "caption": "담장 너머 작은 둥지"
+          "caption": "덮이는 중이었다",
+          "caption_en": "slowly being covered over"
         },
         {
           "type": "botanical",
@@ -1666,20 +1706,25 @@
           "number": "9",
           "title": "오후의 작은 사치",
           "subtitle": "오후의 작은 사치/A small afternoon luxury",
-          "caption": "오후의 작은 사치"
+          "caption": "먹기 전에 잠깐 멈췄다",
+          "caption_en": "paused before the first cut"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tfd0_bd825853_777ab35.jpg",
-          "captionLeft": "문 하나 열면 — 몸은 조금 늦게 따라온다",
-          "captionRight": "",
+          "captionLeft": "기대기 전에 멈춘 곳",
+          "captionLeft_en": "paused before leaning in",
+          "captionRight": "팔을 벌리고 있었다",
+          "captionRight_en": "arms open, back turned",
           "splitX": 59
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ovfk_ced42342_5762bd5c.jpg",
-          "label": "오후의 정적",
-          "text": "바닥에 서 있었다.\n\n발을 움직일 생각도 없이\n한참을 그 자리에.\n\n햇빛이 나무 마루 위에\n몇 개의 얼룩을 만들어두고 있었다.\n\n창문 너머로 들어온 빛이\n바닥을 절반만 밝히고,\n나머지는 그냥 그림자로 두었다.\n\n발끝에도\n그림자 하나.\n\n내 것인지\n집 안 어딘가에서 넘어온 것인지\n구분이 되지 않았다.\n\n빛이 들어오는 방에서는\n늘 이런 일이 생긴다.\n\n밝은 곳과 어두운 곳이\n확실히 나뉘고,\n\n그 경계 위에\n뭔가 서 있게 된다.\n\n빛을 받은 마루는\n따뜻했을 것이고,\n\n그림자 안의 마루는\n조금 차가웠을 것이다.\n\n나는 그 사이\n어디쯤에 서 있었다.\n\n이사 온 지 얼마 안 된 집에서는\n자꾸만 멈추게 된다.\n\n아직 익숙하지 않은 곳에서\n빛이 들어오는 시간과\n그림자가 걸리는 위치를\n조금씩 배워가는 중이다.\n\n그날도\n그런 오후였다.",
+          "label": "그림자는 나보다 먼저 바닥에 닿는다",
+          "label_en": "The shadow reaches the floor before I do",
+          "text": "한참을 내려다보고 있었다.\n\n발끝이 빛 안에 들어와 있었고,\n그림자는 이미\n바닥 깊숙이 뻗어 있었다.\n\n몸은 여기 있는데\n그림자는 훨씬 멀리까지 가 있었다.\n\n빛이 낮은 각도로 들어오는 시간이었다.\n마루 결이 옆으로 길게 드러나고,\n그 위로 그림자 하나가\n나보다 길게 누워 있었다.\n\n발을 옮기면\n그림자도 따라오겠지.\n그걸 알면서도 잠깐 그 자리에 있었다.",
+          "text_en": "I stood there for a while, looking down.\n\nThe tip of my foot had crossed into the light.\nThe shadow was already stretched far ahead,\nlying longer than I was standing.\n\nThe sun came in at a low angle.\nThe grain of the floor ran sideways,\nand across it, a shadow —\nflatter and further than me.\n\nIf I moved, it would follow.\nI knew that.\nStill, I stayed a moment.",
           "darkText": false
         },
         {
@@ -1689,7 +1734,8 @@
           "number": "10",
           "title": "작은 우주를 품은 날",
           "subtitle": "작은 우주를 품은 날/A day holding a small universe",
-          "caption": "작은 우주를 품은 날"
+          "caption": "별을 안고 가만히 있었다",
+          "caption_en": "holding a star, just staying still"
         },
         {
           "type": "botanical",
@@ -1698,51 +1744,63 @@
           "number": "11",
           "title": "초록 우산의 오후",
           "subtitle": "초록 우산의 오후/Afternoon under green umbrellas",
-          "caption": "초록 우산의 오후"
+          "caption": "한쪽은 열렸고 한쪽은 아직",
+          "caption_en": "one opened, one still whole"
         },
         {
           "type": "quote",
-          "text": "고개를 들어야 보이는 것보다\n고개를 숙여야 알게 되는 것들이 있다",
+          "text": "내용이 입력되지 않았습니다. 어떤 장면, 사진, 또는 이야기를 바탕으로 글을 쓸까요?",
+          "text_en": "",
           "context": ""
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1be6g_8ac83c10_97883efa.jpg",
-          "captionLeft": "잔디밭 한가운데 — 고양이가 막 뛰어든 참이다",
-          "captionRight": "",
+          "captionLeft": "벼 위로 날던 중",
+          "captionLeft_en": "mid-flight over the rice",
+          "captionRight": "멈추지 않았다",
+          "captionRight_en": "it did not stop",
           "splitX": 22
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/y3wc_b4c57052_2f58f114.jpg",
-          "label": "정원 일기",
-          "text": "손끝에 흙이 묻었다.\n\n한쪽 손에는\n흙을 만지던 장갑을 끼고,\n\n다른 손은\n맨손으로\n벽돌의 온도를 확인한다.\n\n마당 한쪽에\n쌓아둔 것들.\n\n녹슨 철판,\n나무 상자,\n흙이 담긴 육묘판.\n\n누가 봐도\n버려진 것처럼 보이는데,\n\n손을 대고 보면\n다 쓸 곳이 있다.\n\n철판은 녹슬어도\n무게가 남아 있고,\n\n나무 상자는\n어디든 올려두면\n그 자리가 선반이 된다.\n\n햇빛이 마당 안쪽까지\n들어오는 오후.\n\n허리를 굽히고\n한참을 만지작거린다.\n\n급하게 정리하려는 마음보다는\n어디에 쓸지\n조금 천천히 생각하는 시간.\n\n아직 결정하지 않아도 된다.\n\n손에 닿는 것들이\n말을 걸어올 때까지\n그냥 만져보는 것.\n\n마당이 있는 집에서는\n그런 시간이 허락된다.\n\n당장 치워야 할 것이 아니라\n천천히 자리를 찾아가는 것들.\n\n손끝에는\n아직 흙이 남아 있다.",
+          "label": "정원 — 장갑을 끼고 나서야",
+          "label_en": "Garden — After Putting On the Gloves",
+          "text": "고개를 숙이고 있었다.\n\n한 손에는 장갑을 끼고,\n다른 손은 맨손인 채로\n벽돌 하나를 잡고 있었다.\n\n주변에는 마른 잎이 쌓인 통,\n각진 자재들,\n오후 햇빛이 비스듬하게 들어와\n손등 위에 잠깐 얹혔다.\n\n그 손을 한참 보고 있었다.\n\n장갑을 끼지 않은 손이\n더 조심스럽게 움직이는 게\n보였다.\n\n무엇을 만들려는 건지는 몰라도,\n지금은 그걸 알아야 할 것 같지 않았다.\n\n그냥 거기서 무언가를\n제자리에 놓으려 하고 있다는 것만.",
+          "text_en": "She was bent low,\none hand gloved, the other bare,\nholding a brick steady.\n\nAround her — dry leaves in a metal bin,\nsquare timber frames,\nand afternoon light that slipped in sideways\nand rested a moment on her knuckles.\n\nI watched the ungloved hand.\n\nIt moved more carefully than the other.\n\nI didn't know what she was building.\nIt didn't feel like the right thing to ask.\n\nShe was just trying to set something\nwhere it belonged.",
           "darkText": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/wh2g_eda5f82a_776d87f8.jpg",
-          "captionLeft": "벽돌을 만지고 있으니",
-          "captionRight": "손끝이 까칠했다.",
+          "captionLeft": "고개를 숙이고 있었다",
+          "captionLeft_en": "she stayed low, hands first",
+          "captionRight": "벽돌은 아직 쌓이는 중",
+          "captionRight_en": "still stacking, not yet done",
           "splitX": 50
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1dxlk_8cbffd98_dfc4a18a.jpg",
-          "label": "휴식의 풍경",
-          "text": "머물다 — Stay\n\n차를 세우고\n조금 걸었다.\n\n나무 몇 그루가\n흙길 옆에 서 있었다.\n\n키가 크고,\n몸이 가늘고,\n잎이 많았다.\n\n햇빛이 잎 사이로 들어왔고,\n바람이 불 때마다\n나무는 조금씩 흔들렸다.\n\nStay라는 표지판이\n길 왼쪽에 있었다.\n\n머물다.\n\n누군가에게\n여기 머물러도 된다고\n말해주는 곳인가 보다.\n\n나는 그 앞에\n잠깐 서 있었다.\n\n흙길은\n사람이 자주 밟지 않은 것 같았고,\n\n풀들은\n제 속도로 자라고 있었다.\n\n멀리 산이 보였다.\n초여름 산은\n짙은 초록으로 가득했다.\n\n하늘은 높고 맑았다.\n\n나무 아래 그늘이\n길게 누워 있었다.\n\n그 그늘은\n누구를 위한 것도 아니었는데\n\n괜히 그곳에 앉아도 되겠다는\n생각이 들었다.\n\n머무는 것이\n특별한 일일 필요는 없다.\n\n그냥\n차를 세우고,\n잠깐 걷고,\n나무 앞에 서 있는 것.\n\n그 정도로도\n머무는 게 되는 날이 있다.\n\n바람이 한 번 더 불었고,\n나무는 또 흔들렸다.\n\n나는 조금 더\n그 자리에 있었다.",
+          "label": "포플러",
+          "label_en": "Poplars",
+          "text": "지나치다가\n잠깐 봤다.\n\n포플러 나무들이\n여럿이서 붙어 서 있었다.\n\n좁고 길쭉한 몸으로\n하늘 쪽만 보고.\n\n옆을 안 보는 나무들이었다.\n볕이 세고 하늘이 맑은 날이었는데\n그게 어울린다기보다\n그냥 그런 날에 거기 있었다.\n\n흙은 말라 있었고\n풀은 짧았다.\n\n뭔가를 느끼러 선 게 아니라\n그냥 잠깐 멈춘 것뿐이었는데\n한동안 시선이 거기 있었다.",
+          "text_en": "I saw them passing by.\nJust for a moment.\n\nA cluster of poplars\nstanding close together—\n\ntall and narrow,\nfacing only upward.\n\nThey didn't look sideways.\nIt was a bright day, dry sky,\nand they were simply there in it.\n\nThe soil was cracked.\nThe grass cut short.\n\nI hadn't stopped to feel anything in particular.\nI just stopped.\nAnd my eyes stayed there a little longer than I expected.",
           "darkText": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/15i5c_f6e5a7fa_f3069a8c.jpg",
-          "captionLeft": "손끝에 아직 흙이 남아 있었다",
-          "captionRight": "조금 늦어진 오후였다",
+          "captionLeft": "벽돌을 놓던 손",
+          "captionLeft_en": "hands that set the brick",
+          "captionRight": "마른 잎 위의 오후",
+          "captionRight_en": "an afternoon on dry leaves",
           "splitX": 50
         },
         {
           "type": "dialogue",
-          "label": "불씨 — 조금 늦게 피어나도",
+          "label": "내용이 입력되지 않은 것 같습니다.\n\n어떤 장면이나 상황, 혹은 사진에 대한 설명을 주시면 글을 써드리겠습니다.",
           "lines": [
             {
               "speaker": "",
@@ -1999,41 +2057,50 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/x9q4_8bdcce79_367883c5.jpg",
-          "captionLeft": "불을 피우려고 앉아 있었다",
-          "captionRight": "오늘은 마당에 앉아",
+          "captionLeft": "장갑 낀 손으로",
+          "captionLeft_en": "hands in white gloves",
+          "captionRight": "불 피울 준비",
+          "captionRight_en": "before the fire begins",
           "splitX": 59
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/10tdo_d4219bb4_f2064728.jpg",
-          "caption": "벽돌을 쌓아\n화로를 만들었다.\n\n완벽한 모양은 아니었지만\n불을 담을 만큼은 되었다.\n\n마당 한쪽에\n둥근 나무 의자를 놓고,\n\n그 옆에\n플라스틱 의자도 하나 두었다.\n\n누가 오면\n앉으라고.\n\n아직 아무도\n오지 않았지만.\n\n벽돌 사이로\n풀이 자라고,\n\n화분에 심은 나무는\n아직 작아서\n그늘 하나 만들지 못한다.\n\n뒤쪽 벽은\n붉은 벽돌로 쌓여 있고,\n\n그 너머로\n누군가의 집 지붕이 보인다.\n\n여기는\n아직 내 집이 아니다.\n\n먼저 살아보는 중이다.\n\n마당이 있어서 좋았고,\n불을 피울 수 있어서 좋았고,\n\n밤이 되면\n벽돌 위에 앉아\n조금 오래 있을 수 있어서 좋았다.\n\n완성되지 않은 것들이\n조금 편했다.",
+          "caption": "불 없이도 그 앞에 오래 있었다",
+          "caption_en": "No fire, but I stayed anyway",
           "focalX": 50,
           "focalY": 50
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1awcs_972aeae4_321eb6a4.jpg",
-          "captionLeft": "앉아 있는 것만으로도",
-          "captionRight": "그날이 조금 느려졌다.",
+          "captionLeft": "잠깐 앉아 있었다",
+          "captionLeft_en": "she just sat for a while",
+          "captionRight": "흙 냄새가 먼저 왔다",
+          "captionRight_en": "the smell of earth came first",
           "splitX": 2
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1mgh4_cd951ded_9e6d59d.jpg",
-          "caption": "# 머물다\n\n다리 위에서\n한참을 서 있었다.\n\n들어가도 되는 곳이었는데,\n그냥 조금 멀리서\n바라보고 싶었다.\n\n초여름 햇빛은\n나무들 사이로 흘러\n간판 위에도\n흰 난간 위에도\n조용히 내려앉았다.\n\nThe Stay.\n\n머무는 곳.\n\n누군가는\n저 안에서 쉬고 있을 것이고,\n\n나는\n아직 다리 위에\n서 있다.\n\n들어가기 전의 시간이\n괜히 더 오래 남을 때가 있다.\n\n도착하기 전,\n문을 열기 전,\n\n잠깐 멈춰 서서\n저 안이 어떤 곳일까\n생각하던 시간.\n\n오늘은\n그 정도의 거리가\n나에게 맞는 속도 같았다.",
+          "caption": "그냥 서 있었다, 한참을",
+          "caption_en": "She stood there. Just for a while.",
           "focalX": 30,
           "focalY": 50
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/2fywo_d1200ab6_119a3ac4.jpg",
-          "captionLeft": "나무 사이로 들어가는 길",
-          "captionRight": "조금 서성이다 따라갔다",
+          "captionLeft": "한낮의 초록이 너무 많아",
+          "captionLeft_en": "too much green for midday",
+          "captionRight": "난간에 기대어 잠깐",
+          "captionRight_en": "leaning on the railing, just a moment",
           "splitX": 76
         },
         {
           "type": "closing",
-          "text": "# 오늘도 느리게, 잘 보냈습니다\n\n한 해가 지나갔다.\n빠르게 간 건지, 천천히 간 건지\n잘 모르겠지만\n\n오늘 하루는\n조금 느리게 보냈다.\n\n그 정도면\n괜찮은 하루였다.",
+          "text": "오늘도 느리게 걸어왔습니다.",
+          "text_en": "Another day, walked through slowly.",
           "cta": ""
         }
       ]
