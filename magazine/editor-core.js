@@ -779,8 +779,12 @@ async function autoBuildPages(status) {
       pg.imageId = p.id;
       pg.captionLeft = (p.analysis && p.analysis.suggested_caption_left) || '';
       pg.captionRight = (p.analysis && p.analysis.suggested_caption_right) || '';
-      if (p.analysis && typeof p.analysis.spread_focal_left === 'number') pg.focalXLeft = p.analysis.spread_focal_left;
-      if (p.analysis && typeof p.analysis.spread_focal_right === 'number') pg.focalXRight = p.analysis.spread_focal_right;
+      // splitX: 분석값에서 left/right 중간값으로 자동 추정 (없으면 기본값 50)
+      if (p.analysis && typeof p.analysis.spread_focal_left === 'number' && typeof p.analysis.spread_focal_right === 'number') {
+        pg.splitX = Math.round((p.analysis.spread_focal_left + p.analysis.spread_focal_right) / 2);
+      } else {
+        pg.splitX = 50;
+      }
       newPages.push(pg);
     } else if (best === 'botanical') {
       flushGrid(true);
@@ -922,7 +926,7 @@ const PAGE_DEFAULTS = {
   split: () => ({ type: 'split', imageId: null, label: '', text: '', darkText: false }),
   grid: () => ({ type: 'grid', imageIds: [], label: '', caption: '' }),
   quote: () => ({ type: 'quote', text: '', context: '' }),
-  spread: () => ({ type: 'spread', imageId: null, captionLeft: '', captionRight: '', focalXLeft: 0, focalXRight: 100 }),
+  spread: () => ({ type: 'spread', imageId: null, captionLeft: '', captionRight: '', splitX: 50 }),
   essay: () => ({ type: 'essay', label: '', title: '', text: '', dark: false }),
   dialogue: () => ({ type: 'dialogue', label: '', lines: [{ speaker: '', text: '', side: 'left' }] }),
   list: () => ({ type: 'list', label: '', title: '', items: [{ name: '', desc: '' }] }),
@@ -984,16 +988,30 @@ function setFocalPoint(evt, idx) {
   renderPageList();
 }
 
-// 스프레드 모바일 크롭 미리보기를 슬라이더 값에 맞춰 즉시 갱신 (라벨 텍스트도 함께 갱신)
-function updateSpreadFocalPreview(idx, side, value) {
+// 스프레드 단일 슬라이더 — splitX 값에 따라 좌/우 미리보기 동시 갱신
+function updateSpreadSplitPreview(idx, splitX) {
   const card = document.querySelectorAll('.page-card')[idx];
   if (!card) return;
-  const previews = card.querySelectorAll('.focal-spread-preview img');
-  const img = previews[side === 'left' ? 0 : 1];
-  if (img) img.style.objectPosition = `${value}% center`;
-  const labels = card.querySelectorAll('.field > div[style*="opacity:0.6"]');
-  const label = labels[side === 'left' ? 0 : 1];
-  if (label) label.textContent = `${side === 'left' ? '왼쪽' : '오른쪽'} 페이지: ${value}`;
+  const imgLeft  = card.querySelector('.spread-preview-left img');
+  const imgRight = card.querySelector('.spread-preview-right img');
+  const label    = card.querySelector('.spread-split-label');
+  const splitVal = Number(splitX);
+  // 왼쪽: 이미지 왼쪽 splitX% 부분 표시 → object-position 0%
+  // 오른쪽: 이미지 오른쪽 (100-splitX)% 부분 표시 → object-position 100%
+  // width를 조정해서 해당 비율만큼만 보이도록
+  if (imgLeft) {
+    imgLeft.style.width = splitVal > 0 ? `${(100/splitVal)*100}%` : '200%';
+    imgLeft.style.left  = '0';
+    imgLeft.style.transform = 'none';
+  }
+  if (imgRight) {
+    const rightPct = 100 - splitVal;
+    imgRight.style.width = rightPct > 0 ? `${(100/rightPct)*100}%` : '200%';
+    imgRight.style.right = '0';
+    imgRight.style.left  = 'auto';
+    imgRight.style.transform = 'none';
+  }
+  if (label) label.textContent = `자르는 지점: ${splitVal}%`;
 }
 
 function renderPageCard(pg, idx) {
@@ -1075,36 +1093,38 @@ function renderPageCard(pg, idx) {
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 문장 생성</button></div>
       `;
       break;
-    case 'spread':
+    case 'spread': {
+      const sx = pg.splitX ?? 50;
+      const src = pg.imageId ? photoSrc(pg.imageId) : '';
+      const leftW  = sx > 0   ? `${(100/sx)*100}%`       : '200%';
+      const rightW = (100-sx) > 0 ? `${(100/(100-sx))*100}%` : '200%';
       body = `
         <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
         <div class="hint">와이드 사진 1장을 2페이지에 걸쳐 보여줍니다. PC/패드는 한 화면, 모바일은 좌/우로 나눠서 순서대로 표시됩니다.</div>
-        <div class="field"><label>모바일 크롭 위치 (좌/우 페이지에서 잘리는 지점을 직접 조정)</label>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <div style="flex:1;min-width:140px">
-              <div class="focal-spread-preview" style="position:relative;width:100%;max-width:160px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#000;">
-                ${pg.imageId ? `<img src="${photoSrc(pg.imageId)}" style="position:absolute;inset:0;width:200%;max-width:200%;height:100%;object-fit:cover;object-position:${pg.focalXLeft ?? 0}% center;display:block;">` : ''}
-              </div>
-              <div style="font-size:11px;opacity:0.6;margin:4px 0">왼쪽 페이지: ${Math.round(pg.focalXLeft ?? 0)}</div>
-              <input type="range" min="0" max="100" value="${pg.focalXLeft ?? 0}" style="width:100%"
-                oninput="pages[${idx}].focalXLeft=Number(this.value); updateSpreadFocalPreview(${idx},'left',this.value)">
+        <div class="field"><label>모바일 크롭 위치 — 슬라이더로 사진 자르는 지점 조정</label>
+          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+            <div class="spread-preview-left" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#111;flex-shrink:0;">
+              ${src ? `<img src="${src}" style="position:absolute;top:0;left:0;width:${leftW};max-width:none;height:100%;object-fit:cover;object-position:left center;display:block;">` : ''}
+              <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.05em;">왼쪽</div>
             </div>
-            <div style="flex:1;min-width:140px">
-              <div class="focal-spread-preview" style="position:relative;width:100%;max-width:160px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#000;">
-                ${pg.imageId ? `<img src="${photoSrc(pg.imageId)}" style="position:absolute;inset:0;width:200%;max-width:200%;height:100%;object-fit:cover;object-position:${pg.focalXRight ?? 100}% center;transform:translateX(-50%);display:block;">` : ''}
-              </div>
-              <div style="font-size:11px;opacity:0.6;margin:4px 0">오른쪽 페이지: ${Math.round(pg.focalXRight ?? 100)}</div>
-              <input type="range" min="0" max="100" value="${pg.focalXRight ?? 100}" style="width:100%"
-                oninput="pages[${idx}].focalXRight=Number(this.value); updateSpreadFocalPreview(${idx},'right',this.value)">
+            <div class="spread-preview-right" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#111;flex-shrink:0;">
+              ${src ? `<img src="${src}" style="position:absolute;top:0;right:0;width:${rightW};max-width:none;height:100%;object-fit:cover;object-position:right center;display:block;">` : ''}
+              <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.05em;">오른쪽</div>
+            </div>
+            <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:8px;justify-content:center;">
+              <div class="spread-split-label" style="font-size:11px;color:var(--dim)">자르는 지점: ${sx}%</div>
+              <input type="range" min="5" max="95" value="${sx}" style="width:100%"
+                oninput="pages[${idx}].splitX=Number(this.value); updateSpreadSplitPreview(${idx},this.value)">
+              <div style="font-size:11px;opacity:0.45">← 왼쪽으로 당기면 오른쪽 비중 커짐 / 오른쪽으로 당기면 왼쪽 비중 커짐</div>
             </div>
           </div>
-          <div style="font-size:11px;opacity:0.5;margin-top:4px">기본값: 왼쪽=0(이미지 좌측), 오른쪽=100(이미지 우측). 중요한 부분이 가운데에 있어 잘릴 때 슬라이더로 조정하세요.</div>
         </div>
         <div class="field"><label>왼쪽 페이지 캡션</label><input value="${esc(pg.captionLeft||'')}" oninput="pages[${idx}].captionLeft=this.value"></div>
         <div class="field"><label>오른쪽 페이지 캡션</label><input value="${esc(pg.captionRight||'')}" oninput="pages[${idx}].captionRight=this.value"></div>
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
       `;
       break;
+    }
     case 'essay':
       body = `
         <div class="field"><label>라벨 (소제목)</label><input value="${esc(pg.label||'')}" oninput="pages[${idx}].label=this.value"></div>
@@ -1390,6 +1410,12 @@ function loadIssueIntoForm(issue) {
 // issue.html 스키마(image/images 경로) → 에디터 내부 스키마(imageId/imageIds) 매핑
 // 기존 경로는 _existingImage(s)에 보관하고, 발행 시 imageId가 없으면 그대로 사용
 function mapExistingPageToEditable(pg) {
+  // 기존 focalXLeft/focalXRight → splitX 변환 (하위호환)
+  if (pg.type === 'spread' && typeof pg.splitX === 'undefined') {
+    const l = pg.focalXLeft ?? 0;
+    const r = pg.focalXRight ?? 100;
+    pg.splitX = Math.round((l + r) / 2);
+  }
   if (pg.image) {
     const id = 'existing_' + Math.random().toString(36).slice(2);
     photos.push({ id, dataUrl: pg.image, mediaType: 'image/jpeg', name: id, analysis: null, _existing: true });
@@ -1526,8 +1552,12 @@ async function publish() {
           out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
           out.captionLeft = pg.captionLeft || '';
           out.captionRight = pg.captionRight || '';
-          if (typeof pg.focalXLeft === 'number') out.focalXLeft = pg.focalXLeft;
-          if (typeof pg.focalXRight === 'number') out.focalXRight = pg.focalXRight;
+          if (typeof pg.splitX === 'number') out.splitX = pg.splitX;
+          // 하위호환: 기존 focalXLeft/Right도 유지
+          else {
+            if (typeof pg.focalXLeft === 'number') out.focalXLeft = pg.focalXLeft;
+            if (typeof pg.focalXRight === 'number') out.focalXRight = pg.focalXRight;
+          }
           break;
         case 'essay':
           out.label = pg.label || '';
