@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.3.0</title>
+<title>감성찾아삽만리 · Writing Studio v3.3.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -293,14 +293,20 @@ header {
 .image-meta-status { font-family:var(--mono); font-size:10px; color:var(--dim); line-height:1.7; margin-top:8px; word-break:break-word; }
 .library-modal { display:none; position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.78); align-items:center; justify-content:center; padding:18px; }
 .library-modal.active { display:flex; }
-.library-panel { width:min(920px,96vw); max-height:88vh; background:var(--s1); border:1px solid var(--border); border-radius:8px; display:flex; flex-direction:column; overflow:hidden; }
+.library-panel { width:min(1080px,96vw); height:min(820px,90vh); background:var(--s1); border:1px solid var(--border); border-radius:8px; display:flex; flex-direction:column; overflow:hidden; }
 .library-head { height:48px; flex-shrink:0; display:flex; align-items:center; gap:8px; padding:0 14px; border-bottom:1px solid var(--border); }
 .library-search { flex:1; background:var(--s2); border:1px solid var(--border); color:var(--text); font-family:var(--sans); font-size:12px; padding:7px 10px; border-radius:4px; outline:none; }
-.library-grid { overflow-y:auto; padding:14px; display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
-.library-card { position:relative; aspect-ratio:1; border:1px solid var(--border); border-radius:5px; overflow:hidden; background:var(--s2); cursor:pointer; }
+.library-grid { flex:1; min-height:0; overflow-y:auto; padding:14px; display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; align-content:start; }
+.library-card { position:relative; aspect-ratio:1; min-height:150px; border:1px solid var(--border); border-radius:5px; overflow:hidden; background:var(--s2); cursor:pointer; }
 .library-card:hover { border-color:var(--accent); }
 .library-card img { width:100%; height:100%; object-fit:cover; display:block; }
-.library-card-meta { position:absolute; inset:auto 0 0; padding:18px 7px 6px; background:linear-gradient(transparent,rgba(0,0,0,.78)); font-size:9px; color:rgba(255,255,255,.82); line-height:1.45; }
+.library-card-meta { position:absolute; inset:auto 0 0; padding:20px 8px 7px; background:linear-gradient(transparent,rgba(0,0,0,.82)); font-size:10px; color:rgba(255,255,255,.88); line-height:1.45; max-height:52px; overflow:hidden; }
+.library-foot { height:46px; flex-shrink:0; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 14px; }
+.library-page-info { font-family:var(--mono); font-size:10px; color:var(--dim); }
+.library-page-buttons { display:flex; gap:6px; align-items:center; }
+.library-page-buttons button { background:none; border:1px solid var(--border); color:var(--muted); font-family:var(--mono); font-size:10px; padding:5px 9px; border-radius:3px; cursor:pointer; }
+.library-page-buttons button:hover:not(:disabled) { border-color:var(--accent); color:var(--accent); }
+.library-page-buttons button:disabled { opacity:.35; cursor:not-allowed; }
 .perception-box { background:rgba(184,122,110,0.06); border:1px solid rgba(184,122,110,0.25); border-radius:4px; padding:8px 10px; font-size:11px; color:var(--muted); line-height:1.7; margin-top:8px; }
 
 
@@ -323,7 +329,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.3.0</span>
+    <span class="ver">v3.3.1</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -392,7 +398,7 @@ header {
         </div>
         <div class="img-actions">
           <button class="btn-ghost-sm" onclick="openLibraryPicker('auto')">라이브러리에서 선택</button>
-          <button class="btn-ghost-sm" onclick="clearAutoImageMeta()">이미지 메타 해제</button>
+          <button class="btn-ghost-sm" onclick="clearAutoImageMeta()">메타 초기화</button>
         </div>
         <div class="image-meta-status" id="autoImageMetaStatus">이미지 메타 없음</div>
       </div>
@@ -476,7 +482,7 @@ header {
         </div>
         <div class="img-actions">
           <button class="btn-ghost-sm" onclick="openLibraryPicker('manual')">라이브러리에서 선택</button>
-          <button class="btn-ghost-sm" onclick="clearManualImageMeta()">이미지 메타 해제</button>
+          <button class="btn-ghost-sm" onclick="clearManualImageMeta()">메타 초기화</button>
         </div>
         <div class="image-meta-status" id="manualImageMetaStatus">이미지 메타 없음</div>
       </div>
@@ -893,10 +899,17 @@ header {
   <div class="library-panel">
     <div class="library-head">
       <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">IMAGE LIBRARY</span>
-      <input class="library-search" id="librarySearch" placeholder="피사체, 분위기, 태그, 질감 검색…" oninput="renderLibraryPicker()">
+      <input class="library-search" id="librarySearch" placeholder="피사체, 분위기, 태그, 질감 검색…" oninput="renderLibraryPicker(true)">
       <button class="btn-sm" onclick="closeLibraryPicker()">닫기</button>
     </div>
     <div id="libraryGrid" class="library-grid"></div>
+    <div class="library-foot">
+      <span class="library-page-info" id="libraryPageInfo">—</span>
+      <div class="library-page-buttons">
+        <button id="libraryPrevBtn" onclick="changeLibraryPage(-1)">← 이전</button>
+        <button id="libraryNextBtn" onclick="changeLibraryPage(1)">다음 →</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -990,6 +1003,9 @@ let autoImageMeta = null;
 let manualImageMeta = null;
 let autoImageSource = 'none';
 let manualImageSource = 'none';
+const LIBRARY_PAGE_SIZE = 36;
+let libraryPickerPage = 0;
+let libraryPickerFiltered = [];
 
 function safeJsonFromText(raw) {
   const text = String(raw || '').replace(/```json|```/g,'').trim();
@@ -1086,27 +1102,50 @@ async function openLibraryPicker(target='auto') {
   libraryPickerTarget = target;
   document.getElementById('libraryModal').classList.add('active');
   document.getElementById('libraryGrid').innerHTML = '<div style="color:var(--dim);font-size:12px">불러오는 중…</div>';
+  libraryPickerPage = 0;
   await loadImageCacheEntries();
   renderLibraryPicker();
 }
 function closeLibraryPicker() { document.getElementById('libraryModal').classList.remove('active'); }
-function renderLibraryPicker() {
+function renderLibraryPicker(resetPage=false) {
   const grid = document.getElementById('libraryGrid');
   const q = (document.getElementById('librarySearch')?.value || '').toLowerCase().trim();
+  if (resetPage) libraryPickerPage = 0;
   const entries = Object.entries(libraryCacheEntries)
     .map(([id, meta]) => ({ id, ...meta, image_id: meta.image_id || id }))
     .filter(x => !x.deleted && (x.r2_url || x.thumbnail_url));
-  const filtered = entries.filter(item => {
+  libraryPickerFiltered = entries.filter(item => {
     if (!q) return true;
-    const hay = [item.filename,item.primary_subject,item.mood,item.suggested_caption,item.suggested_label,item.thumbnail_reason,item.location_type,item.activity_type,item.human_presence,item.season,item.time_of_day,...safeArray(item.secondary_subjects),...safeArray(item.material_texture),...safeArray(item.visual_dna_tags)].filter(Boolean).join('\n').toLowerCase();
+    const hay = [
+      item.filename,item.primary_subject,item.mood,item.suggested_caption,item.suggested_label,
+      item.thumbnail_reason,item.location_type,item.activity_type,item.human_presence,item.season,item.time_of_day,
+      ...safeArray(item.secondary_subjects),...safeArray(item.material_texture),...safeArray(item.visual_dna_tags)
+    ].filter(Boolean).join('
+').toLowerCase();
     return hay.includes(q);
-  }).slice(0,240);
-  if (!filtered.length) { grid.innerHTML = '<div style="color:var(--dim);font-size:12px">검색 결과 없음</div>'; return; }
-  grid.innerHTML = filtered.map(item => `
-    <div class="library-card" onclick="chooseLibraryImage('${libraryPickerTarget}','${item.id.replace(/'/g,"\\'")}')">
+  });
+  const total = libraryPickerFiltered.length;
+  const totalPages = Math.max(1, Math.ceil(total / LIBRARY_PAGE_SIZE));
+  libraryPickerPage = Math.min(Math.max(0, libraryPickerPage), totalPages - 1);
+  const start = libraryPickerPage * LIBRARY_PAGE_SIZE;
+  const pageItems = libraryPickerFiltered.slice(start, start + LIBRARY_PAGE_SIZE);
+  const info = document.getElementById('libraryPageInfo');
+  const prev = document.getElementById('libraryPrevBtn');
+  const next = document.getElementById('libraryNextBtn');
+  if (info) info.textContent = total ? `${start + 1}-${Math.min(start + LIBRARY_PAGE_SIZE, total)} / ${total} · ${libraryPickerPage + 1}/${totalPages}` : '0개';
+  if (prev) prev.disabled = libraryPickerPage <= 0;
+  if (next) next.disabled = libraryPickerPage >= totalPages - 1;
+  if (!pageItems.length) { grid.innerHTML = '<div style="color:var(--dim);font-size:12px">검색 결과 없음</div>'; return; }
+  grid.innerHTML = pageItems.map(item => `
+    <div class="library-card" onclick="chooseLibraryImage('${libraryPickerTarget}','${String(item.id).replace(/'/g,"\'")}')" title="${escHtml(item.primary_subject || item.suggested_label || item.filename || item.id)}">
       <img src="${escHtml(item.thumbnail_url || item.r2_url)}" loading="lazy" alt="">
       <div class="library-card-meta">${escHtml(item.primary_subject || item.suggested_label || item.filename || item.id)}<br>${escHtml([item.mood,item.location_type,item.activity_type].filter(Boolean).join(' · '))}</div>
-    </div>`).join('\n');
+    </div>`).join('
+');
+}
+function changeLibraryPage(delta) {
+  libraryPickerPage += delta;
+  renderLibraryPicker(false);
 }
 function chooseLibraryImage(target, id) {
   const meta = { ...(libraryCacheEntries[id] || {}), image_id: id };
@@ -1114,7 +1153,6 @@ function chooseLibraryImage(target, id) {
     manualImageMeta = meta;
     manualImageSource = 'library';
     manualImageBase64 = null; manualImageType = null;
-  manualImageMeta = null; manualImageSource = 'none'; updateImageMetaStatus();
     const preview = document.getElementById('manualImgPreview');
     preview.src = meta.thumbnail_url || meta.r2_url || '';
     preview.style.display = 'block';
@@ -1126,7 +1164,6 @@ function chooseLibraryImage(target, id) {
     autoImageMeta = meta;
     autoImageSource = 'library';
     autoImageBase64 = null; autoImageType = null;
-  autoImageMeta = null; autoImageSource = 'none'; updateImageMetaStatus();
     const preview = document.getElementById('autoImgPreview');
     preview.src = meta.thumbnail_url || meta.r2_url || '';
     preview.style.display = 'block';
@@ -1139,8 +1176,8 @@ function chooseLibraryImage(target, id) {
   closeLibraryPicker();
   toast('라이브러리 이미지 메타 연결됨');
 }
-function clearAutoImageMeta() { autoImageMeta=null; autoImageSource='none'; updateImageMetaStatus(); toast('자동 이미지 메타 해제'); }
-function clearManualImageMeta() { manualImageMeta=null; manualImageSource='none'; updateImageMetaStatus(); toast('수동 이미지 메타 해제'); }
+function clearAutoImageMeta() { autoImageMeta=null; autoImageSource='none'; updateImageMetaStatus(); toast('자동 메타 초기화'); }
+function clearManualImageMeta() { manualImageMeta=null; manualImageSource='none'; updateImageMetaStatus(); toast('수동 메타 초기화'); }
 
 async function analyzeImageV2FromBase64(key, base64, mediaType, extraText='') {
   const prompt = `이 사진을 분석해서 아래 JSON 형식으로만 반환해줘. 다른 텍스트 없이 JSON만. 삽만리(@sapmanri)는 한국 농촌/슬로우라이프/생활공예/사진 산문 채널이고, 글쓰기 도구에서 재사용할 수 있게 관찰 재료를 풍부하게 뽑는다.${extraText ? `\n추가 메모: ${extraText}` : ''}
@@ -2506,10 +2543,44 @@ function setAutoType(btn) {
   autoType = btn.dataset.type;
 }
 
+
+function hydrateAutoImageStateFromPreview() {
+  const img = document.getElementById('autoImgPreview');
+  if (!img || img.style.display === 'none' || !img.src) return false;
+
+  // 직접 업로드 이미지인데 상태 변수가 비어 있는 경우, preview dataURL에서 복구한다.
+  if (!autoImageBase64 && img.src.startsWith('data:image/')) {
+    const m = img.src.match(/^data:(image\/[^;]+);base64,(.+)$/);
+    if (m) {
+      autoImageType = m[1];
+      autoImageBase64 = m[2];
+      autoImageSource = 'direct';
+      updateImageMetaStatus();
+      return true;
+    }
+  }
+
+  // 라이브러리 이미지인데 메타 변수가 비어 있는 경우, preview URL로 cache에서 다시 찾는다.
+  if (!autoImageMeta && libraryCacheEntries && Object.keys(libraryCacheEntries).length) {
+    const found = Object.entries(libraryCacheEntries).find(([id, meta]) =>
+      meta && (meta.thumbnail_url === img.src || meta.r2_url === img.src)
+    );
+    if (found) {
+      autoImageMeta = { ...(found[1] || {}), image_id: found[0] };
+      autoImageSource = 'library';
+      updateImageMetaStatus();
+      return true;
+    }
+  }
+
+  return !!(autoImageBase64 || autoImageMeta);
+}
+
 // ── 자동 모드: 글 생성 ──
 async function autoGenerate() {
   const key = getApiKey(); if (!key) return;
   const text = document.getElementById('autoTextInput').value.trim();
+  hydrateAutoImageStateFromPreview();
   if (!autoImageBase64 && !autoImageMeta && !text) { toast('이미지나 텍스트를 입력해주세요.'); return; }
 
   const btn = document.getElementById('autoGenBtn');
