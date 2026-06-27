@@ -458,10 +458,24 @@ ${instruction}
   let userContent;
   const ctxText = extraContext ? `\n\n참고 컨텍스트: ${extraContext}` : '';
   if (photo && photo.dataUrl) {
-    userContent = [
-      { type: 'image', source: { type: 'base64', media_type: photo.mediaType, data: photo.dataUrl.split(',')[1] } },
-      { type: 'text', text: `이 이미지를 보고 글을 써주세요. 이미지의 분위기, 빛, 계절, 감각적 디테일을 Vase 문체로 담아주세요.${ctxText}` }
-    ];
+    // R2/외부 URL인 경우 fetchAsDataUrl로 base64 변환
+    let imgDataUrl = photo.dataUrl;
+    if (imgDataUrl.startsWith('http') || imgDataUrl.startsWith('./')) {
+      try {
+        imgDataUrl = await window.ImageLibrary.fetchAsDataUrl(imgDataUrl);
+      } catch (e) {
+        imgDataUrl = null;
+      }
+    }
+    if (imgDataUrl && imgDataUrl.startsWith('data:')) {
+      const mediaType = imgDataUrl.match(/data:([^;]+)/)?.[1] || photo.mediaType || 'image/jpeg';
+      userContent = [
+        { type: 'image', source: { type: 'base64', media_type: mediaType, data: imgDataUrl.split(',')[1] } },
+        { type: 'text', text: `이 이미지를 보고 글을 써주세요. 이미지의 분위기, 빛, 계절, 감각적 디테일을 Vase 문체로 담아주세요.${ctxText}` }
+      ];
+    } else {
+      userContent = `다음 내용을 바탕으로 글을 써주세요.${ctxText}`;
+    }
   } else {
     userContent = `다음 내용을 바탕으로 글을 써주세요.${ctxText}`;
   }
