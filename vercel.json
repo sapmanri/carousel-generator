@@ -4,7 +4,7 @@
   ],
   "headers": [
     {
-      "source": "/magazine/(.*)\\.html",
+      "source": "/(.*).html",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0" },
         { "key": "Pragma", "value": "no-cache" },
@@ -14,27 +14,20 @@
       ]
     },
     {
-      "source": "/magazine/(.*)\\.json",
+      "source": "/(.*).json",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0, s-maxage=0" },
         { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
       ]
     },
     {
-      "source": "/(.*)\\.html",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0, s-maxage=0" },
-        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
-      ]
-    },
-    {
-      "source": "/(.*)\\.js",
+      "source": "/(.*).js",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "source": "/(.*)\\.css",
+      "source": "/(.*).css",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
