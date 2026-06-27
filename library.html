@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-27c</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28a</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -166,13 +166,13 @@ header{
   <div style="margin-bottom:32px">
     <div class="section-label">이미지 업로드 + AI 분석</div>
     <div class="upload-zone" id="uploadZone">
-      <input type="file" id="fileInput" accept="image/*" multiple>
+      <input type="file" id="fileInput" accept="image/*,.heic,.heif,.HEIC,.HEIF" multiple>
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5">
         <path d="M12 16V4m0 0L8 8m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke-linecap="round"/>
       </svg>
       <p>이미지를 끌어다 놓거나 클릭해서 선택</p>
-      <span>JPG · PNG · WEBP · 여러 장 동시 가능 · EXIF 날짜 자동 추출</span>
+      <span>JPG · PNG · WEBP · HEIC · 여러 장 동시 가능 · EXIF 날짜 자동 추출 · HEIC 자동 변환</span>
     </div>
 
     <div class="queue" id="queue" style="display:none"></div>
@@ -233,6 +233,8 @@ header{
 </div>
 
 <!-- 공통 설정 모듈 -->
+<!-- HEIC 변환 라이브러리 -->
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="/shared-config.js"></script>
 <!-- 이미지 라이브러리 모듈 -->
 <script src="/magazine/image-library.js?v=20260627a"></script>
@@ -315,10 +317,32 @@ function exifDateToISO(exifDate) {
 // ── 큐 관리 ─────────────────────────────────────────────────────
 let queue = [];
 
+// HEIC/HEIF → JPEG 변환
+async function convertHeicIfNeeded(file) {
+  const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+    /\.(heic|heif)$/i.test(file.name);
+  if (!isHeic) return file;
+  try {
+    updateStatus && updateStatus('HEIC 변환 중…');
+    const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
+    const converted = Array.isArray(blob) ? blob[0] : blob;
+    const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
+    return new File([converted], newName, { type: 'image/jpeg' });
+  } catch(e) {
+    console.warn('HEIC 변환 실패:', e);
+    return file;
+  }
+}
+
 async function handleFiles(files) {
   if (!files || !files.length) return;
-  for (const file of files) {
+  for (let file of files) {
+    // HEIC/HEIF 변환
+    if (/heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)) {
+      file = await convertHeicIfNeeded(file);
+    }
     if (!file.type.startsWith('image/')) continue;
+
     const url = URL.createObjectURL(file);
     const exif = await readExif(file);
     const shotDate = exifDateToISO(exif.DateTimeOriginal || exif.DateTime);
@@ -391,9 +415,11 @@ async function startProcess() {
         reader.readAsDataURL(item.file);
       });
 
-      // 2. R2 업로드 (원본)
+      // 2. R2 업로드 (원본) — mediaType 정규화
       updateItemStatus(i, 'uploading');
-      const uploadResult = await window.ImageLibrary.uploadIfNeeded(dataUrl, item.file.type);
+      // HEIC 변환 후에도 file.type이 잘못 남을 수 있으므로 dataUrl에서 추출
+      const actualMediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || item.file.type || 'image/jpeg';
+      const uploadResult = await window.ImageLibrary.uploadIfNeeded(dataUrl, actualMediaType);
 
       // 2b. 썸네일 생성 + R2 업로드 (thumb_ prefix)
       let thumbUrl = null;
@@ -412,7 +438,7 @@ async function startProcess() {
       let analysis = null;
       if (apiKey) {
         updateItemStatus(i, 'analyzing');
-        analysis = await analyzeImage(dataUrl, item.file.type, apiKey);
+        analysis = await analyzeImage(dataUrl, actualMediaType, apiKey);
       }
 
       // 4. 캐시에 저장 (EXIF + 썸네일 URL 포함)
