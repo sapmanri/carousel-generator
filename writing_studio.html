@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v3.2.6</title>
+<title>감성찾아삽만리 · Writing Studio v3.3.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -289,6 +289,21 @@ header {
   font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;
 }
 
+.img-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.image-meta-status { font-family:var(--mono); font-size:10px; color:var(--dim); line-height:1.7; margin-top:8px; word-break:break-word; }
+.library-modal { display:none; position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.78); align-items:center; justify-content:center; padding:18px; }
+.library-modal.active { display:flex; }
+.library-panel { width:min(920px,96vw); max-height:88vh; background:var(--s1); border:1px solid var(--border); border-radius:8px; display:flex; flex-direction:column; overflow:hidden; }
+.library-head { height:48px; flex-shrink:0; display:flex; align-items:center; gap:8px; padding:0 14px; border-bottom:1px solid var(--border); }
+.library-search { flex:1; background:var(--s2); border:1px solid var(--border); color:var(--text); font-family:var(--sans); font-size:12px; padding:7px 10px; border-radius:4px; outline:none; }
+.library-grid { overflow-y:auto; padding:14px; display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+.library-card { position:relative; aspect-ratio:1; border:1px solid var(--border); border-radius:5px; overflow:hidden; background:var(--s2); cursor:pointer; }
+.library-card:hover { border-color:var(--accent); }
+.library-card img { width:100%; height:100%; object-fit:cover; display:block; }
+.library-card-meta { position:absolute; inset:auto 0 0; padding:18px 7px 6px; background:linear-gradient(transparent,rgba(0,0,0,.78)); font-size:9px; color:rgba(255,255,255,.82); line-height:1.45; }
+.perception-box { background:rgba(184,122,110,0.06); border:1px solid rgba(184,122,110,0.25); border-radius:4px; padding:8px 10px; font-size:11px; color:var(--muted); line-height:1.7; margin-top:8px; }
+
+
 /* ── 모바일 ── */
 @media(max-width:768px) {
   header { padding:0 12px; height:44px; }
@@ -308,7 +323,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v3.2.6</span>
+    <span class="ver">v3.3.0</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -375,6 +390,11 @@ header {
           <img id="autoImgPreview" style="display:none;pointer-events:none" class="img-preview">
           <button id="autoImgRemove" class="img-remove" style="display:none" onclick="removeAutoImage(event)">×</button>
         </div>
+        <div class="img-actions">
+          <button class="btn-ghost-sm" onclick="openLibraryPicker('auto')">라이브러리에서 선택</button>
+          <button class="btn-ghost-sm" onclick="clearAutoImageMeta()">이미지 메타 해제</button>
+        </div>
+        <div class="image-meta-status" id="autoImageMetaStatus">이미지 메타 없음</div>
       </div>
 
       <div class="sec">
@@ -454,6 +474,11 @@ header {
           <img id="manualImgPreview" style="display:none;pointer-events:none;width:100%;border-radius:3px;margin-top:6px;max-height:120px;object-fit:cover">
           <button id="manualImgRemove" class="img-remove" style="display:none" onclick="removeManualImage(event)">×</button>
         </div>
+        <div class="img-actions">
+          <button class="btn-ghost-sm" onclick="openLibraryPicker('manual')">라이브러리에서 선택</button>
+          <button class="btn-ghost-sm" onclick="clearManualImageMeta()">이미지 메타 해제</button>
+        </div>
+        <div class="image-meta-status" id="manualImageMetaStatus">이미지 메타 없음</div>
       </div>
       <div class="sec">
         <div class="sec-label">오늘의 메모 · 소재</div>
@@ -862,6 +887,19 @@ header {
   </div>
 </div>
 
+
+<!-- 이미지 라이브러리 선택 모달 -->
+<div class="library-modal" id="libraryModal">
+  <div class="library-panel">
+    <div class="library-head">
+      <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">IMAGE LIBRARY</span>
+      <input class="library-search" id="librarySearch" placeholder="피사체, 분위기, 태그, 질감 검색…" oninput="renderLibraryPicker()">
+      <button class="btn-sm" onclick="closeLibraryPicker()">닫기</button>
+    </div>
+    <div id="libraryGrid" class="library-grid"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -929,6 +967,298 @@ let state = {
 
 let db = { examples: [], pairs: [], rules: [] };
 let githubFileSha = null;
+
+// ══════════════════════════════════════════
+// v3.3 — Runtime / Perception / Image Library Bridge
+// ══════════════════════════════════════════
+const RUNTIME_RULES = [
+  '삽만리 문체는 시가 아니라 생활 산문이다.',
+  '입력에서 하나의 소재만 중심으로 고른다.',
+  '한 글에는 하나의 마음만 둔다.',
+  '사진이나 메모를 설명하지 말고, 거기서 잠깐 멈춘 이유를 쓴다.',
+  '감정은 직접 말하지 않고 행동, 감각, 물성으로 남긴다.',
+  '삶의 교훈이나 큰 결론으로 확장하지 않는다.',
+  '마지막 문장은 의미 정리가 아니라 장면 안에 남긴다.',
+  '최근 반복된 표현은 사용하지 않는다.'
+];
+const OBSERVATION_AXES = ['시간','습관','온도','거리','손의 움직임','사용감','기다림','남은 것','사라진 것','소리','무게','빛','반복','어긋남','흔적','빈자리'];
+const VIEWPOINTS = ['기록','관찰','발견','질문','회상','메모','혼잣말'];
+const IMAGE_CACHE_FILE = 'image_cache.json';
+let libraryCacheEntries = {};
+let libraryPickerTarget = 'auto';
+let autoImageMeta = null;
+let manualImageMeta = null;
+let autoImageSource = 'none';
+let manualImageSource = 'none';
+
+function safeJsonFromText(raw) {
+  const text = String(raw || '').replace(/```json|```/g,'').trim();
+  const s = text.indexOf('{'), e = text.lastIndexOf('}');
+  if (s >= 0 && e > s) return JSON.parse(text.slice(s, e + 1));
+  return JSON.parse(text);
+}
+function safeArray(v) { return Array.isArray(v) ? v : (v ? [v] : []); }
+function imageMetaSummary(meta) {
+  if (!meta) return '이미지 메타 없음';
+  const parts = [meta.primary_subject, meta.mood, meta.location_type, meta.activity_type, ...(meta.visual_dna_tags||[]).slice(0,3)].filter(Boolean);
+  return `메타 연결됨 · ${parts.join(' · ') || meta.image_id || 'analysis'}`;
+}
+function updateImageMetaStatus() {
+  const a = document.getElementById('autoImageMetaStatus');
+  const m = document.getElementById('manualImageMetaStatus');
+  if (a) a.textContent = imageMetaSummary(autoImageMeta);
+  if (m) m.textContent = imageMetaSummary(manualImageMeta);
+}
+function buildRuntimeRulesText() {
+  return RUNTIME_RULES.map((r,i)=>`${i+1}. ${r}`).join('\n');
+}
+function buildAvoidPhraseText() {
+  const recentText = state.generationHistory.slice(-30).join('\n');
+  const overused = WATCH_PHRASES.filter(p => (recentText.match(new RegExp(p,'g'))||[]).length >= 2);
+  const base = ['한참 보고 있었다','그 손이 좋았다','서두르지 않았다','그 정도면 충분했다','그런 오후였다','마음이 늦어졌다'];
+  return [...new Set([...base, ...overused])];
+}
+function metaToMaterialData(meta) {
+  if (!meta) return null;
+  return {
+    objects: [meta.primary_subject, ...safeArray(meta.secondary_subjects)].filter(Boolean),
+    places: [meta.location_type, meta.season, meta.time_of_day].filter(Boolean),
+    actions: [meta.activity_type, meta.motion_implied, meta.human_presence].filter(Boolean),
+    sensory: [meta.mood, meta.color_temperature, meta.dominant_color, meta.thumbnail_reason, ...safeArray(meta.material_texture), ...safeArray(meta.visual_dna_tags)].filter(Boolean)
+  };
+}
+function compactImageMeta(meta) {
+  if (!meta) return '';
+  const keep = {
+    image_id: meta.image_id,
+    r2_url: meta.r2_url,
+    thumbnail_url: meta.thumbnail_url,
+    primary_subject: meta.primary_subject,
+    secondary_subjects: meta.secondary_subjects,
+    activity_type: meta.activity_type,
+    human_presence: meta.human_presence,
+    animal_presence: meta.animal_presence,
+    mood: meta.mood,
+    season: meta.season,
+    time_of_day: meta.time_of_day,
+    location_type: meta.location_type,
+    material_texture: meta.material_texture,
+    visual_dna_tags: meta.visual_dna_tags,
+    thumbnail_potential: meta.thumbnail_potential,
+    thumbnail_reason: meta.thumbnail_reason,
+    sapmanri_score: meta.sapmanri_score,
+    domesticity_score: meta.domesticity_score,
+    rurality_score: meta.rurality_score,
+    craft_score: meta.craft_score,
+    suggested_caption: meta.suggested_caption,
+    suggested_label: meta.suggested_label,
+    schema_version: meta.schema_version,
+    analyzed_at: meta.analyzed_at,
+    model: meta.model
+  };
+  Object.keys(keep).forEach(k => keep[k] == null && delete keep[k]);
+  return JSON.stringify(keep, null, 2);
+}
+async function loadImageCacheEntries() {
+  const token = getGhToken();
+  try {
+    if (token) {
+      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${IMAGE_CACHE_FILE}`, { headers:{ Authorization:`token ${token}` }, cache:'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        const bytes = Uint8Array.from(atob(json.content.replace(/\n/g,'')), c => c.charCodeAt(0));
+        const data = JSON.parse(new TextDecoder().decode(bytes));
+        libraryCacheEntries = data.entries || {};
+        return libraryCacheEntries;
+      }
+    }
+    const res2 = await fetch('/image_cache.json', { cache:'no-store' });
+    if (res2.ok) {
+      const data = await res2.json();
+      libraryCacheEntries = data.entries || {};
+      return libraryCacheEntries;
+    }
+  } catch(e) { console.warn('image_cache load failed', e); }
+  libraryCacheEntries = {};
+  return libraryCacheEntries;
+}
+async function openLibraryPicker(target='auto') {
+  libraryPickerTarget = target;
+  document.getElementById('libraryModal').classList.add('active');
+  document.getElementById('libraryGrid').innerHTML = '<div style="color:var(--dim);font-size:12px">불러오는 중…</div>';
+  await loadImageCacheEntries();
+  renderLibraryPicker();
+}
+function closeLibraryPicker() { document.getElementById('libraryModal').classList.remove('active'); }
+function renderLibraryPicker() {
+  const grid = document.getElementById('libraryGrid');
+  const q = (document.getElementById('librarySearch')?.value || '').toLowerCase().trim();
+  const entries = Object.entries(libraryCacheEntries)
+    .map(([id, meta]) => ({ id, ...meta, image_id: meta.image_id || id }))
+    .filter(x => !x.deleted && (x.r2_url || x.thumbnail_url));
+  const filtered = entries.filter(item => {
+    if (!q) return true;
+    const hay = [item.filename,item.primary_subject,item.mood,item.suggested_caption,item.suggested_label,item.thumbnail_reason,item.location_type,item.activity_type,item.human_presence,item.season,item.time_of_day,...safeArray(item.secondary_subjects),...safeArray(item.material_texture),...safeArray(item.visual_dna_tags)].filter(Boolean).join('\n').toLowerCase();
+    return hay.includes(q);
+  }).slice(0,240);
+  if (!filtered.length) { grid.innerHTML = '<div style="color:var(--dim);font-size:12px">검색 결과 없음</div>'; return; }
+  grid.innerHTML = filtered.map(item => `
+    <div class="library-card" onclick="chooseLibraryImage('${libraryPickerTarget}','${item.id.replace(/'/g,"\\'")}')">
+      <img src="${escHtml(item.thumbnail_url || item.r2_url)}" loading="lazy" alt="">
+      <div class="library-card-meta">${escHtml(item.primary_subject || item.suggested_label || item.filename || item.id)}<br>${escHtml([item.mood,item.location_type,item.activity_type].filter(Boolean).join(' · '))}</div>
+    </div>`).join('\n');
+}
+function chooseLibraryImage(target, id) {
+  const meta = { ...(libraryCacheEntries[id] || {}), image_id: id };
+  if (target === 'manual') {
+    manualImageMeta = meta;
+    manualImageSource = 'library';
+    manualImageBase64 = null; manualImageType = null;
+  manualImageMeta = null; manualImageSource = 'none'; updateImageMetaStatus();
+    const preview = document.getElementById('manualImgPreview');
+    preview.src = meta.thumbnail_url || meta.r2_url || '';
+    preview.style.display = 'block';
+    document.getElementById('manualDropLabel').style.display = 'none';
+    document.getElementById('manualImgRemove').style.display = 'flex';
+    document.getElementById('manualDropzone').style.borderStyle = 'solid';
+    document.getElementById('manualDropzone').style.borderColor = 'var(--accent)';
+  } else {
+    autoImageMeta = meta;
+    autoImageSource = 'library';
+    autoImageBase64 = null; autoImageType = null;
+  autoImageMeta = null; autoImageSource = 'none'; updateImageMetaStatus();
+    const preview = document.getElementById('autoImgPreview');
+    preview.src = meta.thumbnail_url || meta.r2_url || '';
+    preview.style.display = 'block';
+    document.getElementById('autoDropLabel').style.display = 'none';
+    document.getElementById('autoImgRemove').style.display = 'flex';
+    document.getElementById('autoDropzone').style.borderStyle = 'solid';
+    document.getElementById('autoDropzone').style.borderColor = 'var(--accent)';
+  }
+  updateImageMetaStatus();
+  closeLibraryPicker();
+  toast('라이브러리 이미지 메타 연결됨');
+}
+function clearAutoImageMeta() { autoImageMeta=null; autoImageSource='none'; updateImageMetaStatus(); toast('자동 이미지 메타 해제'); }
+function clearManualImageMeta() { manualImageMeta=null; manualImageSource='none'; updateImageMetaStatus(); toast('수동 이미지 메타 해제'); }
+
+async function analyzeImageV2FromBase64(key, base64, mediaType, extraText='') {
+  const prompt = `이 사진을 분석해서 아래 JSON 형식으로만 반환해줘. 다른 텍스트 없이 JSON만. 삽만리(@sapmanri)는 한국 농촌/슬로우라이프/생활공예/사진 산문 채널이고, 글쓰기 도구에서 재사용할 수 있게 관찰 재료를 풍부하게 뽑는다.${extraText ? `\n추가 메모: ${extraText}` : ''}
+{
+  "subject_position": "left|center|right|top|bottom|full",
+  "focal_x": 0,
+  "focal_y": 0,
+  "aspect_ratio": "wide|square|tall",
+  "best_page_type": "fullbleed|split|grid|quote|spread|botanical",
+  "overall_brightness": "dark|mid|bright",
+  "dominant_color": "#hex",
+  "color_temperature": "warm|cool|neutral",
+  "contrast_level": "low|medium|high",
+  "visual_density": "low|medium|high",
+  "negative_space": "low|medium|high",
+  "season": "spring|summer|autumn|winter|unknown",
+  "time_of_day": "dawn|morning|day|afternoon|evening|night|unknown",
+  "location_type": "indoor|outdoor|garden|kitchen|workshop|countryside|city|cafe|unknown",
+  "primary_subject": "주요 피사체 한국어 키워드",
+  "secondary_subjects": [],
+  "activity_type": "cooking|gardening|craft|coffee|walking|resting|cleaning|travel|animal|object|unknown",
+  "human_presence": "none|hands|back|side|face|multiple",
+  "animal_presence": "none|cat|dog|bird|other",
+  "material_texture": [],
+  "has_text": false,
+  "text_area_position": "none|top|center|bottom|left|right",
+  "camera_distance": "closeup|medium|wide",
+  "camera_angle": "top_down|eye_level|low_angle|side|unknown",
+  "motion_implied": "still|hand_action|walking|pouring|cutting|making|unknown",
+  "focus_clarity": "clear|soft|busy",
+  "thumbnail_potential": "low|medium|high",
+  "thumbnail_reason": "썸네일 적합도 이유 한 줄",
+  "mood": "한 단어 한국어",
+  "suggested_caption": "한국어 캡션 1줄",
+  "suggested_label": "소제목 한국어",
+  "domesticity_score": 0,
+  "rurality_score": 0,
+  "craft_score": 0,
+  "visual_dna_tags": ["한국어 태그 3~6개"],
+  "sapmanri_score": 0
+}`;
+  const raw = await callClaude(key, [
+    { type:'image', source:{ type:'base64', media_type:mediaType, data:base64 } },
+    { type:'text', text: prompt }
+  ], '이미지 분석 도구입니다. JSON만 출력합니다.', 1600, 2);
+  const meta = safeJsonFromText(raw);
+  meta.schema_version = 'image-analysis-v2';
+  meta.analyzed_at = new Date().toISOString();
+  meta.model = 'claude-sonnet-4-5';
+  meta.source = 'writing_studio_direct_upload';
+  meta.image_id = 'local_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+  rememberLocalImageMeta(meta);
+  return meta;
+}
+function rememberLocalImageMeta(meta) {
+  try {
+    const key = 'ws_local_image_meta_history';
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    arr.push(meta);
+    localStorage.setItem(key, JSON.stringify(arr.slice(-100)));
+  } catch(e) {}
+}
+async function ensureAutoImageMeta(key, text='') {
+  if (autoImageMeta) return autoImageMeta;
+  if (autoImageBase64) {
+    toast('이미지 v2 분석 중…');
+    autoImageMeta = await analyzeImageV2FromBase64(key, autoImageBase64, autoImageType, text);
+    autoImageSource = 'direct-analyzed';
+    updateImageMetaStatus();
+    return autoImageMeta;
+  }
+  return null;
+}
+async function ensureManualImageMeta(key, text='') {
+  if (manualImageMeta) return manualImageMeta;
+  if (manualImageBase64) {
+    toast('이미지 v2 분석 중…');
+    manualImageMeta = await analyzeImageV2FromBase64(key, manualImageBase64, manualImageType, text);
+    manualImageSource = 'direct-analyzed';
+    updateImageMetaStatus();
+    return manualImageMeta;
+  }
+  return null;
+}
+async function buildPerceptionPlan(key, payload) {
+  const avoid = buildAvoidPhraseText();
+  const system = `너는 MIMESIS Writing Studio의 Perception Engine이다. 글을 쓰지 않는다. 입력에서 무엇을 볼지, 왜 멈출지, 어떤 축으로 쓸지만 정한다. JSON만 출력한다.`;
+  const user = `입력 정보를 보고 글쓰기 전 사고 계획을 만든다.
+
+입력 타입: ${payload.input_type}
+원문/메모: ${payload.text || ''}
+선택 소재: ${payload.materials || ''}
+이미지 메타 JSON:
+${payload.image_meta || ''}
+
+선택 가능한 observation_axis: ${OBSERVATION_AXES.join(', ')}
+선택 가능한 viewpoint: ${VIEWPOINTS.join(', ')}
+피해야 할 표현: ${avoid.join(', ')}
+
+반드시 아래 JSON만 출력:
+{
+  "selected_material": "오늘 중심으로 볼 소재 하나",
+  "focus_reason": "왜 그것을 골랐는지 한 문장",
+  "observation_axis": "${OBSERVATION_AXES.join('|')}",
+  "viewpoint": "${VIEWPOINTS.join('|')}",
+  "small_shift": "장면 앞에서 생긴 작은 마음의 변화 한 줄",
+  "do_not_write": ["이번 글에서 쓰지 말아야 할 것 2~4개"],
+  "avoid_phrases": []
+}`;
+  const raw = await callClaude(key, user, system, 900, 2);
+  const plan = safeJsonFromText(raw);
+  plan.avoid_phrases = [...new Set([...(plan.avoid_phrases||[]), ...avoid])];
+  return plan;
+}
+function planToText(plan) {
+  if (!plan) return '';
+  return `선택 소재: ${plan.selected_material || ''}\n선택 이유: ${plan.focus_reason || ''}\n관찰 축: ${plan.observation_axis || ''}\n관점: ${plan.viewpoint || ''}\n작은 변화: ${plan.small_shift || ''}\n금지: ${safeArray(plan.do_not_write).join(', ')}\n피할 표현: ${safeArray(plan.avoid_phrases).join(', ')}`;
+}
 
 // ══════════════════════════════════════════
 // GitHub / API Key
@@ -1001,7 +1331,7 @@ async function saveDB() {
   setDbStatus('저장 중…', 'load');
   try {
     const enc = new TextEncoder().encode(JSON.stringify(db, null, 2));
-    const bin = Array.from(enc).map(b => String.fromCharCode(b)).join('');
+    const bin = Array.from(enc).map(b => String.fromCharCode(b)).join('\n');
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_FILE}`, {
       method: 'PUT',
       headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
@@ -1106,34 +1436,45 @@ function updateSettingSummary() {
 async function extractMaterials() {
   const key = getApiKey(); if (!key) return;
   const raw = document.getElementById('rawInput').value.trim();
-  if (!raw && !manualImageBase64) { toast('이미지나 메모를 입력해주세요.'); return; }
+  if (!raw && !manualImageBase64 && !manualImageMeta) { toast('이미지나 메모를 입력해주세요.'); return; }
   state.rawInput = raw;
 
   const btn = document.getElementById('extractBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>추출 중…';
 
-  // 이미지만 있는 경우 — 이미지 분석으로 소재 추출
   let userContent;
-  if (manualImageBase64) {
-    const textPart = raw ? `\n\n추가 메모: ${raw}` : '';
-    userContent = [
-      { type:'image', source:{ type:'base64', media_type:manualImageType, data:manualImageBase64 } },
-      { type:'text', text:`이 이미지에서 소재를 추출해주세요.${textPart}\n\n출력 형식 (설명 없이 JSON만):
-{"objects":["사물1","사물2"],"places":["장소1"],"actions":["행동1","행동2"],"sensory":["감각 디테일1","감각 디테일2"]}` }
-    ];
-    if (!state.rawInput) state.rawInput = '(이미지 소재)';
-  } else {
-    userContent = `다음 메모에서 소재를 추출해주세요. 반드시 아래 JSON 형식으로만 답하세요.\n\n메모: ${raw}\n\n출력 형식 (설명 없이 JSON만):\n{"objects":["사물1","사물2"],"places":["장소1"],"actions":["행동1","행동2"],"sensory":["감각 디테일1","감각 디테일2"]}`;
-  }
-
   try {
-    const res = await callClaude(key, userContent, '소재를 추출하는 도구입니다. JSON만 출력합니다.');
-    const text = res.replace(/```json|```/g,'').trim();
-    const data = JSON.parse(text);
+    const imageMeta = await ensureManualImageMeta(key, raw);
+    if (imageMeta) {
+      const metaMaterials = metaToMaterialData(imageMeta);
+      userContent = `이미지 분석 메타데이터와 메모에서 소재를 추출해주세요. 반드시 아래 JSON 형식으로만 답하세요.
+
+이미지 메타:
+${compactImageMeta(imageMeta)}
+
+추가 메모: ${raw || ''}
+
+기본 후보(참고):
+${JSON.stringify(metaMaterials, null, 2)}
+
+출력 형식 (설명 없이 JSON만):
+{"objects":["사물1","사물2"],"places":["장소1"],"actions":["행동1","행동2"],"sensory":["감각 디테일1","감각 디테일2"]}`;
+      if (!state.rawInput) state.rawInput = '(이미지 메타 소재)';
+    } else {
+      userContent = `다음 메모에서 소재를 추출해주세요. 반드시 아래 JSON 형식으로만 답하세요.
+
+메모: ${raw}
+
+출력 형식 (설명 없이 JSON만):
+{"objects":["사물1","사물2"],"places":["장소1"],"actions":["행동1","행동2"],"sensory":["감각 디테일1","감각 디테일2"]}`;
+    }
+
+    const res = await callClaude(key, userContent, '소재를 추출하는 도구입니다. JSON만 출력합니다. 이미지가 있으면 이미지 분석 메타데이터를 우선 사용합니다.');
+    const data = safeJsonFromText(res);
 
     state.materials = [];
     const add = (cat, items) => (items||[]).forEach(t =>
-      state.materials.push({ id: Date.now()+Math.random(), category:cat, text:t, selected:true })
+      state.materials.push({ id: Date.now()+Math.random(), category:cat, text:String(t), selected:true })
     );
     add('사물', data.objects);
     add('장소', data.places);
@@ -1227,7 +1568,7 @@ function updateSelectedScenes() {
   }
   el.innerHTML = state.scenes.map(s =>
     `<span class="chip active" style="cursor:default">${escHtml(s)}</span>`
-  ).join('');
+  ).join('\n');
 }
 
 // ══════════════════════════════════════════
@@ -1243,7 +1584,7 @@ function updateGenSummary() {
 
 async function generateCandidates() {
   const key = getApiKey(); if (!key) return;
-  if (!state.rawInput && !manualImageBase64) { toast('STEP 1로 돌아가 메모나 이미지를 입력해주세요.'); return; }
+  if (!state.rawInput && !manualImageBase64 && !manualImageMeta) { toast('STEP 1로 돌아가 메모나 이미지를 입력해주세요.'); return; }
 
   const btn = document.getElementById('genBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>생성 중…';
@@ -1255,16 +1596,30 @@ async function generateCandidates() {
   const exStr = examples.map((e,i)=>`[예시 ${i+1}]\n${e.text}`).join('\n\n');
 
   // 최근 생성 반복 문구
-  const recentText = state.generationHistory.slice(-30).join(' ');
+  const recentText = state.generationHistory.slice(-30).join('\n');
   const overused = WATCH_PHRASES.filter(p => {
     const cnt = (recentText.match(new RegExp(p,'g'))||[]).length;
     return cnt >= 2;
   });
 
+  const imageMeta = await ensureManualImageMeta(key, state.rawInput);
+  const perceptionPlan = await buildPerceptionPlan(key, {
+    input_type: imageMeta ? 'image_meta+text' : 'text',
+    text: state.rawInput,
+    materials: state.scenes.join(', ') || state.materials.filter(m=>m.selected).map(m=>m.text).join(', '),
+    image_meta: compactImageMeta(imageMeta)
+  });
+
   const system = `너는 삽만리 Writing Studio의 후보 생성 엔진이다.
 완성글을 쓰지 말고, 사용자가 고르고 버릴 수 있는 짧은 후보를 만든다.
 
-우선순위: 장면 > 사실 > 리듬 > 감정 > 의미
+우선순위: 관찰 선택 > 장면 > 사실 > 리듬 > 감정 > 의미
+
+Runtime Rules:
+${buildRuntimeRulesText()}
+
+Perception Plan — 반드시 이 계획 안에서만 쓸 것:
+${planToText(perceptionPlan)}
 
 절대 금지:
 - 교훈형 결말 (그래서 삶은, 그것만으로 충분, 괜찮다 등)
@@ -1285,15 +1640,19 @@ ${TYPE_INSTRUCTION[state.type]}
   "prose":   ["짧은 산문 후보1","짧은 산문 후보2","짧은 산문 후보3"]
 }`;
 
-  let user;
-  if (manualImageBase64) {
-    user = [
-      { type:'image', source:{ type:'base64', media_type:manualImageType, data:manualImageBase64 } },
-      { type:'text', text:`소재: ${state.rawInput}\n선택 장면: ${state.scenes.join(', ') || '(이미지 전체 참고)'}\n시점: ${state.persp}\n결: ${state.grain}\n도입 방식: ${state.openMode}으로 시작\n전개 방식: ${state.devMode}\n끝맺음: ${state.endMode}` }
-    ];
-  } else {
-    user = `소재: ${state.rawInput}\n선택 장면: ${state.scenes.join(', ') || '(전체 소재 참고)'}\n시점: ${state.persp}\n결: ${state.grain}\n도입 방식: ${state.openMode}으로 시작\n전개 방식: ${state.devMode}\n끝맺음: ${state.endMode}`;
-  }
+  const user = `소재/메모: ${state.rawInput}
+선택 장면: ${state.scenes.join(', ') || '(전체 소재 참고)'}
+시점: ${state.persp}
+결: ${state.grain}
+도입 방식: ${state.openMode}으로 시작
+전개 방식: ${state.devMode}
+끝맺음: ${state.endMode}
+
+이미지 메타:
+${compactImageMeta(imageMeta)}
+
+Perception Plan:
+${planToText(perceptionPlan)}`;
 
   try {
     const raw = await callClaude(key, user, system, 2000);
@@ -1308,7 +1667,7 @@ ${TYPE_INSTRUCTION[state.type]}
     add('prose',   data.prose);
 
     // 생성 히스토리 저장
-    const allText = [...(data.opening||[]), ...(data.middle||[]), ...(data.ending||[]), ...(data.prose||[])].join(' ');
+    const allText = [...(data.opening||[]), ...(data.middle||[]), ...(data.ending||[]), ...(data.prose||[])].join('\n');
     state.generationHistory.push(allText);
     if (state.generationHistory.length > 50) state.generationHistory.shift();
 
@@ -1343,7 +1702,7 @@ function renderCandidates() {
       const idx = state.candidates.indexOf(c);
       // 반복 문구 감지
       const hits = WATCH_PHRASES.filter(p => c.text.includes(p));
-      const recentCnt = state.generationHistory.slice(0,-1).join(' ');
+      const recentCnt = state.generationHistory.slice(0,-1).join('\n');
       const highRisk = WATCH_PHRASES.filter(p => c.text.includes(p) && (recentCnt.match(new RegExp(p,'g'))||[]).length >= 3);
 
       const card = document.createElement('div');
@@ -1413,7 +1772,7 @@ function updateSelectedCandidatesPanel() {
   const html = sel.map((c,i) => `
     <div style="margin-bottom:10px;padding:8px;background:var(--s2);border-radius:4px;cursor:pointer;font-family:var(--serif);font-size:13px;line-height:1.9;color:var(--text)" onclick="insertToEditor(${state.candidates.indexOf(c)})">
       ${escHtml(c.text)}
-    </div>`).join('');
+    </div>`).join('\n');
   if (el3) el3.innerHTML = html;
   if (el4) el4.innerHTML = html;
 }
@@ -1452,7 +1811,7 @@ function checkLessonEnding(text) {
   const found = LESSON_PATTERNS.filter(p => text.includes(p));
   const el = document.getElementById('lessonCheck');
   if (found.length) {
-    el.innerHTML = found.map(p => `<span class="warn-badge">△ ${escHtml(p)}</span>`).join(' ') +
+    el.innerHTML = found.map(p => `<span class="warn-badge">△ ${escHtml(p)}</span>`).join('\n') +
       '<div style="margin-top:6px;font-size:11px;color:var(--yellow)">교훈형 패턴이 감지됐어요.</div>';
   } else {
     el.innerHTML = '<span style="color:var(--green);font-size:11px">✓ 교훈형 결말 없음</span>';
@@ -1567,7 +1926,7 @@ function runQualityCheck() {
   }
 
   // 반복 문구 현황
-  const recentAll = state.generationHistory.join(' ') + ' ' + text;
+  const recentAll = state.generationHistory.join('\n') + ' ' + text;
   const phraseStats = document.getElementById('phraseStats');
   phraseStats.innerHTML = '';
   WATCH_PHRASES.forEach(p => {
@@ -1586,7 +1945,7 @@ function runQualityCheck() {
     { label:'장면이 있는가?', pass: state.scenes.length > 0 || /마당|창가|커피|목련|고양이/.test(text) },
     { label:'교훈형 결말이 없는가?', pass: !LESSON_PATTERNS.some(p=>text.includes(p)) },
     { label:'감시 문구가 과하지 않은가?', pass: WATCH_PHRASES.filter(p=>text.includes(p)).length <= 1 },
-    { label:'마지막 문장이 너무 정리되지 않았는가?', pass: !/(그래서|결국|충분|괜찮|소중|위로)/.test(text.split('\n').slice(-2).join('')) },
+    { label:'마지막 문장이 너무 정리되지 않았는가?', pass: !/(그래서|결국|충분|괜찮|소중|위로)/.test(text.split('\n').slice(-2).join('\n')) },
     { label:'글이 비어있지 않은가?', pass: text.trim().length > 10 },
   ];
 
@@ -1614,7 +1973,7 @@ async function copyFinal() {
 // 반복 문구 감시
 // ══════════════════════════════════════════
 function checkRepeatWarning() {
-  const recentText = state.generationHistory.slice(-30).join(' ');
+  const recentText = state.generationHistory.slice(-30).join('\n');
   const warns = [];
   WATCH_PHRASES.forEach(p => {
     const cnt = (recentText.match(new RegExp(p,'g'))||[]).length;
@@ -1626,15 +1985,15 @@ function checkRepeatWarning() {
     `<div class="phrase-row" style="padding:4px 0">
       <span style="color:var(--muted);font-size:11px">${escHtml(w.phrase)}</span>
       <span class="phrase-count ${w.danger?'danger':'warn'}">${w.cnt}회</span>
-    </div>`).join('');
+    </div>`).join('\n');
 }
 
 function updateWatchPhraseList() {
-  const recentText = state.generationHistory.slice(-30).join(' ');
+  const recentText = state.generationHistory.slice(-30).join('\n');
   const el = document.getElementById('watchPhraseList');
   const active = WATCH_PHRASES.filter(p => (recentText.match(new RegExp(p,'g'))||[]).length >= 2);
   if (!active.length) { el.textContent = '현재 반복 없음'; return; }
-  el.innerHTML = active.map(p => `<span class="warn-badge" style="margin:2px">${escHtml(p)}</span>`).join('');
+  el.innerHTML = active.map(p => `<span class="warn-badge" style="margin:2px">${escHtml(p)}</span>`).join('\n');
 }
 
 function updateRefCount() {
@@ -2069,6 +2428,9 @@ async function loadManualImage(file) {
     const img = await resizeImageFile(file);
     manualImageBase64 = img.base64;
     manualImageType = img.mediaType;
+    manualImageMeta = null;
+    manualImageSource = 'direct';
+    updateImageMetaStatus();
     const preview = document.getElementById('manualImgPreview');
     preview.src = img.dataUrl;
     preview.style.display = 'block';
@@ -2084,6 +2446,7 @@ async function loadManualImage(file) {
 function removeManualImage(e) {
   e.stopPropagation();
   manualImageBase64 = null; manualImageType = null;
+  manualImageMeta = null; manualImageSource = 'none'; updateImageMetaStatus();
   document.getElementById('manualImgPreview').style.display = 'none';
   document.getElementById('manualDropLabel').style.display = 'block';
   document.getElementById('manualImgRemove').style.display = 'none';
@@ -2112,6 +2475,9 @@ async function loadAutoImage(file) {
     const img = await resizeImageFile(file);
     autoImageBase64 = img.base64;
     autoImageType = img.mediaType;
+    autoImageMeta = null;
+    autoImageSource = 'direct';
+    updateImageMetaStatus();
     const preview = document.getElementById('autoImgPreview');
     preview.src = img.dataUrl;
     preview.style.display = 'block';
@@ -2127,6 +2493,7 @@ async function loadAutoImage(file) {
 function removeAutoImage(e) {
   e.stopPropagation();
   autoImageBase64 = null; autoImageType = null;
+  autoImageMeta = null; autoImageSource = 'none'; updateImageMetaStatus();
   document.getElementById('autoImgPreview').style.display = 'none';
   document.getElementById('autoDropLabel').style.display = 'block';
   document.getElementById('autoImgRemove').style.display = 'none';
@@ -2143,71 +2510,88 @@ function setAutoType(btn) {
 async function autoGenerate() {
   const key = getApiKey(); if (!key) return;
   const text = document.getElementById('autoTextInput').value.trim();
-  if (!autoImageBase64 && !text) { toast('이미지나 텍스트를 입력해주세요.'); return; }
+  if (!autoImageBase64 && !autoImageMeta && !text) { toast('이미지나 텍스트를 입력해주세요.'); return; }
 
   const btn = document.getElementById('autoGenBtn');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>생성 중…';
 
-  // profile_data 기반 시스템 프롬프트
-  const examples = db.examples.filter(e => e.type === autoType || e.type === 'poem').slice(-4);
-  const pairs = db.pairs.filter(p => p.type === autoType).slice(-2);
+  try {
+    const imageMeta = await ensureAutoImageMeta(key, text);
+    const perceptionPlan = await buildPerceptionPlan(key, {
+      input_type: imageMeta ? 'image_meta+text' : 'text',
+      text,
+      materials: text,
+      image_meta: compactImageMeta(imageMeta)
+    });
 
-  const ruleStr = db.rules.map((r,i) => `${i+1}. ${r}`).join('\n');
-  let system = '당신은 한국 크리에이터 Vase Lim(@sapmanri)의 글쓰기 도구입니다.\n'
-    + 'Vase의 문체로 글을 씁니다.\n\n'
-    + '## 문체 규칙\n' + ruleStr + '\n\n'
-    + '## 절대 금지\n'
-    + '- 교훈형 결말: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게"\n'
-    + '- 감성 상투어: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"\n'
-    + '- 입력에 없는 장면 지어내기\n'
-    + '- 감정 직접 설명 (장면·사물로 드러낼 것)\n\n'
-    + '## 생성 원칙\n'
-    + '장면 → 사실 → 리듬 → 감정 → 의미\n\n'
-    + TYPE_INSTRUCTION[autoType];
+    const examples = db.examples.filter(e => e.type === autoType || e.type === 'poem').slice(-3);
+    const pairs = db.pairs.filter(p => p.type === autoType).slice(-2);
+    const avoidPhrases = buildAvoidPhraseText();
 
-  if (examples.length) {
-    system += `
+    let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 Writing Studio입니다.
+이번 버전은 바로 글을 쓰지 않고 Perception Plan을 따른 뒤 글을 씁니다.
 
-## Vase가 직접 쓴 예시 (문체 참고, 복사 금지)
+## Runtime Rules
+${buildRuntimeRulesText()}
+
+## Perception Plan
+${planToText(perceptionPlan)}
+
+## 절대 금지
+- 교훈형 결말: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게"
+- 감성 상투어와 반복 표현: ${avoidPhrases.join(', ')}
+- 입력에 없는 장면 지어내기
+- 감정 직접 설명. 장면, 행동, 감각, 물성으로 남길 것
+- 이미지 메타 전체를 설명문처럼 나열하지 말 것
+
+## 생성 원칙
+선택 소재 하나 → 작은 관찰 → 마음의 미세한 변화 → 장면 안에서 멈춤
+
+${TYPE_INSTRUCTION[autoType]}`;
+
+    if (examples.length) {
+      system += `
+
+## Vase가 직접 쓴 예시 (온도와 리듬만 참고, 표현 복사 금지)
 `;
-    examples.forEach((e,i) => { system += `
+      examples.forEach((e,i) => { system += `
 --- 예시 ${i+1} ---
-${e.text.slice(0,400)}
+${e.text.slice(0,360)}
 `; });
-  }
-  if (pairs.length) {
-    system += `
+    }
+    if (pairs.length) {
+      system += `
 
 ## Vase 수정 패턴
 `;
-    pairs.forEach((p,i) => { system += `
-[AI]: ${p.original.slice(0,200)}
-[수정]: ${p.edited.slice(0,200)}
+      pairs.forEach((p,i) => { system += `
+[AI]: ${p.original.slice(0,160)}
+[수정]: ${p.edited.slice(0,160)}
 `; });
-  }
-
-  try {
-    let userContent;
-    if (autoImageBase64) {
-      userContent = [
-        { type:'image', source:{ type:'base64', media_type:autoImageType, data:autoImageBase64 } },
-        { type:'text', text: text
-          ? `이 이미지를 보고, 아래 내용도 참고해서 글을 써주세요.
-
-${text}`
-          : '이 이미지를 보고 글을 써주세요. 이미지의 분위기, 빛, 계절, 감각적 디테일을 Vase 문체로 담아주세요.' }
-      ];
-    } else {
-      userContent = `다음 내용을 바탕으로 글을 써주세요:
-
-${text}`;
     }
+    if (db.rules.length) {
+      system += `
+
+## Style Bible 참고 규칙(과적용 금지)
+${db.rules.slice(-8).map((r,i)=>`${i+1}. ${r}`).join('\n')}
+`;
+    }
+
+    const userContent = `입력 메모:
+${text || '(없음)'}
+
+이미지 분석 메타:
+${compactImageMeta(imageMeta) || '(없음)'}
+
+Perception Plan:
+${planToText(perceptionPlan)}
+
+위 계획을 기준으로 글을 써주세요. 메타데이터를 설명하지 말고, 선택된 소재 하나와 작은 변화만 남겨주세요.`;
 
     const raw = await callClaude(key, userContent, system, 1500);
     document.getElementById('autoEditor').value = raw;
     document.getElementById('autoCharCount').textContent = raw.length.toLocaleString() + '자';
 
-    // 히스토리 + 품질 체크
     state.generationHistory.push(raw);
     if (state.generationHistory.length > 50) state.generationHistory.shift();
     checkAutoQuality(raw);
@@ -2221,14 +2605,14 @@ ${text}`;
 
 function checkAutoQuality(text) {
   // 반복 문구
-  const recentText = state.generationHistory.slice(-30).join(' ');
+  const recentText = state.generationHistory.slice(-30).join('\n');
   const warns = WATCH_PHRASES.filter(p => {
     const cnt = (recentText.match(new RegExp(p,'g'))||[]).length;
     return cnt >= 3;
   });
   const warnEl = document.getElementById('autoRepeatWarn');
   if (warns.length) {
-    warnEl.innerHTML = warns.map(w => `<span class="warn-badge" style="margin:2px">${escHtml(w)}</span>`).join('');
+    warnEl.innerHTML = warns.map(w => `<span class="warn-badge" style="margin:2px">${escHtml(w)}</span>`).join('\n');
   } else {
     warnEl.innerHTML = '<span style="color:var(--green);font-size:11px">반복 문구 없음 ✓</span>';
   }
@@ -2237,7 +2621,7 @@ function checkAutoQuality(text) {
   const lessonEl = document.getElementById('autoLessonCheck');
   const found = LESSON_PATTERNS.filter(p => text.includes(p));
   if (found.length) {
-    lessonEl.innerHTML = found.map(p => `<span class="warn-badge">${escHtml(p)}</span>`).join(' ');
+    lessonEl.innerHTML = found.map(p => `<span class="warn-badge">${escHtml(p)}</span>`).join('\n');
   } else {
     lessonEl.innerHTML = '<span style="color:var(--green);font-size:11px">교훈형 결말 없음 ✓</span>';
   }
@@ -2309,6 +2693,7 @@ async function init() {
     document.getElementById('apiBtn').style.color = 'var(--green)';
   }
   updateSettingSummary();
+  updateImageMetaStatus();
   switchMainTab('write'); // 초기 탭
   setMode('auto'); // 초기 모드
   await loadDB();
