@@ -423,7 +423,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-27 14:00 KST</span></a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-27 17:30 KST</span></a>
   <div class="topbar-right">
     <div class="indicator" id="indicator"></div>
     <div class="lang-toggle">
@@ -468,6 +468,11 @@ function setLang(lang) {
 function t(ko, en) {
   if (SAPMANRI_LANG === 'en') return (en && en.trim()) ? en : (ko || '');
   return ko || '';
+}
+// 배열용 언어 선택 헬퍼
+function tArr(koArr, enArr) {
+  if (SAPMANRI_LANG === 'en' && Array.isArray(enArr) && enArr.length) return enArr;
+  return koArr || [];
 }
 
 let _currentIssue = null;
@@ -626,8 +631,10 @@ function renderPage(p, i, allPages, issue) {
 }
 
 function renderCover(p, issue) {
-  const headline = (p.headline || []).map(l => `<span>${esc(l)}</span>`).join('');
-  const toc = (p.toc || []).map((t, i) => `<div class="toc-item"><span class="n">${String(i+1).padStart(2,'0')}</span>${esc(t)}</div>`).join('');
+  const headlineArr = tArr(p.headline, p.headline_en);
+  const tocArr      = tArr(p.toc,      p.toc_en);
+  const headline = headlineArr.map(l => `<span>${esc(l)}</span>`).join('');
+  const toc = tocArr.map((item, i) => `<div class="toc-item"><span class="n">${String(i+1).padStart(2,'0')}</span>${esc(item)}</div>`).join('');
   return `
   <section class="page page-cover">
     ${p.image ? `<div class="bg-photo" style="background-image:url('${esc(p.image)}')"></div>` : ''}
@@ -656,7 +663,8 @@ function renderFullbleed(p) {
 }
 
 function renderIndex(p) {
-  const items = (p.items || []).map((t, i) => `<div class="index-item"><div class="n">${String(i+1).padStart(2,'0')}</div><div class="t">${esc(t)}</div></div>`).join('');
+  const itemsArr = tArr(p.items, p.items_en);
+  const items = itemsArr.map((item, i) => `<div class="index-item"><div class="n">${String(i+1).padStart(2,'0')}</div><div class="t">${esc(item)}</div></div>`).join('');
   return `
   <section class="page page-index">
     <div class="label">${esc(t(p.label, p.label_en) || 'Contents · 이번 호 이야기')}</div>
@@ -787,10 +795,11 @@ function renderDialogue(p) {
   }
   const lineHtml = lines.map(l => {
     const sideCls = l.side === 'right' ? ' right' : '';
+    const lineText = t(l.text, l.text_en);
     return `
     <div class="dlg-line${sideCls}">
       ${l.speaker ? `<div class="dlg-speaker">${esc(l.speaker)}</div>` : ''}
-      <div class="dlg-text">${esc(l.text || '')}</div>
+      <div class="dlg-text">${esc(lineText || '')}</div>
     </div>`;
   }).join('');
   return `
