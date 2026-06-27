@@ -1174,19 +1174,31 @@ function updateSpreadSplitPreview(idx, splitX) {
   // background-image 방식: 이미지를 배율 조정해서 해당 부분만 보이게
   // 왼쪽: 이미지 전체 너비를 (100/splitX)*100% 로 확대 → 왼쪽 정렬 → 왼쪽 splitX% 부분이 보임
   // 오른쪽: (100/(100-splitX))*100% 로 확대 → 오른쪽 정렬 → 오른쪽 (100-splitX)% 부분이 보임
-  const imgEl = leftDiv ? leftDiv.querySelector('img') : null;
-  const imgSrc = imgEl ? imgEl.src : null;
+  // src: div background에서 URL 추출, 없으면 img 태그 fallback
+  let imgSrc = null;
+  if (leftDiv) {
+    const bg = leftDiv.style.background || leftDiv.style.backgroundImage || '';
+    const m = bg.match(/url\(['"]?([^'"\)]+)['"]?\)/);
+    if (m) imgSrc = m[1];
+    if (!imgSrc) {
+      const imgEl = leftDiv.querySelector('img');
+      if (imgEl) imgSrc = imgEl.src;
+    }
+  }
+  // 현재 page의 photo src를 pages 배열에서 직접 가져오기 (가장 확실)
+  if (!imgSrc) {
+    const pg = pages[idx];
+    if (pg && pg.imageId) {
+      const photo = typeof photos !== 'undefined' ? photos.find(p => p.id === pg.imageId) : null;
+      if (photo) imgSrc = photo.dataUrl || photo.url || null;
+    }
+  }
 
   if (imgSrc) {
     const leftW  = `${(100/splitVal)*100}%`;
     const rightW = `${(100/(100-splitVal))*100}%`;
-
-    [leftDiv, rightDiv].forEach((div, side) => {
-      if (!div) return;
-      div.style.background = `url('${imgSrc}') ${side===0?'0%':'100%'} 50% / ${side===0?leftW:rightW} auto`;
-      const imgTag = div.querySelector('img');
-      if (imgTag) imgTag.style.display = 'none'; // img 태그는 숨기고 background로만 표시
-    });
+    if (leftDiv)  leftDiv.style.background  = `url('${imgSrc.startsWith('data:') ? imgSrc : `'${imgSrc}'`}') 0% 50% / ${leftW} auto`;
+    if (rightDiv) rightDiv.style.background = `url('${imgSrc.startsWith('data:') ? imgSrc : `'${imgSrc}'`}') 100% 50% / ${rightW} auto`;
   }
   if (label) label.textContent = `자르는 지점: ${splitVal}%`;
 }
@@ -1275,17 +1287,18 @@ function renderPageCard(pg, idx) {
       const src = pg.imageId ? photoSrc(pg.imageId) : '';
       const leftW  = sx > 0   ? `${(100/sx)*100}%`       : '200%';
       const rightW = (100-sx) > 0 ? `${(100/(100-sx))*100}%` : '200%';
+      // spread 프리뷰: background-image 방식으로 초기 렌더부터 정확한 크롭 표시
+      const leftBg  = src ? `url('${src}') 0% 50% / ${leftW} auto` : '#111';
+      const rightBg = src ? `url('${src}') 100% 50% / ${rightW} auto` : '#111';
       body = `
         <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
         <div class="hint">와이드 사진 1장을 2페이지에 걸쳐 보여줍니다. PC/패드는 한 화면, 모바일은 좌/우로 나눠서 순서대로 표시됩니다.</div>
         <div class="field"><label>모바일 크롭 위치 — 슬라이더로 사진 자르는 지점 조정</label>
           <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-            <div class="spread-preview-left" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#111;flex-shrink:0;">
-              ${src ? `<img src="${src}" style="position:absolute;top:0;left:0;width:${leftW};max-width:none;height:100%;object-fit:cover;object-position:left center;display:block;">` : ''}
+            <div class="spread-preview-left" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:${leftBg};flex-shrink:0;">
               <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.05em;">왼쪽</div>
             </div>
-            <div class="spread-preview-right" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#111;flex-shrink:0;">
-              ${src ? `<img src="${src}" style="position:absolute;top:0;right:0;width:${rightW};max-width:none;height:100%;object-fit:cover;object-position:right center;display:block;">` : ''}
+            <div class="spread-preview-right" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:${rightBg};flex-shrink:0;">
               <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.05em;">오른쪽</div>
             </div>
             <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:8px;justify-content:center;">
