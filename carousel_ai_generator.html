@@ -702,8 +702,58 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
     if (!hash || !service) return null;
     await _ensureLoaded();
     const entry = _cache.entries[hash];
-    if (!entry || !entry[service]) return null;
-    return entry[service].data;
+    if (!entry) return null;
+    // 1) 서비스별 네임스페이스 방식 (기존)
+    if (entry[service] && entry[service].data) return entry[service].data;
+    // 2) library.html flat 방식 fallback — mood 등 분석 필드가 직접 있는 경우
+    if (entry.mood || entry.subject_position || entry.suggested_caption) {
+      // flat 구조를 캐러셀이 쓰는 data 형식으로 매핑
+      return {
+        subject_position   : entry.subject_position,
+        focal_x            : entry.focal_x,
+        focal_y            : entry.focal_y,
+        aspect_ratio       : entry.aspect_ratio,
+        best_page_type     : entry.best_page_type,
+        overall_brightness : entry.overall_brightness,
+        dominant_color     : entry.dominant_color,
+        color_temperature  : entry.color_temperature,
+        contrast_level     : entry.contrast_level,
+        visual_density     : entry.visual_density,
+        negative_space     : entry.negative_space,
+        season             : entry.season,
+        time_of_day        : entry.time_of_day,
+        location_type      : entry.location_type,
+        primary_subject    : entry.primary_subject,
+        secondary_subjects : entry.secondary_subjects,
+        activity_type      : entry.activity_type,
+        human_presence     : entry.human_presence,
+        animal_presence    : entry.animal_presence,
+        material_texture   : entry.material_texture,
+        has_text           : entry.has_text,
+        text_area_position : entry.text_area_position,
+        text_safe_area     : entry.text_safe_area,
+        camera_distance    : entry.camera_distance,
+        camera_angle       : entry.camera_angle,
+        motion_implied     : entry.motion_implied,
+        focus_clarity      : entry.focus_clarity,
+        thumbnail_potential: entry.thumbnail_potential,
+        thumbnail_reason   : entry.thumbnail_reason,
+        mood               : entry.mood,
+        suggested_caption  : entry.suggested_caption,
+        suggested_caption_en: entry.suggested_caption_en,
+        suggested_caption_left : entry.suggested_caption_left,
+        suggested_caption_right: entry.suggested_caption_right,
+        suggested_label    : entry.suggested_label,
+        suggested_label_en : entry.suggested_label_en,
+        spread_focal_left  : entry.spread_focal_left,
+        spread_focal_right : entry.spread_focal_right,
+        domesticity_score  : entry.domesticity_score,
+        rurality_score     : entry.rurality_score,
+        craft_score        : entry.craft_score,
+        schema_version     : entry.schema_version,
+      };
+    }
+    return null;
   }
 
   /**
