@@ -790,6 +790,7 @@ async function autoBuildPages(status) {
       flushGrid(true);
       consecutiveFullbleed = 0;
       const pg = PAGE_DEFAULTS.botanical();
+      pg.number = String(pages.filter(x => x.type === 'botanical').length + 1);
       pg.imageId = p.id;
       pg.caption = (p.analysis && p.analysis.suggested_caption) || '';
       newPages.push(pg);
@@ -931,7 +932,7 @@ const PAGE_DEFAULTS = {
   dialogue: () => ({ type: 'dialogue', label: '', lines: [{ speaker: '', text: '', side: 'left' }] }),
   list: () => ({ type: 'list', label: '', title: '', items: [{ name: '', desc: '' }] }),
   milestone: () => ({ type: 'milestone', number: '', label: '', text: '' }),
-  botanical: () => ({ type: 'botanical', imageId: null, tag: 'Botanical Notes', caption: '' }),
+  botanical: () => ({ type: 'botanical', imageId: null, tag: 'Botanical Notes', number: '', title: '', subtitle: '', caption: '' }),
   closing: () => ({ type: 'closing', text: '', cta: '' }),
 };
 
@@ -1185,9 +1186,14 @@ function renderPageCard(pg, idx) {
     case 'botanical':
       body = `
         <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
-        <div class="hint">세이지색 배경의 "잡지 속 잡지" 페이지입니다. 식물/소품 일러스트나 클로즈업 사진에 어울립니다.</div>
-        <div class="field"><label>상단 태그</label><input value="${esc(pg.tag||'')}" oninput="pages[${idx}].tag=this.value"></div>
-        <div class="field"><label>캡션 (이탤릭, 작게)</label><input value="${esc(pg.caption||'')}" oninput="pages[${idx}].caption=this.value"></div>
+        <div class="hint">전시 카탈로그 스타일 페이지. 태그·번호·제목·서브라벨·사진·캡션 조합. 서브라벨은 "한국어/English" 형식으로 입력하면 좌우로 나뉩니다.</div>
+        <div class="row">
+          <div class="field" style="flex:2"><label>상단 태그 (소분류)</label><input value="${esc(pg.tag||'')}" oninput="pages[${idx}].tag=this.value"></div>
+          <div class="field w-fixed"><label>번호</label><input value="${esc(pg.number||'')}" oninput="pages[${idx}].number=this.value" placeholder="1"></div>
+        </div>
+        <div class="field"><label>제목</label><input value="${esc(pg.title||'')}" oninput="pages[${idx}].title=this.value" placeholder="차를 세우는 시간"></div>
+        <div class="field"><label>서브라벨 (한국어/English 형식으로 입력 → 좌우 분리)</label><input value="${esc(pg.subtitle||'')}" oninput="pages[${idx}].subtitle=this.value" placeholder="차 한 잔의 루틴/A ritual with tea"></div>
+        <div class="field"><label>캡션 (하단 이탤릭, 작게)</label><input value="${esc(pg.caption||'')}" oninput="pages[${idx}].caption=this.value"></div>
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
       `;
       break;
@@ -1580,9 +1586,12 @@ async function publish() {
           out.text = pg.text || '';
           break;
         case 'botanical':
-          out.image = pg.imageId ? photoPathMap[pg.imageId] : '';
-          out.tag = pg.tag || '';
-          out.caption = pg.caption || '';
+          out.image    = pg.imageId ? photoPathMap[pg.imageId] : '';
+          out.tag      = pg.tag      || '';
+          out.number   = pg.number   || '';
+          out.title    = pg.title    || '';
+          out.subtitle = pg.subtitle || '';
+          out.caption  = pg.caption  || '';
           break;
         case 'closing':
           out.text = pg.text || '';
