@@ -1040,24 +1040,27 @@ function setFocalPoint(evt, idx) {
 function updateSpreadSplitPreview(idx, splitX) {
   const card = document.querySelectorAll('.page-card')[idx];
   if (!card) return;
-  const imgLeft  = card.querySelector('.spread-preview-left img');
-  const imgRight = card.querySelector('.spread-preview-right img');
+  const leftDiv  = card.querySelector('.spread-preview-left');
+  const rightDiv = card.querySelector('.spread-preview-right');
   const label    = card.querySelector('.spread-split-label');
-  const splitVal = Number(splitX);
-  // 왼쪽: 이미지 왼쪽 splitX% 부분 표시 → object-position 0%
-  // 오른쪽: 이미지 오른쪽 (100-splitX)% 부분 표시 → object-position 100%
-  // width를 조정해서 해당 비율만큼만 보이도록
-  if (imgLeft) {
-    imgLeft.style.width = splitVal > 0 ? `${(100/splitVal)*100}%` : '200%';
-    imgLeft.style.left  = '0';
-    imgLeft.style.transform = 'none';
-  }
-  if (imgRight) {
-    const rightPct = 100 - splitVal;
-    imgRight.style.width = rightPct > 0 ? `${(100/rightPct)*100}%` : '200%';
-    imgRight.style.right = '0';
-    imgRight.style.left  = 'auto';
-    imgRight.style.transform = 'none';
+  const splitVal = Math.max(5, Math.min(95, Number(splitX)));
+
+  // background-image 방식: 이미지를 배율 조정해서 해당 부분만 보이게
+  // 왼쪽: 이미지 전체 너비를 (100/splitX)*100% 로 확대 → 왼쪽 정렬 → 왼쪽 splitX% 부분이 보임
+  // 오른쪽: (100/(100-splitX))*100% 로 확대 → 오른쪽 정렬 → 오른쪽 (100-splitX)% 부분이 보임
+  const imgEl = leftDiv ? leftDiv.querySelector('img') : null;
+  const imgSrc = imgEl ? imgEl.src : null;
+
+  if (imgSrc) {
+    const leftW  = `${(100/splitVal)*100}%`;
+    const rightW = `${(100/(100-splitVal))*100}%`;
+
+    [leftDiv, rightDiv].forEach((div, side) => {
+      if (!div) return;
+      div.style.background = `url('${imgSrc}') ${side===0?'0%':'100%'} 50% / ${side===0?leftW:rightW} auto`;
+      const imgTag = div.querySelector('img');
+      if (imgTag) imgTag.style.display = 'none'; // img 태그는 숨기고 background로만 표시
+    });
   }
   if (label) label.textContent = `자르는 지점: ${splitVal}%`;
 }
@@ -1264,7 +1267,24 @@ async function genPageText(idx, extraContext) {
   try {
     toast('생성 중…');
     const needsTitle = pg.type === 'essay' && !(pg.label || '').trim() && !(pg.title || '').trim();
-    const result = await generateMagazineText(pg.type, photo, extraContext, { needsTitle });
+
+    // 이미지 없는 텍스트 페이지(essay/dialogue/quote/list/milestone)의 경우
+    // 기존 텍스트(pg.text, pg.label, pg.title)를 컨텍스트로 전달해서 AI가 작업할 내용을 알게 함
+    let effectiveContext = extraContext || '';
+    if (!photo && pg.type !== 'fullbleed' && pg.type !== 'spread') {
+      const existingBits = [
+        pg.label && `라벨: ${pg.label}`,
+        pg.title && `제목: ${pg.title}`,
+        pg.text  && pg.text.length > 10 && `기존 본문 (다시 쓰되 같은 주제): ${pg.text.slice(0, 200)}`,
+        pg.caption && `캡션: ${pg.caption}`,
+        pg.context && `맥락: ${pg.context}`,
+      ].filter(Boolean);
+      if (existingBits.length) {
+        effectiveContext = existingBits.join(' / ') + (extraContext ? ` / ${extraContext}` : '');
+      }
+    }
+
+    const result = await generateMagazineText(pg.type, photo, effectiveContext, { needsTitle });
 
     // bilingual JSON 결과 처리
     if (result && typeof result === 'object' && !result._parseError) {
