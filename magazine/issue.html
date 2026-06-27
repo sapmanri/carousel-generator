@@ -328,24 +328,60 @@ img{max-width:100%;display:block}
 .page-milestone .ms-desc{font-family:var(--serif);font-size:18px;line-height:1.7;margin-top:28px;max-width:480px;color:rgba(250,245,238,0.85)}
 @media(min-width:768px){.page-milestone .ms-number{font-size:160px}.page-milestone .ms-desc{font-size:22px}}
 
-/* ── Type 13: Botanical (보태니컬 연속 일러스트, 잡지 속 잡지) ── */
-.page-botanical{background:var(--sage);color:var(--ink);padding:0}
+/* ── Type 13: Botanical — 전시 카탈로그 스타일 ── */
+.page-botanical{
+  background:#F5F2ED;color:var(--ink);padding:0;
+  display:flex;flex-direction:column;min-height:100vh;
+}
 .page-botanical .bot-wrap{
-  width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  position:relative;padding:48px 20px;
+  width:100%;flex:1;display:flex;flex-direction:column;
+  padding:48px 32px 40px;gap:0;
 }
-.page-botanical .bot-frame{
-  width:100%;max-width:480px;aspect-ratio:3/4;overflow:hidden;
-  border:1px solid rgba(0,0,0,0.1);background:var(--cream);
-}
-.page-botanical .bot-frame img{width:100%;height:100%;object-fit:contain;display:block}
-.page-botanical .bot-caption{
-  margin-top:20px;font-family:var(--serif);font-style:italic;font-size:14px;
-  color:rgba(0,0,0,0.5);text-align:center;
+/* 상단: 라벨(좌) + 번호(우) */
+.page-botanical .bot-header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:20px;
 }
 .page-botanical .bot-tag{
-  position:absolute;top:32px;left:50%;transform:translateX(-50%);
-  font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(0,0,0,0.35);
+  font-family:var(--sans);font-size:9px;letter-spacing:0.22em;
+  text-transform:uppercase;color:rgba(0,0,0,0.38);padding-top:3px;
+}
+.page-botanical .bot-number{
+  font-family:'Helvetica Neue',Arial,sans-serif;font-weight:900;
+  font-size:clamp(52px,14vw,80px);line-height:0.85;
+  color:var(--ink);letter-spacing:-0.02em;
+}
+/* 타이틀 */
+.page-botanical .bot-title{
+  font-family:var(--serif);font-weight:700;
+  font-size:clamp(22px,6vw,34px);line-height:1.18;
+  color:var(--ink);margin-bottom:16px;word-break:keep-all;
+}
+/* 이중 언어 서브라벨 */
+.page-botanical .bot-sublabels{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin-bottom:28px;padding-bottom:20px;
+  border-bottom:1px solid rgba(0,0,0,0.1);
+}
+.page-botanical .bot-sublabel-item{
+  font-family:var(--sans);font-size:10px;font-weight:300;
+  color:rgba(0,0,0,0.45);line-height:1.5;
+}
+.page-botanical .bot-sublabel-item .sub-heading{
+  display:block;font-size:8px;letter-spacing:0.14em;
+  text-transform:uppercase;color:rgba(0,0,0,0.28);margin-bottom:3px;
+}
+/* 사진 */
+.page-botanical .bot-frame{
+  flex:1;width:100%;overflow:hidden;
+  border:1px solid rgba(0,0,0,0.08);background:#fff;
+  min-height:200px;
+}
+.page-botanical .bot-frame img{width:100%;height:100%;object-fit:cover;display:block}
+/* 하단 캡션 */
+.page-botanical .bot-caption{
+  margin-top:14px;font-family:var(--serif);font-style:italic;
+  font-size:12px;color:rgba(0,0,0,0.4);letter-spacing:0.03em;
 }
 
 
@@ -728,12 +764,36 @@ function renderMilestone(p) {
 }
 
 function renderBotanical(p) {
+  const tag      = p.tag      || 'Botanical Notes';
+  const number   = p.number   || '';
+  const title    = p.title    || '';
+  const subtitle = p.subtitle || '';
+  const caption  = p.caption  || '';
+  const img      = p.image    || '';
+
+  // 이중 언어 서브라벨: subtitle을 '/' 또는 줄바꿈으로 구분 (없으면 단일)
+  let subKo = subtitle, subEn = '';
+  const divider = subtitle.indexOf('/');
+  if (divider > -1) {
+    subKo = subtitle.slice(0, divider).trim();
+    subEn = subtitle.slice(divider + 1).trim();
+  }
+
   return `
   <section class="page page-botanical">
     <div class="bot-wrap">
-      <div class="bot-tag">${esc(p.tag || 'Botanical Notes')}</div>
-      <div class="bot-frame">${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy">` : ''}</div>
-      ${p.caption ? `<div class="bot-caption">${esc(p.caption)}</div>` : ''}
+      <div class="bot-header">
+        <div class="bot-tag">${esc(tag)}</div>
+        ${number ? `<div class="bot-number">${esc(number)}</div>` : ''}
+      </div>
+      ${title ? `<div class="bot-title">${nl(title)}</div>` : ''}
+      ${(subKo || subEn) ? `
+      <div class="bot-sublabels">
+        ${subKo ? `<div class="bot-sublabel-item"><span class="sub-heading">Exhibition</span>${esc(subKo)}</div>` : ''}
+        ${subEn ? `<div class="bot-sublabel-item"><span class="sub-heading">전시</span>${esc(subEn)}</div>` : ''}
+      </div>` : ''}
+      <div class="bot-frame">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ''}</div>
+      ${caption ? `<div class="bot-caption">${esc(caption)}</div>` : ''}
     </div>
   </section>`;
 }
