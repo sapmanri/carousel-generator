@@ -193,7 +193,62 @@ async function analyzeImage(dataUrl, hints) {
   const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
   const key = getApiKey();
   if (!key) throw new Error('API Key가 필요합니다.');
-  const hintText = hints ? `\n\n참고로 이 사진은 이전에 다른 도구에서 분석한 적이 있고, 그 결과는 다음과 같아 (참고만 하고 필요하면 다르게 판단해도 됨): subject_position=${hints.subject_position}, overall_brightness=${hints.overall_brightness}, dominant_color=${hints.dominant_color}, mood=${hints.mood}` : '';
+
+  const hintText = hints ? `\n\n이전 분석 참고 (달라도 됨): subject_position=${hints.subject_position}, brightness=${hints.overall_brightness}, color=${hints.dominant_color}, mood=${hints.mood}` : '';
+
+  const prompt = `이 사진을 분석해서 아래 JSON 형식으로만 반환해줘. 다른 텍스트 없이 JSON만. 삽만리(@sapmanri) 는 한국 농촌/슬로우라이프 채널이고, 이 맥락을 반영해서 분석할 것.
+
+{
+  "subject_position": "left|center|right|top|bottom|full",
+  "focal_x": 피사체 가로위치 0~100 숫자,
+  "focal_y": 피사체 세로위치 0~100 숫자,
+  "aspect_ratio": "wide|square|tall",
+  "best_page_type": "fullbleed|split|grid|quote|spread|botanical 중 택1. spread=가로풍경/그룹샷, botanical=정물/클로즈업/식물",
+  "spread_focal_left": 스프레드 왼쪽 크롭 중심 0~100,
+  "spread_focal_right": 스프레드 오른쪽 크롭 중심 0~100,
+
+  "overall_brightness": "dark|mid|bright",
+  "dominant_color": "#hex",
+  "color_temperature": "warm|cool|neutral",
+  "contrast_level": "low|medium|high",
+  "visual_density": "low|medium|high",
+  "negative_space": "low|medium|high",
+
+  "season": "spring|summer|autumn|winter|unknown",
+  "time_of_day": "dawn|morning|day|afternoon|evening|night|unknown",
+  "location_type": "indoor|outdoor|garden|kitchen|workshop|countryside|city|cafe|unknown",
+
+  "primary_subject": "주요 피사체 한국어 키워드 1-2단어",
+  "secondary_subjects": ["배경/보조 피사체 배열"],
+  "activity_type": "cooking|gardening|craft|coffee|walking|resting|cleaning|travel|animal|object|unknown",
+  "human_presence": "none|hands|back|side|face|multiple",
+  "animal_presence": "none|cat|dog|bird|other",
+  "material_texture": ["재질 배열: wood|soil|fabric|metal|water|glass|food|plant|paper|ceramic"],
+  "has_text": true/false,
+  "text_area_position": "none|top|center|bottom|left|right",
+
+  "camera_distance": "closeup|medium|wide",
+  "camera_angle": "top_down|eye_level|low_angle|side|unknown",
+  "motion_implied": "still|hand_action|walking|pouring|cutting|making|unknown",
+  "focus_clarity": "clear|soft|busy",
+
+  "text_safe_area": "left|right|top|bottom|center|none",
+  "thumbnail_potential": "low|medium|high",
+  "thumbnail_reason": "썸네일 적합도 이유 한 줄",
+
+  "mood": "한 단어 한국어 분위기",
+  "suggested_caption": "Vase 문체 한국어 캡션 1줄 (12자 이내, 명조체 어울리는 문장)",
+  "suggested_caption_en": "English caption (poetic, under 8 words)",
+  "suggested_caption_left": "스프레드 왼쪽 캡션 한국어 (10자 이내)",
+  "suggested_caption_right": "스프레드 오른쪽 캡션 한국어 (10자 이내)",
+  "suggested_label": "소제목 한국어 (4-8자)",
+  "suggested_label_en": "English sublabel (2-4 words)",
+
+  "domesticity_score": 0~5 (일상/가정 느낌 강도),
+  "rurality_score": 0~5 (농촌/자연 느낌 강도),
+  "craft_score": 0~5 (수공예/만들기 느낌 강도)
+}${hintText}`;
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -203,12 +258,11 @@ async function analyzeImage(dataUrl, hints) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 600,
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1200,
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-        { type: 'text', text: `이 이미지를 분석해서 웹매거진 페이지 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"subject_position":"left|center|right|top|bottom|full","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_caption":"명조체로 어울리는 한국어 캡션 한 줄 (Vase 문체, 12자 이내)","suggested_caption_left":"스프레드용 왼쪽 캡션 (10자 내외)","suggested_caption_right":"스프레드용 오른쪽 캡션 (10자 내외)","suggested_label":"소제목 한국어 (예: 아침의 루틴, 4-8자)","suggested_label_en":"Short English sublabel (3-5 words, poetic mood)","suggested_caption_en":"English caption one line matching the Korean caption (poetic, under 8 words)","aspect_ratio":"wide|square|tall (이미지의 가로세로 비율 느낌)","best_page_type":"fullbleed|split|grid|quote|spread|botanical 중 이 사진에 가장 어울리는 것. 가로로 넓고 풍경/그룹샷처럼 펼쳐 보여주면 좋은 사진은 spread를 우선 선택할 것. 식물, 꽃, 작은 정물, 디테일 클로즈업처럼 여백 있는 카드형 프레임에 단아하게 어울리는 사진은 botanical을 선택할 것.","focal_x":"이 사진에서 가장 중요한 피사체(인물, 얼굴, 핵심 사물 등)의 가로 위치를 0~100 사이 숫자로 (좌측=0, 중앙=50, 우측=100). 풀블리드로 세로 화면에 꽉 채울 때 이 지점이 잘리지 않도록 기준점이 됨.","focal_y":"같은 피사체의 세로 위치를 0~100 사이 숫자로 (상단=0, 중앙=50, 하단=100).","spread_focal_left":"이 사진을 스프레드(2페이지로 나눠 보여주는 형태)로 쓸 때, 모바일 첫 페이지(왼쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 0=이미지 좌측 끝). 핵심 피사체가 이미지 중앙~우측에 있다면 이 값을 높여서 첫 페이지에도 보이게 할 것.","spread_focal_right":"같은 사진을 모바일 둘째 페이지(오른쪽)에서 보여줄 크롭의 중심을 0~100으로 (기본값 100=이미지 우측 끝). 핵심 피사체가 이미지 중앙~좌측에 있다면 이 값을 낮춰서 둘째 페이지에도 보이게 할 것."}${hintText}` }
+        { type: 'text', text: prompt }
       ]}]
     })
   });
