@@ -617,24 +617,33 @@ function renderSpread(p) {
   const img = esc(p.image || '');
   const leftCaption = p.captionLeft || p.caption || '';
   const rightCaption = p.captionRight || '';
-  // 모바일에서 절반씩 자를 때 어느 지점을 중심으로 자를지 (0~100, object-position-x 값)
-  // 기본값: 왼쪽 절반=0(이미지 좌측 끝), 오른쪽 절반=100(이미지 우측 끝) — 기존 동작과 동일
-  const focalXLeft = (typeof p.focalXLeft === 'number') ? p.focalXLeft : 0;
-  const focalXRight = (typeof p.focalXRight === 'number') ? p.focalXRight : 100;
 
-  // 모바일: 좌/우 절반을 각각 별도 페이지로
+  // splitX: 단일 슬라이더 기반 (신규). focalXLeft/Right: 기존 방식 (하위호환)
+  let leftStyle = '', rightStyle = '';
+  if (typeof p.splitX === 'number') {
+    const sx = p.splitX;
+    const leftW  = sx > 0       ? `${(100/sx)*100}%`       : '200%';
+    const rightW = (100-sx) > 0 ? `${(100/(100-sx))*100}%` : '200%';
+    leftStyle  = `width:${leftW};max-width:none;height:100%;position:absolute;top:0;left:0;object-fit:cover;object-position:left center;`;
+    rightStyle = `width:${rightW};max-width:none;height:100%;position:absolute;top:0;right:0;object-fit:cover;object-position:right center;`;
+  } else {
+    const focalXLeft  = (typeof p.focalXLeft  === 'number') ? p.focalXLeft  : 0;
+    const focalXRight = (typeof p.focalXRight === 'number') ? p.focalXRight : 100;
+    leftStyle  = `object-position:${focalXLeft}% center`;
+    rightStyle = `object-position:${focalXRight}% center`;
+  }
+
   const mobileLeft = `
   <section class="page page-spread half-left">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="object-position:${focalXLeft}% center">` : ''}</div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${leftStyle}">` : ''}</div>
     ${leftCaption ? `<div class="spread-caption">${nl(leftCaption)}</div>` : ''}
   </section>`;
   const mobileRight = `
   <section class="page page-spread half-right">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="object-position:${focalXRight}% center">` : ''}</div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${rightStyle}">` : ''}</div>
     ${rightCaption ? `<div class="spread-caption">${nl(rightCaption)}</div>` : ''}
   </section>`;
 
-  // 데스크탑/패드: 한 화면에 전체 스프레드
   const desktop = `
   <section class="page page-spread-desktop">
     <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</div>
@@ -763,25 +772,18 @@ async function exportPdf() {
       bar.style.width = `${Math.round((i / pages.length) * 80)}%`;
 
       const page = pages[i];
-      let canvas;
-      try {
-        canvas = await html2canvas(page, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: null,
-          scrollX: 0,
-          scrollY: 0,
-          width: page.offsetWidth,
-          height: page.scrollHeight,
-          windowWidth: page.offsetWidth,
-          windowHeight: page.scrollHeight,
-        });
-      } catch(capErr) {
-        console.warn(`페이지 ${i+1} 캡처 실패, 스킵:`, capErr);
-        canvases.push(null);
-        continue;
-      }
+      const canvas = await html2canvas(page, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        scrollX: 0,
+        scrollY: 0,
+        width: page.offsetWidth,
+        height: page.scrollHeight,
+        windowWidth: page.offsetWidth,
+        windowHeight: page.scrollHeight,
+      });
       canvases.push(canvas);
     }
 
@@ -793,9 +795,8 @@ async function exportPdf() {
 
     for (let i = 0; i < canvases.length; i++) {
       const canvas = canvases[i];
-      if (!canvas || !canvas.width || !canvas.height) continue; // 빈 캔버스 스킵
       const ratio = canvas.height / canvas.width;
-      const pageH = Math.max(1, Math.round(PDF_W_MM * ratio)); // 최소 1mm 보장
+      const pageH = Math.round(PDF_W_MM * ratio);
       const orient = ratio > 1 ? 'portrait' : 'landscape';
 
       if (i === 0) {
