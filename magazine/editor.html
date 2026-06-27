@@ -210,7 +210,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Magazine Editor<span class="build-tag">v2026-06-27c</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Magazine Editor<span class="build-tag">v2026-06-27d</span></div>
   <div class="header-right">
     <input type="password" class="key-field" id="apiKeyField" placeholder="Anthropic API Key">
     <button class="btn-ghost" id="apiKeyBtn" onclick="toggleField('apiKeyField','apiKeyBtn',API_KEY_STORAGE)">API Key</button>
@@ -323,12 +323,14 @@ header{
   <div class="section">
     <div class="section-title">발행</div>
     <div class="publish-bar">
-      <button class="btn-primary" onclick="publish()" id="publishBtn">발행하기</button>
+      <button class="btn-primary" onclick="regenAllAndPublish()" id="regenPublishBtn">✦ 전체 텍스트 재생성 + 발행</button>
+      <button class="btn-primary" onclick="publish()" id="publishBtn" style="background:var(--s3);border-color:var(--border2)">발행하기</button>
       <span class="publish-status" id="publishStatus"></span>
     </div>
     <div class="hint" style="margin-top:8px">
-      이미지는 <strong>Cloudflare R2</strong>에 저장됩니다. R2 미설정 시 GitHub 라이브러리에 저장.
-      페이지 데이터는 <code>magazine/issues.json</code>에 저장됩니다.
+      <strong>전체 재생성</strong>: 모든 페이지 텍스트를 AI가 한/영 동시 재생성 후 발행. &nbsp;
+      <strong>발행하기</strong>: 현재 내용 그대로 발행.
+      이미지는 Cloudflare R2에 저장됩니다.
     </div>
   </div>
 
