@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAPMANRI · Image Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1a1a;--s1:#222;--s2:#2a2a2a;--s3:#323232;
+  --border:#333;--border2:#444;
+  --text:#fff;--muted:rgba(255,255,255,0.6);--dim:rgba(255,255,255,0.3);
+  --orange:#E8762C;--green:#8aaa88;--red:#c47a6a;
+  --serif:"Gowun Batang",Georgia,serif;
+  --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh}
+a{color:inherit;text-decoration:none}
+
+/* header */
+header{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 24px;background:rgba(26,26,26,0.9);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:var(--sans);font-size:13px;letter-spacing:0.06em}
+.logo em{color:var(--orange);font-style:normal;font-weight:500}
+.build-tag{font-family:var(--mono);font-size:9px;color:var(--dim);margin-left:8px}
+.header-right{display:flex;gap:8px;align-items:center}
+.btn-ghost{
+  background:none;border:1px solid var(--border);color:var(--muted);
+  font-family:var(--mono);font-size:10px;padding:6px 12px;border-radius:4px;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-ghost.ok{color:var(--green);border-color:var(--green)}
+
+/* layout */
+.app{max-width:1200px;margin:0 auto;padding:24px}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+.section-label{font-family:var(--mono);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+
+/* upload zone */
+.upload-zone{
+  border:1.5px dashed var(--border2);border-radius:8px;padding:36px 24px;text-align:center;
+  cursor:pointer;background:var(--s1);transition:all .15s;position:relative;
+}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--orange);background:var(--s2)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone p{font-size:13px;color:var(--muted);margin-top:10px}
+.upload-zone span{font-size:11px;color:var(--dim);margin-top:6px;display:block}
+
+/* queue */
+.queue{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.queue-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--s2);border-radius:6px;padding:10px 14px;
+  border:1px solid var(--border);
+}
+.queue-thumb{width:48px;height:48px;object-fit:cover;border-radius:4px;flex-shrink:0;background:var(--s3)}
+.queue-info{flex:1;min-width:0}
+.queue-name{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.queue-meta{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:2px}
+.queue-status{font-family:var(--mono);font-size:10px;min-width:100px;text-align:right}
+.status-wait{color:var(--dim)}
+.status-uploading{color:var(--orange)}
+.status-analyzing{color:#7bb8d4}
+.status-done{color:var(--green)}
+.status-err{color:var(--red)}
+
+/* action bar */
+.action-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.btn-primary{
+  background:var(--orange);border:none;color:#fff;
+  font-family:var(--sans);font-weight:500;font-size:13px;
+  padding:10px 20px;border-radius:6px;cursor:pointer;transition:opacity .15s;
+}
+.btn-primary:hover{opacity:0.85}
+.btn-primary:disabled{opacity:0.35;cursor:not-allowed}
+.hint{font-size:11px;color:var(--dim);line-height:1.6}
+.progress-label{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+/* gallery */
+.gallery-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.filter-input{
+  background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--sans);font-size:12px;padding:7px 12px;border-radius:4px;outline:none;
+  flex:1;min-width:180px;max-width:300px;
+}
+.filter-input:focus{border-color:var(--border2)}
+.sort-select{
+  background:var(--s2);border:1px solid var(--border);color:var(--muted);
+  font-family:var(--mono);font-size:10px;padding:7px 10px;border-radius:4px;outline:none;cursor:pointer;
+}
+.count-label{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:auto}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.grid-item{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;cursor:pointer;background:var(--s2);border:1px solid var(--border)}
+.grid-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.grid-item:hover img{transform:scale(1.04)}
+.grid-item-meta{
+  position:absolute;inset:auto 0 0;
+  background:linear-gradient(transparent,rgba(0,0,0,0.75));
+  padding:24px 10px 8px;
+  font-size:10px;color:rgba(255,255,255,0.8);
+  opacity:0;transition:opacity .2s;
+}
+.grid-item:hover .grid-item-meta{opacity:1}
+.grid-item-date{font-family:var(--mono);font-size:9px;opacity:0.6}
+.grid-item-mood{display:inline-block;background:rgba(232,118,44,0.5);border-radius:3px;padding:1px 5px;font-size:9px;margin-top:3px}
+
+/* detail panel */
+.detail-overlay{
+  display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.8);
+  align-items:center;justify-content:center;padding:24px;
+}
+.detail-overlay.active{display:flex}
+.detail-panel{
+  background:var(--s1);border-radius:10px;
+  display:flex;gap:0;max-width:860px;width:100%;max-height:90vh;overflow:hidden;
+}
+.detail-img{flex:1;min-width:0;background:#000}
+.detail-img img{width:100%;height:100%;object-fit:contain;display:block}
+.detail-info{width:300px;flex-shrink:0;padding:20px;overflow-y:auto;border-left:1px solid var(--border)}
+.detail-close{position:absolute;top:24px;right:24px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:50%;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.meta-row{margin-bottom:12px}
+.meta-label{font-family:var(--mono);font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-bottom:3px}
+.meta-value{font-size:12px;color:var(--muted);word-break:break-all;line-height:1.5}
+.meta-value.mood-tag{display:inline-block;background:rgba(232,118,44,0.2);border:1px solid rgba(232,118,44,0.4);border-radius:4px;padding:2px 8px;color:var(--orange)}
+
+/* empty state */
+.empty{text-align:center;padding:60px 20px;color:var(--dim)}
+.empty div{font-size:32px;margin-bottom:12px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:640px){
+  .detail-panel{flex-direction:column}
+  .detail-info{width:100%;border-left:none;border-top:1px solid var(--border)}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-27a</span></div>
+  <div class="header-right">
+    <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
+    <a class="btn-ghost" href="/index.html">← Tools</a>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- 업로드 섹션 -->
+  <div style="margin-bottom:32px">
+    <div class="section-label">이미지 업로드 + AI 분석</div>
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*" multiple>
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5">
+        <path d="M12 16V4m0 0L8 8m4-4l4 4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke-linecap="round"/>
+      </svg>
+      <p>이미지를 끌어다 놓거나 클릭해서 선택</p>
+      <span>JPG · PNG · WEBP · 여러 장 동시 가능 · EXIF 날짜 자동 추출</span>
+    </div>
+
+    <div class="queue" id="queue" style="display:none"></div>
+
+    <div class="action-bar" id="actionBar" style="display:none">
+      <button class="btn-primary" id="startBtn" onclick="startProcess()">↑ 업로드 + 분석 시작</button>
+      <button class="btn-ghost" onclick="clearQueue()">초기화</button>
+      <span class="progress-label" id="progressLabel"></span>
+    </div>
+    <div class="hint" style="margin-top:8px">
+      R2에 업로드하고 Claude Vision으로 분석합니다. 분석 결과(캡션·라벨·분위기·EXIF·날짜)는 <code>image_cache.json</code>에 저장됩니다.
+    </div>
+  </div>
+
+  <!-- 갤러리 섹션 -->
+  <div>
+    <div class="gallery-bar">
+      <div class="section-label" style="margin-bottom:0">라이브러리 갤러리</div>
+      <input class="filter-input" id="filterInput" placeholder="분위기, 캡션, 날짜로 검색…" oninput="applyFilter()">
+      <select class="sort-select" id="sortSelect" onchange="applyFilter()">
+        <option value="date_desc">촬영일 최신순</option>
+        <option value="date_asc">촬영일 오래된순</option>
+        <option value="upload_desc">업로드 최신순</option>
+        <option value="mood">분위기별</option>
+      </select>
+      <button class="btn-ghost" onclick="loadGallery()">↻ 새로고침</button>
+      <span class="count-label" id="countLabel"></span>
+    </div>
+    <div class="grid" id="gallery">
+      <div class="empty"><div>📷</div>라이브러리가 비어있습니다<br>이미지를 업로드해보세요</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 상세 패널 -->
+<div class="detail-overlay" id="detailOverlay" onclick="closeDetail(event)">
+  <button class="detail-close" onclick="closeDetail()">✕</button>
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<!-- 공통 설정 모듈 -->
+<script src="/shared-config.js"></script>
+<!-- 이미지 라이브러리 모듈 -->
+<script src="/magazine/image-library.js?v=20260627a"></script>
+
+<script>
+// ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
+async function readExif(file) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const buf = e.target.result;
+        const view = new DataView(buf);
+        if (view.getUint16(0) !== 0xFFD8) { resolve({}); return; }
+        let offset = 2;
+        while (offset < buf.byteLength - 2) {
+          const marker = view.getUint16(offset);
+          if (marker === 0xFFE1) { // APP1 (EXIF)
+            const exifData = parseExif(view, offset + 4);
+            resolve(exifData);
+            return;
+          }
+          if (marker === 0xFFDA) break;
+          offset += 2 + view.getUint16(offset + 2);
+        }
+      } catch(e) {}
+      resolve({});
+    };
+    reader.onerror = () => resolve({});
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function parseExif(view, start) {
+  try {
+    const littleEndian = view.getUint16(start) === 0x4949;
+    const ifdOffset = view.getUint32(start + 4, littleEndian);
+    const ifd = start + ifdOffset;
+    const entries = view.getUint16(ifd, littleEndian);
+    const result = {};
+    const tagNames = {
+      0x0132: 'DateTime', 0x9003: 'DateTimeOriginal', 0x9004: 'DateTimeDigitized',
+      0x010F: 'Make', 0x0110: 'Model',
+      0x829A: 'ExposureTime', 0x829D: 'FNumber', 0x8827: 'ISO',
+      0xA002: 'PixelXDimension', 0xA003: 'PixelYDimension',
+    };
+    for (let i = 0; i < entries; i++) {
+      const e = ifd + 2 + i * 12;
+      const tag = view.getUint16(e, littleEndian);
+      const type = view.getUint16(e + 2, littleEndian);
+      const count = view.getUint32(e + 4, littleEndian);
+      const valOffset = e + 8;
+      if (tagNames[tag]) {
+        if (type === 2) { // ASCII
+          const offset = count <= 4 ? valOffset : start + view.getUint32(valOffset, littleEndian);
+          let str = '';
+          for (let j = 0; j < count - 1; j++) str += String.fromCharCode(view.getUint8(offset + j));
+          result[tagNames[tag]] = str.trim();
+        } else if (type === 3) { // SHORT
+          result[tagNames[tag]] = view.getUint16(valOffset, littleEndian);
+        } else if (type === 4) { // LONG
+          result[tagNames[tag]] = view.getUint32(valOffset, littleEndian);
+        } else if (type === 5) { // RATIONAL
+          const off = start + view.getUint32(valOffset, littleEndian);
+          result[tagNames[tag]] = view.getUint32(off, littleEndian) / view.getUint32(off + 4, littleEndian);
+        }
+      }
+    }
+    return result;
+  } catch(e) { return {}; }
+}
+
+function exifDateToISO(exifDate) {
+  if (!exifDate) return null;
+  // "2026:06:13 14:30:00" → "2026-06-13"
+  const m = exifDate.match(/^(\d{4}):(\d{2}):(\d{2})/);
+  return m ? `${m[1]}-${m[2]}-${m[3]}` : null;
+}
+
+// ── 큐 관리 ─────────────────────────────────────────────────────
+let queue = [];
+
+async function handleFiles(files) {
+  if (!files || !files.length) return;
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    const url = URL.createObjectURL(file);
+    const exif = await readExif(file);
+    const shotDate = exifDateToISO(exif.DateTimeOriginal || exif.DateTime);
+    queue.push({ file, url, exif, shotDate, status: 'wait' });
+  }
+  renderQueue();
+}
+
+function renderQueue() {
+  const qEl = document.getElementById('queue');
+  const aEl = document.getElementById('actionBar');
+  if (!queue.length) { qEl.style.display = 'none'; aEl.style.display = 'none'; return; }
+  qEl.style.display = 'flex';
+  aEl.style.display = 'flex';
+  qEl.innerHTML = queue.map((item, i) => `
+    <div class="queue-item" id="qi-${i}">
+      <img class="queue-thumb" src="${item.url}" alt="">
+      <div class="queue-info">
+        <div class="queue-name">${item.file.name}</div>
+        <div class="queue-meta">
+          ${Math.round(item.file.size / 1024)}KB
+          ${item.shotDate ? ` · 📅 ${item.shotDate}` : ''}
+          ${item.exif.Make ? ` · ${item.exif.Make} ${item.exif.Model || ''}`.trim() : ''}
+        </div>
+      </div>
+      <div class="queue-status status-${item.status}" id="qs-${i}">
+        ${item.status === 'wait' ? '대기' : item.status === 'uploading' ? '<span class="spinner"></span>업로드' : item.status === 'analyzing' ? '<span class="spinner"></span>분석' : item.status === 'done' ? '✓ 완료' : '✗ 실패'}
+      </div>
+    </div>
+  `).join('');
+}
+
+function updateItemStatus(i, status) {
+  queue[i].status = status;
+  const el = document.getElementById(`qs-${i}`);
+  if (!el) return;
+  el.className = `queue-status status-${status}`;
+  el.innerHTML = {
+    wait: '대기', uploading: '<span class="spinner"></span>업로드',
+    analyzing: '<span class="spinner"></span>분석', done: '✓ 완료', err: '✗ 실패'
+  }[status] || status;
+}
+
+function clearQueue() {
+  queue.forEach(item => URL.revokeObjectURL(item.url));
+  queue = [];
+  renderQueue();
+  document.getElementById('progressLabel').textContent = '';
+}
+
+// ── 메인 프로세스: 업로드 + AI 분석 ────────────────────────────
+async function startProcess() {
+  if (!window.ImageLibrary) { alert('이미지 라이브러리 모듈을 불러오지 못했습니다.'); return; }
+  const apiKey = window.SapConfig.getAnthropicKey();
+  const btn = document.getElementById('startBtn');
+  btn.disabled = true;
+
+  let done = 0, failed = 0;
+  for (let i = 0; i < queue.length; i++) {
+    const item = queue[i];
+    if (item.status === 'done') continue;
+    document.getElementById('progressLabel').textContent = `${i + 1} / ${queue.length}`;
+
+    try {
+      // 1. DataURL 변환
+      const dataUrl = await new Promise((res, rej) => {
+        const reader = new FileReader();
+        reader.onload = () => res(reader.result);
+        reader.onerror = rej;
+        reader.readAsDataURL(item.file);
+      });
+
+      // 2. R2 업로드
+      updateItemStatus(i, 'uploading');
+      const uploadResult = await window.ImageLibrary.uploadIfNeeded(dataUrl, item.file.type);
+
+      // 3. AI 분석 (API 키 있을 때만)
+      let analysis = null;
+      if (apiKey) {
+        updateItemStatus(i, 'analyzing');
+        analysis = await analyzeImage(dataUrl, item.file.type, apiKey);
+      }
+
+      // 4. 캐시에 저장 (EXIF 포함)
+      const hash = await window.ImageLibrary.hashImage(dataUrl);
+      if (hash) {
+        await saveToCache(hash, uploadResult.url || uploadResult.path, item, analysis);
+      }
+
+      updateItemStatus(i, 'done');
+      done++;
+    } catch(e) {
+      console.error(e);
+      updateItemStatus(i, 'err');
+      failed++;
+    }
+  }
+
+  btn.disabled = false;
+  document.getElementById('progressLabel').textContent =
+    `완료: ${done}장${failed ? ` / 실패: ${failed}장` : ''}`;
+  loadGallery();
+}
+
+// ── Claude Vision 분석 ──────────────────────────────────────────
+async function analyzeImage(dataUrl, mediaType, apiKey) {
+  const base64 = dataUrl.split(',')[1];
+  const prompt = `이 사진을 보고 다음 JSON만 반환 (다른 텍스트 없이):
+{"mood":"한 단어 한국어 분위기","suggested_caption":"Vase 문체 한국어 캡션 1줄 (12자 이내)","suggested_caption_en":"English caption (under 8 words)","suggested_label":"소제목 한국어 (4-8자)","suggested_label_en":"English sublabel (2-4 words)","subject":"주요 피사체 한국어 1-2단어","dominant_color":"#hex","overall_brightness":"dark|mid|bright","best_page_type":"fullbleed|split|grid|botanical|spread"}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 300,
+      messages: [{ role: 'user', content: [
+        { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+        { type: 'text', text: prompt }
+      ]}]
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  const text = data.content?.[0]?.text || '{}';
+  const s = text.indexOf('{'), e = text.lastIndexOf('}');
+  return JSON.parse(text.slice(s, e + 1));
+}
+
+// ── image_cache.json 저장 ───────────────────────────────────────
+async function saveToCache(hash, r2Url, queueItem, analysis) {
+  const token = window.SapConfig.getGithubToken();
+  if (!token) return; // 토큰 없으면 캐시 저장 스킵
+
+  const REPO = 'sapmanri/carousel-generator';
+  const FILE = 'image_cache.json';
+  const API  = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+
+  // 현재 캐시 로드
+  let cache = { entries: {} }, sha = null;
+  try {
+    const res = await fetch(API, { headers: { Authorization: `token ${token}` } });
+    if (res.ok) {
+      const json = await res.json();
+      sha = json.sha;
+      const decoded = JSON.parse(atob(json.content.replace(/\n/g, '')));
+      cache = decoded;
+    }
+  } catch(e) {}
+
+  // 항목 추가/업데이트
+  const exif = queueItem.exif || {};
+  cache.entries[hash] = {
+    r2_url         : r2Url,
+    uploaded_at    : new Date().toISOString().slice(0, 10),
+    // EXIF
+    exif_date      : queueItem.shotDate || null,
+    exif_datetime  : exif.DateTimeOriginal || exif.DateTime || null,
+    exif_make      : exif.Make || null,
+    exif_model     : exif.Model || null,
+    exif_iso       : exif.ISO || null,
+    exif_fstop     : exif.FNumber ? `f/${exif.FNumber.toFixed(1)}` : null,
+    exif_exposure  : exif.ExposureTime ? `1/${Math.round(1/exif.ExposureTime)}s` : null,
+    exif_width     : exif.PixelXDimension || null,
+    exif_height    : exif.PixelYDimension || null,
+    // AI 분석
+    ...(analysis || {}),
+    // 파일 정보
+    filename       : queueItem.file.name,
+    filesize       : queueItem.file.size,
+  };
+
+  // 저장
+  const jsonStr  = JSON.stringify(cache, null, 2);
+  const bytes    = new TextEncoder().encode(jsonStr);
+  const binStr   = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+  const body     = { message: `Library: add ${hash}`, content: btoa(binStr) };
+  if (sha) body.sha = sha;
+  await fetch(API, {
+    method: 'PUT',
+    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+}
+
+// ── 갤러리 ─────────────────────────────────────────────────────
+let allItems = [];
+
+async function loadGallery() {
+  const galleryEl = document.getElementById('gallery');
+  galleryEl.innerHTML = '<div class="empty"><span class="spinner"></span> 불러오는 중…</div>';
+
+  try {
+    // R2 목록 + 캐시 메타데이터 병합
+    const [items, cache] = await Promise.all([
+      window.ImageLibrary ? window.ImageLibrary.list() : [],
+      loadCache()
+    ]);
+
+    allItems = items.map(item => {
+      const hash = item.hash;
+      const meta = cache[hash] || {};
+      return { ...item, ...meta };
+    });
+
+    applyFilter();
+  } catch(e) {
+    galleryEl.innerHTML = `<div class="empty"><div>⚠️</div>${e.message}</div>`;
+  }
+}
+
+async function loadCache() {
+  const token = window.SapConfig.getGithubToken();
+  if (!token) return {};
+  try {
+    const res = await fetch(
+      `https://api.github.com/repos/sapmanri/carousel-generator/contents/image_cache.json`,
+      { headers: { Authorization: `token ${token}` }, cache: 'no-store' }
+    );
+    if (!res.ok) return {};
+    const json = await res.json();
+    const data = JSON.parse(atob(json.content.replace(/\n/g, '')));
+    return data.entries || {};
+  } catch(e) { return {}; }
+}
+
+function applyFilter() {
+  const query = document.getElementById('filterInput').value.toLowerCase().trim();
+  const sort  = document.getElementById('sortSelect').value;
+
+  let filtered = allItems.filter(item => {
+    if (!query) return true;
+    const searchable = [
+      item.suggested_caption, item.suggested_label, item.mood,
+      item.subject, item.exif_date, item.filename
+    ].filter(Boolean).join(' ').toLowerCase();
+    return searchable.includes(query);
+  });
+
+  filtered.sort((a, b) => {
+    if (sort === 'date_desc') return (b.exif_date || b.uploaded_at || '').localeCompare(a.exif_date || a.uploaded_at || '');
+    if (sort === 'date_asc')  return (a.exif_date || a.uploaded_at || '').localeCompare(b.exif_date || b.uploaded_at || '');
+    if (sort === 'upload_desc') return (b.uploaded_at || '').localeCompare(a.uploaded_at || '');
+    if (sort === 'mood') return (a.mood || '').localeCompare(b.mood || '');
+    return 0;
+  });
+
+  document.getElementById('countLabel').textContent = `${filtered.length}장`;
+  renderGallery(filtered);
+}
+
+function renderGallery(items) {
+  const el = document.getElementById('gallery');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div>📷</div>이미지가 없습니다</div>';
+    return;
+  }
+  el.innerHTML = items.map((item, i) => `
+    <div class="grid-item" onclick="openDetail(${allItems.indexOf(item)})">
+      <img src="${item.download_url || item.url || ''}" alt="" loading="lazy" onerror="this.style.opacity=0.2">
+      <div class="grid-item-meta">
+        ${item.suggested_caption || item.filename || ''}
+        ${item.exif_date ? `<div class="grid-item-date">${item.exif_date}</div>` : ''}
+        ${item.mood ? `<div class="grid-item-mood">${item.mood}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function openDetail(idx) {
+  const item = allItems[idx];
+  if (!item) return;
+  const overlay = document.getElementById('detailOverlay');
+  const panel = document.getElementById('detailPanel');
+
+  const metaRows = [
+    ['캡션', item.suggested_caption],
+    ['영문 캡션', item.suggested_caption_en],
+    ['라벨', item.suggested_label],
+    ['분위기', item.mood],
+    ['피사체', item.subject],
+    ['촬영일', item.exif_date],
+    ['카메라', [item.exif_make, item.exif_model].filter(Boolean).join(' ')],
+    ['ISO', item.exif_iso],
+    ['조리개', item.exif_fstop],
+    ['셔터', item.exif_exposure],
+    ['해상도', item.exif_width ? `${item.exif_width}×${item.exif_height}` : null],
+    ['밝기', item.overall_brightness],
+    ['주요색', item.dominant_color],
+    ['업로드일', item.uploaded_at],
+    ['파일명', item.filename],
+  ].filter(([, v]) => v);
+
+  panel.innerHTML = `
+    <div class="detail-img"><img src="${item.download_url || item.url}" alt="" loading="lazy"></div>
+    <div class="detail-info">
+      <div style="font-size:11px;font-family:var(--mono);color:var(--dim);margin-bottom:16px;word-break:break-all">${item.hash || ''}</div>
+      ${metaRows.map(([label, val]) => `
+        <div class="meta-row">
+          <div class="meta-label">${label}</div>
+          <div class="meta-value ${label==='분위기'?'mood-tag':''}">${val}</div>
+        </div>
+      `).join('')}
+      <div style="margin-top:16px">
+        <button onclick="navigator.clipboard.writeText('${(item.r2_url || item.download_url || '').replace(/'/g,'')}')" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;">URL 복사</button>
+      </div>
+    </div>
+  `;
+  overlay.classList.add('active');
+}
+
+function closeDetail(e) {
+  if (e && e.target !== document.getElementById('detailOverlay') && !e.target.classList.contains('detail-close')) return;
+  document.getElementById('detailOverlay').classList.remove('active');
+}
+
+// ── 파일 입력 이벤트 ────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const zone  = document.getElementById('uploadZone');
+  const input = document.getElementById('fileInput');
+
+  input.addEventListener('change', e => handleFiles(e.target.files));
+  zone.addEventListener('click', e => { if (e.target !== input) input.click(); });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    handleFiles(e.dataTransfer.files);
+  });
+
+  // 갤러리 초기 로드
+  if (window.ImageLibrary) loadGallery();
+});
+</script>
+</body>
+</html>
