@@ -1749,8 +1749,8 @@
         },
         {
           "type": "quote",
-          "text": "장면보다 조금 늦게 도착하는 마음이 있다.",
-          "text_en": "Sometimes the heart arrives a little late to the scene.",
+          "text": "장면은 이미 지나갔는데 마음은 아직 그 앞에 서 있을 때가 있다.",
+          "text_en": "Sometimes the scene has already passed, but the heart is still standing there.",
           "context": ""
         },
         {
@@ -2101,7 +2101,7 @@
           "type": "closing",
           "text": "오늘도 조금 느리게, 잘 걸어왔습니다.",
           "text_en": "Today, too, we walked slowly — and that was enough.",
-          "cta": ""
+          "cta": "https://youtu.be/RgDPQ7-nB-w"
         }
       ]
     }
