@@ -270,15 +270,14 @@ img{max-width:100%;display:block}
   width:100%;flex:1 1 0%;min-height:0;overflow:hidden;position:relative;background:#000;
 }
 .page-spread .spread-img-wrap img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;
+  position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;
 }
-/* 모바일: 좌/우 절반 — background-image로 크롭 (img 충돌 없음) */
-.page-spread.half-left .spread-img-wrap,
-.page-spread.half-right .spread-img-wrap {
-  background-repeat: no-repeat;
-}
+/* 모바일 half 페이지: img는 컨테이너 채우고 object-position으로만 크롭 위치 제어 */
 .page-spread.half-left .spread-img-wrap img,
-.page-spread.half-right .spread-img-wrap img { display:none; }
+.page-spread.half-right .spread-img-wrap img {
+  position:absolute;top:0;left:0;width:100%;height:100%;
+  object-fit:cover;display:block;max-width:none;
+}
 .page-spread .spread-caption{
   position:absolute;left:20px;top:50%;transform:translateY(-50%);z-index:2;
   font-family:var(--serif);font-size:18px;line-height:1.6;color:var(--cream);
@@ -427,7 +426,7 @@ img{max-width:100%;display:block}
 <body>
 
 <div class="topbar" id="topbar">
-  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-28 10:10 KST</span></a>
+  <a class="back" href="./index.html">← SAPMANRI<span class="build-tag">Last update: 2026-06-28 10:20 KST</span></a>
   <div class="topbar-right">
     <div class="indicator" id="indicator"></div>
     <div class="lang-toggle">
@@ -741,35 +740,29 @@ function renderSpread(p) {
   const leftCaption = p.captionLeft || p.caption || '';
   const rightCaption = p.captionRight || '';
 
-  // splitX: 단일 슬라이더 기반. focalXLeft/Right: 하위호환
-  // 모바일 반쪽은 background-image로 크롭 — CSS/인라인 width 충돌 없음
-  let leftBg = '', rightBg = '';
-  if (img) {
-    const sx = typeof p.splitX === 'number' ? Math.max(5, Math.min(95, p.splitX)) : 50;
-    const fL  = typeof p.focalXLeft  === 'number' ? p.focalXLeft  : 0;
-    const fR  = typeof p.focalXRight === 'number' ? p.focalXRight : 100;
-
-    if (typeof p.splitX === 'number') {
-      // splitX 방식: 이미지를 배율 조정해서 해당 부분만 보이게
-      const leftW  = `${(100/sx)*100}%`;
-      const rightW = `${(100/(100-sx))*100}%`;
-      leftBg  = `background:url('${img}') 0% 50% / ${leftW} auto no-repeat #000;`;
-      rightBg = `background:url('${img}') 100% 50% / ${rightW} auto no-repeat #000;`;
-    } else {
-      // 기존 focalX 방식: object-position 대응 background-position
-      leftBg  = `background:url('${img}') ${fL}% 50% / cover no-repeat #000;`;
-      rightBg = `background:url('${img}') ${fR}% 50% / cover no-repeat #000;`;
-    }
+  // 모바일 half: object-fit:cover + object-position으로 크롭
+  // inset:0 충돌 없이 position:absolute top/left/width/height 명시
+  let leftPos = '0% 50%', rightPos = '100% 50%';
+  if (typeof p.splitX === 'number') {
+    const sx = Math.max(5, Math.min(95, p.splitX));
+    // 왼쪽: 이미지 왼쪽 편향, 오른쪽: 이미지 오른쪽 편향
+    // object-position 0%=왼쪽끝 노출, 100%=오른쪽끝 노출
+    leftPos  = `${Math.round(sx * 0.3)}% 50%`;   // splitX 작을수록 더 왼쪽
+    rightPos = `${Math.round(50 + (100-sx) * 0.5)}% 50%`; // splitX 클수록 더 오른쪽
+  } else if (typeof p.focalXLeft === 'number') {
+    leftPos  = `${p.focalXLeft}% 50%`;
+    rightPos = `${p.focalXRight || 100}% 50%`;
   }
 
+  const imgStyle = `position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;`;
   const mobileLeft = `
   <section class="page page-spread half-left">
-    <div class="spread-img-wrap" style="${leftBg}"></div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}object-position:${leftPos}">` : ''}</div>
     ${leftCaption ? `<div class="spread-caption">${nl(t(leftCaption, p.captionLeft_en))}</div>` : ''}
   </section>`;
   const mobileRight = `
   <section class="page page-spread half-right">
-    <div class="spread-img-wrap" style="${rightBg}"></div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}object-position:${rightPos}">` : ''}</div>
     ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
   </section>`;
 
