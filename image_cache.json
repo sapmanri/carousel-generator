@@ -12,11 +12,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ¨",
-          "suggested_caption": "ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ¬ÃÂ¹ÃÂ",
-          "suggested_caption_left": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
-          "suggested_caption_right": "ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ­ÃÂÃÂÃÂ«ÃÂ³ÃÂµ",
-          "suggested_label": "ÃÂ«ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ­ÃÂÃÂ¸ ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ",
+          "mood": "ÃÂÃÂ«ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ¬ÃÂÃÂ½ÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂ¨",
+          "suggested_caption": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ¬ÃÂÃÂ¹ÃÂÃÂ",
+          "suggested_caption_left": "ÃÂÃÂ«ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ¬ÃÂÃÂ½ÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂªÃÂÃÂ°ÃÂÃÂ",
+          "suggested_caption_right": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ­ÃÂÃÂÃÂÃÂÃÂÃÂ«ÃÂÃÂ³ÃÂÃÂµ",
+          "suggested_label": "ÃÂÃÂ«ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂÃÂÃÂÃÂ­ÃÂÃÂÃÂÃÂ¸ ÃÂÃÂ­ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ",
           "aspect_ratio": "wide",
           "best_page_type": "botanical",
           "focal_x": "35",
@@ -31,10 +31,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ¨",
+          "mood": "ÃÂÃÂ«ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ¬ÃÂÃÂ½ÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂ¨",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ¬ÃÂ¹ÃÂ",
+          "suggested_copy": "ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂÃÂÃÂ¬ÃÂÃÂÃÂÃÂ ÃÂÃÂ¬ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ¬ÃÂÃÂ¹ÃÂÃÂ",
           "suggested_body": ""
         },
         "ts": 1782487480396
@@ -44,7 +44,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂ½ÃÂ¤ÃÂ­ÃÂÃÂ¨"
+          "mood": "ÃÂÃÂ«ÃÂÃÂÃÂÃÂ¬ÃÂÃÂ¬ÃÂÃÂ½ÃÂÃÂ¤ÃÂÃÂ­ÃÂÃÂÃÂÃÂ¨"
         },
         "ts": 1782487480585
       },
@@ -64,20 +64,20 @@
       "season": "summer",
       "time_of_day": "unknown",
       "location_type": "cafe",
-      "primary_subject": "ÃªÂµÂ¬Ã­ÂÂ Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸ Ã«ÂÂ ÃªÂ°Â",
+      "primary_subject": "ÃÂªÃÂµÃÂ¬ÃÂ­ÃÂÃÂ ÃÂ«ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ­ÃÂÃÂ¸ ÃÂ«ÃÂÃÂ ÃÂªÃÂ°ÃÂ",
       "secondary_subjects": [
-        "ÃªÂ¸ÂÃ¬ÂÂ Ã¬ÂÂ¤Ã­ÂÂ¼",
-        "Ã¬ÂÂ",
-        "Ã­ÂÂ°Ã¬ÂÂ Ã­ÂÂÃ«Â ÂÃ¬ÂÂ´Ã­ÂÂ¸",
-        "ÃªÂ²ÂÃ¬Â Â Ã¬ÂÂÃ­ÂÂ Ã­ÂÂ¸Ã«Â ÂÃ¬ÂÂ´"
+        "ÃÂªÃÂ¸ÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ¤ÃÂ­ÃÂÃÂ¼",
+        "ÃÂ¬ÃÂÃÂ",
+        "ÃÂ­ÃÂÃÂ°ÃÂ¬ÃÂÃÂ ÃÂ­ÃÂÃÂÃÂ«ÃÂ ÃÂÃÂ¬ÃÂÃÂ´ÃÂ­ÃÂÃÂ¸",
+        "ÃÂªÃÂ²ÃÂÃÂ¬ÃÂ ÃÂ ÃÂ¬ÃÂÃÂÃÂ­ÃÂÃÂ ÃÂ­ÃÂÃÂ¸ÃÂ«ÃÂ ÃÂÃÂ¬ÃÂÃÂ´"
       ],
       "activity_type": "cooking",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "Ã«Â²Â¨Ã«Â²Â³ Ã­ÂÂÃ¬ÂÂ°Ã«ÂÂ",
-        "Ã¬ÂÂ¸Ã«ÂÂ¼Ã«Â¯Â¹",
-        "ÃªÂ¸ÂÃ¬ÂÂ"
+        "ÃÂ«ÃÂ²ÃÂ¨ÃÂ«ÃÂ²ÃÂ³ ÃÂ­ÃÂÃÂÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ",
+        "ÃÂ¬ÃÂÃÂ¸ÃÂ«ÃÂÃÂ¼ÃÂ«ÃÂ¯ÃÂ¹",
+        "ÃÂªÃÂ¸ÃÂÃÂ¬ÃÂÃÂ"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -87,13 +87,13 @@
       "focus_clarity": "soft",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "Ã¬ÂÂ´Ã¬ÂÂÃ¬Â ÂÃ¬ÂÂ¸ ÃªÂµÂ¬Ã­ÂÂ Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸Ã¬ÂÂ Ã¬ÂÂ Ã«ÂªÂÃ­ÂÂ Ã¬ÂÂ Ã«ÂÂÃ«Â¹ÂÃªÂ°Â Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ ÃªÂ°ÂÃ­ÂÂÃªÂ²Â Ã«ÂÂÃ¬ÂÂ´ Ã­ÂÂ´Ã«Â¦Â­ Ã¬ÂÂ Ã«ÂÂÃ«Â Â¥ Ã«ÂÂÃ¬ÂÂ",
-      "mood": "Ã¬ÂÂ¬Ã¬ÂÂ¸Ã­ÂÂ¨",
-      "suggested_caption": "Ã«ÂÂ¥ÃªÂ·Â¼ ÃªÂ³ÂÃ¬Â ÂÃ¬ÂÂ Ã«Â§Â",
+      "thumbnail_reason": "ÃÂ¬ÃÂÃÂ´ÃÂ¬ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂ¸ ÃÂªÃÂµÃÂ¬ÃÂ­ÃÂÃÂ ÃÂ«ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ­ÃÂÃÂ¸ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂªÃÂÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂÃÂÃÂ«ÃÂ¹ÃÂÃÂªÃÂ°ÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂ ÃÂªÃÂ°ÃÂÃÂ­ÃÂÃÂÃÂªÃÂ²ÃÂ ÃÂ«ÃÂÃÂÃÂ¬ÃÂÃÂ´ ÃÂ­ÃÂÃÂ´ÃÂ«ÃÂ¦ÃÂ­ ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂÃÂÃÂ«ÃÂ ÃÂ¥ ÃÂ«ÃÂÃÂÃÂ¬ÃÂÃÂ",
+      "mood": "ÃÂ¬ÃÂÃÂ¬ÃÂ¬ÃÂÃÂ¸ÃÂ­ÃÂÃÂ¨",
+      "suggested_caption": "ÃÂ«ÃÂÃÂ¥ÃÂªÃÂ·ÃÂ¼ ÃÂªÃÂ³ÃÂÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂ§ÃÂ",
       "suggested_caption_en": "Two seasons on a plate",
-      "suggested_caption_left": "Ã«Â¶ÂÃ¬ÂÂ Ã«ÂÂ¬Ã¬ÂÂ Ã«ÂÂ¨Ã«Â©Â´",
-      "suggested_caption_right": "Ã¬Â´ÂÃ«Â¡Â Ã¬ÂÂ¬Ã«Â¦Â Ã­ÂÂ Ã¬ÂÂ",
-      "suggested_label": "ÃªÂ³ÂÃ¬Â Â Ã«ÂÂÃ¬Â ÂÃ­ÂÂ¸",
+      "suggested_caption_left": "ÃÂ«ÃÂ¶ÃÂÃÂ¬ÃÂÃÂ ÃÂ«ÃÂÃÂ¬ÃÂ¬ÃÂÃÂ ÃÂ«ÃÂÃÂ¨ÃÂ«ÃÂ©ÃÂ´",
+      "suggested_caption_right": "ÃÂ¬ÃÂ´ÃÂÃÂ«ÃÂ¡ÃÂ ÃÂ¬ÃÂÃÂ¬ÃÂ«ÃÂ¦ÃÂ ÃÂ­ÃÂÃÂ ÃÂ¬ÃÂÃÂ",
+      "suggested_label": "ÃÂªÃÂ³ÃÂÃÂ¬ÃÂ ÃÂ ÃÂ«ÃÂÃÂÃÂ¬ÃÂ ÃÂÃÂ­ÃÂÃÂ¸",
       "suggested_label_en": "Season's Sweet",
       "domesticity_score": 2,
       "rurality_score": 1,
@@ -114,11 +114,11 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#5a6b4a",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
-          "suggested_caption": "Ã¬Â°Â¨Ã«Â¥Â¼ Ã¬ÂÂ¸Ã¬ÂÂ°Ã«ÂÂ Ã¬ÂÂÃªÂ°Â",
-          "suggested_caption_left": "Ã¬Â°Â»Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ",
-          "suggested_caption_right": "Ã¬Â ÂÃ¬ÂÂ±ÃªÂ³Â¼ ÃªÂ³Â Ã¬ÂÂ",
-          "suggested_label": "Ã«ÂÂ¤Ã«ÂÂÃ¬ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
+          "suggested_caption": "ÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ¬ÃÂÃÂ¸ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
+          "suggested_caption_left": "ÃÂ¬ÃÂ°ÃÂ»ÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂ¬ÃÂÃÂ",
+          "suggested_caption_right": "ÃÂ¬ÃÂ ÃÂÃÂ¬ÃÂÃÂ±ÃÂªÃÂ³ÃÂ¼ ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
+          "suggested_label": "ÃÂ«ÃÂÃÂ¤ÃÂ«ÃÂÃÂÃÂ¬ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
           "aspect_ratio": "wide",
           "best_page_type": "botanical",
           "focal_x": "55",
@@ -133,10 +133,10 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#5a6b4a",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "Ã¬Â°Â¨Ã«Â¥Â¼ Ã¬ÂÂ¸Ã¬ÂÂ°Ã«ÂÂ Ã¬ÂÂÃªÂ°Â",
+          "suggested_copy": "ÃÂ¬ÃÂ°ÃÂ¨ÃÂ«ÃÂ¥ÃÂ¼ ÃÂ¬ÃÂÃÂ¸ÃÂ¬ÃÂÃÂ°ÃÂ«ÃÂÃÂ ÃÂ¬ÃÂÃÂÃÂªÃÂ°ÃÂ",
           "suggested_body": ""
         },
         "ts": 1782487476109
@@ -146,7 +146,7 @@
           "subject_position": "center",
           "overall_brightness": "mid",
           "dominant_color": "#5a6b4a",
-          "mood": "ÃªÂ³Â Ã¬ÂÂ"
+          "mood": "ÃÂªÃÂ³ÃÂ ÃÂ¬ÃÂÃÂ"
         },
         "ts": 1782487476300
       },
@@ -166,19 +166,19 @@
       "season": "winter",
       "time_of_day": "day",
       "location_type": "cafe",
-      "primary_subject": "ë§ì°¨ íí",
+      "primary_subject": "Ã«Â§ÂÃ¬Â°Â¨ Ã­ÂÂÃ­ÂÂ",
       "secondary_subjects": [
-        "ì°¨ì ",
-        "ë§ì°¨ì",
-        "ì±"
+        "Ã¬Â°Â¨Ã¬ÂÂ ",
+        "Ã«Â§ÂÃ¬Â°Â¨Ã¬ÂÂ",
+        "Ã¬Â±Â"
       ],
       "activity_type": "craft",
       "human_presence": "hands",
       "animal_presence": "none",
       "material_texture": [
-        "ëëë¬´",
-        "ëìê¸°",
-        "ìëª©"
+        "Ã«ÂÂÃ«ÂÂÃ«Â¬Â´",
+        "Ã«ÂÂÃ¬ÂÂÃªÂ¸Â°",
+        "Ã¬ÂÂÃ«ÂªÂ©"
       ],
       "has_text": true,
       "text_area_position": "left",
@@ -188,13 +188,13 @@
       "focus_clarity": "clear",
       "text_safe_area": "left",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "ë¹ì ë§ì°¨ì ìì ëë¹ê° ëë ·íê³  ì¬ë¡ì°ë¼ì´í ê°ì±ì ì§ê´ì ì¼ë¡ ì ë¬í¨",
-      "mood": "ê³ ìí¨",
-      "suggested_caption": "ì²ì²í, í ì",
+      "thumbnail_reason": "Ã«ÂÂ¹Ã¬ÂÂ Ã«Â§ÂÃ¬Â°Â¨Ã¬ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã«ÂÂÃ«Â¹ÂÃªÂ°Â Ã«ÂÂÃ«Â Â·Ã­ÂÂÃªÂ³Â  Ã¬ÂÂ¬Ã«Â¡ÂÃ¬ÂÂ°Ã«ÂÂ¼Ã¬ÂÂ´Ã­ÂÂ ÃªÂ°ÂÃ¬ÂÂ±Ã¬ÂÂ Ã¬Â§ÂÃªÂ´ÂÃ¬Â ÂÃ¬ÂÂ¼Ã«Â¡Â Ã¬Â ÂÃ«ÂÂ¬Ã­ÂÂ¨",
+      "mood": "ÃªÂ³Â Ã¬ÂÂÃ­ÂÂ¨",
+      "suggested_caption": "Ã¬Â²ÂÃ¬Â²ÂÃ­ÂÂ, Ã­ÂÂ Ã¬ÂÂ",
       "suggested_caption_en": "slow hands, quiet green",
-      "suggested_caption_left": "ì°¨ í ìì ì¬ì ",
-      "suggested_caption_right": "ìëì ê³ ì",
-      "suggested_label": "ë§ì°¨ í ì",
+      "suggested_caption_left": "Ã¬Â°Â¨ Ã­ÂÂ Ã¬ÂÂÃ¬ÂÂ Ã¬ÂÂ¬Ã¬ÂÂ ",
+      "suggested_caption_right": "Ã¬ÂÂÃ«ÂÂÃ¬ÂÂ ÃªÂ³Â Ã¬ÂÂ",
+      "suggested_label": "Ã«Â§ÂÃ¬Â°Â¨ Ã­ÂÂ Ã¬ÂÂ",
       "suggested_label_en": "Whisked Still",
       "domesticity_score": 4,
       "rurality_score": 2,
@@ -215,11 +215,11 @@
           "subject_position": "left",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ê³ ì",
-          "suggested_caption": "ë¹ì´ ë§ë  ê·¸ë¦¼ì",
-          "suggested_caption_left": "íì´ ìë",
-          "suggested_caption_right": "ê·¸ë¦¼ìì ì¶¤",
-          "suggested_label": "ì¤íì ì ì ",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
+          "suggested_caption": "Ã«Â¹ÂÃ¬ÂÂ´ Ã«Â§ÂÃ«ÂÂ  ÃªÂ·Â¸Ã«Â¦Â¼Ã¬ÂÂ",
+          "suggested_caption_left": "Ã­ÂÂÃ¬ÂÂ´ Ã¬ÂÂÃ«ÂÂ",
+          "suggested_caption_right": "ÃªÂ·Â¸Ã«Â¦Â¼Ã¬ÂÂÃ¬ÂÂ Ã¬Â¶Â¤",
+          "suggested_label": "Ã¬ÂÂ¤Ã­ÂÂÃ¬ÂÂ Ã¬Â ÂÃ¬Â Â",
           "aspect_ratio": "wide",
           "best_page_type": "spread",
           "focal_x": "30",
@@ -234,10 +234,10 @@
           "subject_position": "left",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ê³ ì",
+          "mood": "ÃªÂ³Â Ã¬ÂÂ",
           "best_text_position": "bottom_left",
           "text_color": "white",
-          "suggested_copy": "ë¹ì´ ë§ë  ê·¸ë¦¼ì",
+          "suggested_copy": "Ã«Â¹ÂÃ¬ÂÂ´ Ã«Â§ÂÃ«ÂÂ  ÃªÂ·Â¸Ã«Â¦Â¼Ã¬ÂÂ",
           "suggested_body": ""
         },
         "ts": 1782487499024
@@ -247,7 +247,7 @@
           "subject_position": "left",
           "overall_brightness": "mid",
           "dominant_color": "#8B7355",
-          "mood": "ê³ ì"
+          "mood": "ÃªÂ³Â Ã¬ÂÂ"
         },
         "ts": 1782487499213
       },
@@ -267,19 +267,19 @@
       "season": "unknown",
       "time_of_day": "afternoon",
       "location_type": "indoor",
-      "primary_subject": "맨발과 그림자",
+      "primary_subject": "ë§¨ë°ê³¼ ê·¸ë¦¼ì",
       "secondary_subjects": [
-        "원목 바닥",
-        "햇살",
-        "긴 그림자"
+        "ìëª© ë°ë¥",
+        "íì´",
+        "ê¸´ ê·¸ë¦¼ì"
       ],
       "activity_type": "walking",
       "human_presence": "side",
       "animal_presence": "none",
       "material_texture": [
-        "원목",
-        "나무결",
-        "광택"
+        "ìëª©",
+        "ëë¬´ê²°",
+        "ê´í"
       ],
       "has_text": false,
       "text_area_position": "right",
@@ -289,19 +289,126 @@
       "focus_clarity": "soft",
       "text_safe_area": "right",
       "thumbnail_potential": "medium",
-      "thumbnail_reason": "강한 명암 대비와 그림자가 인상적이나 피사체가 부분적으로만 보여 맥락 전달이 약함",
-      "mood": "고요함",
-      "suggested_caption": "빛이 머문 자리",
+      "thumbnail_reason": "ê°í ëªì ëë¹ì ê·¸ë¦¼ìê° ì¸ìì ì´ë í¼ì¬ì²´ê° ë¶ë¶ì ì¼ë¡ë§ ë³´ì¬ ë§¥ë½ ì ë¬ì´ ì½í¨",
+      "mood": "ê³ ìí¨",
+      "suggested_caption": "ë¹ì´ ë¨¸ë¬¸ ìë¦¬",
       "suggested_caption_en": "barefoot on quiet wood",
-      "suggested_caption_left": "볕 드는 오후",
-      "suggested_caption_right": "그림자의 무게",
-      "suggested_label": "맨발의 하루",
+      "suggested_caption_left": "ë³ ëë ì¤í",
+      "suggested_caption_right": "ê·¸ë¦¼ìì ë¬´ê²",
+      "suggested_label": "ë§¨ë°ì íë£¨",
       "suggested_label_en": "Barefoot Hours",
       "domesticity_score": 4,
       "rurality_score": 2,
       "craft_score": 1,
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-27T08:32:33.217Z",
+      "model": "claude-sonnet-4-6"
+    },
+    "owyo_28a9e464_7b4d6664": {
+      "name": "owyo_28a9e464_7b4d6664.jpg",
+      "path": "library/owyo_28a9e464_7b4d6664.jpg",
+      "hash": "owyo_28a9e464_7b4d6664",
+      "ext": "jpg",
+      "download_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/owyo_28a9e464_7b4d6664.jpg",
+      "url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/owyo_28a9e464_7b4d6664.jpg",
+      "magazine": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "dark",
+          "dominant_color": "#4a3f38",
+          "mood": "ê³ ì",
+          "suggested_caption": "ì°¨ í ì, ì± í íì´ì§",
+          "suggested_caption_left": "ì¤íì ì¨ê¸°",
+          "suggested_caption_right": "ì°¨ì ì±",
+          "suggested_label": "ëìì ìê°",
+          "suggested_label_en": "A Quiet Afternoon",
+          "suggested_caption_en": "Tea, book, and gentle light",
+          "aspect_ratio": "wide",
+          "best_page_type": "spread",
+          "focal_x": 50,
+          "focal_y": 45,
+          "spread_focal_left": 35,
+          "spread_focal_right": 65
+        },
+        "ts": 1782540626585
+      },
+      "carousel": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "dark",
+          "dominant_color": "#4a3f38",
+          "mood": "ê³ ì",
+          "best_text_position": "bottom_left",
+          "text_color": "white",
+          "suggested_copy": "ì°¨ í ì, ì± í íì´ì§",
+          "suggested_body": ""
+        },
+        "ts": 1782540626597
+      },
+      "skyline": {
+        "data": {
+          "subject_position": "center",
+          "overall_brightness": "dark",
+          "dominant_color": "#4a3f38",
+          "mood": "ê³ ì"
+        },
+        "ts": 1782540626698
+      },
+      "subject_position": "center",
+      "focal_x": 62,
+      "focal_y": 45,
+      "aspect_ratio": "wide",
+      "best_page_type": "spread",
+      "spread_focal_left": 25,
+      "spread_focal_right": 65,
+      "overall_brightness": "dark",
+      "dominant_color": "#3d2a1a",
+      "color_temperature": "warm",
+      "contrast_level": "high",
+      "visual_density": "medium",
+      "negative_space": "medium",
+      "season": "autumn",
+      "time_of_day": "afternoon",
+      "location_type": "indoor",
+      "primary_subject": "촛불 위에 올린 유리 찻주전자",
+      "secondary_subjects": [
+        "작은 찻잔",
+        "책 읽는 손",
+        "청포도",
+        "찻잎 통",
+        "나무 받침"
+      ],
+      "activity_type": "resting",
+      "human_presence": "hands",
+      "animal_presence": "none",
+      "material_texture": [
+        "유리",
+        "도자기",
+        "나무",
+        "금속",
+        "천"
+      ],
+      "has_text": true,
+      "text_area_position": "left",
+      "camera_distance": "medium",
+      "camera_angle": "top_down",
+      "motion_implied": "still",
+      "focus_clarity": "soft",
+      "text_safe_area": "bottom",
+      "thumbnail_potential": "high",
+      "thumbnail_reason": "촛불로 달궈지는 찻주전자의 따뜻한 빛이 시선을 강하게 끌며 슬로우라이프 감성을 직관적으로 전달함",
+      "mood": "고요함",
+      "suggested_caption": "불 앞에서 익는 오후",
+      "suggested_caption_en": "Tea warming over candlelight",
+      "suggested_caption_left": "책과 차 한 잔",
+      "suggested_caption_right": "천천히 끓는 시간",
+      "suggested_label": "차 한 잔의 여유",
+      "suggested_label_en": "Slow Tea Hour",
+      "domesticity_score": 5,
+      "rurality_score": 3,
+      "craft_score": 4,
+      "schema_version": "image-analysis-v2",
+      "analyzed_at": "2026-06-27T08:32:44.994Z",
       "model": "claude-sonnet-4-6"
     }
   }
