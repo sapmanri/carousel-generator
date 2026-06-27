@@ -213,7 +213,7 @@ header{
     <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
       <button class="btn-ghost" onclick="loadGallery()">↻ 새로고침</button>
       <button class="btn-ghost" id="reanalyzeSel" onclick="reanalyzeSelected()" style="display:none">✦ 선택 재분석</button>
-      <button class="btn-ghost" id="deleteSel" onclick="deleteSelected()" style="display:none">🗑 선택 숨김</button>
+      <button class="btn-ghost" id="deleteSel" onclick="deleteSelected()" style="display:none">🗑 선택 삭제</button>
       <button class="btn-ghost" onclick="reanalyzeAll()">⟳ 전체 재분석</button>
       <button class="btn-ghost" onclick="generateAllThumbnails()" id="thumbGenBtn">🖼 썸네일 일괄 생성</button>
       <span style="font-size:10px;color:var(--dim);align-self:center">Shift+클릭으로 선택 후 선택 재분석</span>
@@ -1002,57 +1002,79 @@ R2 인증 정보가 필요합니다. 계속할까요?`)) return;
   setTimeout(() => { countEl.textContent = orig; }, 4000);
 }
 
-async function updateCacheEntry(hash, data) {
-  const token = window.SapConfig.getGithubToken();
-  if (!token) return;
+async function updateCacheEntry(hash, data, commitMessage = null) {
+  const token = window.SapConfig?.getGithubToken?.();
+  if (!token) throw new Error('GitHub 토큰이 필요합니다. 설정에서 GitHub 토큰을 먼저 입력하세요.');
   const REPO = 'sapmanri/carousel-generator';
   const FILE = 'image_cache.json';
   const API  = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
 
   let cache = { entries: {} }, sha = null;
   try {
-    const res = await fetch(API, { headers: { Authorization: `token ${token}` } });
+    const res = await fetch(API, { headers: { Authorization: `token ${token}` }, cache: 'no-store' });
     if (res.ok) {
       const json = await res.json();
       sha = json.sha;
       cache = JSON.parse(decodeGithubContent(json.content));
+    } else if (res.status !== 404) {
+      throw new Error(`image_cache.json 로드 실패: ${res.status}`);
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn(e);
+    throw e;
+  }
 
+  cache.entries = cache.entries || {};
   cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
 
   const jsonStr = JSON.stringify(cache, null, 2);
-  const body    = { message: `Library: reanalyze ${hash}`, content: encodeGithubContent(jsonStr) };
+  const body    = { message: commitMessage || `Library: update ${hash}`, content: encodeGithubContent(jsonStr) };
   if (sha) body.sha = sha;
-  await fetch(API, {
+  const saveRes = await fetch(API, {
     method: 'PUT',
     headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
+  if (!saveRes.ok) {
+    const text = await saveRes.text().catch(() => '');
+    throw new Error(`image_cache.json 저장 실패: ${saveRes.status} ${text}`);
+  }
+  return true;
 }
 
 
 async function deleteImage(hash) {
   if (!hash) return;
-  if (!confirm('이 이미지를 갤러리에서 숨길까요? R2 원본 파일은 삭제하지 않고 image_cache.json에 deleted 표시만 남깁니다.')) return;
-  await updateCacheEntry(hash, { deleted: true, deleted_at: new Date().toISOString() });
-  selectedHashes.delete(hash);
-  closeDetail();
-  await loadGallery();
+  if (!confirm('이 이미지를 갤러리에서 삭제할까요?\n\nR2 원본 파일은 삭제하지 않고, image_cache.json에 deleted 표시를 남겨 갤러리에서 제거합니다.')) return;
+  try {
+    await updateCacheEntry(hash, { deleted: true, deleted_at: new Date().toISOString() }, `Library: delete ${hash}`);
+    selectedHashes.delete(hash);
+    allItems = allItems.filter(item => (item.hash || item.image_id || deriveImageId(item)) !== hash);
+    closeDetail();
+    applyFilter(false);
+  } catch(e) {
+    alert(e.message || '삭제 실패');
+  }
 }
 
 async function deleteSelected() {
   const hashes = Array.from(selectedHashes);
   if (!hashes.length) return;
-  if (!confirm(`선택한 ${hashes.length}장을 갤러리에서 숨길까요? R2 원본 파일은 삭제하지 않습니다.`)) return;
-  for (const hash of hashes) {
-    await updateCacheEntry(hash, { deleted: true, deleted_at: new Date().toISOString() });
+  if (!confirm(`선택한 ${hashes.length}장을 갤러리에서 삭제할까요?\n\nR2 원본 파일은 삭제하지 않고, image_cache.json에 deleted 표시를 남겨 갤러리에서 제거합니다.`)) return;
+  try {
+    for (const hash of hashes) {
+      await updateCacheEntry(hash, { deleted: true, deleted_at: new Date().toISOString() }, `Library: delete ${hash}`);
+    }
+    selectedHashes.clear();
+    const reBtn = document.getElementById('reanalyzeSel');
+    if (reBtn) reBtn.style.display = 'none';
+    const delBtn = document.getElementById('deleteSel');
+    if (delBtn) delBtn.style.display = 'none';
+    allItems = allItems.filter(item => !hashes.includes(item.hash || item.image_id || deriveImageId(item)));
+    applyFilter(false);
+  } catch(e) {
+    alert(e.message || '삭제 실패');
   }
-  selectedHashes.clear();
-  document.getElementById('reanalyzeSel').style.display = 'none';
-  const delBtn = document.getElementById('deleteSel');
-  if (delBtn) delBtn.style.display = 'none';
-  await loadGallery();
 }
 
 function openDetail(idx) {
@@ -1127,7 +1149,7 @@ function openDetail(idx) {
       `).join('')}
       <div style="margin-top:16px">
         <button onclick="navigator.clipboard.writeText('${escapeHtml((getOriginalUrl(item) || '').replace(/'/g,''))}')" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;">URL 복사</button>
-        <button onclick="deleteImage('${escapeHtml(item.hash || item.image_id || deriveImageId(item))}')" style="background:rgba(196,122,106,0.12);border:1px solid rgba(196,122,106,0.5);color:var(--red);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:6px;">숨김</button>
+        <button onclick="deleteImage('${escapeHtml(item.hash || item.image_id || deriveImageId(item))}')" style="background:rgba(196,122,106,0.12);border:1px solid rgba(196,122,106,0.5);color:var(--red);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:6px;">삭제</button>
       </div>
     </div>
   `;
