@@ -306,6 +306,8 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 .pano-slide-preview{flex:0 0 220px;height:220px;position:relative;overflow:hidden;border:0.5px solid rgba(255,255,255,0.08)}
 </style>
 
+<script src="/shared-config.js"></script>
+<script src="/magazine/image-library.js?v=20260627a"></script>
 </head>
 <body>
 <div class="app">
@@ -338,6 +340,12 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
   <div class="upload-sub">JPG · PNG · 최대 10장</div>
 </div>
 
+<div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+  <button onclick="openLibraryPicker()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;letter-spacing:0.06em;white-space:nowrap" onmouseover="this.style.borderColor='rgba(255,255,255,0.5)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='rgba(255,255,255,0.6)'">
+    📁 라이브러리에서 선택
+  </button>
+  <span style="font-size:10px;color:rgba(255,255,255,0.25)">R2에 저장된 이미지를 바로 불러옵니다</span>
+</div>
 <div class="image-grid" id="imageGrid"></div>
 
 <!-- 파노라마 구간 픽커 (파노라마 스타일 + 이미지 1장일 때만 표시) -->
@@ -896,6 +904,37 @@ uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.cl
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
 uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+// ── 이미지 라이브러리 피커 ─────────────────────────────────────
+async function openLibraryPicker() {
+  if (!window.ImageLibrary) {
+    alert('ImageLibrary 모듈이 로드되지 않았습니다. 페이지를 새로고침해 주세요.');
+    return;
+  }
+  const maxAdd = 10 - images.length;
+  if (maxAdd <= 0) { alert('이미지는 최대 10장까지 추가할 수 있습니다.'); return; }
+
+  window.ImageLibrary.openPicker(async (selected) => {
+    // 단일 선택 또는 다중 선택 모두 처리
+    const items = Array.isArray(selected) ? selected : [selected];
+    for (const item of items.slice(0, maxAdd)) {
+      try {
+        // R2 URL → dataUrl 변환 (이미 dataUrl이면 그대로)
+        let dataUrl = item.dataUrl;
+        if (!dataUrl || !dataUrl.startsWith('data:')) {
+          dataUrl = await window.ImageLibrary.fetchAsDataUrl(item.url || item.path);
+        }
+        if (!dataUrl) continue;
+        // hash는 캐시에서 가져온 것 사용
+        const hash = item.hash || await window.SapmanriCache.hashImage(dataUrl);
+        images.push({ dataUrl, hash, analysis: null, fromLibrary: true, r2_url: item.url });
+        renderThumbs(); updateBtn(); updatePanoPickerVisibility();
+      } catch(e) {
+        console.warn('라이브러리 이미지 로드 실패:', e.message);
+      }
+    }
+  }, { multiple: maxAdd > 1, theme: 'dark' });
+}
 
 function handleFiles(files) {
   Array.from(files).slice(0, 10 - images.length).forEach(file => {
