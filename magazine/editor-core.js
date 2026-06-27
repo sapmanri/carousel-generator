@@ -270,7 +270,12 @@ async function analyzeImage(dataUrl, hints) {
   if (data.error) throw new Error(data.error.message);
   const text = data.content?.find(b => b.type === 'text')?.text || '{}';
   const s = text.indexOf('{'), e = text.lastIndexOf('}');
-  return JSON.parse(text.slice(s, e + 1));
+  const result = JSON.parse(text.slice(s, e + 1));
+  // QC 메타 — 스키마 버전/분석일/모델명 항상 기록
+  result.schema_version = 'image-analysis-v2';
+  result.analyzed_at    = new Date().toISOString();
+  result.model          = 'claude-sonnet-4-6';
+  return result;
 }
 
 
