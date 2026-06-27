@@ -403,8 +403,51 @@ async function startProcess() {
 // ── Claude Vision 분석 ──────────────────────────────────────────
 async function analyzeImage(dataUrl, mediaType, apiKey) {
   const base64 = dataUrl.split(',')[1];
-  const prompt = `이 사진을 보고 다음 JSON만 반환 (다른 텍스트 없이):
-{"mood":"한 단어 한국어 분위기","suggested_caption":"Vase 문체 한국어 캡션 1줄 (12자 이내)","suggested_caption_en":"English caption (under 8 words)","suggested_label":"소제목 한국어 (4-8자)","suggested_label_en":"English sublabel (2-4 words)","subject":"주요 피사체 한국어 1-2단어","dominant_color":"#hex","overall_brightness":"dark|mid|bright","best_page_type":"fullbleed|split|grid|botanical|spread"}`;
+  const prompt = `이 사진을 분석해서 아래 JSON 형식으로만 반환해줘. 다른 텍스트 없이 JSON만. 삽만리(@sapmanri)는 한국 농촌/슬로우라이프 채널이고, 이 맥락을 반영해서 분석할 것.
+
+{
+  "subject_position": "left|center|right|top|bottom|full",
+  "focal_x": 피사체 가로위치 0~100 숫자,
+  "focal_y": 피사체 세로위치 0~100 숫자,
+  "aspect_ratio": "wide|square|tall",
+  "best_page_type": "fullbleed|split|grid|quote|spread|botanical",
+  "spread_focal_left": 0~100,
+  "spread_focal_right": 0~100,
+  "overall_brightness": "dark|mid|bright",
+  "dominant_color": "#hex",
+  "color_temperature": "warm|cool|neutral",
+  "contrast_level": "low|medium|high",
+  "visual_density": "low|medium|high",
+  "negative_space": "low|medium|high",
+  "season": "spring|summer|autumn|winter|unknown",
+  "time_of_day": "dawn|morning|day|afternoon|evening|night|unknown",
+  "location_type": "indoor|outdoor|garden|kitchen|workshop|countryside|city|cafe|unknown",
+  "primary_subject": "주요 피사체 한국어 키워드",
+  "secondary_subjects": [],
+  "activity_type": "cooking|gardening|craft|coffee|walking|resting|cleaning|travel|animal|object|unknown",
+  "human_presence": "none|hands|back|side|face|multiple",
+  "animal_presence": "none|cat|dog|bird|other",
+  "material_texture": [],
+  "has_text": false,
+  "text_area_position": "none|top|center|bottom|left|right",
+  "camera_distance": "closeup|medium|wide",
+  "camera_angle": "top_down|eye_level|low_angle|side|unknown",
+  "motion_implied": "still|hand_action|walking|pouring|cutting|making|unknown",
+  "focus_clarity": "clear|soft|busy",
+  "text_safe_area": "left|right|top|bottom|center|none",
+  "thumbnail_potential": "low|medium|high",
+  "thumbnail_reason": "썸네일 적합도 이유 한 줄",
+  "mood": "한 단어 한국어",
+  "suggested_caption": "Vase 문체 한국어 캡션 1줄 (12자 이내)",
+  "suggested_caption_en": "English caption (poetic, under 8 words)",
+  "suggested_caption_left": "스프레드 왼쪽 캡션 (10자 이내)",
+  "suggested_caption_right": "스프레드 오른쪽 캡션 (10자 이내)",
+  "suggested_label": "소제목 한국어 (4-8자)",
+  "suggested_label_en": "English sublabel (2-4 words)",
+  "domesticity_score": 0~5,
+  "rurality_score": 0~5,
+  "craft_score": 0~5
+}`;
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -415,8 +458,8 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
       'anthropic-dangerous-direct-browser-access': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1200,
       messages: [{ role: 'user', content: [
         { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
         { type: 'text', text: prompt }
@@ -577,22 +620,55 @@ function openDetail(idx) {
   const panel = document.getElementById('detailPanel');
 
   const metaRows = [
-    ['캡션', item.suggested_caption],
-    ['영문 캡션', item.suggested_caption_en],
-    ['라벨', item.suggested_label],
+    // 텍스트
+    ['캡션 (KO)', item.suggested_caption],
+    ['캡션 (EN)', item.suggested_caption_en],
+    ['라벨 (KO)', item.suggested_label],
+    ['라벨 (EN)', item.suggested_label_en],
     ['분위기', item.mood],
-    ['피사체', item.subject],
+    // 피사체
+    ['주요 피사체', item.primary_subject],
+    ['보조 피사체', Array.isArray(item.secondary_subjects) ? item.secondary_subjects.join(', ') : item.secondary_subjects],
+    ['활동 유형', item.activity_type],
+    ['사람 존재', item.human_presence],
+    ['동물 존재', item.animal_presence !== 'none' ? item.animal_presence : null],
+    ['재질/질감', Array.isArray(item.material_texture) ? item.material_texture.join(', ') : item.material_texture],
+    // 장면
+    ['계절', item.season],
+    ['시간대', item.time_of_day],
+    ['장소 유형', item.location_type],
+    // 카메라
+    ['카메라 거리', item.camera_distance],
+    ['카메라 앵글', item.camera_angle],
+    ['움직임', item.motion_implied],
+    ['포커스', item.focus_clarity],
+    // 시각
+    ['밝기', item.overall_brightness],
+    ['색 온도', item.color_temperature],
+    ['대비', item.contrast_level],
+    ['시각 밀도', item.visual_density],
+    ['여백', item.negative_space],
+    ['주요색', item.dominant_color],
+    // 썸네일/레이아웃
+    ['텍스트 안전 영역', item.text_safe_area],
+    ['썸네일 적합도', item.thumbnail_potential],
+    ['썸네일 이유', item.thumbnail_reason],
+    ['페이지 타입', item.best_page_type],
+    // GENOME 점수
+    ['일상성', item.domesticity_score != null ? `${item.domesticity_score}/5` : null],
+    ['농촌성', item.rurality_score != null ? `${item.rurality_score}/5` : null],
+    ['수공예성', item.craft_score != null ? `${item.craft_score}/5` : null],
+    // EXIF
     ['촬영일', item.exif_date],
     ['카메라', [item.exif_make, item.exif_model].filter(Boolean).join(' ')],
     ['ISO', item.exif_iso],
     ['조리개', item.exif_fstop],
     ['셔터', item.exif_exposure],
     ['해상도', item.exif_width ? `${item.exif_width}×${item.exif_height}` : null],
-    ['밝기', item.overall_brightness],
-    ['주요색', item.dominant_color],
+    // 기타
     ['업로드일', item.uploaded_at],
     ['파일명', item.filename],
-  ].filter(([, v]) => v);
+  ].filter(([, v]) => v != null && v !== '' && v !== 'unknown' && v !== 'none');
 
   panel.innerHTML = `
     <div class="detail-img"><img src="${item.download_url || item.url}" alt="" loading="lazy"></div>
