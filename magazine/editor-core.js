@@ -442,12 +442,15 @@ ${instruction}
 
 결과는 텍스트만 반환하세요. 따옴표, 설명, 마크다운 기호 없이 순수한 글만 반환합니다.`;
 
-  const filteredExamples = profile.examples
-    .filter(e => e.type === 'poem' || e.type === 'blog')
-    .slice(-4);
-  if (filteredExamples.length > 0) {
-    system += `\n\n## Vase가 직접 쓴 예시 글 (문체와 어조 참고, 복사 금지)\n`;
-    filteredExamples.forEach((e, i) => { system += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,500)}\n`; });
+  // botanical은 짧은 캡션만 생성 — 예시글 불필요
+  if (pageType !== 'botanical') {
+    const filteredExamples = profile.examples
+      .filter(e => e.type === 'poem' || e.type === 'blog')
+      .slice(-4);
+    if (filteredExamples.length > 0) {
+      system += `\n\n## Vase가 직접 쓴 예시 글 (문체와 어조 참고, 복사 금지)\n`;
+      filteredExamples.forEach((e, i) => { system += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,500)}\n`; });
+    }
   }
 
   const videoCtx = videoContextText();
@@ -490,7 +493,7 @@ ${instruction}
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-5',
-      max_tokens: 1200,
+      max_tokens: pageType === 'botanical' ? 80 : 1200,
       system,
       messages: [{ role: 'user', content: userContent }],
     }),
