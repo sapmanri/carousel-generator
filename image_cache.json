@@ -359,7 +359,9 @@
       "analyzed_at": "2026-06-27T14:46:10.389Z",
       "model": "claude-sonnet-4-6",
       "filename": "sapmanri_slide_08.png",
-      "filesize": 1694838
+      "filesize": 1694838,
+      "deleted": true,
+      "deleted_at": "2026-06-27T15:23:28.598Z"
     },
     "10tdo_d4219bb4_f2064728": {
       "thumbnail_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_10tdo_d4219bb4_f2064728.webp",
