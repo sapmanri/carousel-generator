@@ -1543,6 +1543,64 @@ function toRelativePath(repoPath) {
   return repoPath.replace(/^magazine\//, './');      // GitHub 경로
 }
 
+// ── 전체 텍스트 재생성 + 발행 ──────────────────────────────────────
+async function regenAllAndPublish() {
+  if (!getApiKey()) { toast('API Key를 먼저 입력해주세요.'); return; }
+  if (!pages.length) { toast('페이지를 먼저 구성해주세요.'); return; }
+
+  const btn = document.getElementById('regenPublishBtn');
+  const statusEl = document.getElementById('publishStatus');
+  btn.disabled = true;
+
+  // 텍스트 생성 대상 페이지 (cover 포함 전체)
+  const textPages = pages.filter(pg =>
+    ['cover','fullbleed','split','grid','quote','spread','essay',
+     'dialogue','list','milestone','botanical','closing'].includes(pg.type)
+  );
+
+  let done = 0;
+  for (let i = 0; i < pages.length; i++) {
+    const pg = pages[i];
+    if (!textPages.includes(pg)) continue;
+    done++;
+    statusEl.className = 'publish-status';
+    statusEl.innerHTML = `<span class="spinner"></span>텍스트 재생성 중 (${done}/${textPages.length}) — ${PAGE_TYPE_LABEL[pg.type] || pg.type}…`;
+    try {
+      if (pg.type === 'cover') {
+        await genCoverHeadline(i);
+      } else if (['essay','dialogue','quote','list'].includes(pg.type)) {
+        // 텍스트 전용 페이지: 주변 사진 분위기 컨텍스트
+        const nearbyMoods = [];
+        for (let off = -2; off <= 2; off++) {
+          const nb = pages[i + off];
+          if (!nb) continue;
+          const nbPhoto = photos.find(p => p.id === (nb.imageId || (nb.imageIds && nb.imageIds[0])));
+          if (nbPhoto && nbPhoto.analysis) {
+            if (nbPhoto.analysis.mood) nearbyMoods.push(nbPhoto.analysis.mood);
+            if (nbPhoto.analysis.suggested_caption) nearbyMoods.push(nbPhoto.analysis.suggested_caption);
+          }
+        }
+        const ctx = nearbyMoods.filter(Boolean).slice(0, 6).join(', ');
+        await genPageText(i, ctx ? `주변 페이지들의 분위기: ${ctx}` : undefined);
+      } else {
+        await genPageText(i);
+      }
+    } catch (e) {
+      // 개별 실패해도 계속 진행
+      console.warn(`페이지 ${i} 재생성 실패:`, e.message);
+    }
+  }
+
+  statusEl.innerHTML = '<span class="spinner"></span>재생성 완료 — 발행 중…';
+  renderPageList();
+
+  // 이어서 발행
+  await publish();
+
+  btn.disabled = false;
+}
+
+
 async function publish() {
   const token = getGhToken();
   const apiKey = getApiKey();
