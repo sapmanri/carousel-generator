@@ -405,24 +405,10 @@ async function startProcess() {
   const progressEl = document.getElementById('progressLabel');
 
   let done = 0, skipped = 0, failed = 0;
-  const total = queue.filter(it => it.status !== 'done').length;
-
-  function updateProgress(cur, action, filename) {
-    const name = filename ? filename.slice(0,18) + (filename.length>18?'…':'') : '';
-    progressEl.innerHTML = `
-      <span style="color:var(--muted)">${cur}/${total}</span>
-      <span style="color:var(--dim);margin:0 6px">|</span>
-      <span style="color:var(--orange)">${action}</span>
-      ${name ? `<span style="color:var(--dim);margin-left:4px">${name}</span>` : ''}
-      <span style="color:var(--dim);margin-left:8px">✓${done} ⏭${skipped} ✗${failed}</span>
-    `;
-  }
-
   for (let i = 0; i < queue.length; i++) {
     const item = queue[i];
     if (item.status === 'done') continue;
-    const cur = done + skipped + failed + 1;
-    updateProgress(cur, '해시 확인 중…', item.file.name);
+    progressEl.textContent = `[${i + 1}/${queue.length}] 해시 확인 중 — ${item.file.name.slice(0,20)}`;  
 
     try {
       // 1. DataURL 변환
@@ -439,15 +425,16 @@ async function startProcess() {
       const hash = await window.ImageLibrary.hashImage(dataUrl);
       const cached = hash ? existingCache[hash] : null;
       if (cached && (cached.r2_url || cached.download_url || cached.url) && cached.mood) {
+        // 분석까지 완료된 항목 → 스킵
         updateItemStatus(i, 'done');
         skipped++;
-        updateProgress(cur, '⏭ 스킵 (이미 처리됨)', item.file.name);
+        progressEl.textContent = `[${i + 1}/${queue.length}] ⏭ 스킵 (캐시 있음) — ${item.file.name.slice(0,20)}  |  완료 ${done} 스킵 ${skipped} 실패 ${failed}`;
         continue;
       }
 
       // 2. R2 업로드 (원본)
       updateItemStatus(i, 'uploading');
-      updateProgress(cur, '↑ R2 업로드 중…', item.file.name);
+      progressEl.textContent = `[${i + 1}/${queue.length}] ↑ R2 업로드 중 — ${item.file.name.slice(0,20)}`;
       const uploadResult = await window.ImageLibrary.uploadIfNeeded(dataUrl, actualMediaType);
 
       // 2b. 썸네일 생성 + R2 업로드 (thumb_ prefix)
@@ -467,7 +454,7 @@ async function startProcess() {
       let analysis = null;
       if (apiKey) {
         updateItemStatus(i, 'analyzing');
-        updateProgress(cur, '🔍 AI 분석 중…', item.file.name);
+        progressEl.textContent = `[${i + 1}/${queue.length}] 🔍 AI 분석 중 — ${item.file.name.slice(0,20)}`;
         analysis = await analyzeImage(dataUrl, actualMediaType, apiKey);
       }
 
@@ -479,7 +466,7 @@ async function startProcess() {
 
       updateItemStatus(i, 'done');
       done++;
-      updateProgress(cur, '✓ 완료', item.file.name);
+      progressEl.textContent = `[${i + 1}/${queue.length}] ✓ 완료 — ${item.file.name.slice(0,20)}  |  완료 ${done} 스킵 ${skipped} 실패 ${failed}`;
     } catch(e) {
       console.error(e);
       updateItemStatus(i, 'err');
