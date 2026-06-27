@@ -1259,14 +1259,20 @@
           "type": "cover",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/jf8s_e11f64ea_1f1d9af0.jpg",
           "headline": [
-            "6월 27일,",
-            "손끝으로 넘긴 날짜 하나"
+            "손끝으로 날짜를 넘기는 사람",
+            "JUN 27, 작은 것들 사이에서"
           ],
-          "toc": []
+          "headline_en": [
+            "Small things, held carefully,",
+            "become the whole day."
+          ],
+          "toc": [],
+          "toc_en": []
         },
         {
           "type": "index",
           "label": "Contents · 이번 호 이야기",
+          "label_en": "",
           "items": [
             "침묵의 시간",
             "소소한 일상",
@@ -1274,22 +1280,23 @@
             "정돈된 일상",
             "일상의 풍경",
             "차 한 잔"
-          ]
+          ],
+          "items_en": []
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/bybg_71e490bd_116edb33.jpg",
-          "captionLeft": "맨발로 서 있던 오후",
-          "captionLeft_en": "standing barefoot in the afternoon",
-          "captionRight": "그림자가 더 멀리 닿았다",
-          "captionRight_en": "the shadow reached further than I did",
+          "captionLeft": "맨발이 빛 끄트머리에",
+          "captionLeft_en": "bare feet at the edge of light",
+          "captionRight": "그림자는 먼저 닿았다",
+          "captionRight_en": "the shadow arrived first",
           "splitX": 0
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l9ys_77e67197_b9fb2321.jpg",
-          "caption": "불을 켜두고 이름을 들었다",
-          "caption_en": "held the light, heard the name",
+          "caption": "두 손으로 들었다, 이 이름을",
+          "caption_en": "held this name up with both hands",
           "focalX": 50,
           "focalY": 45
         },
@@ -1300,43 +1307,43 @@
           "number": "1",
           "title": "매달린 시간",
           "subtitle": "매달린 시간/A moment suspended",
-          "caption": "실에 매달린 채로 충분한 것들",
-          "caption_en": "still enough, just hanging there"
+          "caption": "매달린 채로 있었다",
+          "caption_en": "still, hung mid-air"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/smjo_a51c5f55_f8239b97.jpg",
-          "captionLeft": "물건들은 제자리에",
-          "captionLeft_en": "everything in its place",
-          "captionRight": "나만 아직 움직이는 중",
-          "captionRight_en": "only I'm still moving",
+          "captionLeft": "가방은 의자에 걸려 있었다",
+          "captionLeft_en": "the bag still hung on the chair",
+          "captionRight": "사람은 이미 움직이는 중이었다",
+          "captionRight_en": "the person had already moved on",
           "splitX": 84
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/svag_2a889a64_68b5f82a.jpg",
           "label": "아직 내려놓지 않은 가방",
-          "label_en": "Bag Still in Hand",
-          "text": "들어오자마자\n내려놓지 않았다.\n\n토트백은 아직 손에 걸려 있고,\n발은 이미 방 안에 들어와 있는데\n몸은 어딘가 결정을 미루고 있었다.\n\n창밖에 초록이 보이고,\n테이블 위에는 잔이 하나 놓여 있었다.\n커피 향이 났는지는 모르겠다.\n그냥 그 사람은 거기 서 있었다.\n\n하루를 다 들고 온 채로.",
-          "text_en": "They didn't set it down right away.\n\nThe tote bag still hung from their hand,\nfeet already inside,\nbut the rest of the body\nstill somewhere between out there and here.\n\nGreen outside the window.\nA cup on the table.\nMaybe there was coffee. Maybe not.\n\nThey were just standing there—\nholding the whole day,\nnot yet ready to let it go.",
+          "label_en": "Bag Still on the Wrist",
+          "text": "들어서자마자 멈춰 선 것 같다.\n\n토트백 손잡이가 아직 손목에 걸려 있고,\n발은 이미 안에 있는데\n마음은 조금 늦게 따라온 것처럼.\n\n창문 너머로 여름 초입의 잎들이 보이고,\n원두 냄새가 어딘가서 낮게 깔려 있었다.\n\n앉으려다\n그냥 서 있었던 것 같다.",
+          "text_en": "It looked like she had just stepped in and stopped.\n\nThe tote bag still hung from her wrist,\nfeet already inside\nbut the rest of her arriving a little later.\n\nThrough the window, early summer leaves.\nSomewhere nearby, the low smell of coffee grounds.\n\nShe might have meant to sit down.\nInstead, she just stood there for a moment.",
           "darkText": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lbe4_64f572d3_471e9db7.jpg",
-          "captionLeft": "천천히 섞이는 중",
-          "captionLeft_en": "slowly finding each other",
-          "captionRight": "아직 닿기 전의 색",
-          "captionRight_en": "the moment before green meets white",
+          "captionLeft": "천천히 부어도 되는 오후",
+          "captionLeft_en": "an afternoon that asks nothing of you",
+          "captionRight": "섞이기 전의 잠깐",
+          "captionRight_en": "the moment just before it all becomes one",
           "splitX": 59
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ljug_a0331a7b_3cdbb9a5.jpg",
-          "label": "바늘을 내리기 전",
-          "label_en": "Before the needle drops",
-          "text": "톤암을 잡은 손이\n잠깐 멈춰 있었다.\n\n내리면 소리가 시작되고,\n그 전까지는 아무것도 아닌 시간.\n\n흰 판이 돌고 있었다.\n중앙의 빨간 레이블만\n제자리에서 느리게 흔들렸다.\n\n손은 아직\n바늘을 내리지 않았다.\n\n뭘 더 준비하려는 건지,\n아니면 그냥 조금 더\n그 상태로 있고 싶었던 건지.",
-          "text_en": "The hand held the tonearm\nand didn't move.\n\nOnce it lands, the sound begins—\nbut before that, nothing yet.\n\nThe white record was already spinning.\nOnly the red label at the center\nslow and slightly unsteady.\n\nThe hand hadn't come down.\n\nMaybe waiting for something.\nOr maybe just not ready\nto let the quiet go.",
+          "label": "바늘을 올리기 전",
+          "label_en": "Before the Needle",
+          "text": "톤암을 잡은 손이\n잠깐 멈춰 있었다.\n\n내려놓으면 소리가 시작될 텐데,\n그 직전에\n손이 먼저 알고 있는 것 같았다.\n\n흰 판은 아직 돌지 않았고,\n붉은 라벨만 가운데서\n가만히 있었다.\n\n서두를 이유가 없는 오후였는데,\n그래도 손은 천천히 내려가는 중이었는데.",
+          "text_en": "The hand holding the tonearm\nhad paused for a moment.\n\nOnce it comes down, the sound begins—\nand the hand seemed to know that\nbefore anything else did.\n\nThe white record hadn't started turning yet.\nOnly the red label in the center\nwas still.\n\nThere was no reason to rush that afternoon.\nStill, the hand was slowly on its way down.",
           "darkText": false
         },
         {
@@ -1346,8 +1353,8 @@
           "number": "2",
           "title": "오후의 작은 휴식",
           "subtitle": "오후의 작은 휴식/A quiet afternoon pause",
-          "caption": "섞이기 전의 잠깐",
-          "caption_en": "just before it dissolves"
+          "caption": "섞이기 전 잠깐",
+          "caption_en": "just before it all blends"
         },
         {
           "type": "essay",
@@ -1355,17 +1362,17 @@
           "label_en": "",
           "title": "시간의 속도를 바꾸는 법",
           "title_en": "",
-          "text": "서두른다고\n빨라지는 게 아니라는 걸\n몸이 먼저 알 때가 있다.\n\n발을 바쁘게 움직이고\n손을 쉬지 않고 써도\n하루가 제 속도로 흘러갈 때.\n\n그런 날은\n내가 시간을 앞지른 게 아니라\n그냥 같이 돌고 있었던 거다.\n\n팽이를 세게 돌려놓아도\n팽이는 팽이의 속도로 돈다.\n나는 그 옆에서\n잠깐 손을 놓을 수 있을 뿐이다.\n\n속도를 바꾸고 싶을 때\n더 빨리 움직이는 것보다\n한 박자 늦게 숨을 쉬는 쪽이\n나한테는 맞았다.\n\n뭔가를 해야 할 것 같은 마음이\n조금 늦게 따라오도록\n그냥 두는 것.\n\n오늘은 그렇게 했다.",
-          "text_en": "There are days the body knows\nbefore the mind does—\nthat hurrying doesn't make things faster.\n\nFeet moving, hands busy,\nand still the hours pass\nat exactly their own pace.\n\nOn those days\nI wasn't getting ahead of time.\nI was just spinning alongside it.\n\nYou can send a top into motion,\nbut the top keeps its own rhythm.\nAll you can do\nis let go for a moment.\n\nWhen I want to change the speed of things,\nmoving faster rarely helps.\nWhat works, at least for me,\nis breathing one beat later than usual.\n\nLetting the urge to do something\narrive a little slowly.\nNot stopping it—\njust not rushing out to meet it.\n\nThat's what today was.",
+          "text": "어릴 때는 여름방학이\n끝나지 않을 것 같았다.\n\n매일 아침\n선풍기 바람 앞에 앉아\n만화를 보고,\n\n점심은 냉장고 문을\n두 번쯤 열었다 닫고 나서야\n겨우 먹었다.\n\n그 시절의 오후는\n길었다.\n\n지금은 어떤 날은\n하루가 다 끝나고 나서도\n제대로 산 느낌이 들지 않는다.\n\n같은 스물네 시간인데\n이상하게\n올해의 하루는 작년의 하루보다 짧다.\n\n시간이 빨라지는 건\n나이 때문만은 아닐 것이다.\n\n같은 일만 반복되면\n뇌는 기억을 따로 저장하지 않는다고 한다.\n\n비슷한 월요일들이\n쌓이면서\n그것들은 한 덩어리가 되고,\n\n그 덩어리를 나중에 꺼내보면\n한 달이 아니라\n하루처럼 느껴진다.\n\n그래서 새로운 길을 걸어본 날은\n다음 날 기억이 더 선명하고,\n\n처음 가본 도시에서의 이틀은\n집에서의 두 주보다\n길게 느껴지기도 하는 것이다.\n\n시간의 속도를 늦추는 방법이\n있다면,\n\n거창한 일을 해야 하는 것이\n아닐지도 모른다.\n\n퇴근길에\n늘 가던 방향이 아닌 쪽으로\n한 블록만 돌아봐도,\n\n뇌는 그날을\n조금 더 오래 기억한다.\n\n처음 먹어보는 음식,\n말을 걸어본 적 없는 사람,\n한 번도 앉아본 적 없는 벤치.\n\n낯선 것들이\n시간을 늘려주는 건\n어쩌면 그 때문일까.\n\n회전목마가 빠르게 돌아도\n안에 탄 사람은\n자기가 도는 걸 잘 모른다.\n\n지금 내가\n그 안에 타 있는 건 아닌지.\n\n오늘은\n지하철 두 정거장을\n걸어봤다.\n\n별일은 아니었다.",
+          "text_en": "When I was young, summer vacation felt like it would never end.\n\nI'd sit in front of the electric fan every morning watching cartoons,\nand lunch only happened after I'd opened and closed the refrigerator\nat least twice.\n\nAfternoons were long back then.\n\nNow there are days when I reach the end of them\nand still feel like nothing quite happened.\n\nTwenty-four hours, the same as always,\nbut somehow this year's days are shorter than last year's.\n\nIt isn't only age, I think.\n\nWhen the same things repeat,\nthe brain stops storing each one separately.\n\nSimilar Mondays pile up and compress into a single mass,\nand when you try to pull one out later,\na whole month comes back feeling like a single afternoon.\n\nThat's why a day you walked a new street stays sharper the next morning.\nThat's why two days in an unfamiliar city can feel longer\nthan two weeks at home.\n\nIf there's a way to slow time down,\nit might not require anything extraordinary.\n\nJust turning down a different block on the way home,\none block you haven't tried before,\nand the brain holds that day a little longer.\n\nA new dish. A word exchanged with someone you'd never spoken to.\nA bench you've never sat on.\n\nMaybe unfamiliar things stretch time\nfor exactly that reason.\n\nA merry-go-round spins fast,\nbut the people riding it rarely notice they're turning.\n\nI wonder if I'm the one inside right now.\n\nToday I walked two subway stops instead of riding.\n\nNothing much happened.",
           "dark": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/pkes_1fa671c5_12eb16e7.jpg",
-          "captionLeft": "차솔이 닿는 아침",
-          "captionLeft_en": "a morning the whisk still touches",
-          "captionRight": "아직 서두르지 않은",
-          "captionRight_en": "not yet in a hurry",
+          "captionLeft": "아직 아무도 깨지 않은 오전",
+          "captionLeft_en": "morning before anyone woke",
+          "captionRight": "손은 이미 알고 있었다",
+          "captionRight_en": "the hands already knew",
           "splitX": 50
         },
         {
@@ -1375,16 +1382,16 @@
           "number": "3",
           "title": "국수 한 그릇의 온기",
           "subtitle": "국수 한 그릇의 온기/Warmth in a bowl",
-          "caption": "국물이 아직 식지 않았다",
-          "caption_en": "the broth still holding its warmth"
+          "caption": "국물이 먼저 식었다",
+          "caption_en": "broth cooling before I did"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lufg_e4fc4828_d5479a48.jpg",
           "captionLeft": "페이지를 넘기다 잠깐 멈췄다",
           "captionLeft_en": "paused mid-turn",
-          "captionRight": "말차는 아직 차가웠다",
-          "captionRight_en": "the matcha still cold",
+          "captionRight": "말차는 그 사이에도 식고 있었다",
+          "captionRight_en": "the matcha kept cooling, quietly",
           "splitX": 39
         },
         {
@@ -1394,115 +1401,126 @@
           "number": "4",
           "title": "차를 세우는 시간",
           "subtitle": "차를 세우는 시간/A ritual with tea",
-          "caption": "손이 먼저 알고 있었다",
-          "caption_en": "the hands already knew"
+          "caption": "손 안에서 녹는 오전",
+          "caption_en": "morning dissolved in both hands"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/o1zg_2e8a675d_e98c70d.jpg",
-          "captionLeft": "앨범 표지 위에 손을 얹었다",
-          "captionLeft_en": "a hand resting on the album cover",
-          "captionRight": "오른손은 이미 다음 자리에 있었다",
-          "captionRight_en": "the other hand already somewhere else",
+          "captionLeft": "손이 먼저 닿았다",
+          "captionLeft_en": "the hand arrived first",
+          "captionRight": "아직 정리하지 않은 것들",
+          "captionRight_en": "things not yet put away",
           "splitX": 21
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ra0w_1ea03cd8_3f59e236.jpg",
-          "caption": "손끝에서 떨어지는 것들",
-          "caption_en": "things falling from the hand",
+          "caption": "손 안에 잠깐 있다 가는 것들",
+          "caption_en": "held for a moment, then let go",
           "focalX": 50,
           "focalY": 50
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/su70_8fb30aa9_7570d233.jpg",
-          "captionLeft": "말차 한 모금, 페이지 한 장",
-          "captionLeft_en": "a sip, a page turned slowly",
-          "captionRight": "서두르지 않아도 되는 오후",
-          "captionRight_en": "an afternoon with nowhere to be",
+          "captionLeft": "찻사발을 쥔 채로",
+          "captionLeft_en": "still holding the bowl",
+          "captionRight": "페이지는 아직 덜 넘어갔다",
+          "captionRight_en": "the page not yet turned",
           "splitX": 39
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l2js_587398bd_cf80e02b.jpg",
-          "caption": "검은 고양이, 그림 옆에 그냥 있다",
-          "caption_en": "the black cat, just there beside the painting",
+          "caption": "그림 옆에, 그냥 있었다",
+          "caption_en": "just there, beside the painting",
           "focalX": 50,
           "focalY": 50
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/q9aw_8b6cbccf_f5ab4853.jpg",
-          "captionLeft": "젓가락이 먼저 닿았다",
-          "captionLeft_en": "chopsticks before the first bite",
-          "captionRight": "비비기 전의 한 박자",
-          "captionRight_en": "one breath before mixing",
+          "captionLeft": "젓가락을 들기 전에 잠깐",
+          "captionLeft_en": "a moment before the chopsticks move",
+          "captionRight": "비비기가 아까운 날이 있다",
+          "captionRight_en": "some bowls are too good to stir",
           "splitX": 11
         },
         {
           "type": "dialogue",
           "label": "참고 컨텍스트에 내용이 입력되지 않았습니다.\n\n어떤 장면, 사물, 상황, 또는 사진에 대해 쓰고 싶으신지 알려주시면 글을 써드리겠습니다.",
+          "label_en": "",
           "lines": [
             {
+              "side": "left",
               "speaker": "빼빼",
               "text": "오늘도 거기 있네",
-              "side": "left"
+              "text_en": "오늘도 거기 있네\n\nYou're still there today"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "고양이는 늘 같은 자리에 앉아 있다",
-              "side": "right"
+              "text_en": "# 고양이는 늘 같은 자리에 앉아 있다\n# The cat always sits in the same spot"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "나는 지나가다 멈췄다",
-              "side": "left"
+              "text_en": "잠깐 멈추는 것에 대하여\n\nSome things only arrive when you stop"
             },
             {
+              "side": "right",
               "speaker": "콩이",
               "text": "형 또 졸고 있어",
-              "side": "right"
+              "text_en": "형 또 졸고 있어\n\n*My brother is dozing off again*"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "오후는 조용했다",
-              "side": "left"
+              "text_en": "오후는 조용했다\nThe afternoon was quiet"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "아무도 서두르지 않는 시간",
-              "side": "right"
+              "text_en": "아무도 서두르지 않는 시간\n\nWhen No One Is in a Hurry"
             },
             {
+              "side": "left",
               "speaker": "빼빼",
               "text": "여기 앉으면 따뜻해",
-              "side": "left"
+              "text_en": "**Sitting here,**\n**you'll feel the warmth.**"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "햇빛이 조금 남아 있는 곳",
-              "side": "right"
+              "text_en": "햇빛이 조금 남아 있는 곳\nWhere a Little Sunlight Remains"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "그 앞에서 나도 잠깐 앉았다",
-              "side": "left"
+              "text_en": "Briefly, I sat there too."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "오늘은 그 정도면 충분했다",
-              "side": "right"
+              "text_en": "# 오늘은\n그 정도면 충분했다"
             }
           ]
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tgy8_9cff8bf7_260a5b51.jpg",
-          "captionLeft": "손끝으로 먼저 닿았다",
-          "captionLeft_en": "touched it before looking",
-          "captionRight": "오래 쓴 것들 곁에",
-          "captionRight_en": "beside things worn with time",
+          "captionLeft": "손이 먼저 닿았다",
+          "captionLeft_en": "the hand reached first",
+          "captionRight": "아직 쓰지 않은 오후",
+          "captionRight_en": "an afternoon not yet used",
           "splitX": 34
         },
         {
@@ -1512,16 +1530,16 @@
           "number": "5",
           "title": "작은 것들을 모으는 시간",
           "subtitle": "작은 것들을 모으는 시간/Gathering small things",
-          "caption": "잡을 듯 말 듯 멈춘 손",
-          "caption_en": "a hand that almost touched"
+          "caption": "잡을 듯 말 듯 멈췄다",
+          "caption_en": "a hand almost touching"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/u3j0_918e71d5_5a67b1ed.jpg",
-          "captionLeft": "차솔이 떠나기 전",
-          "captionLeft_en": "before the whisk was lifted",
-          "captionRight": "아직 녹색이었다",
-          "captionRight_en": "still green, not yet tea",
+          "captionLeft": "손이 먼저 알고 있었다",
+          "captionLeft_en": "the hands already knew",
+          "captionRight": "책은 아직 덮여 있었다",
+          "captionRight_en": "the book stayed closed",
           "splitX": 43
         },
         {
@@ -1531,8 +1549,8 @@
           "number": "6",
           "title": "달콤한 순간의 시작",
           "subtitle": "달콤한 순간의 시작/The start of something sweet",
-          "caption": "이미 깨진 것들이 더 보기 좋았다",
-          "caption_en": "the broken ones looked better somehow"
+          "caption": "열기 전이 더 궁금했다",
+          "caption_en": "better before it broke open"
         },
         {
           "type": "botanical",
@@ -1541,152 +1559,179 @@
           "number": "7",
           "title": "아침을 깨우는 베리",
           "subtitle": "아침을 깨우는 베리/Berries that wake the morning",
-          "caption": "볼 안에 담긴 것들",
-          "caption_en": "small things held in white"
+          "caption": "그릇 안에 여름이 있었다",
+          "caption_en": "summer, just sitting in a bowl"
         },
         {
           "type": "dialogue",
           "label": "내용을 입력해주세요",
+          "label_en": "",
           "lines": [
             {
+              "side": "left",
               "speaker": "",
               "text": "아침 — 먼저 일어난 빛",
-              "side": "left"
+              "text_en": "아침 — 먼저 일어난 빛"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "창문을 열었더니",
-              "side": "right"
+              "text_en": "열면 이미 시작된다\n\n창문 너머에서 오는 것들"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "빛이 먼저 들어와 있었다.",
-              "side": "left"
+              "text_en": "Light had already come in."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "어제까지",
-              "side": "right"
+              "text_en": "어제까지\n\nUntil Yesterday"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "어둠이 가득 채워두었던 자리를",
-              "side": "left"
+              "text_en": "어둠이 머물던 자리,\n빛이 천천히 들어서는 법"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "조용히 비워둔 채.",
-              "side": "right"
+              "text_en": "# 조용히 비워둔 채.\n*Left quietly empty.*"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "빛은",
-              "side": "left"
+              "text_en": "빛은\nLight is"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "소리 없이 들어와",
-              "side": "right"
+              "text_en": "# 소리 없이 들어와\n*Come in without a sound*"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "가장 낮은 곳부터 채운다.",
-              "side": "left"
+              "text_en": "가장 낮은 곳부터 채운다.\n\nIt fills from the lowest place first."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "마루 한쪽,",
-              "side": "right"
+              "text_en": "마루 한쪽,\n한 귀퉁이의 언어"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "벽 아래,",
-              "side": "left"
+              "text_en": "벽 아래,\n그 아래부터 시작되는 것들"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "고양이가 자던 방석 끝.",
-              "side": "right"
+              "text_en": "고양이가 자던 방석 끝.\n\nThe edge of the cushion\nwhere the cat used to sleep."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "급하게 밀어내지 않고",
-              "side": "left"
+              "text_en": "급하지 않게\n밀어내지 않는 법"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "천천히 스며들듯",
-              "side": "right"
+              "text_en": "천천히 스며들듯\nLike something slowly seeping in"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "어둠을 바래게 한다.",
-              "side": "left"
+              "text_en": "# 어둠을 바래게 한다\n**It Fades the Dark**"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "아직 시작하지 않아도 되는데",
-              "side": "right"
+              "text_en": "# 아직 시작하지 않아도 되는데\n\nYou don't have to start just yet"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "뭔가를 해야 할 것 같던 마음이",
-              "side": "left"
+              "text_en": "# 무언가를 해야 할 것 같던 마음이\n# Something That Felt Like It Had to Be Done"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "조금 늦게 따라온다.",
-              "side": "right"
+              "text_en": "두 줄 헤드라인을 써드리겠습니다.\n\n---\n\n**번역은 의미가 아니라**\n**마음이 옮겨지는 일이다**\n\n---\n\n혹은:\n\n---\n\n**말은 먼저 건너가고**\n**뜻은 조금 늦게 따라온다**\n\n---\n\n두 번째 안이 컨텍스트의 뉘앙스(\"조금 늦게 따라온다\")를 더 자연스럽게 담고 있습니다. 원하시는 방향이 있으면 말씀해주세요."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "괜찮다.",
-              "side": "left"
+              "text_en": "괜찮다.\n그 말을 영어로 옮기려다 잠깐 멈췄다.\n\n\"I'm fine.\"\n\"It's okay.\"\n\"Don't worry.\"\n\n어떤 것도\n딱 맞지 않는다.\n\n괜찮다는\n괜찮지 않을 수도 있다는 걸\n모두 알면서 하는 말인데,\n\n영어는 그 안을\n조금 더 환하게 들여다보려 한다.\n\n\"It's alright\"이라고 쓰면\n너무 가볍고,\n\n\"I'll be okay\"라고 쓰면\n아직 괜찮지 않다는 쪽에\n더 기운다.\n\n그냥\n\"It's okay\"가\n그나마 가장 가깝지 않을까.\n\n말하는 사람이\n조금 참으면서 내뱉는 말.\n듣는 사람이\n그냥 받아들이기로 하는 말.\n\n괜찮다.\n\n번역은 됐는데\n그 온도는\n좀 남았다."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "오늘은",
-              "side": "right"
+              "text_en": "오늘은,\n어디까지 번역해드릴까요."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "빛이 먼저 깨웠으니까.",
-              "side": "left"
+              "text_en": "빛이 먼저 깨웠으니까\n\nLight woke me first."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "그런 아침이었다",
-              "side": "right"
+              "text_en": "그런 아침이었다\nIt was that kind of morning"
             },
             {
+              "side": "left",
               "speaker": "빼빼",
               "text": "아직 안 일어났어?",
-              "side": "left"
+              "text_en": "아직 안 일어난 사람에게\n어떤 말이 더 맞는 말일까"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "창가에 앉아 있었다",
-              "side": "right"
+              "text_en": "잠깐 멈췄다가\n다시 적었다\n\n---\n\nBy the window, just sitting"
             },
             {
+              "side": "left",
               "speaker": "콩이",
               "text": "...",
-              "side": "left"
+              "text_en": "# 번역이 머뭇거리는 자리\n\n말은 옮겨지는데,\n마음은 조금 늦게 따라온다"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "빛이 먼저 깨워서",
-              "side": "right"
+              "text_en": "빛이 먼저 깨워서\n*The light woke me before I did*"
             }
           ]
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/k5tc_a125e86_ae52801a.jpg",
-          "captionLeft": "빛 안에 앉아 있었다",
-          "captionLeft_en": "sitting inside the light",
-          "captionRight": "그림자만 길어졌다",
-          "captionRight_en": "only the shadow grew long",
+          "captionLeft": "사람은 창 밖에,\n그림자는 벽 위에",
+          "captionLeft_en": "the person at the window,\nthe shadow on the wall",
+          "captionRight": "빛이 지나간 자리에\n남은 것들",
+          "captionRight_en": "what remains\nafter the light moves through",
           "splitX": 16
         },
         {
@@ -1696,8 +1741,8 @@
           "number": "8",
           "title": "담장 너머 작은 둥지",
           "subtitle": "담장 너머 작은 둥지/A nest beyond the fence",
-          "caption": "덩굴 사이, 리스가 거기 있었다",
-          "caption_en": "a wreath half-swallowed by green"
+          "caption": "덩굴 사이에 놓인 것",
+          "caption_en": "left among the vines"
         },
         {
           "type": "botanical",
@@ -1706,25 +1751,25 @@
           "number": "9",
           "title": "오후의 작은 사치",
           "subtitle": "오후의 작은 사치/A small afternoon luxury",
-          "caption": "먹기 전에 잠깐 봤다",
-          "caption_en": "a moment before the spoon goes in"
+          "caption": "먹기 전에 잠깐 멈췄다",
+          "caption_en": "paused before the first bite"
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tfd0_bd825853_777ab35.jpg",
-          "captionLeft": "벽에 기댄 그림",
-          "captionLeft_en": "a painting leaning against the wall",
-          "captionRight": "두 팔 벌린 사람",
-          "captionRight_en": "arms open to no one",
+          "captionLeft": "문 옆에 기대어 둔 것들",
+          "captionLeft_en": "things left leaning by the door",
+          "captionRight": "팔을 벌리고 서 있었다",
+          "captionRight_en": "arms open, just standing there",
           "splitX": 59
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/ovfk_ced42342_5762bd5c.jpg",
-          "label": "그림자가 먼저 가고",
-          "label_en": "The shadow goes first",
-          "text": "마루 위에 빛이 길게 누워 있었다.\n발은 아직 그 가장자리에 있는데\n그림자는 이미 저만치 앞서 있었다.\n\n빛이 낮은 각도로 들어오는 시간,\n오후 늦게 창문을 기울어 통과한 햇빛은\n마루 결을 따라 흘렀다.\n\n나는 움직이지 않았는데\n그림자만 바닥에 길게 드러누워\n뭔가를 먼저 알고 있는 것처럼 보였다.\n\n발이 차가운 마루에 닿아 있었다.\n그 온도가 발바닥에서 천천히 올라왔다.",
-          "text_en": "Light lay flat across the wooden floor,\nlong and still.\n\nThe foot barely at its edge,\nbut the shadow already far ahead—\nstretched out like it had somewhere to be.\n\nIt was late afternoon light,\nthe kind that comes in low and slides along the grain.\n\nI hadn't moved.\nBut there it was,\nlying across the floor like it already knew\nwhere I was going.\n\nThe floor was cold underfoot.\nThat was the only thing that felt certain.",
+          "label": "그림자가 더 길었다",
+          "label_en": "The shadow went ahead",
+          "text": "바닥을 내려다봤을 때\n이미 그림자가 먼저 가 있었다.\n\n발은 아직 그 자리에 있는데\n그림자는 한참 앞으로 뻗어 있었다.\n낮은 각도의 빛이 그렇게 만든 거지만,\n잠깐 멈추게 됐다.\n\n마루의 결이 빛을 받아 드러나 있었고,\n그 위로 그림자 하나가\n내 발보다 훨씬 길게,\n조금 다른 모양으로 누워 있었다.\n\n그 앞에서 한동안\n발을 떼지 않았다.",
+          "text_en": "When I looked down,\nthe shadow had already moved on.\n\nMy feet were still there,\nbut the shadow stretched far ahead—\ncast long by light coming in at a low angle.\nI stopped for a moment anyway.\n\nThe grain of the floorboards was lit up,\nand across it lay a shadow\nstretched longer than my body,\nslightly different in shape.\n\nI stood there a while\nbefore taking the next step.",
           "darkText": false
         },
         {
@@ -1735,7 +1780,7 @@
           "title": "작은 우주를 품은 날",
           "subtitle": "작은 우주를 품은 날/A day holding a small universe",
           "caption": "별을 꼭 안고 있었다",
-          "caption_en": "she held the star close"
+          "caption_en": "holding a star, just so"
         },
         {
           "type": "botanical",
@@ -1745,339 +1790,390 @@
           "title": "초록 우산의 오후",
           "subtitle": "초록 우산의 오후/Afternoon under green umbrellas",
           "caption": "한쪽은 이미 열렸다",
-          "caption_en": "one already opened"
+          "caption_en": "one was already open"
         },
         {
           "type": "quote",
-          "text": "장면은 이미 지나갔는데 마음은 아직 그 앞에 서 있을 때가 있다.",
-          "text_en": "Sometimes the scene has already passed, but the heart is still standing there.",
+          "text": "장면은 이미 지나갔는데, 마음은 아직 그 앞에 서 있을 때가 있다.",
+          "text_en": "The moment has passed, but something in me is still standing there.",
           "context": ""
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1be6g_8ac83c10_97883efa.jpg",
-          "captionLeft": "벼 위를 막 떠난 자리",
-          "captionLeft_en": "where it stood, just a moment ago",
-          "captionRight": "흰 날갯짓, 아직 허공에",
-          "captionRight_en": "white wings, still mid-air",
+          "captionLeft": "벼는 아직 초록이었다",
+          "captionLeft_en": "the rice still green",
+          "captionRight": "새는 이미 떠난 뒤였다",
+          "captionRight_en": "the bird already gone",
           "splitX": 22
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/y3wc_b4c57052_2f58f114.jpg",
-          "label": "장갑을 끼고 하는 일",
-          "label_en": "One Glove On",
-          "text": "한 손에는 장갑을 끼고\n다른 손에는 끼지 않았다.\n\n빛이 손목 위에 잠깐 머물렀다가\n지나갔다.\n\n벽돌을 옮기는 일이었는데,\n서두르는 것 같지는 않았다.\n\n마른 나뭇조각들이 담긴 통 옆에서\n그 사람은 한동안 몸을 낮추고 있었다.\n\n손끝이 닿는 면을 먼저 확인하고,\n그 다음에 들어 올리는 순서.\n\n뭔가를 만들려는 것인지\n정리하려는 것인지\n바깥에서는 잘 몰랐다.\n\n초록이 가장자리를 조금 가리고,\n빛은 사선으로 들어오고 있었다.",
-          "text_en": "One hand gloved,\nthe other not.\n\nLight landed on her wrist for a moment\nthen moved on.\n\nShe was moving bricks,\nbut didn't seem to be in any hurry.\n\nBeside a bin of dried wood scraps,\nshe stayed low for a while.\n\nFirst checking where her fingers would land,\nthen lifting.\n\nWhether she was building something\nor clearing it away\nwas hard to tell from where I stood.\n\nGreen edged into the frame.\nThe light came in at an angle.",
+          "label": "장갑을 낀 손",
+          "label_en": "one glove on",
+          "text": "한쪽만 장갑을 끼고 있었다.\n\n한 손은 맨손으로 벽돌 옆면을 짚고,\n다른 손은 흙 사이를 더듬었다.\n\n빛이 손등 위로 내려앉아 있었고,\n바닥에는 마른 나뭇조각들이 쌓여 있었다.\n\n서두르는 것 같지 않았다.\n뭔가를 완성하려는 것도 아닌 것 같았다.\n그냥 그 자리에 앉아\n손을 쓰고 있었다.\n\n그걸 한참 보고 있었는데,\n그 손이 좋았다.",
+          "text_en": "She wore a glove on only one hand.\n\nThe bare hand rested against the side of a brick,\nthe other moved through something dry and dark.\n\nLight sat on the back of her wrist.\nBelow her, a pile of withered wood chips,\nbrown and still.\n\nShe didn't seem to be in a hurry.\nShe didn't seem to be finishing anything.\nShe was just there,\nusing her hands.\n\nI watched for a while.\nI liked the hands.",
           "darkText": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/wh2g_eda5f82a_776d87f8.jpg",
-          "captionLeft": "고개를 숙인 오후",
-          "captionLeft_en": "an afternoon bent low",
-          "captionRight": "손이 먼저 알았다",
-          "captionRight_en": "the hands knew first",
+          "captionLeft": "고개를 숙이고 있었다",
+          "captionLeft_en": "she had bent down to begin",
+          "captionRight": "벽돌은 아직 차가웠다",
+          "captionRight_en": "the bricks still cool to the touch",
           "splitX": 50
         },
         {
           "type": "split",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1dxlk_8cbffd98_dfc4a18a.jpg",
-          "label": "포플러",
-          "label_en": "Poplars",
-          "text": "지나치다가\n잠깐 봤다.\n\n포플러 나무들이\n일렬로 서 있었다.\n\n하늘이 파랗고\n햇볕이 정수리를 눌러오는 오후였는데,\n나무들은 그 아래\n제 모양 그대로 있었다.\n\n바람이 불었는지\n잎들이 조금 뒤집혀 있었고,\n그쪽이 더 밝았다.\n\n뭔가를 찍어야겠다고 생각해서 찍은 게 아니라\n그냥 창밖으로 보이길래\n손이 먼저 올라갔다.\n\n그런 날이었다.",
-          "text_en": "I caught them passing by.\n\nA row of poplars,\nstanding the way they always do.\n\nThe sky was a hard blue,\nand the midday sun pressed straight down,\nbut the trees just stayed there,\nunchanged.\n\nThe wind must have come through—\nsome of the leaves had turned over,\nthe pale undersides catching more light.\n\nI didn't decide to take the photo.\nI just saw them through the window\nand my hand was already up.\n\nThat kind of afternoon.",
+          "label": "여름, 포플러",
+          "label_en": "Summer, Poplars",
+          "text": "지나가다 잠깐 봤다.\n\n포플러들이 일렬로 서 있었다.\n좁고 곧게,\n하늘 쪽으로만.\n\n여름 한낮의 빛이\n잎마다 다르게 떨어지고 있었는데\n나무들은 그것에 크게 반응하지 않았다.\n\n땅은 말라 있었고\n풀은 아직 초록이었다.\n그 경계가 딱히 어디라고 말하기 어려운 자리.\n\n다들 어딘가로 가고 있을 시간에\n이 나무들만 그 자리에\n그렇게 서 있었다.",
+          "text_en": "I saw them in passing.\n\nA row of poplars, standing close together—\nnarrow and straight,\nonly upward.\n\nThe midday light was landing differently\non each leaf,\nbut the trees didn't seem to mind.\n\nThe ground was dry.\nThe grass was still green.\nThe line between them\nhard to say exactly where.\n\nEveryone else was somewhere going.\nThese trees just stood there,\nlike that,\nin that spot.",
           "darkText": false
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/15i5c_f6e5a7fa_f3069a8c.jpg",
-          "captionLeft": "벽돌을 놓는 손",
-          "captionLeft_en": "hands that set things in place",
-          "captionRight": "마른 잎 위로 햇살",
-          "captionRight_en": "dry leaves, afternoon light",
+          "captionLeft": "벽돌을 쌓는 오후",
+          "captionLeft_en": "an afternoon of stacking bricks",
+          "captionRight": "손끝에 흙이 남았다",
+          "captionRight_en": "dirt still on her fingertips",
           "splitX": 50
         },
         {
           "type": "dialogue",
           "label": "내용이 입력되지 않았습니다. 장면이나 상황을 알려주세요.",
+          "label_en": "",
           "lines": [
             {
+              "side": "left",
               "speaker": "",
               "text": "바람이 부는 날이었다.",
-              "side": "left"
+              "text_en": "두 줄짜리 표지 헤드라인으로 쓰겠습니다.\n\n---\n\n바람이 불었다\n그 말 하나를 영어로 옮기던 오후\n\n---"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "마당 한쪽에",
-              "side": "right"
+              "text_en": "마당 한쪽에\nIn a corner of the yard"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "깔아둔 화로 앞에 앉아",
-              "side": "left"
+              "text_en": "깔아둔 화로 앞에 앉아\n\nSeated before the ember-laid hearth"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "불씨를 피우려 했다.",
-              "side": "right"
+              "text_en": "표지 헤드라인 — 2줄, 명조체\n\n---\n\n불씨를 피우려 했다\nI was trying to start a fire."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "장작은 마르고,",
-              "side": "left"
+              "text_en": "장작은 마르고,\n불은 늦게 붙는다"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "종이는 구겨져 있고,",
-              "side": "right"
+              "text_en": "종이는 구겨져 있고,\nStill, the words stay."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "손에는 라이터 하나.",
-              "side": "left"
+              "text_en": "손에는 라이터 하나.\nOne lighter in hand."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "그런데 이상하게",
-              "side": "right"
+              "text_en": "그런데 이상하게\n\nBut somehow"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "불이 붙지 않았다.",
-              "side": "left"
+              "text_en": "표지 헤드라인 2줄, 명조체 감각으로 씁니다.\n\n---\n\n불이 붙지 않았다\nThe fire didn't catch."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "불꽃이 일어나도",
-              "side": "right"
+              "text_en": "**Even if a flame rises**\n\n**불꽃이 일어나도**"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "바람에 금방 꺼지고,",
-              "side": "left"
+              "text_en": "바람에 지지 않는 말"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "다시 붙여도",
-              "side": "right"
+              "text_en": "다시 붙여도\n\n*Even if you piece it back together*"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "또 사라지고.",
-              "side": "left"
+              "text_en": "또 사라지고\nAnd again, gone."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "손끝이 까맣게 그을렸다.",
-              "side": "right"
+              "text_en": "표지 헤드라인 (2줄, 명조체):\n\n---\n\n손끝이 까맣게 그을렸다\nFingertips, Burned Black"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "서두르지 않으려 했는데",
-              "side": "left"
+              "text_en": "서두르지 않으려 했는데\n마음은 이미 앞서 있었다"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "자꾸 손이 빨라졌다.",
-              "side": "right"
+              "text_en": "내 손은 자꾸 앞서 나갔다."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "몇 번째였을까.",
-              "side": "left"
+              "text_en": "몇 번째였을까\n\nHow many times has it been"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "라이터를 내려놓고",
-              "side": "right"
+              "text_en": "라이터를 내려놓고\n— Put the lighter down"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "그냥 한참 앉아 있었다.",
-              "side": "left"
+              "text_en": "I just sat there for a while."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "바람은",
-              "side": "right"
+              "text_en": "바람은\n— 시작되는 것들에 대하여"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "멈출 생각이 없었고,",
-              "side": "left"
+              "text_en": "멈출 생각이 없었고,\n그게 문제였는지도 모른다"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "나는",
-              "side": "right"
+              "text_en": "표지 헤드라인 2줄, 명조체 기준으로 씁니다.\n\n---\n\n말이 멈추는 자리에서\n나는, 라고 시작했다"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "불씨를 기다리는 것 말고는",
-              "side": "left"
+              "text_en": "불씨를 기다리는 것 말고는\nThere Was Nothing Left But Waiting for a Spark"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "할 수 있는 게 없었다.",
-              "side": "right"
+              "text_en": "표지 헤드라인 두 줄입니다.\n\n---\n\n할 수 있는 게 없었다\nThere was nothing I could do."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "조금 천천히 해보기로 했다.",
-              "side": "left"
+              "text_en": "표지 헤드라인 (2줄, 명조체):\n\n---\n\n조금 천천히 해보기로 했다\n*I decided to take it a little slower.*"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "장작 사이에",
-              "side": "right"
+              "text_en": "장작 사이에\nBetween the Logs"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "바람이 지나갈 자리를 조금 더 두고,",
-              "side": "left"
+              "text_en": "바람이 지나갈 자리를\n조금 더 두고,"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "종이를 너무 꽉 눌러 담지 않고,",
-              "side": "right"
+              "text_en": "종이를 꽉 쥐지 않는 일\n\n힘을 빼는 것도\n연습이 필요하다"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "불꽃이 일어나면",
-              "side": "left"
+              "text_en": "불꽃이 일어나면\nWhen the flame rises"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "그냥 한참을 두고 보기로 했다.",
-              "side": "right"
+              "text_en": "I decided to just sit with it for a while."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "그러자",
-              "side": "left"
+              "text_en": "그러자\n\nThen."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "이상하게",
-              "side": "right"
+              "text_en": "이상하게,\n라는 말이 필요한 순간들이 있다"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "불씨가 조금씩",
-              "side": "left"
+              "text_en": "불씨가 조금씩\n\n*An Ember, Slowly*"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "남기 시작했다.",
-              "side": "right"
+              "text_en": "표지 헤드라인 2줄, 명조체:\n\n---\n\n말이 먼저 사라지고\n흔적이 남기 시작했다"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "빨리 피워야 한다는 마음보다",
-              "side": "left"
+              "text_en": "빨리 피워야 한다는 마음보다\n\n---\n\n**보다 천천히,**\n**그래도 괜찮은 계절에 대하여**"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "천천히 남겨두려는 마음이",
-              "side": "right"
+              "text_en": "천천히, 남겨두는 일\n\nLeaving Things Slowly Behind"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "더 오래 가는 불을 만들었다.",
-              "side": "left"
+              "text_en": "더 오래 가는 불을 만들었다.\nWe made a fire that lasts."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "불씨는",
-              "side": "right"
+              "text_en": "불씨는\n꺼진 것이 아니다"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "서두른다고 빨리 커지는 게 아니었다.",
-              "side": "left"
+              "text_en": "Growing up doesn't get faster\njust because you rush it."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "바람이 부는 날에는",
-              "side": "right"
+              "text_en": "바람이 부는 날에는\n— On Windy Days"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "바람을 이기려 하지 말고,",
-              "side": "left"
+              "text_en": "바람과 싸우지 않는 법\n\nDon't try to beat the wind,"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "바람이 지나갈 자리를",
-              "side": "right"
+              "text_en": "바람이 지나갈 자리를\nLeaving Room for the Wind"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "조금 남겨두는 것.",
-              "side": "left"
+              "text_en": "표지 헤드라인 2줄, 명조체 스타일로:\n\n---\n\n다 말하지 않아도 되는 것들이 있다\n조금 남겨두는 것"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "그게",
-              "side": "right"
+              "text_en": "그게\n\n——\n\n번역이 아니라\n기다림이 필요한 말이 있다."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "불을 피우는 방법이었다.",
-              "side": "left"
+              "text_en": "표지 헤드라인 2줄, 명조체 기준:\n\n---\n\n불을 피우는 방법이었다\nHow to Start a Fire\n\n---"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "손끝에는 아직",
-              "side": "right"
+              "text_en": "손끝에는 아직\n\nFingertips still holding on"
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "검은 그을음이 남아 있었다.",
-              "side": "left"
+              "text_en": "Black soot still clung to the walls."
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "그래도 괜찮았다.",
-              "side": "right"
+              "text_en": "Still, it was okay."
             },
             {
+              "side": "left",
               "speaker": "",
               "text": "불씨는 지금",
-              "side": "left"
+              "text_en": "불씨는 지금\nStill Burning"
             },
             {
+              "side": "right",
               "speaker": "",
               "text": "천천히 번지고 있었다.",
-              "side": "right"
+              "text_en": "# It was spreading, slowly."
             }
           ]
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/x9q4_8bdcce79_367883c5.jpg",
-          "captionLeft": "장갑 낀 손으로",
-          "captionLeft_en": "gloved hands, unhurried",
-          "captionRight": "불 피울 준비를 했다",
-          "captionRight_en": "before the fire",
+          "captionLeft": "장갑을 끼고 나서야",
+          "captionLeft_en": "gloves on first,",
+          "captionRight": "불 앞에 앉았다",
+          "captionRight_en": "then she sat by the fire",
           "splitX": 59
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/10tdo_d4219bb4_f2064728.jpg",
-          "caption": "불 없이도 자리는 남아 있었다",
-          "caption_en": "The fire was gone, but the circle stayed",
+          "caption": "불 없이도 그 자리는 남아 있다",
+          "caption_en": "the fire is gone, but the circle stays",
           "focalX": 50,
           "focalY": 50
         },
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1awcs_972aeae4_321eb6a4.jpg",
-          "captionLeft": "잠깐 거기 앉아 있었다",
-          "captionLeft_en": "she sat there a moment",
-          "captionRight": "흙 묻은 손을 아직 씻지 않은",
-          "captionRight_en": "hands still carrying the soil",
+          "captionLeft": "아무것도 안 해도 되는 오후",
+          "captionLeft_en": "an afternoon with nothing to do",
+          "captionRight": "흙 냄새가 먼저 왔다",
+          "captionRight_en": "the smell of soil came first",
           "splitX": 2
         },
         {
@@ -2091,16 +2187,16 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/2fywo_d1200ab6_119a3ac4.jpg",
-          "captionLeft": "한여름 정오의 그늘",
-          "captionLeft_en": "shade at noon in midsummer",
-          "captionRight": "난간에 기댄 오후",
-          "captionRight_en": "an afternoon leaning on the rail",
+          "captionLeft": "여름은 이쪽으로 먼저 왔다",
+          "captionLeft_en": "summer arrived on this side first",
+          "captionRight": "난간에 잠깐 기댄 오후",
+          "captionRight_en": "an afternoon leaned against the railing",
           "splitX": 76
         },
         {
           "type": "closing",
-          "text": "오늘도 조금 느리게, 잘 걸어왔습니다.",
-          "text_en": "Today, too, we walked slowly — and that was enough.",
+          "text": "오늘도 조금 느리게 왔습니다.\n그 정도면, 잘 온 거라고 생각합니다.",
+          "text_en": "You came a little slowly today, too.\nThat's close enough to doing well.",
           "cta": "https://youtu.be/RgDPQ7-nB-w"
         }
       ]
