@@ -151,11 +151,12 @@
   }
 
   // ── R2 업로드 ────────────────────────────────────────────────────
-  async function uploadToR2(dataUrl, mediaType) {
+  async function uploadToR2(dataUrl, mediaType, customKey) {
     const cfg = getR2Config();
-    const ext  = (mediaType.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
-    const hash = await hashImage(dataUrl);
-    const key  = `library/${hash}.${ext}`;
+    const ext  = (mediaType.split('/')[1] || 'jpg').replace('jpeg', 'jpg').replace('webp','webp');
+    const hash = customKey || await hashImage(dataUrl);
+    // customKey가 있으면 그대로, 없으면 library/<hash>.<ext>
+    const key  = customKey ? `library/${customKey}.${ext}` : `library/${hash}.${ext}`;
     const publicUrl = `${cfg.publicUrl}/${key}`;
 
     // 존재 여부 확인 (HEAD)
@@ -216,9 +217,9 @@
    *   - R2: url = 'https://...' (full public URL)
    *   - GitHub: url = 'magazine/images/library/<hash>.<ext>' (repo-relative, 기존 호환)
    */
-  async function uploadIfNeeded(dataUrl, mediaType) {
+  async function uploadIfNeeded(dataUrl, mediaType, customKey) {
     if (hasR2()) {
-      const result = await uploadToR2(dataUrl, mediaType);
+      const result = await uploadToR2(dataUrl, mediaType, customKey || null);
       return { path: result.key, url: result.url, existed: result.existed };
     } else {
       const result = await uploadToGitHub(dataUrl, mediaType);
