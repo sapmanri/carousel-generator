@@ -400,11 +400,15 @@ async function startProcess() {
   const btn = document.getElementById('startBtn');
   btn.disabled = true;
 
-  let done = 0, failed = 0;
+  // ── 캐시 선로드 (한 번만) ──
+  const existingCache = await loadCache();
+  const progressEl = document.getElementById('progressLabel');
+
+  let done = 0, skipped = 0, failed = 0;
   for (let i = 0; i < queue.length; i++) {
     const item = queue[i];
     if (item.status === 'done') continue;
-    document.getElementById('progressLabel').textContent = `${i + 1} / ${queue.length}`;
+    progressEl.textContent = `${i + 1} / ${queue.length}`;
 
     try {
       // 1. DataURL 변환
@@ -415,10 +419,21 @@ async function startProcess() {
         reader.readAsDataURL(item.file);
       });
 
-      // 2. R2 업로드 (원본) — mediaType 정규화
-      updateItemStatus(i, 'uploading');
-      // HEIC 변환 후에도 file.type이 잘못 남을 수 있으므로 dataUrl에서 추출
       const actualMediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || item.file.type || 'image/jpeg';
+
+      // ── 캐시 히트 확인 — 이미 처리된 이미지는 스킵 ──
+      const hash = await window.ImageLibrary.hashImage(dataUrl);
+      const cached = hash ? existingCache[hash] : null;
+      if (cached && (cached.r2_url || cached.download_url || cached.url) && cached.mood) {
+        // 분석까지 완료된 항목 → 스킵
+        updateItemStatus(i, 'done');
+        skipped++;
+        progressEl.textContent = `${i + 1} / ${queue.length} (스킵 ${skipped})`;
+        continue;
+      }
+
+      // 2. R2 업로드 (원본)
+      updateItemStatus(i, 'uploading');
       const uploadResult = await window.ImageLibrary.uploadIfNeeded(dataUrl, actualMediaType);
 
       // 2b. 썸네일 생성 + R2 업로드 (thumb_ prefix)
@@ -457,8 +472,10 @@ async function startProcess() {
   }
 
   btn.disabled = false;
-  document.getElementById('progressLabel').textContent =
-    `완료: ${done}장${failed ? ` / 실패: ${failed}장` : ''}`;
+  const parts = [`완료: ${done}장`];
+  if (skipped) parts.push(`스킵: ${skipped}장 (이미 처리됨)`);
+  if (failed)  parts.push(`실패: ${failed}장`);
+  document.getElementById('progressLabel').textContent = parts.join(' / ');
   loadGallery();
 }
 
