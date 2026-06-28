@@ -515,13 +515,6 @@ function renderIssue(issue) {
 }
 
 // ── 스프레드 크롭 정밀 보정 (픽셀 기반) ──────────────────────────
-// splitX = 원본 이미지에서 자르는 지점 (0~100%)
-// 왼쪽 페이지: 0~splitX 구간을 꽉 채워 보여줌 → 그 구간의 중심을 컨테이너 중앙에
-// 오른쪽 페이지: splitX~100 구간을 꽉 채워 보여줌 → 그 구간의 중심을 컨테이너 중앙에
-// object-position: X% 50% → 이미지의 X% 지점이 컨테이너의 X% 위치와 일치
-// 따라서 원하는 이미지 픽셀 위치 → object-position% 변환 필요:
-//   objectPos% = (offset / maxOffset) * 100
-//   where offset = center - W/2, maxOffset = renderedW - W
 function fixSpreadCrops() {
   const leftSections = document.querySelectorAll('.page-spread.half-left');
   leftSections.forEach(leftSec => {
@@ -535,60 +528,60 @@ function fixSpreadCrops() {
     const splitX = parseFloat(leftSec.dataset.splitx || '50');
     const sx = Math.max(5, Math.min(95, splitX));
 
-    function apply(naturalW, naturalH) {
+    function applyWithSize(naturalW, naturalH) {
       const W = leftSec.clientWidth  || window.innerWidth;
       const H = leftSec.clientHeight || window.innerHeight;
-      if (!W || !H || !naturalW || !naturalH) return;
+      if (!W || !H) return;
 
-      const imgRatio       = naturalW / naturalH;
-      const containerRatio = W / H;
-
-      let renderedW, renderedH;
-      if (imgRatio > containerRatio) {
-        // 가로로 넘침
-        renderedH = H;
-        renderedW = H * imgRatio;
+      let renderedW;
+      if (naturalW && naturalH) {
+        const imgRatio       = naturalW / naturalH;
+        const containerRatio = W / H;
+        renderedW = imgRatio > containerRatio ? H * imgRatio : W;
       } else {
-        // 세로로 넘침 (또는 딱 맞음)
-        renderedW = W;
-        renderedH = W / imgRatio;
+        // naturalWidth를 못 읽은 경우(확장자 없는 R2 URL 등) — 화면 비율로 추정
+        // 일반적인 풍경 사진은 3:2 비율이 많음
+        renderedW = H * (3 / 2);
       }
 
       const maxOffset = renderedW - W;
-
-      // 이미지 픽셀 기준 splitX 지점
-      const splitPx = (sx / 100) * renderedW;
-
-      // 왼쪽: 0~splitPx 구간의 중심
-      const leftCenterPx  = splitPx / 2;
-      // 오른쪽: splitPx~renderedW 구간의 중심
-      const rightCenterPx = splitPx + (renderedW - splitPx) / 2;
-
       if (maxOffset <= 0) {
-        // 이미지가 컨테이너보다 좁거나 같음 → 크롭 불필요, 그냥 중앙
-        leftImg.style.objectPosition  = '50% 50%';
-        rightImg.style.objectPosition = '50% 50%';
+        leftImg.style.objectPosition  = `${(sx * 0.5).toFixed(1)}% 50%`;
+        rightImg.style.objectPosition = `${(sx + (100 - sx) * 0.5).toFixed(1)}% 50%`;
         return;
       }
 
-      // center → offset (컨테이너 왼쪽 기준 이미지 시작점)
+      const splitPx       = (sx / 100) * renderedW;
+      const leftCenterPx  = splitPx / 2;
+      const rightCenterPx = splitPx + (renderedW - splitPx) / 2;
+
       const leftOffsetPx  = Math.max(0, Math.min(maxOffset, leftCenterPx  - W / 2));
       const rightOffsetPx = Math.max(0, Math.min(maxOffset, rightCenterPx - W / 2));
 
-      // offset → object-position%
-      const leftPos  = (leftOffsetPx  / maxOffset * 100).toFixed(1);
-      const rightPos = (rightOffsetPx / maxOffset * 100).toFixed(1);
-
-      leftImg.style.objectPosition  = `${leftPos}% 50%`;
-      rightImg.style.objectPosition = `${rightPos}% 50%`;
+      leftImg.style.objectPosition  = `${(leftOffsetPx  / maxOffset * 100).toFixed(1)}% 50%`;
+      rightImg.style.objectPosition = `${(rightOffsetPx / maxOffset * 100).toFixed(1)}% 50%`;
     }
 
-    if (leftImg.complete && leftImg.naturalWidth) {
-      apply(leftImg.naturalWidth, leftImg.naturalHeight);
+    function tryApply() {
+      if (leftImg.naturalWidth && leftImg.naturalHeight) {
+        applyWithSize(leftImg.naturalWidth, leftImg.naturalHeight);
+      } else {
+        // naturalWidth 없음 — crossOrigin 없이 probe Image로 재시도
+        const probe = new Image();
+        probe.onload = function() {
+          applyWithSize(this.naturalWidth || 0, this.naturalHeight || 0);
+        };
+        probe.onerror = function() {
+          applyWithSize(0, 0); // 추정값으로 폴백
+        };
+        probe.src = leftImg.src;
+      }
+    }
+
+    if (leftImg.complete) {
+      tryApply();
     } else {
-      leftImg.addEventListener('load', function() {
-        apply(this.naturalWidth, this.naturalHeight);
-      }, { once: true });
+      leftImg.addEventListener('load', tryApply, { once: true });
     }
   });
 }
