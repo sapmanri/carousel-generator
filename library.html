@@ -1241,6 +1241,20 @@ async function loadPreparedImageForAnalysis(item) {
       let dataUrl = await window.ImageLibrary.fetchAsDataUrl(src.url);
       if (!dataUrl || !dataUrl.startsWith('data:')) throw new Error('fetchAsDataUrl returned empty/non-data URL');
 
+      // HEIC/HEIF 원본은 브라우저에서 디코딩 후 JPEG로 변환
+      const headerType = getDataUrlMediaType(dataUrl) || '';
+      if (/heic|heif/i.test(headerType) && typeof heic2any === 'function') {
+        const blob = await (await fetch(dataUrl)).blob();
+        const converted = await heic2any({blob,toType:'image/jpeg',quality:0.9});
+        const jpegBlob = Array.isArray(converted)?converted[0]:converted;
+        dataUrl = await new Promise((resolve,reject)=>{
+          const r=new FileReader();
+          r.onload=()=>resolve(r.result);
+          r.onerror=reject;
+          r.readAsDataURL(jpegBlob);
+        });
+      }
+
       let mediaType = detectImageMimeFromBase64(getDataUrlBase64(dataUrl), getDataUrlMediaType(dataUrl) || '');
       if (!mediaType.startsWith('image/')) throw new Error(`not an image: ${mediaType}`);
       if (/heic|heif/i.test(mediaType)) throw new Error('HEIC/HEIF needs conversion before analysis');
