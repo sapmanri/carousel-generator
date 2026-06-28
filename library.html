@@ -1035,17 +1035,28 @@ async function doReanalyze(targets, apiKey) {
     const item = targets[i];
     countEl.textContent = `재분석 중 ${i + 1}/${targets.length}…`;
     try {
-      const imgUrl = getOriginalUrl(item);
+      // 썸네일 URL 우선 사용 (용량 작음), 없으면 원본
+      const thumbUrl2 = item.thumbnail_url;
+      const imgUrl = thumbUrl2 || getOriginalUrl(item);
       if (!imgUrl) continue;
       // 이미지 → base64
-      const dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
+      let dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
       if (!dataUrl || !dataUrl.startsWith('data:')) continue;
-      // dataUrl에서 실제 mediaType 추출 (URL 확장자 의존 제거)
-      let mediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || 'image/jpeg';
-      // HEIC/HEIF는 Claude API 미지원 → jpeg 강제
+      // mediaType 추출
+      let mediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || '';
+      // 이미지가 아닌 파일 (영상, 오디오 등) → 스킵
+      if (!mediaType.startsWith('image/')) {
+        console.log('스킵 (이미지 아님):', item.filename, mediaType);
+        continue;
+      }
       if (/heic|heif/i.test(mediaType)) mediaType = 'image/jpeg';
-      // Claude API 지원 타입 외엔 jpeg로 fallback
       if (!['image/jpeg','image/png','image/gif','image/webp'].includes(mediaType)) mediaType = 'image/jpeg';
+      // 10MB 초과 시 리사이즈
+      const b64len = dataUrl.length - dataUrl.indexOf(',') - 1;
+      if (Math.ceil(b64len * 0.75) > 9 * 1024 * 1024) {
+        dataUrl = await generateThumbnail(dataUrl, 1200);
+        mediaType = 'image/jpeg';
+      }
       // 재분석
       const analysis = await analyzeImage(dataUrl, mediaType, apiKey);
       // 캐시 갱신
