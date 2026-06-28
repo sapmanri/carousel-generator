@@ -8658,6 +8658,29 @@
     "11rzs_1580a4f2_f4a02532": {
       "deleted": true,
       "deleted_at": "2026-06-27T17:26:56.004Z"
+    },
+    "178hw_634bc1dc_32ba29c0": {
+      "image_id": "178hw_634bc1dc_32ba29c0",
+      "thumbnail_url": null,
+      "uploaded_at": "2026-06-28",
+      "filename": "IMG_0045.HEIC",
+      "filesize": 1512914,
+      "exif_date": null,
+      "exif_datetime": null,
+      "exif_make": null,
+      "exif_model": null,
+      "exif_iso": null,
+      "exif_fstop": null,
+      "exif_exposure": null,
+      "exif_width": null,
+      "exif_height": null,
+      "upload_status": "ok",
+      "decode_status": "ok",
+      "thumbnail_status": "pending",
+      "analysis_status": "pending",
+      "error_stage": "unknown",
+      "error_message": "messages.0.content.0.image.source.base64.media_type: Input should be 'image/jpeg', 'image/png', 'image/gif' or 'image/webp'",
+      "needs_conversion": false
     }
   }
 }
