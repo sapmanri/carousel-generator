@@ -1166,42 +1166,15 @@ function setFocalPoint(evt, idx) {
 function updateSpreadSplitPreview(idx, splitX) {
   const card = document.querySelectorAll('.page-card')[idx];
   if (!card) return;
-  const leftDiv  = card.querySelector('.spread-preview-left');
-  const rightDiv = card.querySelector('.spread-preview-right');
-  const label    = card.querySelector('.spread-split-label');
-  const splitVal = Math.max(5, Math.min(95, Number(splitX)));
-
-  // background-image 방식: 이미지를 배율 조정해서 해당 부분만 보이게
-  // 왼쪽: 이미지 전체 너비를 (100/splitX)*100% 로 확대 → 왼쪽 정렬 → 왼쪽 splitX% 부분이 보임
-  // 오른쪽: (100/(100-splitX))*100% 로 확대 → 오른쪽 정렬 → 오른쪽 (100-splitX)% 부분이 보임
-  // src: div background에서 URL 추출, 없으면 img 태그 fallback
-  let imgSrc = null;
-  if (leftDiv) {
-    const bg = leftDiv.style.background || leftDiv.style.backgroundImage || '';
-    const m = bg.match(/url\(['"]?([^'"\)]+)['"]?\)/);
-    if (m) imgSrc = m[1];
-    if (!imgSrc) {
-      const imgEl = leftDiv.querySelector('img');
-      if (imgEl) imgSrc = imgEl.src;
-    }
-  }
-  // 현재 page의 photo src를 pages 배열에서 직접 가져오기 (가장 확실)
-  if (!imgSrc) {
-    const pg = pages[idx];
-    if (pg && pg.imageId) {
-      const photo = typeof photos !== 'undefined' ? photos.find(p => p.id === pg.imageId) : null;
-      if (photo) imgSrc = photo.dataUrl || photo.url || null;
-    }
-  }
-
-  if (imgSrc) {
-    const leftW  = `${(100/splitVal)*100}%`;
-    const rightW = `${(100/(100-splitVal))*100}%`;
-    const safeUrl = imgSrc.startsWith('data:') ? `url('${imgSrc.slice(0,30)}...')` : `url('${imgSrc}')`;
-    if (leftDiv)  leftDiv.style.cssText  += `;background:url('${imgSrc}') 0% 50% / ${leftW} auto no-repeat;`;
-    if (rightDiv) rightDiv.style.cssText += `;background:url('${imgSrc}') 100% 50% / ${rightW} auto no-repeat;`;
-  }
-  if (label) label.textContent = `자르는 지점: ${splitVal}%`;
+  const divider = card.querySelector('.spread-divider');
+  const label   = card.querySelector('.spread-split-label');
+  const lblLeft = card.querySelector('.spread-lbl-left');
+  const lblRight= card.querySelector('.spread-lbl-right');
+  const sx = Math.max(5, Math.min(95, Number(splitX)));
+  if (divider)  divider.style.left  = `${sx}%`;
+  if (lblLeft)  lblLeft.style.left  = `${sx/2}%`;
+  if (lblRight) lblRight.style.left = `${sx + (100-sx)/2}%`;
+  if (label)    label.textContent   = `자르는 지점: ${sx}%`;
 }
 
 function renderPageCard(pg, idx) {
@@ -1294,20 +1267,16 @@ function renderPageCard(pg, idx) {
       body = `
         <div class="row">${thumbHtml(pg.imageId, `openPhotoPicker(id=>{pages[${idx}].imageId=id; renderPageList()}, '${pg.imageId||''}')`)}</div>
         <div class="hint">와이드 사진 1장을 2페이지에 걸쳐 보여줍니다. PC/패드는 한 화면, 모바일은 좌/우로 나눠서 순서대로 표시됩니다.</div>
-        <div class="field"><label>모바일 크롭 위치 — 슬라이더로 사진 자르는 지점 조정</label>
-          <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
-            <div class="spread-preview-left" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:${leftBg};flex-shrink:0;">
-              <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.05em;">왼쪽</div>
+        <div class="field"><label>모바일 분할 지점 — 슬라이더로 세로선 이동</label>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="spread-split-label" style="font-size:11px;color:var(--dim)">자르는 지점: ${sx}%</div>
+            <div class="spread-preview-wrap" style="position:relative;width:100%;max-width:400px;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:${src ? `url('${src}') center/cover no-repeat` : '#111'};">
+              <div class="spread-divider" style="position:absolute;top:0;bottom:0;left:${sx}%;width:2px;background:rgba(255,200,100,0.9);transform:translateX(-50%);pointer-events:none;"></div>
+              <div class="spread-lbl-left" style="position:absolute;top:50%;left:${sx/2}%;transform:translate(-50%,-50%);font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:0.05em;">왼쪽</div>
+              <div class="spread-lbl-right" style="position:absolute;top:50%;left:${sx+(100-sx)/2}%;transform:translate(-50%,-50%);font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:0.05em;">오른쪽</div>
             </div>
-            <div class="spread-preview-right" style="position:relative;width:100%;max-width:140px;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:${rightBg};flex-shrink:0;">
-              <div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,0.6);letter-spacing:0.05em;">오른쪽</div>
-            </div>
-            <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:8px;justify-content:center;">
-              <div class="spread-split-label" style="font-size:11px;color:var(--dim)">자르는 지점: ${sx}%</div>
-              <input type="range" min="5" max="95" value="${sx}" style="width:100%"
-                oninput="pages[${idx}].splitX=Number(this.value); updateSpreadSplitPreview(${idx},this.value)">
-              <div style="font-size:11px;opacity:0.45">← 왼쪽으로 당기면 오른쪽 비중 커짐 / 오른쪽으로 당기면 왼쪽 비중 커짐</div>
-            </div>
+            <input type="range" min="5" max="95" value="${sx}" style="width:100%;max-width:400px;"
+              oninput="pages[${idx}].splitX=Number(this.value); updateSpreadSplitPreview(${idx},this.value)">
           </div>
         </div>
         <div class="field"><label>왼쪽 페이지 캡션</label><input value="${esc(pg.captionLeft||'')}" oninput="pages[${idx}].captionLeft=this.value"></div>
