@@ -323,7 +323,8 @@ async function convertHeicIfNeeded(file) {
     /\.(heic|heif)$/i.test(file.name);
   if (!isHeic) return file;
   try {
-    updateStatus && updateStatus('HEIC 변환 중…');
+    const prog = document.getElementById('progressLabel');
+    if (prog) prog.textContent = 'HEIC 변환 중…';
     const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.92 });
     const converted = Array.isArray(blob) ? blob[0] : blob;
     const newName = file.name.replace(/\.(heic|heif)$/i, '.jpg');
@@ -419,7 +420,9 @@ async function startProcess() {
         reader.readAsDataURL(item.file);
       });
 
-      const actualMediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || item.file.type || 'image/jpeg';
+      let actualMediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || item.file.type || 'image/jpeg';
+      // HEIC/HEIF는 Claude API 미지원 → jpeg로 강제 교정
+      if (/heic|heif/i.test(actualMediaType)) actualMediaType = 'image/jpeg';
       item._dataUrl = dataUrl; // 실패 시 해시 계산용
 
       // ── 캐시 히트 확인 — 이미 처리된 이미지는 스킵 ──
