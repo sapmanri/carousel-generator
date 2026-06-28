@@ -342,17 +342,26 @@
     } else {
       fetchUrl = `https://raw.githubusercontent.com/${REPO}/main/${pathOrUrl}`;
     }
-    const ext = (pathOrUrl.split('.').pop() || 'jpg').toLowerCase();
-    const mediaType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
     const res = await fetch(fetchUrl, { cache: 'no-store' });
     if (!res.ok) throw new Error(`이미지 로드 실패: ${pathOrUrl}`);
     const blob = await res.blob();
+    // blob.type에서 실제 mediaType 추출 (URL 확장자 의존 제거)
+    let mediaType = blob.type || '';
+    if (!mediaType || mediaType === 'application/octet-stream') {
+      const ext = (pathOrUrl.split('.').pop() || 'jpg').toLowerCase().split('?')[0];
+      mediaType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+    }
+    // HEIC/HEIF → jpeg 강제 (Claude API 미지원)
+    if (/heic|heif/i.test(mediaType)) mediaType = 'image/jpeg';
+    // 지원 타입 외 → jpeg fallback
+    if (!['image/jpeg','image/png','image/gif','image/webp'].includes(mediaType)) mediaType = 'image/jpeg';
     const dataUrl = await new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
+    // dataUrl의 헤더를 올바른 mediaType으로 교체
     const commaIdx = dataUrl.indexOf(',');
     const b64 = dataUrl.slice(commaIdx + 1);
     return `data:${mediaType};base64,${b64}`;
