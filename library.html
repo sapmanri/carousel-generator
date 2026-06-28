@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28f</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28g</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628f"></script>
+<script src="/shared-config.js?v=20260628g"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628f"></script>
+<script src="/magazine/image-library.js?v=20260628g"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -612,6 +612,18 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
   "negative_space": "low|medium|high",
   "season": "spring|summer|autumn|winter|unknown",
   "time_of_day": "dawn|morning|day|afternoon|evening|night|unknown",
+  "weather": "clear|cloudy|rain|snow|fog|indoor|unknown",
+  "precipitation_presence": "none|rain|snow|after_rain|after_snow|unknown",
+  "surface_condition": "dry|wet|snowy|muddy|reflective|unknown",
+  "light_source": "sunlight|window_light|lamp|candle|fire|overcast|night_light|mixed|unknown",
+  "emotional_tone": ["감정/정서 태그 2~5개: 예: 아늑한, 고요한, 쓸쓸한, 명랑한"],
+  "atmosphere_tags": ["날씨/공기/계절감 태그 2~6개: 예: 비온뒤, 젖은바닥, 흐린빛, 눈쌓임"],
+  "object_tags_ko": ["검색용 한국어 사물 태그 3~10개"],
+  "object_tags_en": ["English object tags for search 3-10"],
+  "scene_tags_ko": ["검색용 한국어 장면 태그 3~10개"],
+  "scene_tags_en": ["English scene tags for search 3-10"],
+  "search_keywords_ko": ["검색에 걸려야 할 한국어 키워드 8~20개: 사물, 장소, 날씨, 감정, 색, 계절 포함"],
+  "search_keywords_en": ["English search keywords 8-20: objects, place, weather, mood, color, season"],
   "location_type": "indoor|outdoor|garden|kitchen|workshop|countryside|city|cafe|unknown",
   "primary_subject": "주요 피사체 한국어 키워드",
   "secondary_subjects": [],
@@ -687,7 +699,7 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
     throw new Error('analysis failed: Claude response did not contain JSON');
   }
   const result = JSON.parse(text.slice(s, e + 1));
-  result.schema_version = 'image-analysis-v2';
+  result.schema_version = 'image-analysis-v3';
   result.analyzed_at    = new Date().toISOString();
   result.model          = 'claude-sonnet-4-6';
   return result;
@@ -791,21 +803,25 @@ async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl, statusFie
     upload_status    : statusFields?.upload_status    || existing.upload_status    || 'ok',
     decode_status    : statusFields?.decode_status    || existing.decode_status    || 'ok',
     thumbnail_status : statusFields?.thumbnail_status || existing.thumbnail_status || (thumbUrl ? 'ok' : 'pending'),
-    analysis_status  : statusFields?.analysis_status  || existing.analysis_status  || (analysis ? 'ok' : 'pending'),
-    error_stage      : statusFields?.error_stage      || existing.error_stage      || null,
-    error_message    : statusFields?.error_message    || existing.error_message    || null,
-    needs_conversion : statusFields?.needs_conversion || existing.needs_conversion || false,
+    analysis_status  : statusFields?.analysis_status  || (analysis ? 'ok' : existing.analysis_status) || 'pending',
+    error_stage      : analysis ? null : (statusFields?.error_stage      || existing.error_stage      || null),
+    error_message    : analysis ? null : (statusFields?.error_message    || existing.error_message    || null),
+    needs_conversion : analysis ? false : (statusFields?.needs_conversion || existing.needs_conversion || false),
   };
 
   // AI 분석 — 분석값이 있을 때만 merge (없으면 기존 유지)
   if (analysis && Object.keys(analysis).length > 0) {
     Object.assign(newData, analysis);
+    newData.analysis_status = 'ok';
+    newData.error_stage = null;
+    newData.error_message = null;
+    newData.needs_conversion = false;
   } else {
     // 기존 분석 필드 보존
     const ANALYSIS_FIELDS = ['mood','suggested_caption','suggested_caption_en','suggested_label',
       'suggested_label_en','subject_position','best_page_type','overall_brightness','dominant_color',
       'color_temperature','contrast_level','visual_density','negative_space','season','time_of_day',
-      'location_type','primary_subject','secondary_subjects','activity_type','human_presence',
+      'weather','precipitation_presence','surface_condition','light_source','emotional_tone','atmosphere_tags','object_tags_ko','object_tags_en','scene_tags_ko','scene_tags_en','search_keywords_ko','search_keywords_en','location_type','primary_subject','secondary_subjects','activity_type','human_presence',
       'animal_presence','material_texture','has_text','text_area_position','text_safe_area',
       'camera_distance','camera_angle','motion_implied','focus_clarity','thumbnail_potential',
       'thumbnail_reason','spread_focal_left','spread_focal_right','domesticity_score',
@@ -925,6 +941,18 @@ function repairMojibakeDeep(v) {
   return v;
 }
 
+function isBadMetaText(v) {
+  const text = Array.isArray(v) ? v.join(' ') : String(v ?? '');
+  return /invalid_request_error|Could not process image|messages\.0\.content|api\.anthropic|base64|Bad Request|analysis failed|image\.source|media type/i.test(text);
+}
+
+function cleanDisplayText(v) {
+  if (v == null || v === '') return '';
+  if (isBadMetaText(v)) return '';
+  if (Array.isArray(v)) return v.map(cleanDisplayText).filter(Boolean).join(', ');
+  return repairMojibakeText(v ?? '');
+}
+
 function displayText(v) {
   if (Array.isArray(v)) return v.map(displayText).filter(Boolean).join(', ');
   return repairMojibakeText(v ?? '');
@@ -1018,12 +1046,15 @@ function applyFilter(resetPage = true) {
         item.suggested_caption, item.suggested_caption_en,
         item.suggested_label, item.suggested_label_en,
         item.mood, item.primary_subject, item.secondary_subjects,
+        item.weather, item.precipitation_presence, item.surface_condition, item.light_source,
+        item.emotional_tone, item.atmosphere_tags, item.object_tags_ko, item.object_tags_en,
+        item.scene_tags_ko, item.scene_tags_en, item.search_keywords_ko, item.search_keywords_en,
         item.material_texture, item.visual_dna_tags,
         item.thumbnail_reason, item.activity_type, item.location_type,
         item.season, item.time_of_day, item.filename, item.exif_date,
         item.sapmanri_score, item.best_page_type, item.human_presence,
         item.animal_presence, item.image_id, item.hash
-      ].flat().filter(Boolean).map(displayText).join(' ').toLowerCase();
+      ].flat().filter(Boolean).map(cleanDisplayText).filter(Boolean).join(' ').toLowerCase();
 
       if (!searchable.includes(query)) return false;
     }
@@ -1070,15 +1101,18 @@ function renderGallery() {
     const key = item.hash || item.image_id || deriveImageId(item);
     const thumbSrc = getThumbUrl(item);
     const selectedClass = selectedHashes.has(key) ? ' selected' : '';
+    const cleanCaption = cleanDisplayText(item.suggested_caption || item.filename || key || '');
+    const cleanMood = cleanDisplayText(item.mood);
+    const showError = item.analysis_status !== 'ok' && item.error_stage;
     return `
     <div class="grid-item${selectedClass}" data-hash="${escapeHtml(key)}" onclick="event.shiftKey ? toggleSelect('${escapeHtml(key)}') : openDetail(${absIdx})">
       <img data-src="${escapeHtml(thumbSrc)}" alt="" onerror="this.style.opacity=0.2" class="lazy-img">
       <div class="grid-item-meta">
-        ${escapeHtml(displayText(item.suggested_caption || item.filename || key || ''))}
+        ${escapeHtml(cleanCaption)}
         ${item.exif_date ? `<div class="grid-item-date">${escapeHtml(item.exif_date)}</div>` : ''}
-        ${item.mood ? `<div class="grid-item-mood">${escapeHtml(displayText(item.mood))}</div>` : ''}
-        ${item.error_stage ? `<div style="color:#e07;font-size:9px;margin-top:2px">✗ ${escapeHtml(item.error_stage)}: ${escapeHtml((item.error_message||'').slice(0,30))}</div>` : ''}
-        ${(!item.mood && !item.error_stage && item.upload_status==='ok') ? '<div style="color:#555;font-size:9px;margin-top:2px">분석 대기</div>' : ''}
+        ${cleanMood ? `<div class="grid-item-mood">${escapeHtml(cleanMood)}</div>` : ''}
+        ${showError ? `<div style="color:#e07;font-size:9px;margin-top:2px">✗ ${escapeHtml(item.error_stage)}: ${escapeHtml((item.error_message||'').slice(0,30))}</div>` : ''}
+        ${(!cleanMood && !showError && item.upload_status==='ok') ? '<div style="color:#555;font-size:9px;margin-top:2px">분석 대기</div>' : ''}
       </div>
     </div>`;
   }).join('');
@@ -1145,7 +1179,7 @@ async function reanalyzeSelected() {
 async function reanalyzeAll() {
   const apiKey = window.SapConfig.getAnthropicKey();
   if (!apiKey) { alert('API Key가 필요합니다. 설정에서 입력해주세요.'); return; }
-  const v1Items = allItems.filter(item => !item.schema_version || item.schema_version !== 'image-analysis-v2');
+  const v1Items = allItems.filter(item => !['image-analysis-v2','image-analysis-v3'].includes(item.schema_version));
   const msg = v1Items.length
     ? `구 스키마 이미지 ${v1Items.length}장을 재분석합니다. (v2 이미 완료된 ${allItems.length - v1Items.length}장은 스킵)`
     : `전체 ${allItems.length}장을 재분석합니다.`;
@@ -1197,11 +1231,11 @@ async function doReanalyze(targets, apiKey) {
       const hash = item.hash;
       if (hash) {
         // 기존 캐시 항목에 분석 결과 머지
-        const merged = { ...item, ...analysis };
+        const merged = { ...analysis, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
         pendingCacheUpdates.push([hash, merged]);
         // allItems도 갱신
         const idx = allItems.findIndex(x => x.hash === hash);
-        if (idx >= 0) allItems[idx] = { ...allItems[idx], ...analysis };
+        if (idx >= 0) allItems[idx] = { ...allItems[idx], ...analysis, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
       }
     } catch(e) {
       console.warn('재분석 실패:', item.filename, e.message);
@@ -1305,6 +1339,9 @@ async function updateCacheEntriesBatch(updates, commitMessage = null) {
   const beforeCount = Object.keys(cache.entries).length;
   updates.forEach(([hash, data]) => {
     if (!hash || !data) return;
+    if (data.schema_version || data.analyzed_at || data.analysis_status === 'ok') {
+      data = { ...data, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
+    }
     cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
   });
   const afterCount = Object.keys(cache.entries).length;
@@ -1352,6 +1389,9 @@ async function updateCacheEntry(hash, data, commitMessage = null) {
   }
 
   cache.entries = cache.entries || {};
+  if (data?.schema_version || data?.analyzed_at || data?.analysis_status === 'ok') {
+    data = { ...data, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
+  }
   cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
 
   const jsonStr = JSON.stringify(cache, null, 2);
@@ -1427,6 +1467,14 @@ function openDetail(idx) {
     // 장면
     ['계절', item.season],
     ['시간대', item.time_of_day],
+    ['날씨', item.weather],
+    ['강수/흔적', item.precipitation_presence],
+    ['바닥/표면', item.surface_condition],
+    ['빛', item.light_source],
+    ['정서 태그', Array.isArray(item.emotional_tone) ? item.emotional_tone.join(', ') : item.emotional_tone],
+    ['공기/분위기 태그', Array.isArray(item.atmosphere_tags) ? item.atmosphere_tags.join(', ') : item.atmosphere_tags],
+    ['검색 키워드 KO', Array.isArray(item.search_keywords_ko) ? item.search_keywords_ko.join(', ') : item.search_keywords_ko],
+    ['검색 키워드 EN', Array.isArray(item.search_keywords_en) ? item.search_keywords_en.join(', ') : item.search_keywords_en],
     ['장소 유형', item.location_type],
     // 카메라
     ['카메라 거리', item.camera_distance],
@@ -1471,7 +1519,7 @@ function openDetail(idx) {
       ${metaRows.map(([label, val]) => `
         <div class="meta-row">
           <div class="meta-label">${label}</div>
-          <div class="meta-value ${label==='분위기'?'mood-tag':''}">${escapeHtml(displayText(val))}</div>
+          <div class="meta-value ${label==='분위기'?'mood-tag':''}">${escapeHtml(cleanDisplayText(val))}</div>
         </div>
       `).join('')}
       <div style="margin-top:16px">
