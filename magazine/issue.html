@@ -510,8 +510,7 @@ function renderIssue(issue) {
   });
   flushPair();
   document.getElementById('pages').innerHTML = pageHtml;
-  // 스프레드 크롭 정밀 보정 (이미지 로드 후 계산)
-  requestAnimationFrame(() => fixSpreadCrops());
+  // spread는 imageLeft/imageRight 두 장으로 발행되므로 별도 크롭 처리 불필요
 }
 
 // ── 스프레드 크롭 정밀 보정 (픽셀 기반) ──────────────────────────
@@ -814,32 +813,54 @@ function renderClosing(p, issue) {
 }
 
 function renderSpread(p) {
-  const img = esc(p.image || '');
-  const leftCaption = p.captionLeft || p.caption || '';
+  const leftCaption  = p.captionLeft  || p.caption || '';
   const rightCaption = p.captionRight || '';
 
-  // 모바일 half: JS fixSpreadCrops()가 이미지 로드 후 픽셀 기반으로 정밀 계산해서 덮어씀
-  // 초기값은 50% 50%로 중립 설정 (JS 적용 전 깜빡임 최소화)
-  const sx = typeof p.splitX === 'number' ? Math.max(5, Math.min(95, p.splitX)) : 50;
-  const imgStyle = `position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;object-position:50% 50%;`;
+  // 신규: imageLeft/imageRight로 발행된 경우 — 그냥 두 장 fullbleed처럼 보여줌
+  if (p.imageLeft && p.imageRight) {
+    const imgStyle = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;';
+    const mobileLeft = `
+  <section class="page page-spread half-left">
+    <div class="spread-img-wrap"><img src="${esc(p.imageLeft)}" alt="" loading="lazy" style="${imgStyle}"></div>
+    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
+  </section>`;
+    const mobileRight = `
+  <section class="page page-spread half-right">
+    <div class="spread-img-wrap"><img src="${esc(p.imageRight)}" alt="" loading="lazy" style="${imgStyle}"></div>
+    ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
+  </section>`;
+    const desktop = `
+  <section class="page page-spread-desktop">
+    <div class="spread-img-wrap" style="display:flex;gap:0;">
+      <div style="flex:1;overflow:hidden;position:relative;"><img src="${esc(p.imageLeft)}"  alt="" loading="lazy" style="${imgStyle}"></div>
+      <div style="flex:1;overflow:hidden;position:relative;"><img src="${esc(p.imageRight)}" alt="" loading="lazy" style="${imgStyle}"></div>
+    </div>
+    ${leftCaption  ? `<div class="spread-caption-left">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
+    ${rightCaption ? `<div class="spread-caption-right">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
+  </section>`;
+    return desktop + mobileLeft + mobileRight;
+  }
+
+  // 하위호환: image + splitX 방식 (구 발행본) — 50% 중앙 표시
+  const img = esc(p.image || '');
+  const imgStyle = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;object-position:50% 50%;';
+  const sx = typeof p.splitX === 'number' ? p.splitX : 50;
   const mobileLeft = `
   <section class="page page-spread half-left" data-splitx="${sx}">
     <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}" class="spread-half-img">` : ''}</div>
-    ${leftCaption ? `<div class="spread-caption">${nl(t(leftCaption, p.captionLeft_en))}</div>` : ''}
+    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
   </section>`;
   const mobileRight = `
   <section class="page page-spread half-right" data-splitx="${sx}">
     <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}" class="spread-half-img">` : ''}</div>
     ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
   </section>`;
-
   const desktop = `
   <section class="page page-spread-desktop">
     <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</div>
-    ${leftCaption ? `<div class="spread-caption-left">${nl(t(leftCaption, p.captionLeft_en))}</div>` : ''}
+    ${leftCaption  ? `<div class="spread-caption-left">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
     ${rightCaption ? `<div class="spread-caption-right">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
   </section>`;
-
   return desktop + mobileLeft + mobileRight;
 }
 
