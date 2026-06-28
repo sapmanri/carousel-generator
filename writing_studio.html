@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v5.1.0</title>
+<title>감성찾아삽만리 · Writing Studio v5.2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -215,6 +215,16 @@ header {
 .quality-label { color:var(--muted); flex:1; line-height:1.5; }
 .quality-status { font-family:var(--mono); font-size:10px; flex-shrink:0; }
 
+.output-qc-box{font-size:11px;color:var(--muted);line-height:1.7}
+.qc-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+.qc-row:last-child{border-bottom:none}
+.qc-label{color:var(--muted);flex:1}
+.qc-value{font-family:var(--mono);font-size:10px;white-space:nowrap}
+.qc-ok{color:var(--green)}
+.qc-warn{color:var(--yellow)}
+.qc-bad{color:var(--red)}
+.qc-hint{font-size:10px;color:var(--dim);line-height:1.6;margin-top:6px}
+
 /* ── 반복 문구 리스트 ── */
 .phrase-row {
   display:flex; align-items:center; justify-content:space-between;
@@ -349,7 +359,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v5.1.0</span>
+    <span class="ver">v5.2.0</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -480,11 +490,21 @@ header {
       </div>
       <textarea class="assemble-editor" id="autoEditor"
         placeholder="여기에 생성된 글이 나타나요. 직접 수정도 가능해요."
-        oninput="document.getElementById('autoCharCount').textContent=this.value.length.toLocaleString()+'자'"></textarea>
+        oninput="onAutoEditorInput()"></textarea>
     </div>
 
     <!-- 오른쪽: 품질 + 반복 문구 -->
     <div class="auto-right">
+      <div class="sec">
+        <div class="sec-label">Output QC</div>
+        <div id="autoOutputQC" class="output-qc-box">생성 후 출력 규격 검사가 표시됩니다.</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px">
+          <button class="btn-ghost-sm" onclick="requestAutoBoost('length')">길이 보강</button>
+          <button class="btn-ghost-sm" onclick="requestAutoBoost('keyword')">키워드 자연 추가</button>
+          <button class="btn-ghost-sm" onclick="requestAutoBoost('seo')">SEO 보강</button>
+          <button class="btn-ghost-sm" onclick="requestAutoBoost('style')">문체만 다듬기</button>
+        </div>
+      </div>
       <div class="sec">
         <div class="sec-label">반복 문구 경고</div>
         <div id="autoRepeatWarn" style="font-size:11px;color:var(--dim)">생성 후 표시됩니다</div>
@@ -3159,7 +3179,179 @@ ${buildOutputProfileText(autoType)}
   }
 }
 
+
+function onAutoEditorInput() {
+  const ed = document.getElementById('autoEditor');
+  const text = ed ? ed.value : '';
+  document.getElementById('autoCharCount').textContent = text.length.toLocaleString() + '자';
+  checkAutoQuality(text);
+}
+
+function stripMarkdownForCount(text) {
+  return String(text || '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/[>#*_`~\-]/g, '')
+    .trim();
+}
+
+function countKeyword(text, keyword) {
+  const k = String(keyword || '').trim();
+  if (!k) return 0;
+  const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const m = String(text || '').match(new RegExp(escaped, 'gi'));
+  return m ? m.length : 0;
+}
+
+function firstTwoLines(text) {
+  return String(text || '').split('\n').map(l => l.trim()).filter(Boolean).slice(0, 2).join(' ');
+}
+
+function tagCount(text) {
+  const m = String(text || '').match(/#[\w가-힣]+/g);
+  return m ? m.length : 0;
+}
+
+function photoSlotCount(text) {
+  const m = String(text || '').match(/\[사진\s*\d+\]/g);
+  return m ? m.length : 0;
+}
+
+function headingCount(text) {
+  const m = String(text || '').match(/^#{2,4}\s+.+$/gm);
+  return m ? m.length : 0;
+}
+
+function hasLead(text) {
+  return /(^|\n)\*\*?리드\*\*?|(^|\n)리드\s*[:：]|(^|\n)Lead\s*[:：]/i.test(String(text || ''));
+}
+
+function hasMetaDescription(text) {
+  return /Meta description|메타\s*디스크립션|메타\s*설명/i.test(String(text || ''));
+}
+
+function hasFocusKeyphrase(text) {
+  return /Focus keyphrase|SEO Focus|포커스\s*키프레이즈|키프레이즈/i.test(String(text || ''));
+}
+
+function hasSlug(text) {
+  return /Slug|슬러그/i.test(String(text || ''));
+}
+
+function qcStatus(ok, warn=false) {
+  if (ok) return { cls:'qc-ok', mark:'✓' };
+  if (warn) return { cls:'qc-warn', mark:'△' };
+  return { cls:'qc-bad', mark:'!' };
+}
+
+function renderQcRow(label, value, status, hint='') {
+  return `<div class="qc-row"><div class="qc-label">${escHtml(label)}${hint ? `<div class="qc-hint">${escHtml(hint)}</div>` : ''}</div><div class="qc-value ${status.cls}">${status.mark} ${escHtml(value)}</div></div>`;
+}
+
+function getOutputQC(text) {
+  const type = autoType || 'webmag';
+  const profile = getOutputProfile(type);
+  const lenSpec = getTargetLengthSpec(type);
+  const keyword = getFocusKeyword();
+  const clean = stripMarkdownForCount(text);
+  const chars = clean.length;
+  const rows = [];
+  const charOk = chars >= Math.round(lenSpec.target * 0.8) && chars <= Math.round(lenSpec.target * 1.25);
+  const charWarn = chars >= (lenSpec.min || 0) && chars <= (lenSpec.max || 99999);
+  rows.push(renderQcRow('글자수', `${chars.toLocaleString()} / 목표 ${lenSpec.target.toLocaleString()}자`, qcStatus(charOk, charWarn), `허용 범위 ${lenSpec.min.toLocaleString()}~${lenSpec.max.toLocaleString()}자`));
+
+  if (keyword) {
+    const kc = countKeyword(text, keyword);
+    let goal = '1회 이상';
+    let ok = kc >= 1, warn = kc > 0;
+    if (type === 'naver_blog') { goal = '8~12회'; ok = kc >= 8 && kc <= 12; warn = kc >= 5 && kc <= 16; }
+    else if (type === 'sapmanri_blog') { goal = '3~6회'; ok = kc >= 3 && kc <= 6; warn = kc >= 1 && kc <= 9; }
+    else if (type === 'webmag') { goal = '1~4회'; ok = kc >= 1 && kc <= 4; warn = kc >= 1 && kc <= 8; }
+    rows.push(renderQcRow('핵심 키워드', `${keyword} ${kc}회 / 목표 ${goal}`, qcStatus(ok, warn)));
+  } else {
+    rows.push(renderQcRow('핵심 키워드', '미입력', qcStatus(false, true), 'SEO 출력은 키워드를 넣으면 더 정확합니다.'));
+  }
+
+  if (type === 'naver_blog') {
+    const first = firstTwoLines(text);
+    const seoOk = keyword ? first.includes(keyword) : first.length > 20;
+    const h = headingCount(text);
+    const p = photoSlotCount(text);
+    const t = tagCount(text);
+    rows.push(renderQcRow('첫 두 줄 SEO', seoOk ? '키워드 포함' : '키워드 없음', qcStatus(seoOk, false)));
+    rows.push(renderQcRow('소제목', `${h}개 / 목표 3~5개`, qcStatus(h >= 3 && h <= 5, h >= 2 && h <= 7)));
+    rows.push(renderQcRow('사진 위치', `${p}개 / 목표 5~10개`, qcStatus(p >= 5 && p <= 10, p >= 3 && p <= 12)));
+    rows.push(renderQcRow('태그', `${t}개 / 목표 10~20개`, qcStatus(t >= 10 && t <= 20, t >= 5 && t <= 25)));
+  } else if (type === 'sapmanri_blog') {
+    rows.push(renderQcRow('Focus keyphrase', hasFocusKeyphrase(text) ? '있음' : '없음', qcStatus(hasFocusKeyphrase(text))));
+    rows.push(renderQcRow('Meta description', hasMetaDescription(text) ? '있음' : '없음', qcStatus(hasMetaDescription(text))));
+    rows.push(renderQcRow('Slug 후보', hasSlug(text) ? '있음' : '없음', qcStatus(hasSlug(text))));
+    rows.push(renderQcRow('태그', `${tagCount(text)}개`, qcStatus(tagCount(text) >= 5, tagCount(text) >= 3)));
+  } else if (type === 'webmag') {
+    const h = headingCount(text);
+    rows.push(renderQcRow('리드', hasLead(text) ? '있음' : '없음', qcStatus(hasLead(text), false)));
+    rows.push(renderQcRow('섹션', `${h}개 / 목표 4~8개`, qcStatus(h >= 4 && h <= 8, h >= 2 && h <= 10)));
+    rows.push(renderQcRow('사진 위치', `${photoSlotCount(text)}개`, qcStatus(photoSlotCount(text) >= 1, true)));
+  } else if (type === 'pause_book') {
+    const forbidden = hasMetaDescription(text) || hasFocusKeyphrase(text) || hasSlug(text) || tagCount(text) > 0;
+    const lines = String(text || '').split('\n').filter(l => l.trim()).length;
+    const abstractEnd = /(의미|방향|대상|존재|기억|시간|마음|거리|온도|감정)[\.。]?$/.test(String(text || '').trim().split('\n').filter(Boolean).slice(-1)[0] || '');
+    rows.push(renderQcRow('SEO/태그 없음', forbidden ? '섞임' : '깨끗함', qcStatus(!forbidden)));
+    rows.push(renderQcRow('행갈이', `${lines}행`, qcStatus(lines >= 8, lines >= 5)));
+    rows.push(renderQcRow('추상 결말', abstractEnd ? '주의' : '괜찮음', qcStatus(!abstractEnd, false), '마지막은 사물/행동/빛/거리로 닫는 쪽이 좋습니다.'));
+  } else if (type === 'instagram') {
+    rows.push(renderQcRow('해시태그', `${tagCount(text)}개 / 목표 5개`, qcStatus(tagCount(text) === 5, tagCount(text) > 0 && tagCount(text) <= 8)));
+  } else if (type === 'youtube') {
+    rows.push(renderQcRow('제목 후보', /제목/.test(text) ? '있음' : '확인 필요', qcStatus(/제목/.test(text), true)));
+    rows.push(renderQcRow('고정댓글', /고정\s*댓글|고정댓글/.test(text) ? '있음' : '없음', qcStatus(/고정\s*댓글|고정댓글/.test(text))));
+    rows.push(renderQcRow('해시태그', `${tagCount(text)}개 / 목표 5~8개`, qcStatus(tagCount(text) >= 5 && tagCount(text) <= 8, tagCount(text) >= 3 && tagCount(text) <= 10)));
+  } else if (type === 'carousel') {
+    const cards = (String(text || '').match(/카드\s*\d+|^\d+[\).]/gm) || []).length;
+    rows.push(renderQcRow('카드 수', `${cards}개 / 목표 5~8개`, qcStatus(cards >= 5 && cards <= 8, cards >= 3 && cards <= 10)));
+  }
+
+  return rows.join('') + `<div class="qc-hint">Output Profile: ${escHtml(profile.label)} · 생성 후 부족한 항목은 아래 보강 버튼으로 다시 다듬을 수 있습니다.</div>`;
+}
+
+function runOutputQC(text) {
+  const el = document.getElementById('autoOutputQC');
+  if (!el) return;
+  if (!String(text || '').trim()) {
+    el.innerHTML = '생성 후 출력 규격 검사가 표시됩니다.';
+    return;
+  }
+  el.innerHTML = getOutputQC(text);
+}
+
+async function requestAutoBoost(kind) {
+  const key = getApiKey();
+  if (!key) return;
+  const ed = document.getElementById('autoEditor');
+  const text = ed.value.trim();
+  if (!text) { toast('먼저 글을 생성하거나 입력해주세요.'); return; }
+  const kindMap = {
+    length: '목표 글자수에 맞게 자연스럽게 확장하되, 없는 장면을 지어내지 말고 관찰과 세부 장면을 늘린다.',
+    keyword: '핵심 키워드를 자연스럽게 추가한다. 키워드만 기계적으로 반복하지 말고 문맥 속에 녹인다.',
+    seo: '선택한 출력 목적의 SEO 규칙을 보강한다. 첫 두 줄, 소제목, 메타 정보, 태그 등 부족한 항목을 채운다.',
+    style: '내용과 구조는 유지하고 Vase/Sapmanri 문체로만 다듬는다. 의미를 너무 빨리 만들지 말고 관찰을 더 앞세운다.'
+  };
+  const instruction = kindMap[kind] || kindMap.style;
+  toast('보강 중…');
+  try {
+    const system = `당신은 Vase Lim(@sapmanri)의 Writing Studio v5.2 Output QC 보강 엔진입니다.\n기존 글의 핵심을 보존하면서 선택한 출력 규격을 충족하도록 수정합니다.\n\n${buildConstitutionText()}\n\n${buildOutputContractText(autoType)}`;
+    const user = `현재 글:\n${text}\n\n보강 지시:\n${instruction}\n\n현재 QC:\n${document.getElementById('autoOutputQC')?.innerText || ''}\n\n수정된 최종 글만 출력하세요.`;
+    const out = await callClaude(key, user, system, estimateMaxTokensForType(autoType));
+    ed.value = out.trim();
+    onAutoEditorInput();
+    toast('보강 완료');
+  } catch(e) {
+    toast('보강 실패: ' + e.message);
+  }
+}
+
 function checkAutoQuality(text) {
+  runOutputQC(text);
   // 반복 문구
   const recentText = state.generationHistory.slice(-30).join('\n');
   const warns = WATCH_PHRASES.filter(p => {
@@ -3198,6 +3390,7 @@ function clearAutoEditor() {
   if (document.getElementById('autoEditor').value && confirm('지울까요?')) {
     document.getElementById('autoEditor').value = '';
     document.getElementById('autoCharCount').textContent = '0자';
+    checkAutoQuality('');
   }
 }
 async function copyAutoEditor() {
