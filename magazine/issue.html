@@ -429,7 +429,7 @@ img{max-width:100%;display:block}
 <div class="topbar" id="topbar">
   <a class="back" href="./index.html">
     <span class="back-title">← SAPMANRI</span>
-    <span class="build-tag">2026-06-29 01:25 KST</span>
+    <span class="build-tag">2026-06-29 01:30 KST</span>
   </a>
   <div class="topbar-right">
     <div class="indicator" id="indicator"></div>
@@ -510,10 +510,11 @@ function renderIssue(issue) {
   });
   flushPair();
   document.getElementById('pages').innerHTML = pageHtml;
-  // spread는 imageLeft/imageRight 두 장으로 발행되므로 별도 크롭 처리 불필요
+  // 스프레드 크롭 정밀 보정 (이미지 로드 후 계산)
+  requestAnimationFrame(() => fixSpreadCrops());
 }
 
-// ── 스프레드 크롭 정밀 보정 (픽셀 기반) ──────────────────────────
+// ── 스프레드 크롭 정밀 보정 (이미지 실제 비율 기반) ──────────────
 function fixSpreadCrops() {
   const leftSections = document.querySelectorAll('.page-spread.half-left');
   leftSections.forEach(leftSec => {
@@ -525,63 +526,39 @@ function fixSpreadCrops() {
     if (!leftImg || !rightImg) return;
 
     const splitX = parseFloat(leftSec.dataset.splitx || '50');
-    const sx = Math.max(5, Math.min(95, splitX));
 
-    function applyWithSize(naturalW, naturalH) {
+    const probe = new Image();
+    probe.onload = function() {
       const W = leftSec.clientWidth  || window.innerWidth;
       const H = leftSec.clientHeight || window.innerHeight;
       if (!W || !H) return;
 
+      // object-fit:cover 기준 렌더링 너비 계산
+      const imgRatio = this.naturalWidth / this.naturalHeight;
+      const containerRatio = W / H;
       let renderedW;
-      if (naturalW && naturalH) {
-        const imgRatio       = naturalW / naturalH;
-        const containerRatio = W / H;
-        renderedW = imgRatio > containerRatio ? H * imgRatio : W;
+      if (imgRatio > containerRatio) {
+        // landscape image → width extends beyond container
+        renderedW = H * imgRatio;
       } else {
-        // naturalWidth를 못 읽은 경우(확장자 없는 R2 URL 등) — 화면 비율로 추정
-        // 일반적인 풍경 사진은 3:2 비율이 많음
-        renderedW = H * (3 / 2);
+        // portrait image → fills width, height may crop
+        renderedW = W;
       }
 
       const maxOffset = renderedW - W;
-      if (maxOffset <= 0) {
-        leftImg.style.objectPosition  = `${(sx * 0.5).toFixed(1)}% 50%`;
-        rightImg.style.objectPosition = `${(sx + (100 - sx) * 0.5).toFixed(1)}% 50%`;
-        return;
-      }
+      if (maxOffset <= 0) return; // 이미지가 컨테이너보다 좁으면 크롭 불필요
 
-      const splitPx       = (sx / 100) * renderedW;
-      const leftCenterPx  = splitPx / 2;
-      const rightCenterPx = splitPx + (renderedW - splitPx) / 2;
+      const splitPx = (splitX / 100) * renderedW;
 
-      const leftOffsetPx  = Math.max(0, Math.min(maxOffset, leftCenterPx  - W / 2));
-      const rightOffsetPx = Math.max(0, Math.min(maxOffset, rightCenterPx - W / 2));
+      // 왼쪽: 오른쪽 끝이 splitPx에 오도록
+      const leftOffset  = Math.max(0, Math.min(maxOffset, splitPx - W));
+      // 오른쪽: 왼쪽 끝이 splitPx에 오도록
+      const rightOffset = Math.max(0, Math.min(maxOffset, splitPx));
 
-      leftImg.style.objectPosition  = `${(leftOffsetPx  / maxOffset * 100).toFixed(1)}% 50%`;
-      rightImg.style.objectPosition = `${(rightOffsetPx / maxOffset * 100).toFixed(1)}% 50%`;
-    }
-
-    function tryApply() {
-      if (leftImg.naturalWidth && leftImg.naturalHeight) {
-        applyWithSize(leftImg.naturalWidth, leftImg.naturalHeight);
-      } else {
-        // naturalWidth 없음 — crossOrigin 없이 probe Image로 재시도
-        const probe = new Image();
-        probe.onload = function() {
-          applyWithSize(this.naturalWidth || 0, this.naturalHeight || 0);
-        };
-        probe.onerror = function() {
-          applyWithSize(0, 0); // 추정값으로 폴백
-        };
-        probe.src = leftImg.src;
-      }
-    }
-
-    if (leftImg.complete) {
-      tryApply();
-    } else {
-      leftImg.addEventListener('load', tryApply, { once: true });
-    }
+      leftImg.style.objectPosition  = `${(leftOffset  / maxOffset * 100).toFixed(1)}% 50%`;
+      rightImg.style.objectPosition = `${(rightOffset / maxOffset * 100).toFixed(1)}% 50%`;
+    };
+    probe.src = leftImg.src;
   });
 }
 
@@ -815,52 +792,49 @@ function renderClosing(p, issue) {
 function renderSpread(p) {
   const leftCaption  = p.captionLeft  || p.caption || '';
   const rightCaption = p.captionRight || '';
+  const imgStyle = `position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;`;
 
-  // 신규: imageLeft/imageRight로 발행된 경우 — 그냥 두 장 fullbleed처럼 보여줌
-  if (p.imageLeft && p.imageRight) {
-    const imgStyle = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;';
-    const mobileLeft = `
-  <section class="page page-spread half-left">
-    <div class="spread-img-wrap"><img src="${esc(p.imageLeft)}" alt="" loading="lazy" style="${imgStyle}"></div>
-    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
-  </section>`;
-    const mobileRight = `
-  <section class="page page-spread half-right">
-    <div class="spread-img-wrap"><img src="${esc(p.imageRight)}" alt="" loading="lazy" style="${imgStyle}"></div>
-    ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
-  </section>`;
-    const desktop = `
-  <section class="page page-spread-desktop">
-    <div class="spread-img-wrap" style="display:flex;gap:0;">
-      <div style="flex:1;overflow:hidden;position:relative;"><img src="${esc(p.imageLeft)}"  alt="" loading="lazy" style="${imgStyle}"></div>
-      <div style="flex:1;overflow:hidden;position:relative;"><img src="${esc(p.imageRight)}" alt="" loading="lazy" style="${imgStyle}"></div>
-    </div>
-    ${leftCaption  ? `<div class="spread-caption-left">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
-    ${rightCaption ? `<div class="spread-caption-right">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
-  </section>`;
-    return desktop + mobileLeft + mobileRight;
-  }
-
-  // 하위호환: image + splitX 방식 (구 발행본) — 50% 중앙 표시
-  const img = esc(p.image || '');
-  const imgStyle = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;object-position:50% 50%;';
-  const sx = typeof p.splitX === 'number' ? p.splitX : 50;
-  const mobileLeft = `
-  <section class="page page-spread half-left" data-splitx="${sx}">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}" class="spread-half-img">` : ''}</div>
-    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
-  </section>`;
-  const mobileRight = `
-  <section class="page page-spread half-right" data-splitx="${sx}">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}" class="spread-half-img">` : ''}</div>
-    ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
-  </section>`;
+  // ── 데스크탑: 원본 이미지 하나로 좌우 캡션 (기존 그대로) ──
+  const img = esc(p.image || p.imageLeft || '');
   const desktop = `
   <section class="page page-spread-desktop">
     <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</div>
     ${leftCaption  ? `<div class="spread-caption-left">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
     ${rightCaption ? `<div class="spread-caption-right">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
   </section>`;
+
+  // ── 모바일: imageLeft/imageRight 있으면 그대로, 없으면 splitX 크롭 ──
+  let mobileLeft, mobileRight;
+  if (p.imageLeft && p.imageRight) {
+    // 신규 발행본: 이미 잘린 두 장
+    mobileLeft = `
+  <section class="page page-spread half-left">
+    <div class="spread-img-wrap"><img src="${esc(p.imageLeft)}"  alt="" loading="lazy" style="${imgStyle}"></div>
+    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
+  </section>`;
+    mobileRight = `
+  <section class="page page-spread half-right">
+    <div class="spread-img-wrap"><img src="${esc(p.imageRight)}" alt="" loading="lazy" style="${imgStyle}"></div>
+    ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
+  </section>`;
+  } else {
+    // 구 발행본: splitX 기반 object-position (기존 방식 유지)
+    const sx = typeof p.splitX === 'number' ? Math.max(5, Math.min(95, p.splitX)) : 50;
+    const leftPos  = `${(sx / 2).toFixed(1)}% 50%`;
+    const rightPos = `${(50 + sx / 2).toFixed(1)}% 50%`;
+    const src = esc(p.image || '');
+    mobileLeft = `
+  <section class="page page-spread half-left" data-splitx="${sx}">
+    <div class="spread-img-wrap">${src ? `<img src="${src}" alt="" loading="lazy" style="${imgStyle}object-position:${leftPos}" class="spread-half-img">` : ''}</div>
+    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
+  </section>`;
+    mobileRight = `
+  <section class="page page-spread half-right" data-splitx="${sx}">
+    <div class="spread-img-wrap">${src ? `<img src="${src}" alt="" loading="lazy" style="${imgStyle}object-position:${rightPos}" class="spread-half-img">` : ''}</div>
+    ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
+  </section>`;
+  }
+
   return desktop + mobileLeft + mobileRight;
 }
 
