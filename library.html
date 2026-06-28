@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28p</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28q</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628p"></script>
+<script src="/shared-config.js?v=20260628q"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628p"></script>
+<script src="/magazine/image-library.js?v=20260628q"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -985,28 +985,70 @@ function basenameFromUrl(v) {
 function deriveImageId(itemOrUrl) {
   const src = typeof itemOrUrl === 'string'
     ? itemOrUrl
-    : (itemOrUrl.hash || itemOrUrl.image_id || itemOrUrl.r2_url || itemOrUrl.download_url || itemOrUrl.url || itemOrUrl.path || itemOrUrl.name || '');
+    : (itemOrUrl.hash || itemOrUrl.image_id || itemOrUrl.r2_url || itemOrUrl.display_url || itemOrUrl.download_url || itemOrUrl.url || itemOrUrl.path || itemOrUrl.name || '');
   let base = basenameFromUrl(src);
   if (!base && typeof itemOrUrl !== 'string') base = String(itemOrUrl.path || itemOrUrl.name || '');
-  base = base.replace(/^thumb_/, '').replace(/\.(jpe?g|png|webp|gif|avif)$/i, '');
-  return base || String(src || '').replace(/^thumb_/, '');
+  base = base
+    .replace(/^thumb_/, '')
+    .replace(/_display(?=\.(jpe?g|png|webp|gif|avif)$|$)/i, '')
+    .replace(/\.(jpe?g|png|webp|gif|avif|heic|heif)$/i, '');
+  return base || String(src || '').replace(/^thumb_/, '').replace(/_display$/i, '');
+}
+
+function isGeneratedAssetItem(item) {
+  // R2 list에는 원본 외에 thumb_<hash>.webp, <hash>_display.jpg 같은 파생 파일도 섞여 들어온다.
+  // 이 파일들은 원본 카드의 src로만 쓰고, 갤러리 메인 카드로는 렌더링하지 않는다.
+  const vals = [item.hash, item.image_id, item.path, item.name, item.filename, item.url, item.download_url, item.r2_url, item.display_url, item.thumbnail_url]
+    .filter(Boolean).map(String);
+  return vals.some(v => {
+    const clean = v.split('?')[0].split('#')[0];
+    const base = basenameFromUrl(clean);
+    return /(^|\/)thumb_[^/]+(\.(webp|jpe?g|png))?$/i.test(clean)
+        || /(^|\/)[^/]+_display\.(jpe?g|png|webp)$/i.test(clean)
+        || /_display$/i.test(base);
+  });
 }
 
 function isThumbnailItem(item) {
-  const vals = [item.hash, item.image_id, item.path, item.name, item.filename, item.url, item.download_url, item.r2_url]
-    .filter(Boolean).map(String);
-  return vals.some(v => /(^|\/)thumb_[^/]+(\.(webp|jpe?g|png))?($|\?)/i.test(v));
+  return isGeneratedAssetItem(item);
+}
+
+function isBrowserDisplayableUrl(url) {
+  if (!url) return false;
+  const clean = String(url).split('?')[0].split('#')[0].toLowerCase();
+  return /\.(jpe?g|png|webp|gif|avif)$/i.test(clean) && !/\.(heic|heif|mov|mp4)$/i.test(clean);
+}
+
+function getDisplayUrl(item) {
+  // 화면 표시용: HEIC 원본보다 변환된 display_url/r2_url/thumbnail_url을 우선한다.
+  return item.display_url || item.displayUrl || item.r2_url || item.download_url || item.url || '';
 }
 
 function getOriginalUrl(item) {
-  // 상세 보기/다운로드는 항상 원본 우선
-  return item.r2_url || item.original_url || item.download_url || item.url || '';
+  // 분석/복구용 원본: HEIC 원본을 보존한 경우 original_heic_url을 우선한다.
+  return item.original_heic_url || item.original_url || item.source_url || item.download_url || item.url || item.r2_url || '';
+}
+
+function getDetailUrl(item) {
+  // 상세 보기에서는 브라우저 표시 가능한 display를 우선하고, 없으면 원본 fallback.
+  return getDisplayUrl(item) || getOriginalUrl(item);
 }
 
 function getThumbUrl(item) {
-  // 그리드에서는 썸네일 우선. 단, thumb 항목 자체가 메인으로 들어온 경우는 위에서 필터링됨.
+  // 그리드에서는 썸네일 우선. thumb/display 파생 항목 자체는 위에서 필터링된다.
   const thumb = item.thumbnail_url || item.thumb_url || '';
-  return thumb || getOriginalUrl(item);
+  if (thumb) return thumb;
+  return getDetailUrl(item);
+}
+
+function hasUsableGalleryImage(item) {
+  // 빈 카드 방지: 표시 가능한 URL/썸네일이 없는 HEIC·비디오·오염 항목은 갤러리에서 숨긴다.
+  const thumb = item.thumbnail_url || item.thumb_url || '';
+  if (isBrowserDisplayableUrl(thumb)) return true;
+  if (isBrowserDisplayableUrl(item.display_url || item.displayUrl)) return true;
+  if (isBrowserDisplayableUrl(item.r2_url)) return true;
+  if (isBrowserDisplayableUrl(item.download_url || item.url)) return true;
+  return false;
 }
 
 function escapeHtml(v) {
@@ -1072,7 +1114,7 @@ async function loadGallery() {
     const byHash = new Map();
 
     // 1) R2 목록에서 썸네일 파일은 메인 이미지로 취급하지 않는다.
-    (rawItems || []).filter(item => !isThumbnailItem(item)).forEach(item => {
+    (rawItems || []).filter(item => !isGeneratedAssetItem(item)).forEach(item => {
       const hash = deriveImageId(item);
       const meta = cacheEntries[hash] || {};
       if (meta.deleted) return;
@@ -1084,12 +1126,14 @@ async function loadGallery() {
       if (!meta || meta.deleted) return;
       const cleanHash = deriveImageId(hash);
       if (byHash.has(cleanHash)) return;
-      const url = meta.r2_url || meta.download_url || meta.url;
+      const url = meta.display_url || meta.r2_url || meta.download_url || meta.url || meta.original_heic_url;
       if (!url) return;
       byHash.set(cleanHash, { ...meta, hash: cleanHash, image_id: meta.image_id || cleanHash, url });
     });
 
-    allItems = Array.from(byHash.values());
+    allItems = Array.from(byHash.values())
+      .filter(item => !isGeneratedAssetItem(item))
+      .filter(item => hasUsableGalleryImage(item));
     applyFilter(true);
   } catch(e) {
     console.error(e);
@@ -1398,6 +1442,7 @@ async function doReanalyze(targets, apiKey) {
               original_heic_url: item.original_heic_url || originalHeicUrl,
               original_format: 'heic',
               display_format: 'jpeg',
+              display_url: displayUrl || item.display_url || item.displayUrl || null,
               r2_url: displayUrl || item.r2_url,
               thumbnail_url: thumbUrl || displayUrl || item.thumbnail_url,
               thumbnail_status: thumbUrl ? 'ok' : (displayUrl ? 'ok' : item.thumbnail_status)
