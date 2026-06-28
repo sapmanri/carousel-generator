@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28d</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28e</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628d"></script>
+<script src="/shared-config.js?v=20260628e"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628d"></script>
+<script src="/magazine/image-library.js?v=20260628e"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -420,9 +420,10 @@ async function startProcess() {
         reader.readAsDataURL(item.file);
       });
 
-      let actualMediaType = normalizeClaudeImageMime(
-        getDataUrlMediaType(dataUrl) || item.file.type || 'image/jpeg',
-        getDataUrlBase64(dataUrl)
+      const dataUrlBase64 = getDataUrlBase64(dataUrl);
+      let actualMediaType = detectImageMimeFromBase64(
+        dataUrlBase64,
+        getDataUrlMediaType(dataUrl) || item.file.type || 'image/jpeg'
       );
       // HEIC/HEIF는 Claude API와 브라우저 Canvas에서 안정적으로 처리되지 않는다.
       // 변환이 성공했다면 여기서 image/jpeg가 나와야 한다. 아직 HEIC면 분석/업로드를 진행하지 않는다.
@@ -523,38 +524,15 @@ function getDataUrlBase64(dataUrl) {
   return m ? m[1] : '';
 }
 
-// DataURL 헤더/파일 확장자보다 실제 base64 시그니처를 우선한다.
-// 일부 파일은 data:image/png 헤더를 달고 있지만 실제 바이트는 JPEG인 경우가 있다.
-// Anthropic Vision은 media_type과 실제 이미지 바이트가 다르면 400을 반환한다.
+// dataUrl 헤더가 틀린 경우가 있음: data:image/png 이지만 실제 바이트는 JPEG 등.
+// Claude Vision은 media_type과 실제 이미지 바이트가 다르면 400을 반환하므로 base64 시그니처를 우선한다.
 function detectImageMimeFromBase64(base64, fallback = '') {
-  const b64 = String(base64 || '').replace(/\s/g, '');
-  const fb = String(fallback || '').toLowerCase();
-
-  if (!b64) return fb || 'image/jpeg';
-  if (b64.startsWith('/9j/')) return 'image/jpeg';     // JPEG
-  if (b64.startsWith('iVBOR')) return 'image/png';     // PNG
-  if (b64.startsWith('UklGR')) return 'image/webp';    // WEBP/RIFF
-  if (b64.startsWith('R0lGOD')) return 'image/gif';    // GIF
-
-  return fb || 'image/jpeg';
-}
-
-function normalizeClaudeImageMime(mediaType, base64 = '') {
-  const headerType = String(mediaType || '').toLowerCase();
-  const detected = detectImageMimeFromBase64(base64, headerType);
-
-  // image/jpg는 API 표준 media type이 아니므로 image/jpeg로 교정
-  const normalized = detected === 'image/jpg' ? 'image/jpeg' : detected;
-
-  if (headerType && normalized && headerType !== normalized) {
-    console.warn('[analyzeImage] mediaType corrected by magic bytes', {
-      headerType,
-      detected: normalized,
-      base64Prefix: String(base64 || '').slice(0, 12)
-    });
-  }
-
-  return normalized;
+  const clean = String(base64 || '').replace(/\s/g, '');
+  if (clean.startsWith('/9j/')) return 'image/jpeg';
+  if (clean.startsWith('iVBOR')) return 'image/png';
+  if (clean.startsWith('UklGR')) return 'image/webp';
+  if (clean.startsWith('R0lGOD')) return 'image/gif';
+  return String(fallback || '').toLowerCase();
 }
 
 function isClaudeSupportedImageType(mediaType) {
@@ -570,8 +548,9 @@ function estimateBase64Bytes(base64) {
 
 async function prepareImageForClaude(dataUrl, mediaType) {
   let finalDataUrl = dataUrl;
+  let finalMediaType = getDataUrlMediaType(finalDataUrl) || mediaType || '';
   let base64 = getDataUrlBase64(finalDataUrl);
-  let finalMediaType = normalizeClaudeImageMime(getDataUrlMediaType(finalDataUrl) || mediaType || '', base64);
+  finalMediaType = detectImageMimeFromBase64(base64, finalMediaType);
   const bytes = estimateBase64Bytes(base64);
 
   if (!finalDataUrl || !String(finalDataUrl).startsWith('data:image/')) {
@@ -593,7 +572,7 @@ async function prepareImageForClaude(dataUrl, mediaType) {
     console.warn('[analyzeImage] resize for Claude payload', { mediaType: finalMediaType, bytes });
     finalDataUrl = await generateThumbnail(finalDataUrl, 1600);
     base64 = getDataUrlBase64(finalDataUrl);
-    finalMediaType = normalizeClaudeImageMime(getDataUrlMediaType(finalDataUrl) || 'image/jpeg', base64);
+    finalMediaType = detectImageMimeFromBase64(base64, getDataUrlMediaType(finalDataUrl) || 'image/jpeg');
     if (!isClaudeSupportedImageType(finalMediaType)) finalMediaType = 'image/jpeg';
   }
 
@@ -1161,6 +1140,7 @@ async function doReanalyze(targets, apiKey) {
   const btn = document.getElementById('reanalyzeSel');
   const countEl = document.getElementById('countLabel');
   const orig = countEl.textContent;
+  const pendingCacheUpdates = [];
 
   for (let i = 0; i < targets.length; i++) {
     const item = targets[i];
@@ -1173,8 +1153,8 @@ async function doReanalyze(targets, apiKey) {
       // 이미지 → base64
       let dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
       if (!dataUrl || !dataUrl.startsWith('data:')) continue;
-      // mediaType 추출 — dataUrl 헤더 기준
-      let mediaType = normalizeClaudeImageMime(getDataUrlMediaType(dataUrl) || '', getDataUrlBase64(dataUrl));
+      // mediaType 추출 — dataUrl 헤더 + 실제 base64 시그니처 기준
+      let mediaType = detectImageMimeFromBase64(getDataUrlBase64(dataUrl), getDataUrlMediaType(dataUrl) || '');
       // 이미지가 아닌 파일 (영상, 오디오 등) → 스킵
       if (!mediaType.startsWith('image/')) {
         console.log('스킵 (이미지 아님):', item.filename, mediaType);
@@ -1182,12 +1162,12 @@ async function doReanalyze(targets, apiKey) {
       }
       if (/heic|heif/i.test(mediaType)) {
         console.warn('재분석 스킵: HEIC/HEIF는 변환된 썸네일 또는 JPEG 원본이 필요함', item.filename, mediaType);
-        if (item.hash) await updateCacheEntry(item.hash, { analysis_status:'failed', error_stage:'decode', error_message:'HEIC/HEIF needs conversion before Claude Vision analysis', needs_conversion:true });
+        if (item.hash) pendingCacheUpdates.push([item.hash, { analysis_status:'failed', error_stage:'decode', error_message:'HEIC/HEIF needs conversion before Claude Vision analysis', needs_conversion:true }]);
         continue;
       }
       if (!isClaudeSupportedImageType(mediaType)) {
         console.warn('재분석 스킵: 지원하지 않는 이미지 타입', item.filename, mediaType);
-        if (item.hash) await updateCacheEntry(item.hash, { analysis_status:'failed', error_stage:'analysis', error_message:`Unsupported image type: ${mediaType}` });
+        if (item.hash) pendingCacheUpdates.push([item.hash, { analysis_status:'failed', error_stage:'analysis', error_message:`Unsupported image type: ${mediaType}` }]);
         continue;
       }
       // Claude Vision 요청 전 용량 방어
@@ -1201,7 +1181,7 @@ async function doReanalyze(targets, apiKey) {
       if (hash) {
         // 기존 캐시 항목에 분석 결과 머지
         const merged = { ...item, ...analysis };
-        await updateCacheEntry(hash, merged);
+        pendingCacheUpdates.push([hash, merged]);
         // allItems도 갱신
         const idx = allItems.findIndex(x => x.hash === hash);
         if (idx >= 0) allItems[idx] = { ...allItems[idx], ...analysis };
@@ -1209,6 +1189,11 @@ async function doReanalyze(targets, apiKey) {
     } catch(e) {
       console.warn('재분석 실패:', item.filename, e.message);
     }
+  }
+
+  if (pendingCacheUpdates.length) {
+    countEl.textContent = `재분석 저장 중 1회 커밋 (${pendingCacheUpdates.length}장)…`;
+    await updateCacheEntriesBatch(pendingCacheUpdates, `Library: batch reanalyze ${pendingCacheUpdates.length} images`);
   }
 
   countEl.textContent = `재분석 완료 (${targets.length}장)`;
@@ -1277,6 +1262,54 @@ R2 인증 정보가 필요합니다. 계속할까요?`)) return;
   btn.disabled = false;
   countEl.textContent = `썸네일 완료 ${done}장${failed ? ` / 실패 ${failed}장` : ''}`;
   setTimeout(() => { countEl.textContent = orig; }, 4000);
+}
+
+
+async function updateCacheEntriesBatch(updates, commitMessage = null) {
+  const token = window.SapConfig?.getGithubToken?.();
+  if (!token) throw new Error('GitHub 토큰이 필요합니다. 설정에서 GitHub 토큰을 먼저 입력하세요.');
+  if (!updates || !updates.length) return true;
+
+  const REPO = 'sapmanri/carousel-generator';
+  const FILE = 'image_cache.json';
+  const API  = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+
+  let cache = { entries: {} }, sha = null;
+  const res = await fetch(API, { headers: { Authorization: `token ${token}` }, cache: 'no-store' });
+  if (res.ok) {
+    const json = await res.json();
+    sha = json.sha;
+    cache = JSON.parse(decodeGithubContent(json.content));
+  } else if (res.status !== 404) {
+    throw new Error(`image_cache.json 로드 실패: ${res.status}`);
+  }
+
+  cache.entries = cache.entries || {};
+  const beforeCount = Object.keys(cache.entries).length;
+  updates.forEach(([hash, data]) => {
+    if (!hash || !data) return;
+    cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
+  });
+  const afterCount = Object.keys(cache.entries).length;
+  if (afterCount < beforeCount) {
+    throw new Error(`저장 중단: entry 수 감소 감지 (${beforeCount} → ${afterCount})`);
+  }
+
+  const jsonStr = JSON.stringify(cache, null, 2);
+  try { await backupCache(token, jsonStr); } catch(e) { console.warn('batch backup failed:', e.message); }
+
+  const body = { message: commitMessage || `Library: batch update ${updates.length} entries`, content: encodeGithubContent(jsonStr) };
+  if (sha) body.sha = sha;
+  const saveRes = await fetch(API, {
+    method: 'PUT',
+    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!saveRes.ok) {
+    const text = await saveRes.text().catch(() => '');
+    throw new Error(`image_cache.json 배치 저장 실패: ${saveRes.status} ${text}`);
+  }
+  return true;
 }
 
 async function updateCacheEntry(hash, data, commitMessage = null) {
