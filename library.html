@@ -420,6 +420,7 @@ async function startProcess() {
       });
 
       const actualMediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || item.file.type || 'image/jpeg';
+      item._dataUrl = dataUrl; // 실패 시 해시 계산용
 
       // ── 캐시 히트 확인 — 이미 처리된 이미지는 스킵 ──
       const hash = await window.ImageLibrary.hashImage(dataUrl);
@@ -471,6 +472,25 @@ async function startProcess() {
       console.error(e);
       updateItemStatus(i, 'err');
       failed++;
+      const errStage = e.message?.includes('upload') || e.message?.includes('R2') ? 'upload'
+                     : e.message?.includes('heic') || e.message?.includes('HEIC') || e.message?.includes('decode') ? 'decode'
+                     : e.message?.includes('thumb') ? 'thumbnail'
+                     : e.message?.includes('analyz') || e.message?.includes('분석') ? 'analysis'
+                     : 'unknown';
+      progressEl.textContent = `[${i+1}/${queue.length}] ✗ ${errStage} 실패: ${(e.message||'').slice(0,40)} — ${item.file.name.slice(0,20)}`;
+      if (item._dataUrl) {
+        try {
+          const h = await window.ImageLibrary.hashImage(item._dataUrl);
+          if (h) saveToCache(h, null, item, null, null, {
+            upload_status: errStage==='upload' ? 'failed' : 'ok',
+            decode_status: errStage==='decode' ? 'failed' : 'ok',
+            thumbnail_status: errStage==='thumbnail' ? 'failed' : 'pending',
+            analysis_status: errStage==='analysis' ? 'failed' : 'pending',
+            error_stage: errStage, error_message: (e.message||'').slice(0,200),
+            needs_conversion: errStage==='decode',
+          }).catch(()=>{});
+        } catch(_) {}
+      }
     }
   }
 
@@ -585,55 +605,109 @@ async function generateThumbnail(dataUrl, maxSize = 400) {
 }
 
 // ── image_cache.json 저장 ───────────────────────────────────────
-async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl) {
-  const token = window.SapConfig.getGithubToken();
-  if (!token) return; // 토큰 없으면 캐시 저장 스킵
-
-  const REPO = 'sapmanri/carousel-generator';
-  const FILE = 'image_cache.json';
-  const API  = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
-
-  // 현재 캐시 로드
-  let cache = { entries: {} }, sha = null;
+// ── 캐시 로드 헬퍼 (SHA 포함) ──────────────────────────────────
+async function loadCacheRaw(token) {
+  const API = `https://api.github.com/repos/sapmanri/carousel-generator/contents/image_cache.json`;
   try {
     const res = await fetch(API, { headers: { Authorization: `token ${token}` } });
-    if (res.ok) {
-      const json = await res.json();
-      sha = json.sha;
-      const decoded = JSON.parse(decodeGithubContent(json.content));
-      cache = decoded;
-    }
-  } catch(e) {}
+    if (!res.ok) return { cache: { entries: {} }, sha: null };
+    const json = await res.json();
+    const cache = JSON.parse(decodeGithubContent(json.content));
+    return { cache, sha: json.sha };
+  } catch(e) {
+    return { cache: { entries: {} }, sha: null };
+  }
+}
 
-  // 항목 추가/업데이트
-  const exif = queueItem.exif || {};
-  cache.entries[hash] = {
-    image_id       : hash,
-    r2_url         : r2Url,
-    thumbnail_url  : thumbUrl || r2Url,
-    uploaded_at    : new Date().toISOString().slice(0, 10),
-    // EXIF
-    exif_date      : queueItem.shotDate || null,
-    exif_datetime  : exif.DateTimeOriginal || exif.DateTime || null,
-    exif_make      : exif.Make || null,
-    exif_model     : exif.Model || null,
-    exif_iso       : exif.ISO || null,
-    exif_fstop     : exif.FNumber ? `f/${exif.FNumber.toFixed(1)}` : null,
-    exif_exposure  : exif.ExposureTime ? `1/${Math.round(1/exif.ExposureTime)}s` : null,
-    exif_width     : exif.PixelXDimension || null,
-    exif_height    : exif.PixelYDimension || null,
-    // AI 분석
-    ...(analysis || {}),
-    // 파일 정보
-    filename       : queueItem.file.name,
-    filesize       : queueItem.file.size,
+// ── 자동 백업 ────────────────────────────────────────────────────
+async function backupCache(token, cacheStr) {
+  const ts  = new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+  const key = `backups/image_cache_${ts}.json`;
+  const API = `https://api.github.com/repos/sapmanri/carousel-generator/contents/${key}`;
+  try {
+    await fetch(API, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Backup: ${ts}`, content: encodeGithubContent(cacheStr) })
+    });
+  } catch(e) { console.warn('백업 실패 (무시):', e.message); }
+}
+
+// ── saveToCache — merge 방식 (기존 필드 절대 삭제 안 함) ─────────
+async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl, statusFields) {
+  const token = window.SapConfig.getGithubToken();
+  if (!token) return;
+
+  const { cache, sha } = await loadCacheRaw(token);
+  const beforeCount = Object.keys(cache.entries).length;
+
+  const exif = queueItem?.exif || {};
+  const existing = cache.entries[hash] || {};
+
+  // 새 데이터 준비
+  const newData = {
+    image_id      : existing.image_id || hash,
+    r2_url        : r2Url || existing.r2_url,
+    thumbnail_url : thumbUrl || existing.thumbnail_url || r2Url,
+    uploaded_at   : existing.uploaded_at || new Date().toISOString().slice(0, 10),
+    filename      : queueItem?.file?.name || existing.filename,
+    filesize      : queueItem?.file?.size || existing.filesize,
+    // EXIF — 기존 값 우선, 새 값이 있으면 덮어씀
+    exif_date     : queueItem?.shotDate || existing.exif_date || null,
+    exif_datetime : exif.DateTimeOriginal || exif.DateTime || existing.exif_datetime || null,
+    exif_make     : exif.Make     || existing.exif_make   || null,
+    exif_model    : exif.Model    || existing.exif_model  || null,
+    exif_iso      : exif.ISO      || existing.exif_iso    || null,
+    exif_fstop    : exif.FNumber  ? `f/${exif.FNumber.toFixed(1)}`                : existing.exif_fstop    || null,
+    exif_exposure : exif.ExposureTime ? `1/${Math.round(1/exif.ExposureTime)}s`   : existing.exif_exposure || null,
+    exif_width    : exif.PixelXDimension || existing.exif_width  || null,
+    exif_height   : exif.PixelYDimension || existing.exif_height || null,
+    // 상태 필드
+    upload_status    : statusFields?.upload_status    || existing.upload_status    || 'ok',
+    decode_status    : statusFields?.decode_status    || existing.decode_status    || 'ok',
+    thumbnail_status : statusFields?.thumbnail_status || existing.thumbnail_status || (thumbUrl ? 'ok' : 'pending'),
+    analysis_status  : statusFields?.analysis_status  || existing.analysis_status  || (analysis ? 'ok' : 'pending'),
+    error_stage      : statusFields?.error_stage      || existing.error_stage      || null,
+    error_message    : statusFields?.error_message    || existing.error_message    || null,
+    needs_conversion : statusFields?.needs_conversion || existing.needs_conversion || false,
   };
 
+  // AI 분석 — 분석값이 있을 때만 merge (없으면 기존 유지)
+  if (analysis && Object.keys(analysis).length > 0) {
+    Object.assign(newData, analysis);
+  } else {
+    // 기존 분석 필드 보존
+    const ANALYSIS_FIELDS = ['mood','suggested_caption','suggested_caption_en','suggested_label',
+      'suggested_label_en','subject_position','best_page_type','overall_brightness','dominant_color',
+      'color_temperature','contrast_level','visual_density','negative_space','season','time_of_day',
+      'location_type','primary_subject','secondary_subjects','activity_type','human_presence',
+      'animal_presence','material_texture','has_text','text_area_position','text_safe_area',
+      'camera_distance','camera_angle','motion_implied','focus_clarity','thumbnail_potential',
+      'thumbnail_reason','spread_focal_left','spread_focal_right','domesticity_score',
+      'rurality_score','craft_score','visual_dna_tags','sapmanri_score',
+      'schema_version','analyzed_at','model'];
+    ANALYSIS_FIELDS.forEach(f => { if (existing[f] !== undefined) newData[f] = existing[f]; });
+  }
+
+  // merge — 기존 entry에 새 데이터 합침 (기존 필드 손실 없음)
+  cache.entries[hash] = { ...existing, ...newData };
+
+  // count diff 검사 — 기존보다 줄어들면 저장 중단
+  const afterCount = Object.keys(cache.entries).length;
+  if (afterCount < beforeCount) {
+    console.error(`🛑 저장 중단: entry 수 감소 감지 (${beforeCount} → ${afterCount})`);
+    return;
+  }
+
+  const jsonStr = JSON.stringify(cache, null, 2);
+
+  // 백업 (fire-and-forget)
+  backupCache(token, jsonStr).catch(() => {});
+
   // 저장
-  const jsonStr  = JSON.stringify(cache, null, 2);
-  const body     = { message: `Library: add ${hash}`, content: encodeGithubContent(jsonStr) };
+  const body = { message: `Library: update ${hash}`, content: encodeGithubContent(jsonStr) };
   if (sha) body.sha = sha;
-  await fetch(API, {
+  await fetch(`https://api.github.com/repos/sapmanri/carousel-generator/contents/image_cache.json`, {
     method: 'PUT',
     headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -874,6 +948,8 @@ function renderGallery() {
         ${escapeHtml(displayText(item.suggested_caption || item.filename || key || ''))}
         ${item.exif_date ? `<div class="grid-item-date">${escapeHtml(item.exif_date)}</div>` : ''}
         ${item.mood ? `<div class="grid-item-mood">${escapeHtml(displayText(item.mood))}</div>` : ''}
+        ${item.error_stage ? `<div style="color:#e07;font-size:9px;margin-top:2px">✗ ${escapeHtml(item.error_stage)}: ${escapeHtml((item.error_message||'').slice(0,30))}</div>` : ''}
+        ${(!item.mood && !item.error_stage && item.upload_status==='ok') ? '<div style="color:#555;font-size:9px;margin-top:2px">분석 대기</div>' : ''}
       </div>
     </div>`;
   }).join('');
