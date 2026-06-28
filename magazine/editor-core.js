@@ -1152,6 +1152,119 @@ function photoSrc(photoId) {
   return photo ? photo.dataUrl : '';
 }
 
+// ── 스프레드 이미지 Canvas 크롭 ─────────────────────────────────
+// splitX 기준으로 원본 이미지를 좌/우 두 장으로 잘라 dataUrl 반환
+// 모바일 세로 비율(9:16) 기준으로 크롭
+async function cropSpreadImage(dataUrl, mediaType) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = function() {
+      const W = img.naturalWidth;
+      const H = img.naturalHeight;
+
+      // 출력 크기: 9:16 세로 비율
+      const outH = H;
+      const outW = Math.round(H * 9 / 16);
+
+      // object-fit:cover 기준으로 이미지가 outW x outH 컨테이너에 렌더될 때
+      // 실제 이미지 픽셀에서 어느 영역이 보이는지 계산
+      const imgRatio  = W / H;
+      const boxRatio  = outW / outH;
+      let srcW, srcH, srcY;
+      if (imgRatio > boxRatio) {
+        // 이미지가 가로로 넓음 → 세로 꽉 채움, 좌우 크롭
+        srcH = H;
+        srcW = Math.round(H * boxRatio);
+        srcY = 0;
+      } else {
+        // 이미지가 세로로 김 → 가로 꽉 채움, 상하 크롭
+        srcW = W;
+        srcH = Math.round(W / boxRatio);
+        srcY = Math.round((H - srcH) / 2);
+      }
+
+      // splitX 기준으로 srcW 안에서 왼쪽/오른쪽 각각의 srcX 계산
+      const totalSrcW = srcW * 2; // 가상의 전체 소스 폭 (왼쪽+오른쪽)
+      // 왼쪽: totalSrcW의 0~splitX% 구간을 srcW로 보여줌
+      // 오른쪽: totalSrcW의 splitX~100% 구간을 srcW로 보여줌
+      // 실제 이미지는 W픽셀, 그 안에서 중앙 정렬된 srcW가 보임
+      const srcXBase = imgRatio > boxRatio ? Math.round((W - srcW * 2) / 2) : 0;
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = outW;
+      canvas.height = outH;
+      const ctx = canvas.getContext('2d');
+
+      const results = {};
+
+      // 왼쪽 크롭
+      ctx.clearRect(0, 0, outW, outH);
+      ctx.drawImage(img, srcXBase, srcY, srcW, srcH, 0, 0, outW, outH);
+      results.left = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
+
+      // 오른쪽 크롭
+      ctx.clearRect(0, 0, outW, outH);
+      ctx.drawImage(img, srcXBase + srcW, srcY, srcW, srcH, 0, 0, outW, outH);
+      results.right = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
+
+      resolve(results);
+    };
+    img.onerror = reject;
+    img.src = dataUrl;
+  });
+}
+
+// 슬라이더 안전 범위 계산 — 이미지 비율 기준으로 검은 여백 안 생기는 범위
+// 모바일 세로(9:16) 컨테이너에서 이미지가 얼마나 좌우로 넘치는지로 계산
+function calcSpreadSliderRange(imgW, imgH) {
+  if (!imgW || !imgH) return { min: 20, max: 80 };
+  const boxRatio = 9 / 16;
+  const imgRatio = imgW / imgH;
+  if (imgRatio <= boxRatio) {
+    // 세로 이미지 — 좌우 오버플로우 없음 → 50:50 고정이 최선, 범위 좁게
+    return { min: 40, max: 60 };
+  }
+  // 가로 이미지 — cover 시 좌우로 넘치는 픽셀 계산
+  // srcW = H * boxRatio, totalSrcW = srcW * 2
+  // 이미지 전체 W 중 totalSrcW가 차지: W >= totalSrcW 여야 검은 여백 없음
+  // totalSrcW = H * boxRatio * 2 = H * 9/8
+  // 비율로 보면: 이미지가 splitX 기준 양쪽 각 9/16 비율을 커버해야 함
+  // 한쪽 최소 픽셀 srcW = H * 9/16
+  // splitX의 왼쪽 픽셀 수 = imgW * splitX/100 >= srcW
+  // → splitX >= (srcW / imgW) * 100 = (H * 9/16 / imgW) * 100
+  const srcW = imgH * boxRatio;
+  const minSplit = Math.ceil((srcW / imgW) * 100) + 2;  // 여유 2%
+  const maxSplit = Math.floor(100 - (srcW / imgW) * 100) - 2;
+  return {
+    min: Math.max(10, minSplit),
+    max: Math.min(90, maxSplit)
+  };
+}
+
+// 슬라이더 범위를 이미지 로드 후 동적으로 갱신
+function updateSpreadSliderRange(idx) {
+  const pg = pages[idx];
+  if (!pg || pg.type !== 'spread' || !pg.imageId) return;
+  const src = photoSrc(pg.imageId);
+  if (!src) return;
+  const card = document.querySelectorAll('.page-card')[idx];
+  if (!card) return;
+  const slider = card.querySelector('input[type="range"]');
+  if (!slider) return;
+  const img = new Image();
+  img.onload = function() {
+    const { min, max } = calcSpreadSliderRange(this.naturalWidth, this.naturalHeight);
+    slider.min = min;
+    slider.max = max;
+    // 현재 값이 범위 밖이면 클램프
+    const cur = parseInt(slider.value, 10);
+    if (cur < min) { slider.value = min; pages[idx].splitX = min; }
+    if (cur > max) { slider.value = max; pages[idx].splitX = max; }
+    updateSpreadSplitPreview(idx, slider.value);
+  };
+  img.src = src;
+}
+
 // 풀블리드 초점 위치 미리보기에서 클릭한 좌표를 focalX/focalY(%)로 저장
 function setFocalPoint(evt, idx) {
   const rect = evt.currentTarget.getBoundingClientRect();
@@ -1283,6 +1396,8 @@ function renderPageCard(pg, idx) {
         <div class="field"><label>오른쪽 페이지 캡션</label><input value="${esc(pg.captionRight||'')}" oninput="pages[${idx}].captionRight=this.value"></div>
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
       `;
+      // 이미지 로드 후 슬라이더 범위 갱신
+      setTimeout(() => updateSpreadSliderRange(${idx}), 100);
       break;
     }
     case 'essay':
@@ -1873,15 +1988,35 @@ async function publish() {
           out.context = pg.context || '';
           break;
         case 'spread':
-          out.image            = pg.imageId ? photoPathMap[pg.imageId] : '';
+          // Canvas로 두 장 크롭 후 각각 R2 업로드
+          if (pg.imageId && photoPathMap[pg.imageId]) {
+            const spreadSrc = photos.find(p => p.id === pg.imageId);
+            let spreadDataUrl = spreadSrc?.dataUrl || '';
+            if (spreadDataUrl && !spreadDataUrl.startsWith('data:')) {
+              try { spreadDataUrl = await window.ImageLibrary.fetchAsDataUrl(spreadDataUrl); } catch(e) { spreadDataUrl = ''; }
+            }
+            if (spreadDataUrl) {
+              try {
+                statusEl.innerHTML = `<span class="spinner"></span>스프레드 크롭 중…`;
+                const cropped = await cropSpreadImage(spreadDataUrl, spreadSrc?.mediaType || 'image/jpeg');
+                const [leftResult, rightResult] = await Promise.all([
+                  window.ImageLibrary.uploadIfNeeded(cropped.left,  'image/jpeg', (pg.imageId||'') + '_left'),
+                  window.ImageLibrary.uploadIfNeeded(cropped.right, 'image/jpeg', (pg.imageId||'') + '_right'),
+                ]);
+                out.imageLeft  = leftResult.url;
+                out.imageRight = rightResult.url;
+              } catch(e) {
+                console.warn('spread crop failed, fallback', e);
+                out.image  = photoPathMap[pg.imageId];
+                out.splitX = pg.splitX ?? 50;
+              }
+            } else {
+              out.image  = photoPathMap[pg.imageId];
+              out.splitX = pg.splitX ?? 50;
+            }
+          }
           out.captionLeft      = pg.captionLeft      || ''; out.captionLeft_en  = pg.captionLeft_en  || '';
           out.captionRight     = pg.captionRight     || ''; out.captionRight_en = pg.captionRight_en || '';
-          if (typeof pg.splitX === 'number') out.splitX = pg.splitX;
-          // 하위호환: 기존 focalXLeft/Right도 유지
-          else {
-            if (typeof pg.focalXLeft === 'number') out.focalXLeft = pg.focalXLeft;
-            if (typeof pg.focalXRight === 'number') out.focalXRight = pg.focalXRight;
-          }
           break;
         case 'essay':
           out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
