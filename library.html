@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28c</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28d</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628c"></script>
+<script src="/shared-config.js?v=20260628d"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628c"></script>
+<script src="/magazine/image-library.js?v=20260628d"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -420,7 +420,10 @@ async function startProcess() {
         reader.readAsDataURL(item.file);
       });
 
-      let actualMediaType = getDataUrlMediaType(dataUrl) || item.file.type || 'image/jpeg';
+      let actualMediaType = normalizeClaudeImageMime(
+        getDataUrlMediaType(dataUrl) || item.file.type || 'image/jpeg',
+        getDataUrlBase64(dataUrl)
+      );
       // HEIC/HEIF는 Claude API와 브라우저 Canvas에서 안정적으로 처리되지 않는다.
       // 변환이 성공했다면 여기서 image/jpeg가 나와야 한다. 아직 HEIC면 분석/업로드를 진행하지 않는다.
       if (/heic|heif/i.test(actualMediaType)) {
@@ -520,6 +523,40 @@ function getDataUrlBase64(dataUrl) {
   return m ? m[1] : '';
 }
 
+// DataURL 헤더/파일 확장자보다 실제 base64 시그니처를 우선한다.
+// 일부 파일은 data:image/png 헤더를 달고 있지만 실제 바이트는 JPEG인 경우가 있다.
+// Anthropic Vision은 media_type과 실제 이미지 바이트가 다르면 400을 반환한다.
+function detectImageMimeFromBase64(base64, fallback = '') {
+  const b64 = String(base64 || '').replace(/\s/g, '');
+  const fb = String(fallback || '').toLowerCase();
+
+  if (!b64) return fb || 'image/jpeg';
+  if (b64.startsWith('/9j/')) return 'image/jpeg';     // JPEG
+  if (b64.startsWith('iVBOR')) return 'image/png';     // PNG
+  if (b64.startsWith('UklGR')) return 'image/webp';    // WEBP/RIFF
+  if (b64.startsWith('R0lGOD')) return 'image/gif';    // GIF
+
+  return fb || 'image/jpeg';
+}
+
+function normalizeClaudeImageMime(mediaType, base64 = '') {
+  const headerType = String(mediaType || '').toLowerCase();
+  const detected = detectImageMimeFromBase64(base64, headerType);
+
+  // image/jpg는 API 표준 media type이 아니므로 image/jpeg로 교정
+  const normalized = detected === 'image/jpg' ? 'image/jpeg' : detected;
+
+  if (headerType && normalized && headerType !== normalized) {
+    console.warn('[analyzeImage] mediaType corrected by magic bytes', {
+      headerType,
+      detected: normalized,
+      base64Prefix: String(base64 || '').slice(0, 12)
+    });
+  }
+
+  return normalized;
+}
+
 function isClaudeSupportedImageType(mediaType) {
   return ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(String(mediaType || '').toLowerCase());
 }
@@ -533,8 +570,8 @@ function estimateBase64Bytes(base64) {
 
 async function prepareImageForClaude(dataUrl, mediaType) {
   let finalDataUrl = dataUrl;
-  let finalMediaType = getDataUrlMediaType(finalDataUrl) || mediaType || '';
   let base64 = getDataUrlBase64(finalDataUrl);
+  let finalMediaType = normalizeClaudeImageMime(getDataUrlMediaType(finalDataUrl) || mediaType || '', base64);
   const bytes = estimateBase64Bytes(base64);
 
   if (!finalDataUrl || !String(finalDataUrl).startsWith('data:image/')) {
@@ -555,7 +592,8 @@ async function prepareImageForClaude(dataUrl, mediaType) {
   if (bytes > 4.5 * 1024 * 1024) {
     console.warn('[analyzeImage] resize for Claude payload', { mediaType: finalMediaType, bytes });
     finalDataUrl = await generateThumbnail(finalDataUrl, 1600);
-    finalMediaType = getDataUrlMediaType(finalDataUrl) || 'image/jpeg';
+    base64 = getDataUrlBase64(finalDataUrl);
+    finalMediaType = normalizeClaudeImageMime(getDataUrlMediaType(finalDataUrl) || 'image/jpeg', base64);
     if (!isClaudeSupportedImageType(finalMediaType)) finalMediaType = 'image/jpeg';
   }
 
@@ -1136,7 +1174,7 @@ async function doReanalyze(targets, apiKey) {
       let dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
       if (!dataUrl || !dataUrl.startsWith('data:')) continue;
       // mediaType 추출 — dataUrl 헤더 기준
-      let mediaType = getDataUrlMediaType(dataUrl) || '';
+      let mediaType = normalizeClaudeImageMime(getDataUrlMediaType(dataUrl) || '', getDataUrlBase64(dataUrl));
       // 이미지가 아닌 파일 (영상, 오디오 등) → 스킵
       if (!mediaType.startsWith('image/')) {
         console.log('스킵 (이미지 아님):', item.filename, mediaType);
