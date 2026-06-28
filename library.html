@@ -1389,12 +1389,14 @@ async function reanalyzeSelected() {
 async function reanalyzeAll() {
   const apiKey = window.SapConfig.getAnthropicKey();
   if (!apiKey) { alert('API Key가 필요합니다. 설정에서 입력해주세요.'); return; }
-  const v1Items = allItems.filter(item => !['image-analysis-v2','image-analysis-v3'].includes(item.schema_version));
-  const msg = v1Items.length
-    ? `구 스키마 이미지 ${v1Items.length}장을 재분석합니다. (v2 이미 완료된 ${allItems.length - v1Items.length}장은 스킵)`
-    : `전체 ${allItems.length}장을 재분석합니다.`;
+  // v3만 완료된 것으로 인정. v2 이하는 재분석 대상.
+  const doneItems  = allItems.filter(item => item.schema_version === 'image-analysis-v3');
+  const todoItems  = allItems.filter(item => item.schema_version !== 'image-analysis-v3');
+  const msg = todoItems.length
+    ? `v3 미완료 이미지 ${todoItems.length}장을 재분석합니다.\n(v3 완료 ${doneItems.length}장은 스킵)`
+    : `모든 이미지(${allItems.length}장)가 이미 v3 완료 상태입니다.\n강제로 전체 재분석할까요?`;
   if (!confirm(msg + '\n계속할까요?')) return;
-  await doReanalyze(v1Items.length ? v1Items : allItems, apiKey);
+  await doReanalyze(todoItems.length ? todoItems : allItems, apiKey);
 }
 
 async function doReanalyze(targets, apiKey) {
