@@ -1039,8 +1039,13 @@ async function doReanalyze(targets, apiKey) {
       if (!imgUrl) continue;
       // 이미지 → base64
       const dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
-      const ext = imgUrl.split('.').pop().toLowerCase();
-      const mediaType = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+      if (!dataUrl || !dataUrl.startsWith('data:')) continue;
+      // dataUrl에서 실제 mediaType 추출 (URL 확장자 의존 제거)
+      let mediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || 'image/jpeg';
+      // HEIC/HEIF는 Claude API 미지원 → jpeg 강제
+      if (/heic|heif/i.test(mediaType)) mediaType = 'image/jpeg';
+      // Claude API 지원 타입 외엔 jpeg로 fallback
+      if (!['image/jpeg','image/png','image/gif','image/webp'].includes(mediaType)) mediaType = 'image/jpeg';
       // 재분석
       const analysis = await analyzeImage(dataUrl, mediaType, apiKey);
       // 캐시 갱신
