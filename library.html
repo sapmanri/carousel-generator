@@ -459,8 +459,7 @@ async function startProcess() {
         analysis = await analyzeImage(dataUrl, actualMediaType, apiKey);
       }
 
-      // 4. 캐시에 저장 (EXIF + 썸네일 URL 포함)
-      const hash = await window.ImageLibrary.hashImage(dataUrl);
+      // 4. 캐시에 저장 (EXIF + 썸네일 URL 포함) — hash는 위 캐시 히트 확인에서 이미 계산됨
       if (hash) {
         await saveToCache(hash, uploadResult.url || uploadResult.path, item, analysis, thumbUrl);
       }
