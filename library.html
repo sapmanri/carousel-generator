@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628q"></script>
+<script src="/shared-config.js?v=20260628r"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628q"></script>
+<script src="/magazine/image-library.js?v=20260628r"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -997,16 +997,17 @@ function deriveImageId(itemOrUrl) {
 
 function isGeneratedAssetItem(item) {
   // R2 list에는 원본 외에 thumb_<hash>.webp, <hash>_display.jpg 같은 파생 파일도 섞여 들어온다.
-  // 이 파일들은 원본 카드의 src로만 쓰고, 갤러리 메인 카드로는 렌더링하지 않는다.
-  const vals = [item.hash, item.image_id, item.path, item.name, item.filename, item.url, item.download_url, item.r2_url, item.display_url, item.thumbnail_url]
-    .filter(Boolean).map(String);
-  return vals.some(v => {
-    const clean = v.split('?')[0].split('#')[0];
-    const base = basenameFromUrl(clean);
-    return /(^|\/)thumb_[^/]+(\.(webp|jpe?g|png))?$/i.test(clean)
-        || /(^|\/)[^/]+_display\.(jpe?g|png|webp)$/i.test(clean)
-        || /_display$/i.test(base);
-  });
+  // 단, thumbnail_url/display_url은 원본 카드가 "사용하는 표시용 URL"이므로 절대 숨김 판정에 쓰면 안 된다.
+  // 숨겨야 하는 것은 "그 항목 자체"가 thumb/display 파생 파일인 경우뿐이다.
+  const identity = String(
+    item.hash || item.image_id || item.path || item.name || item.filename || item.url || item.download_url || item.r2_url || ''
+  );
+  if (!identity) return false;
+  const clean = identity.split('?')[0].split('#')[0];
+  const base = basenameFromUrl(clean);
+  return /(^|\/)thumb_[^/]+(\.(webp|jpe?g|png))?$/i.test(clean)
+      || /(^|\/)[^/]+_display\.(jpe?g|png|webp)$/i.test(clean)
+      || /_display$/i.test(base);
 }
 
 function isThumbnailItem(item) {
