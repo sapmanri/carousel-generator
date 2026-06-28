@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · Writing Studio v5.0.0</title>
+<title>감성찾아삽만리 · Writing Studio v5.1.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
@@ -312,6 +312,24 @@ header {
 .perception-box { background:rgba(184,122,110,0.06); border:1px solid rgba(184,122,110,0.25); border-radius:4px; padding:8px 10px; font-size:11px; color:var(--muted); line-height:1.7; margin-top:8px; }
 
 
+
+/* ── 출력 규격 / 길이 설정 ── */
+.profile-box {
+  background:rgba(184,122,110,0.06); border:1px solid rgba(184,122,110,0.22);
+  border-radius:4px; padding:9px 10px; font-size:11px; color:var(--muted);
+  line-height:1.7; margin-top:8px;
+}
+.length-row { display:flex; gap:6px; align-items:center; margin-top:8px; }
+.select-mini, .input-mini {
+  background:var(--s1); border:1px solid var(--border); color:var(--text);
+  font-family:var(--sans); font-weight:300; font-size:12px; padding:7px 9px;
+  border-radius:4px; outline:none;
+}
+.select-mini { flex:1; cursor:pointer; }
+.input-mini { width:88px; font-family:var(--mono); }
+.input-mini:focus, .select-mini:focus { border-color:var(--accent); }
+.keyword-row { margin-top:8px; }
+
 /* ── 모바일 ── */
 @media(max-width:768px) {
   header { padding:0 12px; height:44px; }
@@ -331,7 +349,7 @@ header {
 <header>
   <div class="logo">
     <strong>감성찾아삽만리</strong> · Writing Studio
-    <span class="ver">v5.0.0</span>
+    <span class="ver">v5.1.0</span>
   </div>
   <nav style="display:flex;gap:2px">
     <button class="mode-btn active" id="tabWriteBtn" onclick="switchMainTab('write')">쓰기</button>
@@ -424,6 +442,25 @@ header {
           <button class="chip tier-a" data-type="postcard" onclick="setAutoType(this)">포스트카드</button>
           <button class="chip tier-a" data-type="skyline" onclick="setAutoType(this)">Skyline</button>
         </div>
+        <div class="profile-box" id="outputProfilePreview">출력 규격 로딩 중…</div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-label">출력 길이 · SEO</div>
+        <div class="length-row">
+          <select id="lengthPreset" class="select-mini" onchange="updateOutputProfileUI()">
+            <option value="default">기본값</option>
+            <option value="short">짧게</option>
+            <option value="normal">보통</option>
+            <option value="long">길게</option>
+            <option value="custom">직접 입력</option>
+          </select>
+          <input id="customCharTarget" class="input-mini" type="number" min="40" step="100" placeholder="글자수" oninput="updateOutputProfileUI()">
+        </div>
+        <div class="keyword-row">
+          <input id="focusKeywordInput" class="field" style="resize:none;padding:7px 10px;font-size:12px" placeholder="핵심 키워드 / SEO 키워드 (선택)">
+        </div>
+        <div class="profile-box" id="lengthProfilePreview">출력 목적을 선택하면 권장 길이가 표시됩니다.</div>
       </div>
 
       <div class="sec">
@@ -988,27 +1025,125 @@ const VOICE_LABEL = {
 
 const OUTPUT_PRIORITY = ['webmag','sapmanri_blog','naver_blog','pause_book','instagram','youtube','carousel','postcard','skyline'];
 
+const OUTPUT_PROFILES = {
+  webmag: {
+    label:'웹매거진', defaultChars:2600, shortChars:1600, normalChars:2600, longChars:4200,
+    minChars:1800, maxChars:5000,
+    spec:[
+      '제목 1개, 리드 1개, 본문 4~8개 섹션',
+      '사진/장면을 기반으로 하지만 사진 설명문처럼 쓰지 않음',
+      'SEO는 약하게. 읽는 흐름과 문체 우선',
+      '마지막은 정리문이 아니라 장면 안의 사물/움직임으로 닫음'
+    ]
+  },
+  sapmanri_blog: {
+    label:'삽만리닷컴 블로그', defaultChars:1500, shortChars:900, normalChars:1500, longChars:2200,
+    minChars:1200, maxChars:2600,
+    spec:[
+      '제목, 본문, SEO Focus keyphrase, Meta description, Slug 후보 3개, 태그 포함',
+      '본문 1200자 이상 권장. 웹사이트용이라 너무 일기처럼 흐르지 않음',
+      'Focus keyphrase와 Meta description은 반드시 출력',
+      '태그는 #버전과 키워드형을 함께 고려'
+    ]
+  },
+  naver_blog: {
+    label:'네이버 블로그', defaultChars:2200, shortChars:1500, normalChars:2200, longChars:3000,
+    minChars:1500, maxChars:3500,
+    spec:[
+      '전체 본문 최소 1500자 이상',
+      '핵심 키워드 8~12회 자연 반복. 사용자가 키워드를 넣으면 그 키워드를 우선',
+      '첫 두 줄에 핵심 키워드 포함',
+      '중간 소제목 3~5개, 사진 위치 [사진 1] 등 5~10개 제안',
+      '태그 10~20개. 검색용이지만 광고문처럼 쓰지 않음'
+    ]
+  },
+  pause_book: {
+    label:'잠깐 멈춰.', defaultChars:800, shortChars:450, normalChars:800, longChars:1200,
+    minChars:400, maxChars:1600,
+    spec:[
+      '책 원고 후보. SEO, 해시태그, 홍보문 금지',
+      '짧은 행갈이, 여백, 잔향 유지',
+      '관찰을 충분히 쌓은 뒤 아주 작은 인식만 남김',
+      '추상명사보다 구체적인 사물로 끝냄'
+    ]
+  },
+  instagram: {
+    label:'인스타', defaultChars:500, shortChars:250, normalChars:500, longChars:800,
+    minChars:200, maxChars:900,
+    spec:[
+      '첫 줄은 장면을 붙잡는 짧은 문장',
+      '본문 2~6문장 또는 짧은 행갈이',
+      '해시태그는 반드시 5개만 출력',
+      '서두르지 않았다/별것 없다/충분했다 남발 금지'
+    ]
+  },
+  youtube: {
+    label:'유튜브', defaultChars:900, shortChars:500, normalChars:900, longChars:1300,
+    minChars:500, maxChars:1600,
+    spec:[
+      '제목 후보 5개, 설명란, 고정댓글, 해시태그 포함',
+      '첫 두 줄은 검색과 클릭을 고려',
+      '시골살이/전원주택/마당있는 집/먼저 살아보고 있습니다 맥락 반영',
+      '필요하면 타임라인 섹션 포함'
+    ]
+  },
+  carousel: {
+    label:'캐러셀', defaultChars:420, shortChars:250, normalChars:420, longChars:700,
+    minChars:200, maxChars:900,
+    spec:[
+      '카드 5~8장',
+      '각 카드 1~3줄',
+      '첫 카드는 제목, 마지막 카드는 장면 또는 여운',
+      '카드별 문장만 명확히 분리'
+    ]
+  },
+  postcard: {
+    label:'포스트카드', defaultChars:120, shortChars:40, normalChars:120, longChars:220,
+    minChars:30, maxChars:300,
+    spec:[
+      '1줄 문장 5개 + 2~4행 짧은 문장 3개',
+      '명언처럼 완성하지 않음',
+      '이미지 위 여백을 고려',
+      '사물/빛/거리/손/속도 중 하나가 남게 함'
+    ]
+  },
+  skyline: {
+    label:'Skyline', defaultChars:180, shortChars:80, normalChars:180, longChars:350,
+    minChars:60, maxChars:500,
+    spec:[
+      '음악 매칭용 장면 해석',
+      'mood words, tempo words, texture words 포함',
+      '긴 산문 금지. 음악 추천에 필요한 감정/속도/밀도 중심',
+      '한 줄 요약 포함'
+    ]
+  }
+};
+
+
 const TYPE_INSTRUCTION = {
   webmag: `웹매거진 원고를 생성한다.
 - 입력이 이미지든 텍스트든 둘 다든, 먼저 Vase가 쓴 것 같은 Original Draft를 만든 뒤 웹매거진 문장으로 정리한다
-- 제목 1개, 리드문 1개, 본문 5~9문단을 출력한다
+- 제목 1개, 리드문 1개, 본문 4~8개 섹션을 출력한다
+- 지정 글자수에 맞춘다. 기본은 2600자 안팎이다
 - 사진 설명문처럼 쓰지 말고 장면에서 시작한다
 - 본문은 삽만리 웹매거진에 바로 넣을 수 있는 길이와 호흡
 - 마지막은 교훈이 아니라 장면/사물/행동으로 닫는다`,
 
   sapmanri_blog: `삽만리닷컴 블로그 글을 생성한다.
 - 제목, 본문, SEO Focus keyphrase, Meta description, slug 후보, 태그를 반드시 포함한다
-- 본문은 웹사이트용이라 너무 일기처럼 흐르지 않게 한다
+- 본문은 지정 글자수에 맞춘다. 기본은 1500자, 최소 1200자 이상이다
 - 검색 키워드는 자연스럽게 넣되 문체를 해치지 않는다
 - 한글 중심, 필요하면 짧은 영문 보조 문장 허용
-- 반드시 Focus keyphrase와 Meta description을 함께 제공한다`,
+- 반드시 Focus keyphrase와 Meta description을 함께 제공한다
+- Meta description은 120~155자 안팎으로 작성한다`,
 
   naver_blog: `네이버 블로그 글을 생성한다.
-- 제목, 도입, 본문, 마무리, 태그를 포함한다
-- 삽만리닷컴보다 조금 더 친근하고 설명적이어도 된다
-- 검색 유입을 고려하되 광고문처럼 쓰지 않는다
-- 사진이 들어갈 위치를 [사진 1], [사진 2]처럼 제안한다
-- 제목은 네이버 검색용 키워드와 자연스러운 문장을 함께 고려한다`,
+- 제목, 첫 두 줄 SEO 도입, 본문, 소제목 3~5개, 마무리, 태그를 포함한다
+- 전체 본문은 지정 글자수에 맞춘다. 기본은 2200자, 최소 1500자 이상이다
+- 핵심 키워드는 8~12회 자연스럽게 반복한다. 키워드를 모르면 제목/입력에서 하나를 정하고 명시한다
+- 사진이 들어갈 위치를 [사진 1], [사진 2]처럼 5~10개 제안한다
+- 삽만리 문체를 유지하되 네이버 검색 유입을 위해 조금 더 설명적이어도 된다
+- 광고문처럼 쓰지 않는다`,
 
   pause_book: `산문집 《잠깐 멈춰.》 원고 후보를 생성한다.
 - 책 문체 전용. 블로그처럼 설명하지 않는다
@@ -1070,9 +1205,74 @@ function getOutputInstruction(type) {
   return TYPE_INSTRUCTION[type] || TYPE_INSTRUCTION.webmag;
 }
 
+function getOutputProfile(type) {
+  return OUTPUT_PROFILES[type] || OUTPUT_PROFILES.webmag;
+}
+
+function getTargetLengthSpec(type) {
+  const profile = getOutputProfile(type);
+  const presetEl = document.getElementById('lengthPreset');
+  const customEl = document.getElementById('customCharTarget');
+  const preset = presetEl ? presetEl.value : 'default';
+  let target = profile.defaultChars;
+  if (preset === 'short') target = profile.shortChars;
+  else if (preset === 'normal') target = profile.normalChars;
+  else if (preset === 'long') target = profile.longChars;
+  else if (preset === 'custom') {
+    const n = parseInt(customEl && customEl.value, 10);
+    if (!Number.isNaN(n) && n > 0) target = n;
+  }
+  target = Math.max(profile.minChars || 40, Math.min(profile.maxChars || 5000, target));
+  return { preset, target, min: profile.minChars, max: profile.maxChars };
+}
+
+function getFocusKeyword() {
+  const el = document.getElementById('focusKeywordInput');
+  return el ? el.value.trim() : '';
+}
+
+function estimateMaxTokensForType(type) {
+  const spec = getTargetLengthSpec(type);
+  return Math.max(1500, Math.min(7000, Math.ceil(spec.target * 2.2)));
+}
+
+function buildOutputProfileText(type) {
+  const profile = getOutputProfile(type);
+  const len = getTargetLengthSpec(type);
+  const keyword = getFocusKeyword();
+  const lines = [
+    `출력 규격: ${profile.label}`,
+    `목표 글자수: 약 ${len.target.toLocaleString()}자 (허용 범위 ${len.min.toLocaleString()}~${len.max.toLocaleString()}자)`,
+    keyword ? `핵심 키워드: ${keyword}` : '핵심 키워드: 입력에서 자연스럽게 추출하되, 필요하면 제목에 맞춰 하나를 정한다.',
+    '',
+    '반드시 지킬 출력 규격:',
+    ...(profile.spec || []).map(s => `- ${s}`)
+  ];
+  if (type === 'naver_blog') {
+    lines.push('', '네이버 블로그 특별 규칙:', '- 첫 두 줄에 핵심 키워드를 자연스럽게 넣는다.', '- 핵심 키워드를 본문 전체에 8~12회 자연 반복한다.', '- 1500자 미만이면 실패로 간주한다.', '- 소제목 3~5개와 [사진 n] 위치 제안을 포함한다.');
+  }
+  if (type === 'sapmanri_blog') {
+    lines.push('', '삽만리닷컴 특별 규칙:', '- SEO Focus keyphrase와 Meta description을 반드시 출력한다.', '- Slug 후보는 영어 소문자와 하이픈만 사용한다.', '- 본문이 너무 짧으면 실패로 간주한다.');
+  }
+  return lines.join('\n');
+}
+
 function buildOutputContractText(type) {
   const label = TYPE_LABEL[type] || type;
-  return `현재 출력 목적: ${label}\nVoice: ${VOICE_LABEL[getVoiceForType(type)]}\n\n${getOutputInstruction(type)}`;
+  return `현재 출력 목적: ${label}\nVoice: ${VOICE_LABEL[getVoiceForType(type)]}\n\n${buildOutputProfileText(type)}\n\n${getOutputInstruction(type)}`;
+}
+
+function updateOutputProfileUI() {
+  const profile = getOutputProfile(autoType || 'webmag');
+  const len = getTargetLengthSpec(autoType || 'webmag');
+  const out = document.getElementById('outputProfilePreview');
+  const lenOut = document.getElementById('lengthProfilePreview');
+  if (out) {
+    out.innerHTML = `<strong style="color:var(--accent)">${escHtml(profile.label)}</strong><br>${(profile.spec||[]).slice(0,3).map(s=>'· '+escHtml(s)).join('<br>')}`;
+  }
+  if (lenOut) {
+    lenOut.innerHTML = `목표 약 <strong style="color:var(--accent)">${len.target.toLocaleString()}자</strong> · 허용 ${len.min.toLocaleString()}~${len.max.toLocaleString()}자`;
+  }
 }
 
 // ══════════════════════════════════════════
@@ -1513,7 +1713,7 @@ function scoreSapmanriWriting(text) {
 async function enforceSapmanriQC(key, draft, context={}) {
   const score = scoreSapmanriWriting(draft);
   if (score.issues.length === 0 && score.sapmanri_score >= 82) return draft;
-  const system = `너는 삽만리 Writing Studio v4의 Sapmanri QC + Rewrite Engine이다. 새 글을 만들지 말고, 초안의 시선과 장면은 유지한 채 설명, 교훈, 반복, 안전한 결말만 덜어낸다.`;
+  const system = `너는 삽만리 Writing Studio v5의 Sapmanri QC + Rewrite Engine이다. 새 글을 만들지 말고, 초안의 시선과 장면은 유지한 채 설명, 교훈, 반복, 안전한 결말만 덜어낸다. 단, 출력 매체별 분량/SEO/구조 규격은 절대 줄이지 않는다.`;
   const user = `아래 초안을 Sapmanri Writing Constitution 기준으로 한 번만 정리한다.
 
 Sapmanri Writing Constitution:
@@ -1527,6 +1727,7 @@ ${buildConstitutionText()}
 - 마지막은 의미 정리가 아니라 장면 안의 물성, 움직임, 거리, 빛, 손, 옷자락 중 하나로 끝낸다.
 - 더 예쁘게 만들지 말고 덜어낸다.
 - 제목 포함, 본문만 출력한다. 설명 금지.
+- 아래 출력 규격의 글자수/구조/SEO 항목을 유지한다. 특히 블로그/웹매거진은 짧은 산문으로 줄이지 않는다.
 
 Writing DNA 점수:
 ${JSON.stringify(score, null, 2)}
@@ -1537,10 +1738,13 @@ ${context.planText || ''}
 이미지 메타 요약:
 ${context.metaText || ''}
 
+출력 규격:
+${context.outputProfileText || ''}
+
 초안:
 ${draft}`;
   try {
-    const fixed = await callClaude(key, user, system, 1600, 1);
+    const fixed = await callClaude(key, user, system, context.maxTokens || 2200, 1);
     return fixed && fixed.trim() ? fixed.trim() : draft;
   } catch(e) {
     console.warn('Sapmanri QC rewrite failed', e);
@@ -2794,7 +2998,9 @@ function setAutoType(btn) {
   document.querySelectorAll('#autoTypeChips .chip').forEach(c => c.classList.remove('active'));
   btn.classList.add('active');
   autoType = btn.dataset.type;
+  updateOutputProfileUI();
 }
+
 
 
 function hydrateAutoImageStateFromPreview() {
@@ -2875,6 +3081,11 @@ ${planToText(perceptionPlan)}
 ## 생성 원칙
 선택 소재 하나 → 작은 관찰 → 인식의 미세한 변화 → 장면 안에서 멈춤
 
+## 출력 규격 우선 원칙
+- 문체보다 먼저 선택한 출력 목적의 분량/구조/SEO 규격을 지킨다.
+- 특히 네이버 블로그와 삽만리닷컴 블로그는 짧은 산문으로 끝내면 실패다.
+- 글자수는 정확히 맞추지 않아도 되지만 목표 글자수의 80% 미만이면 실패다.
+
 ## Sapmanri QC를 미리 통과할 것
 - 발견이 있어야 한다. 예쁜 묘사만 있으면 실패.
 - 생각보다 장면이 먼저 와야 한다.
@@ -2920,13 +3131,19 @@ ${compactImageMeta(imageMeta) || '(없음)'}
 Perception Plan:
 ${planToText(perceptionPlan)}
 
-위 계획을 기준으로 글을 써주세요. 메타데이터를 설명하지 말고, 선택된 소재 하나와 작은 인식 변화만 남겨주세요. 초안은 70점이면 됩니다. 마지막은 의미 정리가 아니라 장면 안의 사물/움직임으로 남겨주세요.`;
+출력 규격:
+${buildOutputProfileText(autoType)}
 
-    const raw = await callClaude(key, userContent, system, 1500);
+위 계획과 출력 규격을 기준으로 글을 써주세요. 메타데이터를 설명하지 말고, 선택된 소재 하나와 작은 인식 변화만 남겨주세요. 초안은 70점이면 됩니다. 마지막은 의미 정리가 아니라 장면 안의 사물/움직임으로 남겨주세요. 단, 네이버 블로그/삽만리닷컴/웹매거진은 반드시 지정된 글자수와 구조를 우선 지켜주세요.`;
+
+    const raw = await callClaude(key, userContent, system, estimateMaxTokensForType(autoType));
     toast('Sapmanri QC 적용 중…');
     const finalText = await enforceSapmanriQC(key, raw, {
       planText: planToText(perceptionPlan),
-      metaText: imageMeta ? imageMetaSummary(imageMeta) : ''
+      metaText: imageMeta ? imageMetaSummary(imageMeta) : '',
+      outputType: autoType,
+      outputProfileText: buildOutputProfileText(autoType),
+      maxTokens: estimateMaxTokensForType(autoType)
     });
     document.getElementById('autoEditor').value = finalText;
     document.getElementById('autoCharCount').textContent = finalText.length.toLocaleString() + '자';
@@ -3038,6 +3255,7 @@ async function init() {
   await loadDB();
 }
 init();
+updateOutputProfileUI();
 </script>
 </body>
 </html>
