@@ -1397,7 +1397,7 @@ function renderPageCard(pg, idx) {
         <div class="gen-row"><button class="btn-gen" onclick="genPageText(${idx})">✨ 캡션 생성</button></div>
       `;
       // 이미지 로드 후 슬라이더 범위 갱신
-      setTimeout(() => updateSpreadSliderRange(${idx}), 100);
+      setTimeout(() => updateSpreadSliderRange(idx), 100);
       break;
     }
     case 'essay':
