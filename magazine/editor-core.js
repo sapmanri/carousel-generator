@@ -1770,6 +1770,10 @@ function mapExistingPageToEditable(pg) {
     const r = pg.focalXRight ?? 100;
     pg.splitX = Math.round((l + r) / 2);
   }
+  // spread: imageLeft/imageRight만 있는 경우 imageLeft를 대표 이미지로 등록
+  if (!pg.image && pg.type === 'spread' && pg.imageLeft) {
+    pg.image = pg.imageLeft;
+  }
   if (pg.image) {
     const id = 'existing_' + Math.random().toString(36).slice(2);
     photos.push({ id, dataUrl: pg.image, mediaType: 'image/jpeg', name: id, analysis: null, _existing: true });
