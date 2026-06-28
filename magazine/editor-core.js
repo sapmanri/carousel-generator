@@ -1950,7 +1950,9 @@ async function publish() {
     if (coverPhotoId && !coverPath && photoPathMap[coverPhotoId]) coverPath = photoPathMap[coverPhotoId];
 
     // 3. 페이지 데이터를 issue.html 스키마로 변환
-    const exportedPages = pages.map(pg => {
+    // 3. 페이지 데이터를 issue.html 스키마로 변환 (spread는 await 필요하므로 for 루프)
+    const exportedPages = [];
+    for (const pg of pages) {
       const out = { type: pg.type };
       switch (pg.type) {
         case 'cover':
@@ -1987,7 +1989,7 @@ async function publish() {
           out.text    = pg.text    || ''; out.text_en = pg.text_en || '';
           out.context = pg.context || '';
           break;
-        case 'spread':
+        case 'spread': {
           // Canvas로 두 장 크롭 후 각각 R2 업로드
           if (pg.imageId && photoPathMap[pg.imageId]) {
             const spreadSrc = photos.find(p => p.id === pg.imageId);
@@ -2018,6 +2020,7 @@ async function publish() {
           out.captionLeft      = pg.captionLeft      || ''; out.captionLeft_en  = pg.captionLeft_en  || '';
           out.captionRight     = pg.captionRight     || ''; out.captionRight_en = pg.captionRight_en || '';
           break;
+        }
         case 'essay':
           out.label    = pg.label    || ''; out.label_en = pg.label_en || '';
           out.title    = pg.title    || ''; out.title_en = pg.title_en || '';
@@ -2058,8 +2061,8 @@ async function publish() {
           out.cta     = pg.cta     || '';
           break;
       }
-      return out;
-    });
+      exportedPages.push(out);
+    }
 
     const existingIssue = allIssues.find(x => x.id === id);
     const issueData = {
