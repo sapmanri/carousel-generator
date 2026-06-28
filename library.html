@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28b</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28c</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628"></script>
+<script src="/shared-config.js?v=20260628c"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628"></script>
+<script src="/magazine/image-library.js?v=20260628c"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -420,9 +420,15 @@ async function startProcess() {
         reader.readAsDataURL(item.file);
       });
 
-      let actualMediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || item.file.type || 'image/jpeg';
-      // HEIC/HEIF는 Claude API 미지원 → jpeg로 강제 교정
-      if (/heic|heif/i.test(actualMediaType)) actualMediaType = 'image/jpeg';
+      let actualMediaType = getDataUrlMediaType(dataUrl) || item.file.type || 'image/jpeg';
+      // HEIC/HEIF는 Claude API와 브라우저 Canvas에서 안정적으로 처리되지 않는다.
+      // 변환이 성공했다면 여기서 image/jpeg가 나와야 한다. 아직 HEIC면 분석/업로드를 진행하지 않는다.
+      if (/heic|heif/i.test(actualMediaType)) {
+        throw new Error('HEIC/HEIF decode failed: conversion did not produce JPEG');
+      }
+      if (!isClaudeSupportedImageType(actualMediaType)) {
+        throw new Error(`analysis unsupported image type: ${actualMediaType}`);
+      }
       item._dataUrl = dataUrl; // 실패 시 해시 계산용
 
       // ── 캐시 히트 확인 — 이미 처리된 이미지는 스킵 ──
@@ -505,8 +511,72 @@ async function startProcess() {
 }
 
 // ── Claude Vision 분석 ──────────────────────────────────────────
+function getDataUrlMediaType(dataUrl) {
+  return String(dataUrl || '').match(/^data:([^;,]+);base64,/)?.[1]?.toLowerCase() || '';
+}
+
+function getDataUrlBase64(dataUrl) {
+  const m = String(dataUrl || '').match(/^data:[^;,]+;base64,(.+)$/s);
+  return m ? m[1] : '';
+}
+
+function isClaudeSupportedImageType(mediaType) {
+  return ['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(String(mediaType || '').toLowerCase());
+}
+
+function estimateBase64Bytes(base64) {
+  if (!base64) return 0;
+  const clean = String(base64).replace(/\s/g, '');
+  const padding = (clean.endsWith('==') ? 2 : clean.endsWith('=') ? 1 : 0);
+  return Math.max(0, Math.floor(clean.length * 3 / 4) - padding);
+}
+
+async function prepareImageForClaude(dataUrl, mediaType) {
+  let finalDataUrl = dataUrl;
+  let finalMediaType = getDataUrlMediaType(finalDataUrl) || mediaType || '';
+  let base64 = getDataUrlBase64(finalDataUrl);
+  const bytes = estimateBase64Bytes(base64);
+
+  if (!finalDataUrl || !String(finalDataUrl).startsWith('data:image/')) {
+    throw new Error('analysis invalid dataUrl: not an image data URL');
+  }
+  if (!base64 || base64.length < 32) {
+    throw new Error(`analysis invalid base64: empty or too short (${base64 ? base64.length : 0})`);
+  }
+  if (/heic|heif/i.test(finalMediaType)) {
+    throw new Error('HEIC/HEIF unsupported for Claude Vision: conversion required');
+  }
+  if (!isClaudeSupportedImageType(finalMediaType)) {
+    throw new Error(`analysis unsupported image type: ${finalMediaType}`);
+  }
+
+  // 너무 큰 이미지는 Claude가 400 Could not process image를 반환할 수 있어 분석용 JPEG로 축소한다.
+  // 원본/R2 저장은 별도이므로, 여기서는 분석 payload만 가볍게 만든다.
+  if (bytes > 4.5 * 1024 * 1024) {
+    console.warn('[analyzeImage] resize for Claude payload', { mediaType: finalMediaType, bytes });
+    finalDataUrl = await generateThumbnail(finalDataUrl, 1600);
+    finalMediaType = getDataUrlMediaType(finalDataUrl) || 'image/jpeg';
+    if (!isClaudeSupportedImageType(finalMediaType)) finalMediaType = 'image/jpeg';
+  }
+
+  return { dataUrl: finalDataUrl, mediaType: finalMediaType };
+}
+
 async function analyzeImage(dataUrl, mediaType, apiKey) {
-  const base64 = dataUrl.split(',')[1];
+  const prepared = await prepareImageForClaude(dataUrl, mediaType);
+  dataUrl = prepared.dataUrl;
+  mediaType = prepared.mediaType;
+
+  const base64 = getDataUrlBase64(dataUrl);
+  const estimatedBytes = estimateBase64Bytes(base64);
+
+  console.log('[analyzeImage] payload', {
+    mediaType,
+    base64Length: base64.length,
+    estimatedBytes,
+    model: 'claude-sonnet-4-6'
+  });
+
   const prompt = `이 사진을 분석해서 아래 JSON 형식으로만 반환해줘. 다른 텍스트 없이 JSON만. 삽만리(@sapmanri)는 한국 농촌/슬로우라이프 채널이고, 이 맥락을 반영해서 분석할 것.
 
 {
@@ -555,6 +625,15 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
   "sapmanri_score": 0~10 (삽만리 채널 세계관 부합도: 슬로우라이프/농촌/일상공예/자연 감수성 기준)
 }`;
 
+  const requestBody = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1200,
+    messages: [{ role: 'user', content: [
+      { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+      { type: 'text', text: prompt }
+    ]}]
+  };
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -563,19 +642,33 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
       'anthropic-version': '2023-06-01',
       'anthropic-dangerous-direct-browser-access': 'true',
     },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1200,
-      messages: [{ role: 'user', content: [
-        { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-        { type: 'text', text: prompt }
-      ]}]
-    })
+    body: JSON.stringify(requestBody)
   });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  const text = data.content?.[0]?.text || '{}';
+
+  const raw = await res.text();
+  let data = null;
+  try { data = raw ? JSON.parse(raw) : null; }
+  catch(e) { console.error('[analyzeImage] non-json response', raw); }
+
+  if (!res.ok || data?.error) {
+    console.error('[analyzeImage] Anthropic error', {
+      status: res.status,
+      statusText: res.statusText,
+      mediaType,
+      base64Length: base64.length,
+      estimatedBytes,
+      response: data || raw
+    });
+    const msg = data?.error?.message || raw || `${res.status} ${res.statusText}`;
+    throw new Error(`analysis failed: ${msg}`);
+  }
+
+  const text = data?.content?.[0]?.text || '{}';
   const s = text.indexOf('{'), e = text.lastIndexOf('}');
+  if (s < 0 || e < 0 || e <= s) {
+    console.error('[analyzeImage] JSON parse target missing', text);
+    throw new Error('analysis failed: Claude response did not contain JSON');
+  }
   const result = JSON.parse(text.slice(s, e + 1));
   result.schema_version = 'image-analysis-v2';
   result.analyzed_at    = new Date().toISOString();
@@ -1042,21 +1135,27 @@ async function doReanalyze(targets, apiKey) {
       // 이미지 → base64
       let dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
       if (!dataUrl || !dataUrl.startsWith('data:')) continue;
-      // mediaType 추출
-      let mediaType = dataUrl.match(/data:(image\/[^;]+)/)?.[1] || '';
+      // mediaType 추출 — dataUrl 헤더 기준
+      let mediaType = getDataUrlMediaType(dataUrl) || '';
       // 이미지가 아닌 파일 (영상, 오디오 등) → 스킵
       if (!mediaType.startsWith('image/')) {
         console.log('스킵 (이미지 아님):', item.filename, mediaType);
         continue;
       }
-      if (/heic|heif/i.test(mediaType)) mediaType = 'image/jpeg';
-      if (!['image/jpeg','image/png','image/gif','image/webp'].includes(mediaType)) mediaType = 'image/jpeg';
-      // 10MB 초과 시 리사이즈
-      const b64len = dataUrl.length - dataUrl.indexOf(',') - 1;
-      if (Math.ceil(b64len * 0.75) > 9 * 1024 * 1024) {
-        dataUrl = await generateThumbnail(dataUrl, 1200);
-        mediaType = 'image/jpeg';
+      if (/heic|heif/i.test(mediaType)) {
+        console.warn('재분석 스킵: HEIC/HEIF는 변환된 썸네일 또는 JPEG 원본이 필요함', item.filename, mediaType);
+        if (item.hash) await updateCacheEntry(item.hash, { analysis_status:'failed', error_stage:'decode', error_message:'HEIC/HEIF needs conversion before Claude Vision analysis', needs_conversion:true });
+        continue;
       }
+      if (!isClaudeSupportedImageType(mediaType)) {
+        console.warn('재분석 스킵: 지원하지 않는 이미지 타입', item.filename, mediaType);
+        if (item.hash) await updateCacheEntry(item.hash, { analysis_status:'failed', error_stage:'analysis', error_message:`Unsupported image type: ${mediaType}` });
+        continue;
+      }
+      // Claude Vision 요청 전 용량 방어
+      const prepared = await prepareImageForClaude(dataUrl, mediaType);
+      dataUrl = prepared.dataUrl;
+      mediaType = prepared.mediaType;
       // 재분석
       const analysis = await analyzeImage(dataUrl, mediaType, apiKey);
       // 캐시 갱신
