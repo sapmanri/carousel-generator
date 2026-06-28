@@ -526,6 +526,7 @@ function fixSpreadCrops() {
     if (!leftImg || !rightImg) return;
 
     const splitX = parseFloat(leftSec.dataset.splitx || '50');
+    const sx = Math.max(5, Math.min(95, splitX));
 
     const probe = new Image();
     probe.onload = function() {
@@ -533,30 +534,34 @@ function fixSpreadCrops() {
       const H = leftSec.clientHeight || window.innerHeight;
       if (!W || !H) return;
 
-      // object-fit:cover 기준 렌더링 너비 계산
       const imgRatio = this.naturalWidth / this.naturalHeight;
       const containerRatio = W / H;
-      let renderedW;
+
       if (imgRatio > containerRatio) {
-        // landscape image → width extends beyond container
-        renderedW = H * imgRatio;
+        // 가로 사진: object-fit:cover 시 좌우로 넘침 → 픽셀 기반 정밀 계산
+        const renderedW = H * imgRatio;
+        const maxOffset = renderedW - W;
+        if (maxOffset <= 0) return;
+
+        // 왼쪽: splitX 지점의 왼쪽 절반 중심을 보여줌
+        const leftCenterPx  = (sx / 100) * renderedW * 0.5;
+        // 오른쪽: splitX 지점의 오른쪽 절반 중심을 보여줌
+        const rightCenterPx = (sx / 100) * renderedW + ((1 - sx / 100) * renderedW * 0.5);
+
+        const leftOffsetPx  = Math.max(0, Math.min(maxOffset, leftCenterPx  - W / 2));
+        const rightOffsetPx = Math.max(0, Math.min(maxOffset, rightCenterPx - W / 2));
+
+        leftImg.style.objectPosition  = `${(leftOffsetPx  / maxOffset * 100).toFixed(1)}% 50%`;
+        rightImg.style.objectPosition = `${(rightOffsetPx / maxOffset * 100).toFixed(1)}% 50%`;
       } else {
-        // portrait image → fills width, height may crop
-        renderedW = W;
+        // 세로 사진: 좌우 오버플로우 없음 → 단순 퍼센트로 지점 지정
+        // 왼쪽: 0~splitX 구간의 중심
+        const leftPos  = (sx * 0.5).toFixed(1);
+        // 오른쪽: splitX~100 구간의 중심
+        const rightPos = (sx + (100 - sx) * 0.5).toFixed(1);
+        leftImg.style.objectPosition  = `${leftPos}% 50%`;
+        rightImg.style.objectPosition = `${rightPos}% 50%`;
       }
-
-      const maxOffset = renderedW - W;
-      if (maxOffset <= 0) return; // 이미지가 컨테이너보다 좁으면 크롭 불필요
-
-      const splitPx = (splitX / 100) * renderedW;
-
-      // 왼쪽: 오른쪽 끝이 splitPx에 오도록
-      const leftOffset  = Math.max(0, Math.min(maxOffset, splitPx - W));
-      // 오른쪽: 왼쪽 끝이 splitPx에 오도록
-      const rightOffset = Math.max(0, Math.min(maxOffset, splitPx));
-
-      leftImg.style.objectPosition  = `${(leftOffset  / maxOffset * 100).toFixed(1)}% 50%`;
-      rightImg.style.objectPosition = `${(rightOffset / maxOffset * 100).toFixed(1)}% 50%`;
     };
     probe.src = leftImg.src;
   });
