@@ -514,7 +514,14 @@ function renderIssue(issue) {
   requestAnimationFrame(() => fixSpreadCrops());
 }
 
-// ── 스프레드 크롭 정밀 보정 (이미지 실제 비율 기반) ──────────────
+// ── 스프레드 크롭 정밀 보정 (픽셀 기반) ──────────────────────────
+// splitX = 원본 이미지에서 자르는 지점 (0~100%)
+// 왼쪽 페이지: 0~splitX 구간을 꽉 채워 보여줌 → 그 구간의 중심을 컨테이너 중앙에
+// 오른쪽 페이지: splitX~100 구간을 꽉 채워 보여줌 → 그 구간의 중심을 컨테이너 중앙에
+// object-position: X% 50% → 이미지의 X% 지점이 컨테이너의 X% 위치와 일치
+// 따라서 원하는 이미지 픽셀 위치 → object-position% 변환 필요:
+//   objectPos% = (offset / maxOffset) * 100
+//   where offset = center - W/2, maxOffset = renderedW - W
 function fixSpreadCrops() {
   const leftSections = document.querySelectorAll('.page-spread.half-left');
   leftSections.forEach(leftSec => {
@@ -528,42 +535,61 @@ function fixSpreadCrops() {
     const splitX = parseFloat(leftSec.dataset.splitx || '50');
     const sx = Math.max(5, Math.min(95, splitX));
 
-    const probe = new Image();
-    probe.onload = function() {
+    function apply(naturalW, naturalH) {
       const W = leftSec.clientWidth  || window.innerWidth;
       const H = leftSec.clientHeight || window.innerHeight;
-      if (!W || !H) return;
+      if (!W || !H || !naturalW || !naturalH) return;
 
-      const imgRatio = this.naturalWidth / this.naturalHeight;
+      const imgRatio       = naturalW / naturalH;
       const containerRatio = W / H;
 
+      let renderedW, renderedH;
       if (imgRatio > containerRatio) {
-        // 가로 사진: object-fit:cover 시 좌우로 넘침 → 픽셀 기반 정밀 계산
-        const renderedW = H * imgRatio;
-        const maxOffset = renderedW - W;
-        if (maxOffset <= 0) return;
-
-        // 왼쪽: splitX 지점의 왼쪽 절반 중심을 보여줌
-        const leftCenterPx  = (sx / 100) * renderedW * 0.5;
-        // 오른쪽: splitX 지점의 오른쪽 절반 중심을 보여줌
-        const rightCenterPx = (sx / 100) * renderedW + ((1 - sx / 100) * renderedW * 0.5);
-
-        const leftOffsetPx  = Math.max(0, Math.min(maxOffset, leftCenterPx  - W / 2));
-        const rightOffsetPx = Math.max(0, Math.min(maxOffset, rightCenterPx - W / 2));
-
-        leftImg.style.objectPosition  = `${(leftOffsetPx  / maxOffset * 100).toFixed(1)}% 50%`;
-        rightImg.style.objectPosition = `${(rightOffsetPx / maxOffset * 100).toFixed(1)}% 50%`;
+        // 가로로 넘침
+        renderedH = H;
+        renderedW = H * imgRatio;
       } else {
-        // 세로 사진: 좌우 오버플로우 없음 → 단순 퍼센트로 지점 지정
-        // 왼쪽: 0~splitX 구간의 중심
-        const leftPos  = (sx * 0.5).toFixed(1);
-        // 오른쪽: splitX~100 구간의 중심
-        const rightPos = (sx + (100 - sx) * 0.5).toFixed(1);
-        leftImg.style.objectPosition  = `${leftPos}% 50%`;
-        rightImg.style.objectPosition = `${rightPos}% 50%`;
+        // 세로로 넘침 (또는 딱 맞음)
+        renderedW = W;
+        renderedH = W / imgRatio;
       }
-    };
-    probe.src = leftImg.src;
+
+      const maxOffset = renderedW - W;
+
+      // 이미지 픽셀 기준 splitX 지점
+      const splitPx = (sx / 100) * renderedW;
+
+      // 왼쪽: 0~splitPx 구간의 중심
+      const leftCenterPx  = splitPx / 2;
+      // 오른쪽: splitPx~renderedW 구간의 중심
+      const rightCenterPx = splitPx + (renderedW - splitPx) / 2;
+
+      if (maxOffset <= 0) {
+        // 이미지가 컨테이너보다 좁거나 같음 → 크롭 불필요, 그냥 중앙
+        leftImg.style.objectPosition  = '50% 50%';
+        rightImg.style.objectPosition = '50% 50%';
+        return;
+      }
+
+      // center → offset (컨테이너 왼쪽 기준 이미지 시작점)
+      const leftOffsetPx  = Math.max(0, Math.min(maxOffset, leftCenterPx  - W / 2));
+      const rightOffsetPx = Math.max(0, Math.min(maxOffset, rightCenterPx - W / 2));
+
+      // offset → object-position%
+      const leftPos  = (leftOffsetPx  / maxOffset * 100).toFixed(1);
+      const rightPos = (rightOffsetPx / maxOffset * 100).toFixed(1);
+
+      leftImg.style.objectPosition  = `${leftPos}% 50%`;
+      rightImg.style.objectPosition = `${rightPos}% 50%`;
+    }
+
+    if (leftImg.complete && leftImg.naturalWidth) {
+      apply(leftImg.naturalWidth, leftImg.naturalHeight);
+    } else {
+      leftImg.addEventListener('load', function() {
+        apply(this.naturalWidth, this.naturalHeight);
+      }, { once: true });
+    }
   });
 }
 
@@ -799,32 +825,18 @@ function renderSpread(p) {
   const leftCaption = p.captionLeft || p.caption || '';
   const rightCaption = p.captionRight || '';
 
-  // 모바일 half: object-fit:cover + object-position으로 크롭
-  // inset:0 충돌 없이 position:absolute top/left/width/height 명시
-  // splitX = 이미지를 자르는 지점 (0~100%)
-  // 왼쪽 페이지: 0~splitX 구간의 중심 = splitX/2
-  // 오른쪽 페이지: splitX~100 구간의 중심 = splitX + (100-splitX)/2 = 50 + splitX/2
-  let leftPos, rightPos;
-  if (typeof p.splitX === 'number') {
-    const sx = Math.max(5, Math.min(95, p.splitX));
-    leftPos  = `${(sx / 2).toFixed(1)}% 50%`;
-    rightPos = `${(50 + sx / 2).toFixed(1)}% 50%`;
-  } else {
-    // 기존 focalX 방식
-    leftPos  = `${typeof p.focalXLeft  === 'number' ? p.focalXLeft  : 0}% 50%`;
-    rightPos = `${typeof p.focalXRight === 'number' ? p.focalXRight : 100}% 50%`;
-  }
-
+  // 모바일 half: JS fixSpreadCrops()가 이미지 로드 후 픽셀 기반으로 정밀 계산해서 덮어씀
+  // 초기값은 50% 50%로 중립 설정 (JS 적용 전 깜빡임 최소화)
   const sx = typeof p.splitX === 'number' ? Math.max(5, Math.min(95, p.splitX)) : 50;
-  const imgStyle = `position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;`;
+  const imgStyle = `position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;object-position:50% 50%;`;
   const mobileLeft = `
   <section class="page page-spread half-left" data-splitx="${sx}">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}object-position:${leftPos}" class="spread-half-img">` : ''}</div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}" class="spread-half-img">` : ''}</div>
     ${leftCaption ? `<div class="spread-caption">${nl(t(leftCaption, p.captionLeft_en))}</div>` : ''}
   </section>`;
   const mobileRight = `
   <section class="page page-spread half-right" data-splitx="${sx}">
-    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}object-position:${rightPos}" class="spread-half-img">` : ''}</div>
+    <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy" style="${imgStyle}" class="spread-half-img">` : ''}</div>
     ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
   </section>`;
 
