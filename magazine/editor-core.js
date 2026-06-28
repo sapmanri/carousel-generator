@@ -1770,7 +1770,7 @@ function mapExistingPageToEditable(pg) {
     const r = pg.focalXRight ?? 100;
     pg.splitX = Math.round((l + r) / 2);
   }
-  // spread: imageLeft/imageRight만 있는 경우 imageLeft를 대표 이미지로 등록
+  // spread: image(원본)가 있으면 그걸 사용, 없고 imageLeft만 있으면 imageLeft로 폴백
   if (!pg.image && pg.type === 'spread' && pg.imageLeft) {
     pg.image = pg.imageLeft;
   }
@@ -2009,6 +2009,7 @@ async function publish() {
                   window.ImageLibrary.uploadIfNeeded(cropped.left,  'image/jpeg', (pg.imageId||'') + '_left'),
                   window.ImageLibrary.uploadIfNeeded(cropped.right, 'image/jpeg', (pg.imageId||'') + '_right'),
                 ]);
+                out.image      = photoPathMap[pg.imageId]; // 원본 보존 (에디터 복원용)
                 out.imageLeft  = leftResult.url;
                 out.imageRight = rightResult.url;
               } catch(e) {
