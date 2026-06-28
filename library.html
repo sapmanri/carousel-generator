@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28i</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28j</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628h"></script>
+<script src="/shared-config.js?v=20260628j"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628h"></script>
+<script src="/magazine/image-library.js?v=20260628j"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -565,7 +565,7 @@ async function prepareImageForClaude(dataUrl, mediaType) {
     throw new Error(`analysis unsupported image type: ${finalMediaType}`);
   }
 
-  // v2026-06-28h: Claude Vision에는 원본/큰 썸네일을 보내지 않는다.
+  // v2026-06-28j: Claude Vision에는 원본/큰 썸네일을 보내지 않는다.
   // 이미지가 1~2MB 수준이어도 픽셀 수가 크면 400 Could not process image가 날 수 있어서
   // 분석용 payload는 항상 1024px 이하 JPEG로 새로 만든다. 원본/R2 저장에는 영향 없음.
   const sourceMediaType = finalMediaType;
@@ -740,24 +740,51 @@ async function generateThumbnail(dataUrl, maxSize = 400) {
 
 // Claude Vision 전송 전용 이미지 생성. 항상 JPEG로 변환해 media_type/실제 바이트 불일치를 막는다.
 async function generateAnalysisImage(dataUrl, maxSize = 1024, quality = 0.78) {
+  // Claude Vision 전송용 이미지는 항상 작고 안전한 JPEG로 만든다.
+  // 일부 R2 썸네일 URL이 깨져 있거나, dataUrl 헤더와 실제 바이트가 안 맞으면
+  // <img> decode 단계에서 실패한다. 이 함수는 실패 이유를 더 구체적으로 남긴다.
   return new Promise((resolve, reject) => {
+    if (!dataUrl || !String(dataUrl).startsWith('data:image/')) {
+      reject(new Error('analysis image resize failed: invalid image dataUrl'));
+      return;
+    }
+
     const img = new Image();
+    const timer = setTimeout(() => {
+      reject(new Error('analysis image resize failed: image decode timeout'));
+    }, 12000);
+
     img.onload = () => {
+      clearTimeout(timer);
       try {
-        const ratio = Math.min(maxSize / img.width, maxSize / img.height, 1);
-        const w = Math.max(1, Math.round(img.width * ratio));
-        const h = Math.max(1, Math.round(img.height * ratio));
+        if (!img.naturalWidth || !img.naturalHeight) {
+          throw new Error('decoded image has no dimensions');
+        }
+        const ratio = Math.min(maxSize / img.naturalWidth, maxSize / img.naturalHeight, 1);
+        const w = Math.max(1, Math.round(img.naturalWidth * ratio));
+        const h = Math.max(1, Math.round(img.naturalHeight * ratio));
         const canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d', { alpha: false });
+        if (!ctx) throw new Error('2d canvas context unavailable');
         ctx.drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        const out = canvas.toDataURL('image/jpeg', quality);
+        if (!out || !out.startsWith('data:image/jpeg;base64,')) {
+          throw new Error('canvas returned invalid jpeg dataUrl');
+        }
+        resolve(out);
       } catch (e) {
-        reject(e);
+        reject(new Error(`analysis image resize failed: ${e.message || e}`));
       }
     };
-    img.onerror = () => reject(new Error('analysis image resize failed'));
+    img.onerror = () => {
+      clearTimeout(timer);
+      const mt = getDataUrlMediaType(dataUrl) || 'unknown';
+      const b64 = getDataUrlBase64(dataUrl) || '';
+      const sig = b64.slice(0, 12);
+      reject(new Error(`analysis image resize failed: decode error (${mt}, sig=${sig})`));
+    };
     img.src = dataUrl;
   });
 }
@@ -1199,6 +1226,41 @@ function toggleSelect(key) {
   renderGallery();
 }
 
+// ── 재분석용 이미지 로드/준비 ──────────────────────────────────
+async function loadPreparedImageForAnalysis(item) {
+  // 썸네일이 깨졌거나 아직 R2에 없으면 원본으로 자동 fallback한다.
+  // 이 함수는 Claude에 보내기 전 prepareImageForClaude까지 통과한 결과만 반환한다.
+  const originalUrl = getOriginalUrl(item);
+  const urls = [];
+  if (item.thumbnail_url) urls.push({ kind: 'thumbnail', url: item.thumbnail_url });
+  if (originalUrl && originalUrl !== item.thumbnail_url) urls.push({ kind: 'original', url: originalUrl });
+
+  let lastError = null;
+  for (const src of urls) {
+    try {
+      let dataUrl = await window.ImageLibrary.fetchAsDataUrl(src.url);
+      if (!dataUrl || !dataUrl.startsWith('data:')) throw new Error('fetchAsDataUrl returned empty/non-data URL');
+
+      let mediaType = detectImageMimeFromBase64(getDataUrlBase64(dataUrl), getDataUrlMediaType(dataUrl) || '');
+      if (!mediaType.startsWith('image/')) throw new Error(`not an image: ${mediaType}`);
+      if (/heic|heif/i.test(mediaType)) throw new Error('HEIC/HEIF needs conversion before analysis');
+      if (!isClaudeSupportedImageType(mediaType)) throw new Error(`unsupported image type: ${mediaType}`);
+
+      const prepared = await prepareImageForClaude(dataUrl, mediaType);
+      console.log('[reanalyze] prepared source', { image: item.filename || item.hash, source: src.kind, mediaType: prepared.mediaType });
+      return prepared;
+    } catch (e) {
+      lastError = e;
+      console.warn('[reanalyze] source failed, trying fallback if available', {
+        image: item.filename || item.hash,
+        source: src.kind,
+        message: e.message
+      });
+    }
+  }
+  throw lastError || new Error('analysis image load failed: no usable image URL');
+}
+
 // ── 재분석 ─────────────────────────────────────────────────────
 async function reanalyzeSelected() {
   const apiKey = window.SapConfig.getAnthropicKey();
@@ -1231,34 +1293,8 @@ async function doReanalyze(targets, apiKey) {
     const item = targets[i];
     countEl.textContent = `재분석 중 ${i + 1}/${targets.length}…`;
     try {
-      // 썸네일 URL 우선 사용 (용량 작음), 없으면 원본
-      const thumbUrl2 = item.thumbnail_url;
-      const imgUrl = thumbUrl2 || getOriginalUrl(item);
-      if (!imgUrl) continue;
-      // 이미지 → base64
-      let dataUrl = await window.ImageLibrary.fetchAsDataUrl(imgUrl);
-      if (!dataUrl || !dataUrl.startsWith('data:')) continue;
-      // mediaType 추출 — dataUrl 헤더 + 실제 base64 시그니처 기준
-      let mediaType = detectImageMimeFromBase64(getDataUrlBase64(dataUrl), getDataUrlMediaType(dataUrl) || '');
-      // 이미지가 아닌 파일 (영상, 오디오 등) → 스킵
-      if (!mediaType.startsWith('image/')) {
-        console.log('스킵 (이미지 아님):', item.filename, mediaType);
-        continue;
-      }
-      if (/heic|heif/i.test(mediaType)) {
-        console.warn('재분석 스킵: HEIC/HEIF는 변환된 썸네일 또는 JPEG 원본이 필요함', item.filename, mediaType);
-        if (item.hash) pendingCacheUpdates.push([item.hash, { analysis_status:'failed', error_stage:'decode', error_message:'HEIC/HEIF needs conversion before Claude Vision analysis', needs_conversion:true }]);
-        continue;
-      }
-      if (!isClaudeSupportedImageType(mediaType)) {
-        console.warn('재분석 스킵: 지원하지 않는 이미지 타입', item.filename, mediaType);
-        if (item.hash) pendingCacheUpdates.push([item.hash, { analysis_status:'failed', error_stage:'analysis', error_message:`Unsupported image type: ${mediaType}` }]);
-        continue;
-      }
-      // Claude Vision 요청 전 용량 방어
-      const prepared = await prepareImageForClaude(dataUrl, mediaType);
-      dataUrl = prepared.dataUrl;
-      mediaType = prepared.mediaType;
+      // 이미지 로드 + 썸네일 실패 시 원본 fallback + Claude 전송용 1024px JPEG 준비
+      let { dataUrl, mediaType } = await loadPreparedImageForAnalysis(item);
       // 재분석
       const analysis = await analyzeImage(dataUrl, mediaType, apiKey);
       // 캐시 갱신
