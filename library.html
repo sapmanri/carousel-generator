@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28o</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28p</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628n"></script>
+<script src="/shared-config.js?v=20260628p"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628n"></script>
+<script src="/magazine/image-library.js?v=20260628p"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -526,65 +526,13 @@ function getDataUrlBase64(dataUrl) {
 
 // dataUrl 헤더가 틀린 경우가 있음: data:image/png 이지만 실제 바이트는 JPEG 등.
 // Claude Vision은 media_type과 실제 이미지 바이트가 다르면 400을 반환하므로 base64 시그니처를 우선한다.
-function base64HeadContains(base64, needle) {
-  try {
-    const clean = String(base64 || '').replace(/\s/g, '').slice(0, 256);
-    const bin = atob(clean);
-    return bin.includes(needle);
-  } catch(e) {
-    return false;
-  }
-}
-
-function looksLikeHeicOrIsoContainer(base64) {
-  const clean = String(base64 || '').replace(/\s/g, '');
-  // HEIC/HEIF and many videos are ISO BMFF containers. Their first bytes contain "ftyp".
-  // Example base64 head: AAAAJGZ0eXB0... -> bytes: 00 00 00 24 f t y p
-  return clean.startsWith('AAAA') && base64HeadContains(clean, 'ftyp');
-}
-
 function detectImageMimeFromBase64(base64, fallback = '') {
   const clean = String(base64 || '').replace(/\s/g, '');
   if (clean.startsWith('/9j/')) return 'image/jpeg';
   if (clean.startsWith('iVBOR')) return 'image/png';
   if (clean.startsWith('UklGR')) return 'image/webp';
   if (clean.startsWith('R0lGOD')) return 'image/gif';
-  if (looksLikeHeicOrIsoContainer(clean)) return 'image/heic';
   return String(fallback || '').toLowerCase();
-}
-
-function dataUrlToBlob(dataUrl) {
-  const [header, b64] = String(dataUrl || '').split(',');
-  if (!header || !b64) throw new Error('invalid dataUrl for blob conversion');
-  const mime = header.match(/^data:([^;,]+)/)?.[1] || 'application/octet-stream';
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
-}
-
-function blobToDataUrl(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
-async function convertHeicDataUrlToJpegDataUrl(dataUrl) {
-  if (typeof heic2any !== 'function') {
-    throw new Error('HEIC conversion library unavailable');
-  }
-  const blob = dataUrlToBlob(dataUrl);
-  const out = await heic2any({ blob, toType: 'image/jpeg', quality: 0.9 });
-  const jpegBlob = Array.isArray(out) ? out[0] : out;
-  if (!jpegBlob) throw new Error('HEIC conversion returned empty result');
-  const converted = await blobToDataUrl(jpegBlob);
-  if (!String(converted).startsWith('data:image/jpeg;base64,')) {
-    throw new Error('HEIC conversion did not produce JPEG dataUrl');
-  }
-  return converted;
 }
 
 function isClaudeSupportedImageType(mediaType) {
@@ -596,6 +544,45 @@ function estimateBase64Bytes(base64) {
   const clean = String(base64).replace(/\s/g, '');
   const padding = (clean.endsWith('==') ? 2 : clean.endsWith('=') ? 1 : 0);
   return Math.max(0, Math.floor(clean.length * 3 / 4) - padding);
+}
+
+function dataUrlToBlob(dataUrl) {
+  const mediaType = getDataUrlMediaType(dataUrl) || 'application/octet-stream';
+  const base64 = getDataUrlBase64(dataUrl);
+  const bin = atob(String(base64 || '').replace(/\s/g, ''));
+  const len = bin.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mediaType });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+function isHeicLikeBase64(base64) {
+  const clean = String(base64 || '').replace(/\s/g, '');
+  if (!clean) return false;
+  try {
+    const head = atob(clean.slice(0, 96));
+    if (/ftyp/i.test(head)) return true;
+    if (/heic|heix|hevc|hevx|mif1|msf1/i.test(head)) return true;
+  } catch(e) {}
+  return /^AAAA/.test(clean) && /(Z0eXB|ZnR5c|aGVpY|bWlmMQ|bXNmMQ)/i.test(clean.slice(0, 120));
+}
+
+async function convertHeicDataUrlToJpeg(dataUrl, quality = 0.92) {
+  if (!window.heic2any) throw new Error('HEIC converter not loaded');
+  const sourceBlob = dataUrlToBlob(dataUrl);
+  const heicBlob = new Blob([sourceBlob], { type: 'image/heic' });
+  const converted = await heic2any({ blob: heicBlob, toType: 'image/jpeg', quality });
+  const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+  return await blobToDataUrl(jpegBlob);
 }
 
 async function prepareImageForClaude(dataUrl, mediaType) {
@@ -611,10 +598,7 @@ async function prepareImageForClaude(dataUrl, mediaType) {
     throw new Error(`analysis invalid base64: empty or too short (${base64 ? base64.length : 0})`);
   }
   if (/heic|heif/i.test(finalMediaType)) {
-    console.warn('[analyzeImage] HEIC-like data detected; converting to JPEG before resize');
-    finalDataUrl = await convertHeicDataUrlToJpegDataUrl(finalDataUrl);
-    finalMediaType = 'image/jpeg';
-    base64 = getDataUrlBase64(finalDataUrl);
+    throw new Error('HEIC/HEIF unsupported for Claude Vision: conversion required');
   }
   if (!isClaudeSupportedImageType(finalMediaType)) {
     throw new Error(`analysis unsupported image type: ${finalMediaType}`);
@@ -1284,7 +1268,8 @@ function toggleSelect(key) {
 // ── 재분석용 이미지 로드/준비 ──────────────────────────────────
 async function loadPreparedImageForAnalysis(item) {
   // 썸네일이 깨졌거나 아직 R2에 없으면 원본으로 자동 fallback한다.
-  // 이 함수는 Claude에 보내기 전 prepareImageForClaude까지 통과한 결과만 반환한다.
+  // HEIC 원본은 Chrome <img>가 표시하지 못하므로 재분석 중 JPEG로 변환하고,
+  // 변환된 JPEG를 표시용 R2 URL로 다시 저장할 수 있도록 함께 반환한다.
   const originalUrl = getOriginalUrl(item);
   const urls = [];
   if (item.thumbnail_url) urls.push({ kind: 'thumbnail', url: item.thumbnail_url });
@@ -1296,26 +1281,43 @@ async function loadPreparedImageForAnalysis(item) {
       let dataUrl = await window.ImageLibrary.fetchAsDataUrl(src.url);
       if (!dataUrl || !dataUrl.startsWith('data:')) throw new Error('fetchAsDataUrl returned empty/non-data URL');
 
-      let mediaType = detectImageMimeFromBase64(getDataUrlBase64(dataUrl), getDataUrlMediaType(dataUrl) || '');
-      if (!mediaType.startsWith('image/')) throw new Error(`not an image: ${mediaType}`);
+      let base64 = getDataUrlBase64(dataUrl);
+      let mediaType = detectImageMimeFromBase64(base64, getDataUrlMediaType(dataUrl) || '');
+      const urlLooksHeic = /\.(heic|heif)(\?|#|$)/i.test(src.url || '');
+      const bytesLookHeic = isHeicLikeBase64(base64);
+      let displayDataUrl = null;
+      let displayMediaType = null;
+      let convertedFromHeic = false;
 
-      // R2에 남아 있는 구형 HEIC 원본은 Chrome <img>가 디코딩하지 못한다.
-      // fetchAsDataUrl이 image/jpeg로 잘못 붙여도 base64 ftyp 시그니처로 감지해서 여기서 JPEG로 변환한다.
-      if (/heic|heif/i.test(mediaType)) {
+      if (/heic|heif/i.test(mediaType) || urlLooksHeic || bytesLookHeic) {
         console.warn('[reanalyze] HEIC-like source detected; converting before analysis', {
           image: item.filename || item.hash,
           source: src.kind,
-          url: src.url
+          url: src.url,
+          detectedMediaType: mediaType,
+          sig: base64.slice(0, 16)
         });
-        dataUrl = await convertHeicDataUrlToJpegDataUrl(dataUrl);
+        dataUrl = await convertHeicDataUrlToJpeg(dataUrl, 0.92);
         mediaType = 'image/jpeg';
+        displayDataUrl = dataUrl;
+        displayMediaType = 'image/jpeg';
+        convertedFromHeic = true;
+        base64 = getDataUrlBase64(dataUrl);
       }
 
+      mediaType = detectImageMimeFromBase64(base64, mediaType);
+      if (!mediaType.startsWith('image/')) throw new Error(`not an image: ${mediaType}`);
+      if (/heic|heif/i.test(mediaType)) throw new Error('HEIC/HEIF needs conversion before analysis');
       if (!isClaudeSupportedImageType(mediaType)) throw new Error(`unsupported image type: ${mediaType}`);
 
       const prepared = await prepareImageForClaude(dataUrl, mediaType);
-      console.log('[reanalyze] prepared source', { image: item.filename || item.hash, source: src.kind, mediaType: prepared.mediaType });
-      return prepared;
+      console.log('[reanalyze] prepared source', {
+        image: item.filename || item.hash,
+        source: src.kind,
+        mediaType: prepared.mediaType,
+        convertedFromHeic
+      });
+      return { ...prepared, displayDataUrl, displayMediaType, convertedFromHeic, sourceUrl: src.url, sourceKind: src.kind };
     } catch (e) {
       lastError = e;
       console.warn('[reanalyze] source failed, trying fallback if available', {
@@ -1361,18 +1363,57 @@ async function doReanalyze(targets, apiKey) {
     countEl.textContent = `재분석 중 ${i + 1}/${targets.length}…`;
     try {
       // 이미지 로드 + 썸네일 실패 시 원본 fallback + Claude 전송용 1024px JPEG 준비
-      let { dataUrl, mediaType } = await loadPreparedImageForAnalysis(item);
+      let preparedForAnalysis = await loadPreparedImageForAnalysis(item);
+      let { dataUrl, mediaType } = preparedForAnalysis;
       // 재분석
       const analysis = await analyzeImage(dataUrl, mediaType, apiKey);
       // 캐시 갱신
       const hash = item.hash;
       if (hash) {
+        const displayPatch = {};
+        // HEIC 원본은 분석만 성공해도 브라우저에서 계속 깨져 보인다.
+        // 변환된 JPEG를 R2에 저장하고, r2_url/thumbnail_url을 표시 가능한 URL로 갱신한다.
+        if (preparedForAnalysis.convertedFromHeic && preparedForAnalysis.displayDataUrl) {
+          try {
+            const originalHeicUrl = preparedForAnalysis.sourceUrl || getOriginalUrl(item);
+            const displayResult = await window.ImageLibrary.uploadIfNeeded(
+              preparedForAnalysis.displayDataUrl,
+              preparedForAnalysis.displayMediaType || 'image/jpeg',
+              `${hash}_display`
+            );
+            const displayUrl = displayResult.url || displayResult.path || null;
+            let thumbUrl = null;
+            try {
+              const thumbDataUrl = await generateThumbnail(preparedForAnalysis.displayDataUrl, 400);
+              const thumbResult = await window.ImageLibrary.uploadIfNeeded(
+                thumbDataUrl,
+                thumbDataUrl.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg',
+                `thumb_${hash}`
+              );
+              thumbUrl = thumbResult.url || thumbResult.path || null;
+            } catch (thumbErr) {
+              console.warn('[reanalyze] display thumbnail regeneration failed:', thumbErr.message);
+            }
+            Object.assign(displayPatch, {
+              original_heic_url: item.original_heic_url || originalHeicUrl,
+              original_format: 'heic',
+              display_format: 'jpeg',
+              r2_url: displayUrl || item.r2_url,
+              thumbnail_url: thumbUrl || displayUrl || item.thumbnail_url,
+              thumbnail_status: thumbUrl ? 'ok' : (displayUrl ? 'ok' : item.thumbnail_status)
+            });
+            console.log('[reanalyze] HEIC display URL updated', { image: item.filename || hash, displayUrl, thumbUrl });
+          } catch (displayErr) {
+            console.warn('[reanalyze] HEIC display upload failed:', displayErr.message);
+          }
+        }
+
         // 기존 캐시 항목에 분석 결과 머지
-        const merged = { ...analysis, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
+        const merged = { ...analysis, ...displayPatch, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
         pendingCacheUpdates.push([hash, merged]);
         // allItems도 갱신
         const idx = allItems.findIndex(x => x.hash === hash);
-        if (idx >= 0) allItems[idx] = { ...allItems[idx], ...analysis, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
+        if (idx >= 0) allItems[idx] = { ...allItems[idx], ...analysis, ...displayPatch, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
       }
     } catch(e) {
       console.warn('재분석 실패:', item.filename, e.message);
