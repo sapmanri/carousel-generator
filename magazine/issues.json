@@ -1345,7 +1345,7 @@
           "captionLeft_en": "bare feet at the edge of light",
           "captionRight": "그림자는 먼저 닿았다",
           "captionRight_en": "the shadow arrived first",
-          "splitX": 0
+          "splitX": 39
         },
         {
           "type": "fullbleed",
@@ -1372,7 +1372,7 @@
           "captionLeft_en": "the bag still hung on the chair",
           "captionRight": "사람은 이미 움직이는 중이었다",
           "captionRight_en": "the person had already moved on",
-          "splitX": 84
+          "splitX": 66
         },
         {
           "type": "split",
@@ -1390,7 +1390,7 @@
           "captionLeft_en": "an afternoon that asks nothing of you",
           "captionRight": "섞이기 전의 잠깐",
           "captionRight_en": "the moment just before it all becomes one",
-          "splitX": 59
+          "splitX": 58
         },
         {
           "type": "split",
@@ -1428,7 +1428,7 @@
           "captionLeft_en": "morning before anyone woke",
           "captionRight": "손은 이미 알고 있었다",
           "captionRight_en": "the hands already knew",
-          "splitX": 50
+          "splitX": 51
         },
         {
           "type": "botanical",
@@ -1447,7 +1447,7 @@
           "captionLeft_en": "paused mid-turn",
           "captionRight": "말차는 그 사이에도 식고 있었다",
           "captionRight_en": "the matcha kept cooling, quietly",
-          "splitX": 39
+          "splitX": 46
         },
         {
           "type": "botanical",
@@ -1466,7 +1466,7 @@
           "captionLeft_en": "the hand arrived first",
           "captionRight": "아직 정리하지 않은 것들",
           "captionRight_en": "things not yet put away",
-          "splitX": 21
+          "splitX": 45
         },
         {
           "type": "fullbleed",
@@ -1483,15 +1483,15 @@
           "captionLeft_en": "still holding the bowl",
           "captionRight": "페이지는 아직 덜 넘어갔다",
           "captionRight_en": "the page not yet turned",
-          "splitX": 39
+          "splitX": 46
         },
         {
           "type": "fullbleed",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/l2js_587398bd_cf80e02b.jpg",
           "caption": "그림 옆에, 그냥 있었다",
           "caption_en": "just there, beside the painting",
-          "focalX": 50,
-          "focalY": 50
+          "focalX": 40,
+          "focalY": 48
         },
         {
           "type": "spread",
@@ -1500,7 +1500,7 @@
           "captionLeft_en": "a moment before the chopsticks move",
           "captionRight": "비비기가 아까운 날이 있다",
           "captionRight_en": "some bowls are too good to stir",
-          "splitX": 11
+          "splitX": 40
         },
         {
           "type": "dialogue",
@@ -1576,7 +1576,7 @@
           "captionLeft_en": "the hand reached first",
           "captionRight": "아직 쓰지 않은 오후",
           "captionRight_en": "an afternoon not yet used",
-          "splitX": 34
+          "splitX": 47
         },
         {
           "type": "botanical",
@@ -1595,7 +1595,7 @@
           "captionLeft_en": "the hands already knew",
           "captionRight": "책은 아직 덮여 있었다",
           "captionRight_en": "the book stayed closed",
-          "splitX": 43
+          "splitX": 49
         },
         {
           "type": "botanical",
@@ -1787,7 +1787,7 @@
           "captionLeft_en": "the person at the window,\nthe shadow on the wall",
           "captionRight": "빛이 지나간 자리에\n남은 것들",
           "captionRight_en": "what remains\nafter the light moves through",
-          "splitX": 16
+          "splitX": 40
         },
         {
           "type": "botanical",
@@ -1816,7 +1816,7 @@
           "captionLeft_en": "things left leaning by the door",
           "captionRight": "팔을 벌리고 서 있었다",
           "captionRight_en": "arms open, just standing there",
-          "splitX": 59
+          "splitX": 53
         },
         {
           "type": "split",
@@ -1860,7 +1860,7 @@
           "captionLeft_en": "the rice still green",
           "captionRight": "새는 이미 떠난 뒤였다",
           "captionRight_en": "the bird already gone",
-          "splitX": 22
+          "splitX": 37
         },
         {
           "type": "split",
@@ -1878,7 +1878,7 @@
           "captionLeft_en": "she had bent down to begin",
           "captionRight": "벽돌은 아직 차가웠다",
           "captionRight_en": "the bricks still cool to the touch",
-          "splitX": 50
+          "splitX": 43
         },
         {
           "type": "split",
@@ -1896,7 +1896,7 @@
           "captionLeft_en": "an afternoon of stacking bricks",
           "captionRight": "손끝에 흙이 남았다",
           "captionRight_en": "dirt still on her fingertips",
-          "splitX": 50
+          "splitX": 53
         },
         {
           "type": "dialogue",
@@ -2212,7 +2212,7 @@
           "captionLeft_en": "gloves on first,",
           "captionRight": "불 앞에 앉았다",
           "captionRight_en": "then she sat by the fire",
-          "splitX": 59
+          "splitX": 50
         },
         {
           "type": "fullbleed",
@@ -2229,7 +2229,7 @@
           "captionLeft_en": "an afternoon with nothing to do",
           "captionRight": "흙 냄새가 먼저 왔다",
           "captionRight_en": "the smell of soil came first",
-          "splitX": 2
+          "splitX": 34
         },
         {
           "type": "fullbleed",
@@ -2246,7 +2246,7 @@
           "captionLeft_en": "summer arrived on this side first",
           "captionRight": "난간에 잠깐 기댄 오후",
           "captionRight_en": "an afternoon leaned against the railing",
-          "splitX": 76
+          "splitX": 60
         },
         {
           "type": "closing",
