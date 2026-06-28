@@ -13560,6 +13560,29 @@
       "schema_version": "image-analysis-v2",
       "analyzed_at": "2026-06-28T05:31:02.029Z",
       "model": "claude-sonnet-4-6"
+    },
+    "2btyg_353b1294_70adaaa2": {
+      "image_id": "2btyg_353b1294_70adaaa2",
+      "thumbnail_url": null,
+      "uploaded_at": "2026-06-28",
+      "filename": "IMG_0038.PNG",
+      "filesize": 2933452,
+      "exif_date": null,
+      "exif_datetime": null,
+      "exif_make": null,
+      "exif_model": null,
+      "exif_iso": null,
+      "exif_fstop": null,
+      "exif_exposure": null,
+      "exif_width": null,
+      "exif_height": null,
+      "upload_status": "ok",
+      "decode_status": "ok",
+      "thumbnail_status": "pending",
+      "analysis_status": "pending",
+      "error_stage": "unknown",
+      "error_message": "messages.0.content.0.image.source.base64: The image was specified using the image/png media type, but the image appears to be a image/jpeg image",
+      "needs_conversion": false
     }
   }
 }
