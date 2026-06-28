@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28k</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-28n</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -235,9 +235,9 @@ header{
 <!-- 공통 설정 모듈 -->
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
-<script src="/shared-config.js?v=20260628j"></script>
+<script src="/shared-config.js?v=20260628n"></script>
 <!-- 이미지 라이브러리 모듈 -->
-<script src="/magazine/image-library.js?v=20260628j"></script>
+<script src="/magazine/image-library.js?v=20260628n"></script>
 
 <script>
 // ── EXIF 읽기 (경량 수동 파서) ──────────────────────────────────
@@ -526,13 +526,65 @@ function getDataUrlBase64(dataUrl) {
 
 // dataUrl 헤더가 틀린 경우가 있음: data:image/png 이지만 실제 바이트는 JPEG 등.
 // Claude Vision은 media_type과 실제 이미지 바이트가 다르면 400을 반환하므로 base64 시그니처를 우선한다.
+function base64HeadContains(base64, needle) {
+  try {
+    const clean = String(base64 || '').replace(/\s/g, '').slice(0, 256);
+    const bin = atob(clean);
+    return bin.includes(needle);
+  } catch(e) {
+    return false;
+  }
+}
+
+function looksLikeHeicOrIsoContainer(base64) {
+  const clean = String(base64 || '').replace(/\s/g, '');
+  // HEIC/HEIF and many videos are ISO BMFF containers. Their first bytes contain "ftyp".
+  // Example base64 head: AAAAJGZ0eXB0... -> bytes: 00 00 00 24 f t y p
+  return clean.startsWith('AAAA') && base64HeadContains(clean, 'ftyp');
+}
+
 function detectImageMimeFromBase64(base64, fallback = '') {
   const clean = String(base64 || '').replace(/\s/g, '');
   if (clean.startsWith('/9j/')) return 'image/jpeg';
   if (clean.startsWith('iVBOR')) return 'image/png';
   if (clean.startsWith('UklGR')) return 'image/webp';
   if (clean.startsWith('R0lGOD')) return 'image/gif';
+  if (looksLikeHeicOrIsoContainer(clean)) return 'image/heic';
   return String(fallback || '').toLowerCase();
+}
+
+function dataUrlToBlob(dataUrl) {
+  const [header, b64] = String(dataUrl || '').split(',');
+  if (!header || !b64) throw new Error('invalid dataUrl for blob conversion');
+  const mime = header.match(/^data:([^;,]+)/)?.[1] || 'application/octet-stream';
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function convertHeicDataUrlToJpegDataUrl(dataUrl) {
+  if (typeof heic2any !== 'function') {
+    throw new Error('HEIC conversion library unavailable');
+  }
+  const blob = dataUrlToBlob(dataUrl);
+  const out = await heic2any({ blob, toType: 'image/jpeg', quality: 0.9 });
+  const jpegBlob = Array.isArray(out) ? out[0] : out;
+  if (!jpegBlob) throw new Error('HEIC conversion returned empty result');
+  const converted = await blobToDataUrl(jpegBlob);
+  if (!String(converted).startsWith('data:image/jpeg;base64,')) {
+    throw new Error('HEIC conversion did not produce JPEG dataUrl');
+  }
+  return converted;
 }
 
 function isClaudeSupportedImageType(mediaType) {
@@ -559,7 +611,10 @@ async function prepareImageForClaude(dataUrl, mediaType) {
     throw new Error(`analysis invalid base64: empty or too short (${base64 ? base64.length : 0})`);
   }
   if (/heic|heif/i.test(finalMediaType)) {
-    throw new Error('HEIC/HEIF unsupported for Claude Vision: conversion required');
+    console.warn('[analyzeImage] HEIC-like data detected; converting to JPEG before resize');
+    finalDataUrl = await convertHeicDataUrlToJpegDataUrl(finalDataUrl);
+    finalMediaType = 'image/jpeg';
+    base64 = getDataUrlBase64(finalDataUrl);
   }
   if (!isClaudeSupportedImageType(finalMediaType)) {
     throw new Error(`analysis unsupported image type: ${finalMediaType}`);
@@ -1241,23 +1296,21 @@ async function loadPreparedImageForAnalysis(item) {
       let dataUrl = await window.ImageLibrary.fetchAsDataUrl(src.url);
       if (!dataUrl || !dataUrl.startsWith('data:')) throw new Error('fetchAsDataUrl returned empty/non-data URL');
 
-      // HEIC/HEIF 원본은 브라우저에서 디코딩 후 JPEG로 변환
-      const headerType = getDataUrlMediaType(dataUrl) || '';
-      if (/heic|heif/i.test(headerType) && typeof heic2any === 'function') {
-        const blob = await (await fetch(dataUrl)).blob();
-        const converted = await heic2any({blob,toType:'image/jpeg',quality:0.9});
-        const jpegBlob = Array.isArray(converted)?converted[0]:converted;
-        dataUrl = await new Promise((resolve,reject)=>{
-          const r=new FileReader();
-          r.onload=()=>resolve(r.result);
-          r.onerror=reject;
-          r.readAsDataURL(jpegBlob);
-        });
-      }
-
       let mediaType = detectImageMimeFromBase64(getDataUrlBase64(dataUrl), getDataUrlMediaType(dataUrl) || '');
       if (!mediaType.startsWith('image/')) throw new Error(`not an image: ${mediaType}`);
-      if (/heic|heif/i.test(mediaType)) throw new Error('HEIC/HEIF needs conversion before analysis');
+
+      // R2에 남아 있는 구형 HEIC 원본은 Chrome <img>가 디코딩하지 못한다.
+      // fetchAsDataUrl이 image/jpeg로 잘못 붙여도 base64 ftyp 시그니처로 감지해서 여기서 JPEG로 변환한다.
+      if (/heic|heif/i.test(mediaType)) {
+        console.warn('[reanalyze] HEIC-like source detected; converting before analysis', {
+          image: item.filename || item.hash,
+          source: src.kind,
+          url: src.url
+        });
+        dataUrl = await convertHeicDataUrlToJpegDataUrl(dataUrl);
+        mediaType = 'image/jpeg';
+      }
+
       if (!isClaudeSupportedImageType(mediaType)) throw new Error(`unsupported image type: ${mediaType}`);
 
       const prepared = await prepareImageForClaude(dataUrl, mediaType);
