@@ -464,44 +464,99 @@
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
 
+    const PAGE_SIZE = 20;
+    let currentPage = 0;
+    let allItems = [];
+
     const items = await list();
     if (!items.length) {
       body.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">라이브러리에 이미지가 없습니다.</div>`;
       return;
     }
 
-    body.innerHTML = '';
-    items.forEach(item => {
-      const thumb = document.createElement('div');
-      thumb.style.cssText = `position:relative;width:100%;padding-bottom:100%;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;background:${isDark ? '#2c2c2e' : '#f0f0f0'};`;
-      const img = document.createElement('img');
-      img.src = item.download_url || item.url;
-      img.loading = 'lazy';
-      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
-      thumb.appendChild(img);
+    // image_cache.json 기반 정렬 (analyzed_at 최신순)
+    let cacheMap = {};
+    try {
+      const cacheRes = await fetch('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/image_cache.json');
+      if (cacheRes.ok) {
+        const cacheData = await cacheRes.json();
+        cacheMap = cacheData.entries || {};
+      }
+    } catch(e) {}
 
-      const urlOrPath = item.url || item.path;
-      thumb.addEventListener('click', async () => {
-        if (multiple) {
-          if (selected.has(urlOrPath)) {
-            selected.delete(urlOrPath);
-            thumb.style.borderColor = 'transparent';
-          } else {
-            selected.add(urlOrPath);
-            thumb.style.borderColor = isDark ? '#fff' : '#1c1c1e';
-          }
-        } else {
-          try {
-            const dataUrl = await fetchAsDataUrl(urlOrPath);
-            overlay.remove();
-            onSelect({ dataUrl, path: urlOrPath, url: urlOrPath, hash: item.hash });
-          } catch (e) {
-            alert('이미지를 불러오지 못했습니다: ' + e.message);
-          }
-        }
-      });
-      body.appendChild(thumb);
+    allItems = items.sort((a, b) => {
+      const aDate = (cacheMap[a.download_url || a.url] || {}).analyzed_at || '';
+      const bDate = (cacheMap[b.download_url || b.url] || {}).analyzed_at || '';
+      return bDate.localeCompare(aDate);
     });
+
+    function renderPage(page) {
+      const start = page * PAGE_SIZE;
+      const slice = allItems.slice(start, start + PAGE_SIZE);
+      body.innerHTML = '';
+
+      slice.forEach(item => {
+        const thumb = document.createElement('div');
+        thumb.style.cssText = `position:relative;width:100%;padding-bottom:100%;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;background:${isDark ? '#2c2c2e' : '#f0f0f0'};`;
+        const img = document.createElement('img');
+        img.src = item.download_url || item.url;
+        img.loading = 'lazy';
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
+        // 로드 실패 시 썸네일 숨김
+        img.onerror = () => { thumb.style.display = 'none'; };
+        thumb.appendChild(img);
+
+        const urlOrPath = item.url || item.path;
+        thumb.addEventListener('click', async () => {
+          if (multiple) {
+            if (selected.has(urlOrPath)) {
+              selected.delete(urlOrPath);
+              thumb.style.borderColor = 'transparent';
+            } else {
+              selected.add(urlOrPath);
+              thumb.style.borderColor = isDark ? '#fff' : '#1c1c1e';
+            }
+          } else {
+            try {
+              const dataUrl = await fetchAsDataUrl(urlOrPath);
+              overlay.remove();
+              onSelect({ dataUrl, path: urlOrPath, url: urlOrPath, hash: item.hash });
+            } catch (e) {
+              alert('이미지를 불러오지 못했습니다: ' + e.message);
+            }
+          }
+        });
+        body.appendChild(thumb);
+      });
+
+      // 페이징 컨트롤
+      const totalPages = Math.ceil(allItems.length / PAGE_SIZE);
+      const pagingDiv = document.createElement('div');
+      pagingDiv.style.cssText = 'grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0;';
+
+      const prevBtn = document.createElement('button');
+      prevBtn.textContent = '◀';
+      prevBtn.disabled = page === 0;
+      prevBtn.style.cssText = `padding:6px 14px;border-radius:6px;border:1px solid ${isDark?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.15)'};background:transparent;color:inherit;cursor:pointer;opacity:${page===0?'0.3':'1'};`;
+      prevBtn.onclick = () => { currentPage--; renderPage(currentPage); };
+
+      const pageInfo = document.createElement('span');
+      pageInfo.style.cssText = 'font-size:13px;opacity:0.6;';
+      pageInfo.textContent = `${page + 1} / ${totalPages}`;
+
+      const nextBtn = document.createElement('button');
+      nextBtn.textContent = '▶';
+      nextBtn.disabled = page >= totalPages - 1;
+      nextBtn.style.cssText = `padding:6px 14px;border-radius:6px;border:1px solid ${isDark?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.15)'};background:transparent;color:inherit;cursor:pointer;opacity:${page>=totalPages-1?'0.3':'1'};`;
+      nextBtn.onclick = () => { currentPage++; renderPage(currentPage); };
+
+      pagingDiv.appendChild(prevBtn);
+      pagingDiv.appendChild(pageInfo);
+      pagingDiv.appendChild(nextBtn);
+      body.appendChild(pagingDiv);
+    }
+
+    renderPage(0);
   }
 
   // R2 설정 UI 헬퍼 (각 서비스 헤더에서 호출 가능)
