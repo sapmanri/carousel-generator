@@ -288,9 +288,13 @@
       const keys = [...xml.matchAll(/<Key>([^<]+)<\/Key>/g)].map(m => m[1]);
       return keys
         .filter(key => {
-          if (/_left\.\w+$/.test(key) || /_right\.\w+$/.test(key)) return false;
-          if (/\/existing_/.test(key)) return false;
-          if (/\/thumb_/.test(key)) return false;
+          const base = key.split('/').pop().split('?')[0];
+          if (/^thumb_/i.test(base)) return false;
+          if (/_display\.(jpe?g|png|webp)$/i.test(base)) return false;
+          if (/_display$/i.test(base)) return false;
+          if (/_left\.\w+$/.test(base)) return false;
+          if (/_right\.\w+$/.test(base)) return false;
+          if (/^existing_/i.test(base)) return false;
           return true;
         })
         .map(key => {
