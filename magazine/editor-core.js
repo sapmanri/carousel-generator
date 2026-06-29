@@ -2013,6 +2013,7 @@ async function publish() {
                   window.ImageLibrary.uploadIfNeeded(cropped.right, 'image/jpeg', (pg.imageId||'') + '_right'),
                 ]);
                 out.image      = photoPathMap[pg.imageId]; // 원본 보존 (에디터 복원용)
+                out.splitX     = pg.splitX ?? 50;          // 슬라이더 값 보존
                 out.imageLeft  = leftResult.url;
                 out.imageRight = rightResult.url;
               } catch(e) {
