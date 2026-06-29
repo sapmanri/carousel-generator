@@ -286,7 +286,9 @@
       if (!res.ok) return [];
       const xml = await res.text();
       const keys = [...xml.matchAll(/<Key>([^<]+)<\/Key>/g)].map(m => m[1]);
-      return keys.map(key => {
+      return keys
+        .filter(key => !/_left\.\w+$/.test(key) && !/_right\.\w+$/.test(key))
+        .map(key => {
         const name = key.replace(/^library\//, '');
         const m = name.match(/^(.+)\.(\w+)$/);
         const publicUrl = `${cfg.publicUrl}/${key}`;
