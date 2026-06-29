@@ -30429,7 +30429,9 @@
       "analysis_status": "ok",
       "error_stage": null,
       "error_message": null,
-      "needs_conversion": false
+      "needs_conversion": false,
+      "thumbnail_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_2h1og_78cde643_fb599c25.webp",
+      "r2_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/2h1og_78cde643_fb599c25.png"
     },
     "2jn88_a7d266e6_3fe7eb0": {
       "subject_position": "left",
