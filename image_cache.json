@@ -31682,7 +31682,9 @@
       "analysis_status": "ok",
       "error_stage": null,
       "error_message": null,
-      "needs_conversion": false
+      "needs_conversion": false,
+      "thumbnail_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_6qhjk_75ac8b62_ed83c4b2.webp",
+      "r2_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/6qhjk_75ac8b62_ed83c4b2.jpg"
     },
     "cqka4_9e5d1092_38baeb48": {
       "subject_position": "right",
