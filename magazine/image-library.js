@@ -287,7 +287,12 @@
       const xml = await res.text();
       const keys = [...xml.matchAll(/<Key>([^<]+)<\/Key>/g)].map(m => m[1]);
       return keys
-        .filter(key => !/_left\.\w+$/.test(key) && !/_right\.\w+$/.test(key))
+        .filter(key => {
+          if (/_left\.\w+$/.test(key) || /_right\.\w+$/.test(key)) return false;
+          if (/\/existing_/.test(key)) return false;
+          if (/\/thumb_/.test(key)) return false;
+          return true;
+        })
         .map(key => {
         const name = key.replace(/^library\//, '');
         const m = name.match(/^(.+)\.(\w+)$/);
