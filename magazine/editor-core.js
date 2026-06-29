@@ -1155,59 +1155,67 @@ function photoSrc(photoId) {
 // ── 스프레드 이미지 Canvas 크롭 ─────────────────────────────────
 // splitX 기준으로 원본 이미지를 좌/우 두 장으로 잘라 dataUrl 반환
 // 모바일 세로 비율(9:16) 기준으로 크롭
-async function cropSpreadImage(dataUrl, mediaType) {
+async function cropSpreadImage(dataUrl, mediaType, splitX) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = function() {
       const W = img.naturalWidth;
       const H = img.naturalHeight;
+      const sx = Math.max(5, Math.min(95, splitX ?? 50)); // 0~100%
 
       // 출력 크기: 9:16 세로 비율
       const outH = H;
       const outW = Math.round(H * 9 / 16);
 
-      // object-fit:cover 기준으로 이미지가 outW x outH 컨테이너에 렌더될 때
-      // 실제 이미지 픽셀에서 어느 영역이 보이는지 계산
-      const imgRatio  = W / H;
-      const boxRatio  = outW / outH;
-      let srcW, srcH, srcY;
+      const imgRatio = W / H;
+      const boxRatio = outW / outH;
+
+      let srcW, srcH, srcY, srcXLeft;
       if (imgRatio > boxRatio) {
-        // 이미지가 가로로 넓음 → 세로 꽉 채움, 좌우 크롭
+        // 가로 이미지: 세로 꽉 채우고 좌우 크롭
         srcH = H;
         srcW = Math.round(H * boxRatio);
         srcY = 0;
+        // splitX% 지점을 기준으로 왼쪽/오른쪽 각 srcW 폭만큼 잘라냄
+        const splitPx = Math.round((sx / 100) * W); // 원본 이미지에서 splitX 지점
+        srcXLeft  = Math.max(0, Math.min(W - srcW, splitPx - srcW)); // 왼쪽: splitPx 오른쪽 끝이 splitPx
+        const srcXRight = Math.max(0, Math.min(W - srcW, splitPx));  // 오른쪽: splitPx 왼쪽 끝이 splitPx
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = outW;
+        canvas.height = outH;
+        const ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 0, outW, outH);
+        ctx.drawImage(img, srcXLeft,  srcY, srcW, srcH, 0, 0, outW, outH);
+        const left = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
+
+        ctx.clearRect(0, 0, outW, outH);
+        ctx.drawImage(img, srcXRight, srcY, srcW, srcH, 0, 0, outW, outH);
+        const right = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
+
+        resolve({ left, right });
       } else {
-        // 이미지가 세로로 김 → 가로 꽉 채움, 상하 크롭
+        // 세로 이미지: 가로 꽉 채우고 상하 크롭 → 좌우 분할 의미 없음, 50:50
         srcW = W;
         srcH = Math.round(W / boxRatio);
         srcY = Math.round((H - srcH) / 2);
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = outW;
+        canvas.height = outH;
+        const ctx = canvas.getContext('2d');
+
+        ctx.clearRect(0, 0, outW, outH);
+        ctx.drawImage(img, 0, srcY, srcW, srcH, 0, 0, outW, outH);
+        const left = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
+
+        ctx.clearRect(0, 0, outW, outH);
+        ctx.drawImage(img, 0, srcY, srcW, srcH, 0, 0, outW, outH);
+        const right = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
+
+        resolve({ left, right });
       }
-
-      // splitX 기준으로 srcW 안에서 왼쪽/오른쪽 각각의 srcX 계산
-      const totalSrcW = srcW * 2; // 가상의 전체 소스 폭 (왼쪽+오른쪽)
-      // 왼쪽: totalSrcW의 0~splitX% 구간을 srcW로 보여줌
-      // 오른쪽: totalSrcW의 splitX~100% 구간을 srcW로 보여줌
-      // 실제 이미지는 W픽셀, 그 안에서 중앙 정렬된 srcW가 보임
-      const srcXBase = imgRatio > boxRatio ? Math.round((W - srcW * 2) / 2) : 0;
-
-      const canvas = document.createElement('canvas');
-      canvas.width  = outW;
-      canvas.height = outH;
-      const ctx = canvas.getContext('2d');
-
-      const results = {};
-
-      // 왼쪽 크롭
-      ctx.clearRect(0, 0, outW, outH);
-      ctx.drawImage(img, srcXBase, srcY, srcW, srcH, 0, 0, outW, outH);
-      results.left = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
-
-      // 오른쪽 크롭
-      ctx.clearRect(0, 0, outW, outH);
-      ctx.drawImage(img, srcXBase + srcW, srcY, srcW, srcH, 0, 0, outW, outH);
-      results.right = canvas.toDataURL(mediaType || 'image/jpeg', 0.92);
-
-      resolve(results);
     };
     img.onerror = reject;
     img.src = dataUrl;
@@ -1999,7 +2007,7 @@ async function publish() {
             if (spreadDataUrl) {
               try {
                 statusEl.innerHTML = `<span class="spinner"></span>스프레드 크롭 중…`;
-                const cropped = await cropSpreadImage(spreadDataUrl, spreadSrc?.mediaType || 'image/jpeg');
+                const cropped = await cropSpreadImage(spreadDataUrl, spreadSrc?.mediaType || 'image/jpeg', pg.splitX ?? 50);
                 const [leftResult, rightResult] = await Promise.all([
                   window.ImageLibrary.uploadIfNeeded(cropped.left,  'image/jpeg', (pg.imageId||'') + '_left'),
                   window.ImageLibrary.uploadIfNeeded(cropped.right, 'image/jpeg', (pg.imageId||'') + '_right'),
