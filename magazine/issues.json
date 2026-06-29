@@ -1341,7 +1341,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/bybg_71e490bd_116edb33.jpg",
-          "splitX": 41,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_vnvkuqw75hl_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_vnvkuqw75hl_right.jpg",
           "captionLeft": "맨발이 빛 끄트머리에",
           "captionLeft_en": "bare feet at the edge of light",
           "captionRight": "그림자는 먼저 닿았다",
@@ -1368,7 +1369,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/svag_2a889a64_68b5f82a.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_dmq0v1fawid_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_dmq0v1fawid_right.jpg",
           "captionLeft": "가방은 의자에 걸려 있었다",
           "captionLeft_en": "the bag still hung on the chair",
           "captionRight": "사람은 이미 움직이는 중이었다",
@@ -1386,7 +1388,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/kabc_317cde_ff34c0de.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_711w8p6dlay_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_711w8p6dlay_right.jpg",
           "captionLeft": "천천히 부어도 되는 오후",
           "captionLeft_en": "an afternoon that asks nothing of you",
           "captionRight": "섞이기 전의 잠깐",
@@ -1424,8 +1427,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/oi0c_5bfb8763_90fe657f.jpg",
-          "imageLeft": "magazine/images/library/b6qg_c0cff214_de6d85bc.jpg",
-          "imageRight": "magazine/images/library/bcc0_73efc7ad_b15cb9e1.jpg",
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_da7x23ajjmp_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_da7x23ajjmp_right.jpg",
           "captionLeft": "아직 아무도 깨지 않은 오전",
           "captionLeft_en": "morning before anyone woke",
           "captionRight": "손은 이미 알고 있었다",
@@ -1444,7 +1447,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/lufg_e4fc4828_d5479a48.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p1_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p1_right.jpg",
           "captionLeft": "페이지를 넘기다 잠깐 멈췄다",
           "captionLeft_en": "paused mid-turn",
           "captionRight": "말차는 그 사이에도 식고 있었다",
@@ -1463,7 +1467,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/o1zg_2e8a675d_e98c70d.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p7_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p7_right.jpg",
           "captionLeft": "손이 먼저 닿았다",
           "captionLeft_en": "the hand arrived first",
           "captionRight": "아직 정리하지 않은 것들",
@@ -1480,7 +1485,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/q5c4_98710965_fdb20ded.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p16_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p16_right.jpg",
           "captionLeft": "찻사발을 쥔 채로",
           "captionLeft_en": "still holding the bowl",
           "captionRight": "페이지는 아직 덜 넘어갔다",
@@ -1497,7 +1503,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/q9aw_8b6cbccf_f5ab4853.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p14_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p14_right.jpg",
           "captionLeft": "젓가락을 들기 전에 잠깐",
           "captionLeft_en": "a moment before the chopsticks move",
           "captionRight": "비비기가 아까운 날이 있다",
@@ -1573,7 +1580,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tgy8_9cff8bf7_260a5b51.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p20_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p20_right.jpg",
           "captionLeft": "손이 먼저 닿았다",
           "captionLeft_en": "the hand reached first",
           "captionRight": "아직 쓰지 않은 오후",
@@ -1592,7 +1600,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/pkes_1fa671c5_12eb16e7.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p12_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p12_right.jpg",
           "captionLeft": "손이 먼저 알고 있었다",
           "captionLeft_en": "the hands already knew",
           "captionRight": "책은 아직 덮여 있었다",
@@ -1784,7 +1793,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/k5tc_a125e86_ae52801a.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p23_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p23_right.jpg",
           "captionLeft": "사람은 창 밖에,\n그림자는 벽 위에",
           "captionLeft_en": "the person at the window,\nthe shadow on the wall",
           "captionRight": "빛이 지나간 자리에\n남은 것들",
@@ -1813,7 +1823,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/tfd0_bd825853_777ab35.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p21_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p21_right.jpg",
           "captionLeft": "문 옆에 기대어 둔 것들",
           "captionLeft_en": "things left leaning by the door",
           "captionRight": "팔을 벌리고 서 있었다",
@@ -1857,7 +1868,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1be6g_8ac83c10_97883efa.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p24_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p24_right.jpg",
           "captionLeft": "벼는 아직 초록이었다",
           "captionLeft_en": "the rice still green",
           "captionRight": "새는 이미 떠난 뒤였다",
@@ -1875,7 +1887,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_15i5c_f6e5a7fa_f3069a8c.webp",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p25_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p25_right.jpg",
           "captionLeft": "고개를 숙이고 있었다",
           "captionLeft_en": "she had bent down to begin",
           "captionRight": "벽돌은 아직 차가웠다",
@@ -1893,7 +1906,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/y3wc_b4c57052_2f58f114.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_8gko0te6pxs_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_8gko0te6pxs_right.jpg",
           "captionLeft": "벽돌을 쌓는 오후",
           "captionLeft_en": "an afternoon of stacking bricks",
           "captionRight": "손끝에 흙이 남았다",
@@ -2209,8 +2223,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_15i5c_f6e5a7fa_f3069a8c.webp",
-          "imageLeft": "magazine/images/library/frw_ba3b9afe_619a69aa.jpg",
-          "imageRight": "magazine/images/library/h7g_38f708a_d7087978.jpg",
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p25_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p25_right.jpg",
           "captionLeft": "장갑을 끼고 나서야",
           "captionLeft_en": "gloves on first,",
           "captionRight": "불 앞에 앉았다",
@@ -2227,7 +2241,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_1awcs_972aeae4_321eb6a4.webp",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p26_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/p26_right.jpg",
           "captionLeft": "아무것도 안 해도 되는 오후",
           "captionLeft_en": "an afternoon with nothing to do",
           "captionRight": "흙 냄새가 먼저 왔다",
@@ -2244,7 +2259,8 @@
         {
           "type": "spread",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1mgh4_cd951ded_9e6d59d.jpg",
-          "splitX": 50,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_n0gbfsrskxc_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_n0gbfsrskxc_right.jpg",
           "captionLeft": "여름은 이쪽으로 먼저 왔다",
           "captionLeft_en": "summer arrived on this side first",
           "captionRight": "난간에 잠깐 기댄 오후",
