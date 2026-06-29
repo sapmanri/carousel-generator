@@ -30124,7 +30124,9 @@
       "analysis_status": "ok",
       "error_stage": null,
       "error_message": null,
-      "needs_conversion": false
+      "needs_conversion": false,
+      "thumbnail_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_260x8_611aa1d_f6f14599.webp",
+      "r2_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/260x8_611aa1d_f6f14599.jpg"
     },
     "26hws_25407666_4e47525c": {
       "subject_position": "center",
