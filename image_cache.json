@@ -31042,7 +31042,9 @@
       "analysis_status": "ok",
       "error_stage": null,
       "error_message": null,
-      "needs_conversion": false
+      "needs_conversion": false,
+      "thumbnail_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_2u8ys_4dbb3463_f1c96663.webp",
+      "r2_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/2u8ys_4dbb3463_f1c96663.png"
     },
     "31pt0_7162b578_6b925002": {
       "subject_position": "right",
