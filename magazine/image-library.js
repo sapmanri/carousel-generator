@@ -468,17 +468,11 @@
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     document.body.appendChild(overlay);
 
-    const PAGE_SIZE = 20;
+    const PAGE_SIZE = 30;
     let currentPage = 0;
     let allItems = [];
 
-    const items = await list();
-    if (!items.length) {
-      body.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">라이브러리에 이미지가 없습니다.</div>`;
-      return;
-    }
-
-    // image_cache.json 기반 정렬 (analyzed_at 최신순)
+    // image_cache.json을 먼저 로드 — 이게 실제 라이브러리의 source of truth
     let cacheMap = {};
     try {
       const cacheRes = await fetch('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/image_cache.json');
@@ -488,11 +482,41 @@
       }
     } catch(e) {}
 
-    allItems = items.sort((a, b) => {
-      const aDate = (cacheMap[a.download_url || a.url] || {}).analyzed_at || '';
-      const bDate = (cacheMap[b.download_url || b.url] || {}).analyzed_at || '';
-      return bDate.localeCompare(aDate);
-    });
+    const rawItems = await list();
+    if (!rawItems.length && !Object.keys(cacheMap).length) {
+      body.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">라이브러리에 이미지가 없습니다.</div>`;
+      return;
+    }
+
+    // cache 기반으로 유효한 항목만 필터링 + analyzed_at 최신순 정렬
+    const cfg = hasR2() ? getR2Config() : null;
+    if (Object.keys(cacheMap).length) {
+      // cache에 있는 항목 기준으로 피커 구성
+      allItems = Object.entries(cacheMap)
+        .filter(([url, data]) => {
+          if (!url || !url.startsWith('http')) return false;
+          const base = url.split('/').pop().split('?')[0];
+          if (/^thumb_/i.test(base)) return false;
+          if (/_display/i.test(base)) return false;
+          if (/_left\.\w+$/.test(base)) return false;
+          if (/_right\.\w+$/.test(base)) return false;
+          if (/^existing_/i.test(base)) return false;
+          return true;
+        })
+        .sort(([, a], [, b]) => (b.analyzed_at || '').localeCompare(a.analyzed_at || ''))
+        .map(([url, data]) => ({
+          name: url.split('/').pop(),
+          path: url,
+          hash: data.image_id || url.split('/').pop().replace(/\.\w+$/, ''),
+          ext: url.split('.').pop(),
+          download_url: data.r2_url || data.display_url || url,
+          url: data.r2_url || data.display_url || url,
+          thumbnail_url: data.thumbnail_url || data.r2_url || url,
+        }));
+    } else {
+      // cache 없으면 R2 raw listing 사용
+      allItems = rawItems.sort((a, b) => (b.analyzed_at || '').localeCompare(a.analyzed_at || ''));
+    }
 
     function renderPage(page) {
       const start = page * PAGE_SIZE;
@@ -503,11 +527,9 @@
         const thumb = document.createElement('div');
         thumb.style.cssText = `position:relative;width:100%;padding-bottom:100%;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;background:${isDark ? '#2c2c2e' : '#f0f0f0'};`;
         const img = document.createElement('img');
-        img.src = item.download_url || item.url;
+        img.src = item.thumbnail_url || item.download_url || item.url;
         img.loading = 'lazy';
         img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
-        // 로드 실패 시 썸네일 숨김
-        img.onerror = () => { thumb.style.display = 'none'; };
         thumb.appendChild(img);
 
         const urlOrPath = item.url || item.path;
