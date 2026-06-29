@@ -31837,7 +31837,9 @@
       "analysis_status": "ok",
       "error_stage": null,
       "error_message": null,
-      "needs_conversion": false
+      "needs_conversion": false,
+      "thumbnail_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/thumb_cqka4_9e5d1092_38baeb48.webp",
+      "r2_url": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/cqka4_9e5d1092_38baeb48.png"
     },
     "ezbc_535ff7f5_d36d218d": {
       "subject_position": "right",
