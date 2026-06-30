@@ -475,13 +475,23 @@
     let currentPage = 0;
     let allItems = [];
 
-    // image_cache.json을 먼저 로드 — 이게 실제 라이브러리의 source of truth
+    // 라이브러리 picker 목록의 source of truth.
+    // 2026-06-30: 예전엔 GitHub image_cache.json 전체를 raw fetch했다 (1MB 한계 문제
+    // 발생 지점). SharedCache.getIndex()로 바꿔서 R2 cache/index.json만 가볍게 읽는다.
+    // suggested_caption/mood/thumbnail_url/r2_url 등 피커에 필요한 필드는 모두 index에
+    // 있으므로 충분하다 — 사진별 전체 분석 데이터는 여기서 필요 없다.
     let cacheMap = {};
     try {
-      const cacheRes = await fetch('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/image_cache.json');
-      if (cacheRes.ok) {
-        const cacheData = await cacheRes.json();
-        cacheMap = cacheData.entries || {};
+      if (window.SharedCache && window.SharedCache.getIndex) {
+        const { entries } = await window.SharedCache.getIndex();
+        cacheMap = entries || {};
+      } else {
+        // shared_cache.js가 어떤 이유로든 로드 안 된 경우에만 옛 경로로 폴백
+        const cacheRes = await fetch('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/image_cache.json');
+        if (cacheRes.ok) {
+          const cacheData = await cacheRes.json();
+          cacheMap = cacheData.entries || {};
+        }
       }
     } catch(e) {}
 

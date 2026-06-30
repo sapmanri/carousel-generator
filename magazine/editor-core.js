@@ -27,123 +27,28 @@ const DEFAULT_LANGS = ['ko', 'en']; // 새 호 만들 때 기본 선택
 let currentLangs = [...DEFAULT_LANGS]; // 현재 편집 중인 호가 발행할 언어 목록
 
 // ── 공통 이미지 분석 캐시 (carousel_ai_generator.html과 동일 모듈) ──
+// 2026-06-30: 예전엔 이 블록이 독자적으로 GitHub Contents API를 직접 호출하면서
+// entries[hash][service] = {data, ts} 형태(A구조)로 image_cache.json에 썼다.
+// 이게 library.html이 쓰던 flat 구조(B구조)와 같은 hash 키 아래 다른 모양으로
+// 섞여 들어가는 구조적 충돌이었고, 같은 1MB 응답 한계 문제도 그대로 안고 있었다.
+// 이제는 shared_cache.js의 SharedCache.getLegacy/setLegacy로 위임한다 —
+// service 인자는 무시되고 flat(B구조)으로 통일되어 R2 우선 + GitHub fallback을 탄다.
+// magazine/editor.html에서 shared_storage.js + shared_cache.js가 이 파일보다
+// 먼저 로드되어야 한다.
 (function (global) {
-  const REPO = GITHUB_REPO;
-  const FILE = 'image_cache.json';
-  const TOKEN_KEY = GH_TOKEN_KEY;
-  const MAX_ENTRIES = 800;
-
-  let _cache = null;
-  let _loadPromise = null;
-
-  function getToken() {
-    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch(e) { return ''; }
-  }
-  function setToken(val) {
-    try { localStorage.setItem(TOKEN_KEY, val); } catch(e) {}
-  }
-
-  async function _load() {
-    const token = getToken();
-    if (!token) { _cache = { entries: {}, sha: null }; return _cache; }
-    try {
-      const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
-        headers: { Authorization: `token ${token}` }
-      });
-      if (res.status === 404) { _cache = { entries: {}, sha: null }; return _cache; }
-      const json = await res.json();
-      if (!json.sha) { _cache = { entries: {}, sha: null }; return _cache; }
-      const b64 = json.content.replace(/\n/g, '');
-      const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const data = JSON.parse(new TextDecoder().decode(bytes));
-      _cache = { entries: data.entries || {}, sha: json.sha };
-    } catch (e) {
-      _cache = { entries: {}, sha: null };
+  function ensure() {
+    if (!global.SharedCache) {
+      throw new Error('shared_cache.js가 로드되지 않았습니다 (magazine/editor.html 스크립트 순서 확인).');
     }
-    return _cache;
+    return global.SharedCache;
   }
 
-  async function _ensureLoaded() {
-    if (_cache) return _cache;
-    if (!_loadPromise) _loadPromise = _load();
-    return _loadPromise;
-  }
-
-  function _latestTs(serviceMap) {
-    let max = 0;
-    for (const svc in serviceMap) {
-      const ts = serviceMap[svc] && serviceMap[svc].ts;
-      if (ts && ts > max) max = ts;
-    }
-    return max;
-  }
-
-  function _enforceLimit(entries) {
-    const keys = Object.keys(entries);
-    if (keys.length <= MAX_ENTRIES) return entries;
-    const sorted = keys.map(k => ({ k, ts: _latestTs(entries[k]) })).sort((a,b)=>a.ts-b.ts);
-    const removeCount = keys.length - MAX_ENTRIES;
-    for (let i = 0; i < removeCount; i++) delete entries[sorted[i].k];
-    return entries;
-  }
-
-  let _saveQueue = Promise.resolve();
-  async function _save() {
-    const token = getToken();
-    if (!token || !_cache) return false;
-    _enforceLimit(_cache.entries);
-    const jsonStr = JSON.stringify({ entries: _cache.entries }, null, 0);
-    const bytes = new TextEncoder().encode(jsonStr);
-    const binStr = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
-    const body = { message: 'Update image_cache', content: btoa(binStr) };
-    if (_cache.sha) body.sha = _cache.sha;
-    try {
-      const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FILE}`, {
-        method: 'PUT',
-        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      const json = await res.json();
-      if (json.content?.sha) { _cache.sha = json.content.sha; return true; }
-      if (json.message && /sha/i.test(json.message)) { await _load(); return false; }
-      return false;
-    } catch (e) { return false; }
-  }
-  function _queueSave() { _saveQueue = _saveQueue.then(() => _save()); return _saveQueue; }
-
-  async function hashImage(dataUrl) {
-    if (!dataUrl || typeof dataUrl !== 'string') return null;
-    const commaIdx = dataUrl.indexOf(',');
-    const b64 = commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : dataUrl;
-    const len = b64.length;
-    const sampleSize = Math.min(len, 4000);
-    const step = Math.max(1, Math.floor(len / sampleSize));
-    let h1 = 5381, h2 = 52711;
-    for (let i = 0; i < len; i += step) {
-      const c = b64.charCodeAt(i);
-      h1 = ((h1 << 5) + h1 + c) | 0;
-      h2 = ((h2 << 5) - h2 + c) | 0;
-    }
-    return `${len.toString(36)}_${(h1 >>> 0).toString(16)}_${(h2 >>> 0).toString(16)}`;
-  }
-
-  async function get(hash, service) {
-    if (!hash || !service) return null;
-    await _ensureLoaded();
-    const entry = _cache.entries[hash];
-    if (!entry || !entry[service]) return null;
-    return entry[service].data;
-  }
-
-  async function set(hash, service, data) {
-    if (!hash || !service) return false;
-    await _ensureLoaded();
-    if (!_cache.entries[hash]) _cache.entries[hash] = {};
-    _cache.entries[hash][service] = { data, ts: Date.now() };
-    return _queueSave();
-  }
-
-  function isEnabled() { return !!getToken(); }
+  async function hashImage(dataUrl) { return ensure().hashImage(dataUrl); }
+  async function get(hash, service) { return ensure().getLegacy(hash, service); }
+  async function set(hash, service, data) { return ensure().setLegacy(hash, service, data); }
+  function isEnabled() { return ensure().isEnabled(); }
+  function getToken() { return ensure().getToken(); }
+  function setToken(val) { return ensure().setToken(val); }
 
   global.SapmanriCache = { hashImage, get, set, isEnabled, getToken, setToken };
 })(window);
@@ -808,29 +713,22 @@ function openMagazineLibraryPicker() {
         _libraryPath: item.path,
       };
       // image_cache.json은 library.html이 저장한 flat 구조(SapmanriCache의 서비스별 중첩 구조 아님)
-      // entries[hash] 또는 entries[r2_url]에 caption/label/mood 등이 바로 들어있음
+      // entries[hash]에 caption/label/mood 등이 바로 들어있음.
+      // 2026-06-30: 예전엔 사진 한 장 고를 때마다 전체 image_cache.json을 통째로
+      // GitHub에서 다시 받아왔다 (사진 N장 선택 시 N번 전체 파일 fetch — 그 1MB
+      // 응답 한계 문제의 또 다른 발생 지점이었다). 이제 SharedCache.get(hash)로
+      // 그 사진 1장의 데이터만 R2에서 lazy fetch한다.
       try {
-        const cacheRes = await fetch('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/image_cache.json');
-        if (cacheRes.ok) {
-          const cacheData = await cacheRes.json();
-          const entries = cacheData.entries || {};
-          // item.hash(피커가 넘긴 키) 또는 item.path/url로 매칭 시도
-          let entry = entries[item.hash];
-          if (!entry) {
-            entry = Object.values(entries).find(e =>
-              e.r2_url === item.path || e.url === item.path || e.download_url === item.path
-            );
-          }
-          if (entry && (entry.caption || entry.mood)) {
-            photo.analysis = {
-              suggested_caption: entry.caption || '',
-              mood: entry.mood || '',
-              subject_position: entry.subject_position,
-              overall_brightness: entry.overall_brightness,
-              dominant_color: entry.dominant_color,
-              ...entry, // 나머지 필드도 보존 (label, tags 등 추후 활용 대비)
-            };
-          }
+        const entry = await SharedCache.get(item.hash);
+        if (entry && (entry.suggested_caption || entry.caption || entry.mood)) {
+          photo.analysis = {
+            suggested_caption: entry.suggested_caption || entry.caption || '',
+            mood: entry.mood || '',
+            subject_position: entry.subject_position,
+            overall_brightness: entry.overall_brightness,
+            dominant_color: entry.dominant_color,
+            ...entry, // 나머지 필드도 보존 (label, tags 등 추후 활용 대비)
+          };
         }
       } catch (e) { console.warn('[library photo cache lookup failed]', item.hash, e); }
       photos.push(photo);
