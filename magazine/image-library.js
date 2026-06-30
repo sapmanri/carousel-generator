@@ -424,7 +424,7 @@
     const body = document.createElement('div');
     body.style.cssText = `
       padding:16px 20px; overflow-y:auto; flex:1;
-      display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:10px;
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:14px 10px;
     `;
     body.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">불러오는 중...</div>`;
 
