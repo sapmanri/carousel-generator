@@ -136,10 +136,22 @@ const PROFILE_FILE = 'profile_data.json';
 
 // ── API Key / GitHub Token ──
 function getApiKey() {
-  return document.getElementById('apiKeyField').value.trim() || localStorage.getItem(API_KEY_STORAGE) || '';
+  const fieldVal = document.getElementById('apiKeyField').value.trim();
+  if (fieldVal) return fieldVal;
+  if (window.SapConfig) {
+    const v = window.SapConfig.get('anthropic');
+    if (v) return v;
+  }
+  return localStorage.getItem(API_KEY_STORAGE) || '';
 }
 function getGhToken() {
-  return document.getElementById('ghTokenField').value.trim() || localStorage.getItem(GH_TOKEN_KEY) || '';
+  const fieldVal = document.getElementById('ghTokenField').value.trim();
+  if (fieldVal) return fieldVal;
+  if (window.SapConfig) {
+    const v = window.SapConfig.get('github');
+    if (v) return v;
+  }
+  return localStorage.getItem(GH_TOKEN_KEY) || '';
 }
 function toggleField(fieldId, btnId, storageKey) {
   const field = document.getElementById(fieldId);
@@ -148,6 +160,11 @@ function toggleField(fieldId, btnId, storageKey) {
     const val = field.value.trim();
     if (val) {
       localStorage.setItem(storageKey, val);
+      // SapConfig 통합 저장소에도 동기화
+      if (window.SapConfig) {
+        if (storageKey === API_KEY_STORAGE) window.SapConfig.set('anthropic', val);
+        if (storageKey === GH_TOKEN_KEY) window.SapConfig.set('github', val);
+      }
       document.getElementById(btnId).classList.add('ok');
       document.getElementById(btnId).textContent = btnId.includes('api') ? 'API Key ✓' : 'GitHub ✓';
     }
