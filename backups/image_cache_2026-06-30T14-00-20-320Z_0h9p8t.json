@@ -1,0 +1,27 @@
+{
+  "entries": {
+    "2sslw_2bdf105_6fadb16d": {
+      "image_id": "2sslw_2bdf105_6fadb16d",
+      "thumbnail_url": null,
+      "uploaded_at": "2026-06-30",
+      "filename": "IMG_2319.jpeg",
+      "filesize": 3527007,
+      "exif_date": null,
+      "exif_datetime": null,
+      "exif_make": null,
+      "exif_model": null,
+      "exif_iso": null,
+      "exif_fstop": null,
+      "exif_exposure": null,
+      "exif_width": null,
+      "exif_height": null,
+      "upload_status": "ok",
+      "decode_status": "ok",
+      "thumbnail_status": "pending",
+      "analysis_status": "pending",
+      "error_stage": "unknown",
+      "error_message": "image_cache.json 저장 실패: 422 {\n  \"message\": \"Invalid request.\\n\\n\\\"sha\\\" wasn't supplied.\",\n  \"documentation_url\": \"https://docs.github.com/rest/repos/contents#create-or-update-file-contents\",\n  \"statu",
+      "needs_conversion": false
+    }
+  }
+}
