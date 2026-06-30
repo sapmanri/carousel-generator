@@ -53,6 +53,10 @@ header{
 
 /* ── 호 정보 ── */
 .issue-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lang-checkboxes{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.lang-chip{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;border:1px solid var(--border,#3a3a3a);cursor:pointer;font-size:13px;user-select:none;transition:all .15s;}
+.lang-chip.active{background:var(--accent,#e8714a);border-color:var(--accent,#e8714a);color:#fff;}
+.lang-chip input{display:none;}
 .issue-meta .full{grid-column:1/-1}
 .field label{display:block;font-size:10px;letter-spacing:0.1em;color:var(--dim);margin-bottom:6px;text-transform:uppercase}
 .field input,.field textarea{
@@ -275,6 +279,10 @@ header{
       <div class="field full"><label>유튜브 영상 링크 (선택)</label><input id="fYoutubeUrl" placeholder="https://www.youtube.com/watch?v=..."></div>
       <div class="field"><label>표지 이미지 (사진 업로드 후 선택)</label>
         <img id="fCoverPreview" class="thumb-pick empty" onclick="pickCover()">
+      </div>
+      <div class="field full">
+        <label>발행 언어 (최소 1개 선택)</label>
+        <div id="langCheckboxes" class="lang-checkboxes"></div>
       </div>
     </div>
   </div>
