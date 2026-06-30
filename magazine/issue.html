@@ -898,7 +898,8 @@ function renderDialogue(p) {
   let title = '';
   // 첫 줄이 "# 제목" 형식의 헤더면 대화 버블이 아닌 페이지 제목으로 분리
   if (lines.length && /^#\s+/.test((lines[0].text || '').trim())) {
-    title = lines[0].text.trim().replace(/^#\s+/, '');
+    const titleText = t(lines[0], 'text');
+    title = titleText.trim().replace(/^#\s+/, '');
     lines = lines.slice(1);
   }
   const lineHtml = lines.map(l => {
@@ -925,15 +926,17 @@ function renderListPage(p) {
   let title = p.title || '';
   // 첫 항목이 설명 없이 제목 역할을 하는 경우, 리스트 항목이 아닌 페이지 제목으로 분리
   if (!title && listItems.length > 1 && !(listItems[0].desc || '').trim()) {
-    title = listItems[0].name || '';
+    title = t(listItems[0], 'name') || '';
     listItems = listItems.slice(1);
+  } else if (title) {
+    title = t(p, 'title');
   }
   const items = listItems.map((it, i) => `
     <div class="list-row">
       <div class="list-n">${String(i+1).padStart(2,'0')}</div>
       <div class="list-body">
-        <div class="list-name">${esc(it.name || '')}</div>
-        ${it.desc ? `<div class="list-desc">${esc(it.desc)}</div>` : ''}
+        <div class="list-name">${esc(t(it, 'name') || '')}</div>
+        ${it.desc ? `<div class="list-desc">${esc(t(it, 'desc'))}</div>` : ''}
       </div>
     </div>`).join('');
   return `
