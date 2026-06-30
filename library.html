@@ -406,6 +406,27 @@ async function startProcess() {
   const existingCache = await loadCache();
   const progressEl = document.getElementById('progressLabel');
 
+  // 여러 장을 즉시 한 장씩 저장하면 409 충돌 빈도가 올라간다.
+  // 가능하면 모았다가 setBatch()로 한 번에 저장한다. 단, 배치가 너무 커지면
+  // 중간에 실패했을 때 손실 범위가 커지므로 10장마다 한 번씩 중간 flush한다.
+  const BATCH_FLUSH_SIZE = 10;
+  let pendingUpdates = [];
+  async function flushPending(label) {
+    if (!pendingUpdates.length) return;
+    const toSave = pendingUpdates;
+    pendingUpdates = [];
+    try {
+      await SharedCache.setBatch(toSave, label || `Library: batch update ${toSave.length} entries`);
+    } catch (e) {
+      console.error('batch flush failed, falling back to per-item save:', e.message);
+      // 배치 저장 자체가 실패하면(재시도까지 다 실패) 한 장씩이라도 따로 저장 시도
+      for (const [hash, data] of toSave) {
+        try { await SharedCache.set(hash, data, `Library: update ${hash} (batch fallback)`); }
+        catch (e2) { console.error('per-item fallback also failed:', hash, e2.message); }
+      }
+    }
+  }
+
   let done = 0, skipped = 0, failed = 0;
   for (let i = 0; i < queue.length; i++) {
     const item = queue[i];
@@ -473,9 +494,15 @@ async function startProcess() {
         analysis = await analyzeImage(dataUrl, actualMediaType, apiKey);
       }
 
-      // 4. 캐시에 저장 (EXIF + 썸네일 URL 포함) — hash는 위 캐시 히트 확인에서 이미 계산됨
+      // 4. 캐시 entry 데이터 빌드 후 배치에 적재 (네트워크 저장은 즉시 안 함)
       if (hash) {
-        await saveToCache(hash, uploadResult.url || uploadResult.path, item, analysis, thumbUrl);
+        const newData = buildCacheEntryData(hash, uploadResult.url || uploadResult.path, item, analysis, thumbUrl, null, existingCache[hash]);
+        existingCache[hash] = { ...(existingCache[hash] || {}), ...newData }; // 같은 배치 내 후속 항목이 최신값 참조하도록
+        pendingUpdates.push([hash, newData]);
+        if (pendingUpdates.length >= BATCH_FLUSH_SIZE) {
+          progressEl.textContent = `[${i + 1}/${queue.length}] 💾 ${pendingUpdates.length}장 저장 중…`;
+          await flushPending();
+        }
       }
 
       updateItemStatus(i, 'done');
@@ -485,7 +512,12 @@ async function startProcess() {
       console.error(e);
       updateItemStatus(i, 'err');
       failed++;
-      const errStage = e.message?.includes('upload') || e.message?.includes('R2') ? 'upload'
+      // SharedCache.set/setBatch은 409 충돌 시 최대 3회까지 자체 재시도한다.
+      // 여기까지 에러가 올라왔다는 건 재시도까지 다 실패했다는 뜻이므로 'save_conflict'로
+      // 명확히 구분하고 analysis_status를 save_failed로 남긴다 (분석은 됐는데 저장만 실패한
+      // 경우를 'pending'과 구분하기 위함 — '선택 재분석'으로 복구 가능).
+      const errStage = e.message?.includes('저장 실패') || e.status === 409 || /\b409\b/.test(e.message||'') ? 'save_conflict'
+                     : e.message?.includes('upload') || e.message?.includes('R2') ? 'upload'
                      : e.message?.includes('heic') || e.message?.includes('HEIC') || e.message?.includes('decode') ? 'decode'
                      : e.message?.includes('thumb') ? 'thumbnail'
                      : e.message?.includes('analyz') || e.message?.includes('분석') ? 'analysis'
@@ -498,13 +530,19 @@ async function startProcess() {
             upload_status: errStage==='upload' ? 'failed' : 'ok',
             decode_status: errStage==='decode' ? 'failed' : 'ok',
             thumbnail_status: errStage==='thumbnail' ? 'failed' : 'pending',
-            analysis_status: errStage==='analysis' ? 'failed' : 'pending',
+            analysis_status: errStage==='analysis' ? 'failed' : errStage==='save_conflict' ? 'save_failed' : 'pending',
             error_stage: errStage, error_message: (e.message||'').slice(0,200),
             needs_conversion: errStage==='decode',
           }).catch(()=>{});
         } catch(_) {}
       }
     }
+  }
+
+  // 남은 배치 최종 flush
+  if (pendingUpdates.length) {
+    progressEl.textContent = `💾 마지막 ${pendingUpdates.length}장 저장 중…`;
+    await flushPending();
   }
 
   btn.disabled = false;
@@ -829,22 +867,13 @@ async function generateAnalysisImage(dataUrl, maxSize = 1024, quality = 0.78) {
   });
 }
 
-// ── image_cache.json 저장 ───────────────────────────────────────
-// GitHub 로드/백업/저장/count-safety 공통 로직은 SharedCache(shared_cache.js)로 이동함.
-// 이 파일에는 library.html 고유의 EXIF/상태 필드 병합 로직만 남긴다.
-// (구 loadCacheRaw/backupCache는 SharedCache.loadCacheRaw/backupCache로 대체됨 — 삭제)
-
-// ── saveToCache — merge 방식 (기존 필드 절대 삭제 안 함) ─────────
-async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl, statusFields) {
-  const token = SharedCache.getToken();
-  if (!token) return;
-
-  const { cache } = await SharedCache.loadCacheRaw(token);
-
+// ── 캐시 entry 데이터 빌드 (순수 함수, 네트워크 없음) ─────────────
+// EXIF/상태 필드 병합 로직 — 기존 entry(existing)를 인자로 받아서 merge만 계산한다.
+// 실제 저장(GitHub PUT)은 호출부가 SharedCache.set / setBatch로 한다.
+function buildCacheEntryData(hash, r2Url, queueItem, analysis, thumbUrl, statusFields, existing) {
+  existing = existing || {};
   const exif = queueItem?.exif || {};
-  const existing = cache.entries[hash] || {};
 
-  // 새 데이터 준비
   const newData = {
     image_id      : existing.image_id || hash,
     r2_url        : r2Url || existing.r2_url,
@@ -893,7 +922,17 @@ async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl, statusFie
     ANALYSIS_FIELDS.forEach(f => { if (existing[f] !== undefined) newData[f] = existing[f]; });
   }
 
-  // merge — SharedCache.set이 기존 entry에 newData를 합쳐서 저장 (기존 필드 손실 없음, count-safety 내장)
+  return newData;
+}
+
+// ── saveToCache — 단발성 저장(재분석 1장 등)에서만 사용. ─────────
+// 여러 장 처리하는 업로드 루프는 이걸 직접 호출하지 않고 buildCacheEntryData로
+// 모아뒀다가 SharedCache.setBatch()로 한 번에 저장한다 (아래 startUpload 참고).
+async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl, statusFields) {
+  const token = SharedCache.getToken();
+  if (!token) return;
+  const { cache } = await SharedCache.loadCacheRaw(token);
+  const newData = buildCacheEntryData(hash, r2Url, queueItem, analysis, thumbUrl, statusFields, cache.entries[hash]);
   await SharedCache.set(hash, newData, `Library: update ${hash}`);
 }
 
