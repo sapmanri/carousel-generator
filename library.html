@@ -236,6 +236,7 @@ header{
 <!-- HEIC 변환 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <script src="/shared-config.js?v=20260628r"></script>
+<script src="/shared_cache.js?v=20260630a"></script>
 <!-- 이미지 라이브러리 모듈 -->
 <script src="/magazine/image-library.js?v=20260628r"></script>
 
@@ -829,54 +830,16 @@ async function generateAnalysisImage(dataUrl, maxSize = 1024, quality = 0.78) {
 }
 
 // ── image_cache.json 저장 ───────────────────────────────────────
-// ── 캐시 로드 헬퍼 (SHA 포함) ──────────────────────────────────
-async function loadCacheRaw(token) {
-  const API = `https://api.github.com/repos/sapmanri/carousel-generator/contents/image_cache.json`;
-  try {
-    const res = await fetch(API, { headers: { Authorization: `token ${token}` } });
-    if (!res.ok) return { cache: { entries: {} }, sha: null };
-    const json = await res.json();
-    const cache = JSON.parse(decodeGithubContent(json.content));
-    return { cache, sha: json.sha };
-  } catch(e) {
-    return { cache: { entries: {} }, sha: null };
-  }
-}
-
-// ── 자동 백업 ────────────────────────────────────────────────────
-async function backupCache(token, cacheStr) {
-  // GitHub contents API는 같은 path에 동시에 PUT하면 409 Conflict가 난다.
-  // 초 단위 파일명은 연속 저장/배치 저장에서 충돌할 수 있으므로 ms + random suffix를 붙인다.
-  const ts  = new Date().toISOString().replace(/[:.]/g,'-');
-  const nonce = Math.random().toString(36).slice(2, 8);
-  const key = `backups/image_cache_${ts}_${nonce}.json`;
-  const API = `https://api.github.com/repos/sapmanri/carousel-generator/contents/${key}`;
-  try {
-    const res = await fetch(API, {
-      method: 'PUT',
-      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `Backup: ${ts}`, content: encodeGithubContent(cacheStr) })
-    });
-    if (!res.ok) {
-      const text = await res.text().catch(() => '');
-      // 백업 실패가 본 저장을 막으면 안 된다. 특히 409는 중복 백업 경로 충돌이므로 경고만 남긴다.
-      console.warn(`백업 실패 (무시): ${res.status} ${text.slice(0,160)}`);
-      return false;
-    }
-    return true;
-  } catch(e) {
-    console.warn('백업 실패 (무시):', e.message);
-    return false;
-  }
-}
+// GitHub 로드/백업/저장/count-safety 공통 로직은 SharedCache(shared_cache.js)로 이동함.
+// 이 파일에는 library.html 고유의 EXIF/상태 필드 병합 로직만 남긴다.
+// (구 loadCacheRaw/backupCache는 SharedCache.loadCacheRaw/backupCache로 대체됨 — 삭제)
 
 // ── saveToCache — merge 방식 (기존 필드 절대 삭제 안 함) ─────────
 async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl, statusFields) {
-  const token = window.SapConfig.getGithubToken();
+  const token = SharedCache.getToken();
   if (!token) return;
 
-  const { cache, sha } = await loadCacheRaw(token);
-  const beforeCount = Object.keys(cache.entries).length;
+  const { cache } = await SharedCache.loadCacheRaw(token);
 
   const exif = queueItem?.exif || {};
   const existing = cache.entries[hash] || {};
@@ -930,33 +893,8 @@ async function saveToCache(hash, r2Url, queueItem, analysis, thumbUrl, statusFie
     ANALYSIS_FIELDS.forEach(f => { if (existing[f] !== undefined) newData[f] = existing[f]; });
   }
 
-  // merge — 기존 entry에 새 데이터 합침 (기존 필드 손실 없음)
-  cache.entries[hash] = { ...existing, ...newData };
-
-  // count diff 검사 — 기존보다 줄어들면 저장 중단
-  const afterCount = Object.keys(cache.entries).length;
-  if (afterCount < beforeCount) {
-    console.error(`🛑 저장 중단: entry 수 감소 감지 (${beforeCount} → ${afterCount})`);
-    return;
-  }
-
-  const jsonStr = JSON.stringify(cache, null, 2);
-
-  // 백업 (fire-and-forget)
-  backupCache(token, jsonStr).catch(() => {});
-
-  // 저장
-  const body = { message: `Library: update ${hash}`, content: encodeGithubContent(jsonStr) };
-  if (sha) body.sha = sha;
-  const saveRes = await fetch(`https://api.github.com/repos/sapmanri/carousel-generator/contents/image_cache.json`, {
-    method: 'PUT',
-    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!saveRes.ok) {
-    const text = await saveRes.text().catch(() => '');
-    throw new Error(`image_cache.json 저장 실패: ${saveRes.status} ${text.slice(0,200)}`);
-  }
+  // merge — SharedCache.set이 기존 entry에 newData를 합쳐서 저장 (기존 필드 손실 없음, count-safety 내장)
+  await SharedCache.set(hash, newData, `Library: update ${hash}`);
 }
 
 // ── 갤러리 ─────────────────────────────────────────────────────
@@ -1543,96 +1481,23 @@ R2 인증 정보가 필요합니다. 계속할까요?`)) return;
 
 
 async function updateCacheEntriesBatch(updates, commitMessage = null) {
-  const token = window.SapConfig?.getGithubToken?.();
-  if (!token) throw new Error('GitHub 토큰이 필요합니다. 설정에서 GitHub 토큰을 먼저 입력하세요.');
   if (!updates || !updates.length) return true;
-
-  const REPO = 'sapmanri/carousel-generator';
-  const FILE = 'image_cache.json';
-  const API  = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
-
-  let cache = { entries: {} }, sha = null;
-  const res = await fetch(API, { headers: { Authorization: `token ${token}` }, cache: 'no-store' });
-  if (res.ok) {
-    const json = await res.json();
-    sha = json.sha;
-    cache = JSON.parse(decodeGithubContent(json.content));
-  } else if (res.status !== 404) {
-    throw new Error(`image_cache.json 로드 실패: ${res.status}`);
-  }
-
-  cache.entries = cache.entries || {};
-  const beforeCount = Object.keys(cache.entries).length;
-  updates.forEach(([hash, data]) => {
-    if (!hash || !data) return;
+  // schema_version/analyzed_at/analysis_status='ok'가 있으면 분석 완료 상태 필드를 같이 세팅
+  const normalized = updates.map(([hash, data]) => {
+    if (!hash || !data) return [hash, data];
     if (data.schema_version || data.analyzed_at || data.analysis_status === 'ok') {
-      data = { ...data, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
+      data = { ...data, analysis_status: 'ok', error_stage: null, error_message: null, needs_conversion: false };
     }
-    cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
+    return [hash, data];
   });
-  const afterCount = Object.keys(cache.entries).length;
-  if (afterCount < beforeCount) {
-    throw new Error(`저장 중단: entry 수 감소 감지 (${beforeCount} → ${afterCount})`);
-  }
-
-  const jsonStr = JSON.stringify(cache, null, 2);
-  try { await backupCache(token, jsonStr); } catch(e) { console.warn('batch backup failed:', e.message); }
-
-  const body = { message: commitMessage || `Library: batch update ${updates.length} entries`, content: encodeGithubContent(jsonStr) };
-  if (sha) body.sha = sha;
-  const saveRes = await fetch(API, {
-    method: 'PUT',
-    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!saveRes.ok) {
-    const text = await saveRes.text().catch(() => '');
-    throw new Error(`image_cache.json 배치 저장 실패: ${saveRes.status} ${text}`);
-  }
-  return true;
+  return SharedCache.setBatch(normalized, commitMessage || `Library: batch update ${updates.length} entries`);
 }
 
 async function updateCacheEntry(hash, data, commitMessage = null) {
-  const token = window.SapConfig?.getGithubToken?.();
-  if (!token) throw new Error('GitHub 토큰이 필요합니다. 설정에서 GitHub 토큰을 먼저 입력하세요.');
-  const REPO = 'sapmanri/carousel-generator';
-  const FILE = 'image_cache.json';
-  const API  = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
-
-  let cache = { entries: {} }, sha = null;
-  try {
-    const res = await fetch(API, { headers: { Authorization: `token ${token}` }, cache: 'no-store' });
-    if (res.ok) {
-      const json = await res.json();
-      sha = json.sha;
-      cache = JSON.parse(decodeGithubContent(json.content));
-    } else if (res.status !== 404) {
-      throw new Error(`image_cache.json 로드 실패: ${res.status}`);
-    }
-  } catch(e) {
-    console.warn(e);
-    throw e;
-  }
-
-  cache.entries = cache.entries || {};
   if (data?.schema_version || data?.analyzed_at || data?.analysis_status === 'ok') {
-    data = { ...data, analysis_status:'ok', error_stage:null, error_message:null, needs_conversion:false };
+    data = { ...data, analysis_status: 'ok', error_stage: null, error_message: null, needs_conversion: false };
   }
-  cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
-
-  const jsonStr = JSON.stringify(cache, null, 2);
-  const body    = { message: commitMessage || `Library: update ${hash}`, content: encodeGithubContent(jsonStr) };
-  if (sha) body.sha = sha;
-  const saveRes = await fetch(API, {
-    method: 'PUT',
-    headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!saveRes.ok) {
-    const text = await saveRes.text().catch(() => '');
-    throw new Error(`image_cache.json 저장 실패: ${saveRes.status} ${text}`);
-  }
-  return true;
+  return SharedCache.set(hash, data, commitMessage || `Library: update ${hash}`);
 }
 
 
@@ -1782,3 +1647,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
+
