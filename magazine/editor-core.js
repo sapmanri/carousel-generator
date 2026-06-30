@@ -679,22 +679,24 @@ ${instruction}${bilingualNote}`;
           const m = raw.match(re);
           const text = m?.[1]?.trim() || '';
           result[`${l}_text`] = text;
-          if (l === 'ko' && text) hasText = true;
+          if (text) hasText = true;
         });
         if (hasText) return result;
+        console.warn('[essay parse fail] raw response:', raw);
       } else if (pageType === 'quote') {
         let hasText = false;
         langs.forEach((l, i) => {
           const nextDelim = langs[i+1] ? `===${langs[i+1].toUpperCase()}===` : '$';
           const re = new RegExp(`===${l.toUpperCase()}===\\s*([\\s\\S]*?)(?:${nextDelim}|$)`);
           const m = raw.match(re);
-          const text = m?.[1]?.trim() || (l === 'ko' && i === 0 ? raw.trim() : '');
+          const text = m?.[1]?.trim() || (i === 0 && !raw.includes('===') ? raw.trim() : '');
           result[`${l}_text`] = text;
-          if (l === 'ko' && text) hasText = true;
+          if (text) hasText = true;
         });
         if (hasText) return result;
+        console.warn('[quote parse fail] raw response:', raw);
       }
-    } catch(err) {}
+    } catch(err) { console.warn('[delimiter parse error]', err); }
     return { _raw: raw, _parseError: true };
   }
 
@@ -793,10 +795,10 @@ function readAsDataUrl(file) {
 // 라이브러리 사진은 이미 magazine/images/library/에 존재하므로 발행 시 재업로드 없이 그 경로를 사용한다.
 function openMagazineLibraryPicker() {
   if (!window.ImageLibrary) { toast('이미지 라이브러리 모듈을 불러오지 못했습니다.'); return; }
-  window.ImageLibrary.openPicker((items) => {
+  window.ImageLibrary.openPicker(async (items) => {
     const list = Array.isArray(items) ? items : [items];
-    list.forEach(item => {
-      photos.push({
+    for (const item of list) {
+      const photo = {
         id: 'p' + (++photoIdSeq),
         dataUrl: item.dataUrl,
         mediaType: item.path.endsWith('.png') ? 'image/png' : 'image/jpeg',
@@ -804,8 +806,15 @@ function openMagazineLibraryPicker() {
         analysis: null,
         _existing: true,
         _libraryPath: item.path,
-      });
-    });
+      };
+      // 이미 분석된 캐시가 있으면 재분석하지 않고 그대로 가져옴
+      try {
+        const hash = await SapmanriCache.hashImage(item.dataUrl);
+        let cached = await SapmanriCache.get(hash, 'magazine');
+        if (cached) photo.analysis = cached;
+      } catch (e) { /* 캐시 조회 실패해도 기존 동작(미분석)으로 폴백 */ }
+      photos.push(photo);
+    }
     renderPhotoGrid();
   }, { multiple: true, theme: 'dark' });
 }
