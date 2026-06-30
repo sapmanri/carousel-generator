@@ -1612,6 +1612,7 @@ async function genPageText(idx, extraContext) {
     // pg.{field}(ko), pg.{field}_{lang}(그외)로 자동 분배.
     // 기존 _en 필드 패턴은 그대로 유지하되, 다른 언어는 _ja, _zhTw 등으로 추가.
     function applyField(field, pgKey) {
+      const langs = currentLangs.length ? currentLangs : DEFAULT_LANGS;
       langs.forEach(l => {
         const val = result[`${l}_${field}`];
         if (val === undefined) return;
