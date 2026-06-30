@@ -807,12 +807,32 @@ function openMagazineLibraryPicker() {
         _existing: true,
         _libraryPath: item.path,
       };
-      // 이미 분석된 캐시가 있으면 재분석하지 않고 그대로 가져옴
+      // image_cache.json은 library.html이 저장한 flat 구조(SapmanriCache의 서비스별 중첩 구조 아님)
+      // entries[hash] 또는 entries[r2_url]에 caption/label/mood 등이 바로 들어있음
       try {
-        const hash = await SapmanriCache.hashImage(item.dataUrl);
-        let cached = await SapmanriCache.get(hash, 'magazine');
-        if (cached) photo.analysis = cached;
-      } catch (e) { /* 캐시 조회 실패해도 기존 동작(미분석)으로 폴백 */ }
+        const cacheRes = await fetch('https://raw.githubusercontent.com/sapmanri/carousel-generator/main/image_cache.json');
+        if (cacheRes.ok) {
+          const cacheData = await cacheRes.json();
+          const entries = cacheData.entries || {};
+          // item.hash(피커가 넘긴 키) 또는 item.path/url로 매칭 시도
+          let entry = entries[item.hash];
+          if (!entry) {
+            entry = Object.values(entries).find(e =>
+              e.r2_url === item.path || e.url === item.path || e.download_url === item.path
+            );
+          }
+          if (entry && (entry.caption || entry.mood)) {
+            photo.analysis = {
+              suggested_caption: entry.caption || '',
+              mood: entry.mood || '',
+              subject_position: entry.subject_position,
+              overall_brightness: entry.overall_brightness,
+              dominant_color: entry.dominant_color,
+              ...entry, // 나머지 필드도 보존 (label, tags 등 추후 활용 대비)
+            };
+          }
+        }
+      } catch (e) { console.warn('[library photo cache lookup failed]', item.hash, e); }
       photos.push(photo);
     }
     renderPhotoGrid();
