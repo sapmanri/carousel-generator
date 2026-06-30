@@ -118,10 +118,8 @@
     } catch (e) { return false; }
   }
 
-  // ── 저장 primitive — 호출부가 이미 merge된 cache 객체를 넘겨준다 ──
-  // count-safety check 포함: entries 수가 줄어들면 저장 중단 (사고 방지).
-  async function _saveCache(cache, sha, token, message) {
-    const beforeCount = sha ? null : 0; // 호출부에서 beforeCount를 알고 있으면 그쪽에서 비교하는 게 더 정확
+  // ── 저장 primitive — 이미 merge된 cache를 그대로 PUT만 시도 ──
+  async function _putCache(cache, sha, token, message) {
     const jsonStr = JSON.stringify(cache, null, 2);
     try { await backupCache(token, jsonStr); } catch (e) {}
     const body = { message: message || 'Update image_cache', content: encodeGithubContent(jsonStr) };
@@ -133,43 +131,70 @@
     });
     if (!res.ok) {
       const text = await res.text().catch(() => '');
-      throw new Error(`image_cache.json 저장 실패: ${res.status} ${text.slice(0, 200)}`);
+      const err = new Error(`image_cache.json 저장 실패: ${res.status} ${text.slice(0, 200)}`);
+      err.status = res.status;
+      throw err;
     }
     _readCache = null; // 다음 읽기에서 최신 반영되도록 캐시 무효화
     return true;
   }
 
-  // ── 단건 병합 저장 (기존 필드 보존, 새 필드만 덮어씀) ─────────
-  async function set(hash, data, message) {
-    if (!hash || !data) return false;
+  // ── 409 재시도 포함 저장 ────────────────────────────────────
+  // applyFn(cache)는 cache.entries를 직접 mutate하는 함수 — 매 시도마다 "최신" cache에
+  // 다시 적용해야 하므로(이전에 merge해둔 cache 객체를 재사용하면 안 됨), 데이터가 아니라
+  // 함수를 받는다.
+  // 흐름: load(SHA 포함) → applyFn으로 merge → PUT → 409면 재로드 후 applyFn 다시 적용 → 재시도.
+  // 최대 3회(최초 1회 + 재시도 2회) 시도하고, 그래도 실패하면 에러를 그대로 던진다 —
+  // 호출부(예: library.html saveToCache catch 블록)가 analysis_status: 'save_failed' 등으로
+  // 기록하도록 한다.
+  const MAX_ATTEMPTS = 3;
+  async function _saveWithRetry(applyFn, message) {
     const token = getToken();
     if (!token) throw new Error('GitHub 토큰이 필요합니다.');
-    const { cache, sha } = await loadCacheRaw(token);
-    const beforeCount = Object.keys(cache.entries).length;
-    cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
-    const afterCount = Object.keys(cache.entries).length;
-    if (afterCount < beforeCount) {
-      throw new Error(`저장 중단: entry 수 감소 감지 (${beforeCount} → ${afterCount})`);
+    let lastErr = null;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const { cache, sha } = await loadCacheRaw(token);
+      const beforeCount = Object.keys(cache.entries).length;
+      applyFn(cache);
+      const afterCount = Object.keys(cache.entries).length;
+      if (afterCount < beforeCount) {
+        throw new Error(`저장 중단: entry 수 감소 감지 (${beforeCount} → ${afterCount})`);
+      }
+      try {
+        return await _putCache(cache, sha, token, message);
+      } catch (e) {
+        lastErr = e;
+        const isConflict = e.status === 409 || /\b409\b/.test(e.message);
+        if (isConflict && attempt < MAX_ATTEMPTS) {
+          console.warn(`[SharedCache] 409 충돌, 재시도 ${attempt}/${MAX_ATTEMPTS - 1}`);
+          continue; // 다음 루프에서 최신 SHA로 다시 로드 + merge + PUT
+        }
+        throw lastErr;
+      }
     }
-    return _saveCache(cache, sha, token, message || `Update ${hash}`);
+    throw lastErr;
   }
 
-  // ── 배치 병합 저장 ──────────────────────────────────────────
+  // ── 단건 병합 저장 (기존 필드 보존, 새 필드만 덮어씀) ─────────
+  // 여러 장을 한꺼번에 처리할 때는 호출마다 충돌 가능성이 커지므로
+  // 가능하면 setBatch()로 묶어서 한 번에 저장할 것 — set()은 단발성 변경(재분석 1장,
+  // 삭제 등)에만 쓴다.
+  async function set(hash, data, message) {
+    if (!hash || !data) return false;
+    return _saveWithRetry((cache) => {
+      cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
+    }, message || `Update ${hash}`);
+  }
+
+  // ── 배치 병합 저장 — 여러 장 분석/업로드 시 우선 사용할 것 ────
   async function setBatch(updates, message) {
     if (!updates || !updates.length) return true;
-    const token = getToken();
-    if (!token) throw new Error('GitHub 토큰이 필요합니다.');
-    const { cache, sha } = await loadCacheRaw(token);
-    const beforeCount = Object.keys(cache.entries).length;
-    updates.forEach(([hash, data]) => {
-      if (!hash || !data) return;
-      cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
-    });
-    const afterCount = Object.keys(cache.entries).length;
-    if (afterCount < beforeCount) {
-      throw new Error(`저장 중단: entry 수 감소 감지 (${beforeCount} → ${afterCount})`);
-    }
-    return _saveCache(cache, sha, token, message || `Batch update ${updates.length} entries`);
+    return _saveWithRetry((cache) => {
+      updates.forEach(([hash, data]) => {
+        if (!hash || !data) return;
+        cache.entries[hash] = { ...(cache.entries[hash] || {}), ...data };
+      });
+    }, message || `Batch update ${updates.length} entries`);
   }
 
   // ── 하위호환 wrapper (A구조 호출부 — 임시. 전환 완료되는 대로 삭제 예정) ──
