@@ -491,9 +491,10 @@
     // cache 기반으로 유효한 항목만 필터링 + analyzed_at 최신순 정렬
     const cfg = hasR2() ? getR2Config() : null;
     if (Object.keys(cacheMap).length) {
-      // cache에 있는 항목 기준으로 피커 구성
+      // cache 키는 해시값, 실제 URL은 r2_url 필드에 있음
       allItems = Object.entries(cacheMap)
-        .filter(([url, data]) => {
+        .map(([key, data]) => ({ key, data, url: data.r2_url || data.display_url || data.url || '' }))
+        .filter(({ url }) => {
           if (!url || !url.startsWith('http')) return false;
           const base = url.split('/').pop().split('?')[0];
           if (/^thumb_/i.test(base)) return false;
@@ -503,15 +504,15 @@
           if (/^existing_/i.test(base)) return false;
           return true;
         })
-        .sort(([, a], [, b]) => (b.analyzed_at || '').localeCompare(a.analyzed_at || ''))
-        .map(([url, data]) => ({
+        .sort((a, b) => (b.data.analyzed_at || '').localeCompare(a.data.analyzed_at || ''))
+        .map(({ key, data, url }) => ({
           name: url.split('/').pop(),
           path: url,
-          hash: data.image_id || url.split('/').pop().replace(/\.\w+$/, ''),
+          hash: data.image_id || key,
           ext: url.split('.').pop(),
-          download_url: data.r2_url || data.display_url || url,
-          url: data.r2_url || data.display_url || url,
-          thumbnail_url: data.thumbnail_url || data.r2_url || url,
+          download_url: url,
+          url: url,
+          thumbnail_url: data.thumbnail_url || url,
         }));
     } else {
       // cache 없으면 R2 raw listing 사용
