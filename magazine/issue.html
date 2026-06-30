@@ -433,10 +433,7 @@ img{max-width:100%;display:block}
   </a>
   <div class="topbar-right">
     <div class="indicator" id="indicator"></div>
-    <div class="lang-toggle">
-      <button class="lang-btn active" id="btnKo" onclick="setLang('ko')">KO</button>
-      <button class="lang-btn" id="btnEn" onclick="setLang('en')">EN</button>
-    </div>
+    <div class="lang-toggle" id="langToggle"></div>
     <button class="btn-pdf" id="pdfBtn" onclick="exportPdf()">↓ PDF 저장</button>
   </div>
 </div>
@@ -461,12 +458,39 @@ const params = new URLSearchParams(location.search);
 const issueId = params.get('id');
 let _allIssuesCache = [];
 
-let SAPMANRI_LANG = 'ko';
+// 지원 언어 정의 (editor-core.js의 LANGUAGES와 동일 키 체계)
+const LANGUAGES = [
+  { key: 'ko',   label: 'KO' },
+  { key: 'en',   label: 'EN' },
+  { key: 'ja',   label: 'JA' },
+  { key: 'zhTw', label: 'TW' },
+];
+let SAPMANRI_LANG = localStorage.getItem('sapmanri_lang') || 'ko';
+
+function renderLangToggle(availableLangs) {
+  const container = document.getElementById('langToggle');
+  if (!container) return;
+  // 1개 언어만 있으면 토글 자체를 숨김
+  if (!availableLangs || availableLangs.length <= 1) {
+    container.innerHTML = '';
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = '';
+  // 현재 선택된 언어가 이 호에서 지원 안 되면 첫 번째 언어로 폴백
+  if (!availableLangs.includes(SAPMANRI_LANG)) {
+    SAPMANRI_LANG = availableLangs[0];
+  }
+  container.innerHTML = LANGUAGES
+    .filter(l => availableLangs.includes(l.key))
+    .map(l => `<button class="lang-btn${l.key === SAPMANRI_LANG ? ' active' : ''}" onclick="setLang('${l.key}')">${l.label}</button>`)
+    .join('');
+}
 
 function setLang(lang) {
   SAPMANRI_LANG = lang;
-  document.getElementById('btnKo').className = 'lang-btn' + (lang === 'ko' ? ' active' : '');
-  document.getElementById('btnEn').className = 'lang-btn' + (lang === 'en' ? ' active' : '');
+  localStorage.setItem('sapmanri_lang', lang);
+  if (_currentIssue) renderLangToggle(_currentIssue.langs || ['ko', 'en']);
   // 현재 호 다시 렌더링 + 옵저버 재초기화 (블러 reveal, 패럴랙스 등)
   if (_currentIssue) {
     renderIssue(_currentIssue);
@@ -474,15 +498,22 @@ function setLang(lang) {
   }
 }
 
-// 한/영 텍스트 선택 헬퍼 — EN 없으면 KO fallback
-function t(ko, en) {
-  if (SAPMANRI_LANG === 'en') return (en && en.trim()) ? en : (ko || '');
-  return ko || '';
+// 다국어 텍스트 선택 헬퍼 — 페이지 객체 + 필드명 기반으로 ko/en/ja/zhTw 자동 조회
+// 사용: t(p, 'caption')  → p.caption(ko), p.caption_en, p.caption_ja, p.caption_zhTw 중 SAPMANRI_LANG에 맞는 값
+function t(obj, field) {
+  if (!obj) return '';
+  const koVal = obj[field] || '';
+  if (SAPMANRI_LANG === 'ko') return koVal;
+  const langVal = obj[`${field}_${SAPMANRI_LANG}`];
+  return (langVal && String(langVal).trim()) ? langVal : koVal;
 }
-// 배열용 언어 선택 헬퍼
-function tArr(koArr, enArr) {
-  if (SAPMANRI_LANG === 'en' && Array.isArray(enArr) && enArr.length) return enArr;
-  return koArr || [];
+// 배열용 언어 선택 헬퍼 — 사용: tArr(p, 'toc')
+function tArr(obj, field) {
+  if (!obj) return [];
+  const koArr = obj[field] || [];
+  if (SAPMANRI_LANG === 'ko') return koArr;
+  const langArr = obj[`${field}_${SAPMANRI_LANG}`];
+  return (Array.isArray(langArr) && langArr.length) ? langArr : koArr;
 }
 
 let _currentIssue = null;
@@ -583,6 +614,7 @@ async function load() {
   }
 
   _currentIssue = issue;
+  renderLangToggle(issue.langs || ['ko', 'en']); // 하위호환: langs 없으면 기존 호는 ko+en으로 간주
   document.title = `SAPMANRI · ${issue.title || ''}`;
   renderIssue(issue);
   initInteractions();
@@ -699,8 +731,8 @@ function renderPage(p, i, allPages, issue) {
 }
 
 function renderCover(p, issue) {
-  const headlineArr = tArr(p.headline, p.headline_en);
-  const tocArr      = tArr(p.toc,      p.toc_en);
+  const headlineArr = tArr(p, 'headline');
+  const tocArr      = tArr(p, 'toc');
   const headline = headlineArr.map(l => `<span>${esc(l)}</span>`).join('');
   const toc = tocArr.map((item, i) => `<div class="toc-item"><span class="n">${String(i+1).padStart(2,'0')}</span>${esc(item)}</div>`).join('');
   return `
@@ -718,7 +750,7 @@ function renderCover(p, issue) {
 }
 
 function renderFullbleed(p) {
-  const caption = t(p.caption, p.caption_en) || '';
+  const caption = t(p, 'caption') || '';
   const isShort = caption.length <= 30 && !caption.includes('\n\n');
   const captionCls = isShort ? 'caption short' : 'caption';
   const hasFocal = typeof p.focalX === 'number' && typeof p.focalY === 'number';
@@ -731,11 +763,11 @@ function renderFullbleed(p) {
 }
 
 function renderIndex(p) {
-  const itemsArr = tArr(p.items, p.items_en);
+  const itemsArr = tArr(p, 'items');
   const items = itemsArr.map((item, i) => `<div class="index-item"><div class="n">${String(i+1).padStart(2,'0')}</div><div class="t">${esc(item)}</div></div>`).join('');
   return `
   <section class="page page-index">
-    <div class="label">${esc(t(p.label, p.label_en) || 'Contents · 이번 호 이야기')}</div>
+    <div class="label">${esc(t(p, 'label') || 'Contents · 이번 호 이야기')}</div>
     <div class="list">${items}</div>
   </section>`;
 }
@@ -746,8 +778,8 @@ function renderSplit(p) {
   <section class="page page-split${darkCls}">
     <div class="split-photo">${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy">` : ''}</div>
     <div class="split-text">
-      ${p.label ? `<div class="split-label">${esc(t(p.label, p.label_en))}</div>` : ''}
-      <div class="split-body">${nl(t(p.text, p.text_en))}</div>
+      ${p.label ? `<div class="split-label">${esc(t(p, 'label'))}</div>` : ''}
+      <div class="split-body">${nl(t(p, 'text'))}</div>
     </div>
   </section>`;
 }
@@ -758,9 +790,9 @@ function renderGrid(p) {
   const imgsHtml = imgs.map((src, i) => `<img class="g${i}" src="${esc(src)}" alt="" loading="lazy">`).join('');
   return `
   <section class="page cream page-grid">
-    ${p.label ? `<div class="grid-label">${esc(t(p.label, p.label_en))}</div>` : ''}
+    ${p.label ? `<div class="grid-label">${esc(t(p, 'label'))}</div>` : ''}
     <div class="grid-photos${layoutCls}">${imgsHtml}</div>
-    ${p.caption ? `<div class="grid-caption">${esc(t(p.caption, p.caption_en))}</div>` : ''}
+    ${p.caption ? `<div class="grid-caption">${esc(t(p, 'caption'))}</div>` : ''}
   </section>`;
 }
 
@@ -768,8 +800,8 @@ function renderQuote(p) {
   return `
   <section class="page page-quote">
     <div class="line"></div>
-    <div class="quote-text">${nl(t(p.text, p.text_en))}</div>
-    ${p.context ? `<div class="quote-context">${esc(t(p.context, p.context_en))}</div>` : ''}
+    <div class="quote-text">${nl(t(p, 'text'))}</div>
+    ${p.context ? `<div class="quote-context">${esc(t(p, 'context'))}</div>` : ''}
     <div class="line"></div>
   </section>`;
 }
@@ -791,7 +823,7 @@ function renderClosing(p, issue) {
     </a>` : '';
   return `
   <section class="page page-closing">
-    <div class="closing-text">${nl(t(p.text, p.text_en))}</div>
+    <div class="closing-text">${nl(t(p, 'text'))}</div>
     <div>
       ${youtubeBtn}
       ${cta || !youtubeUrl ? `<div class="closing-cta">${cta || '유튜브에서 더 보기 · <a href="https://www.youtube.com/@sapmanri" target="_blank">@sapmanri</a>'}</div>` : ''}
@@ -810,8 +842,8 @@ function renderSpread(p) {
   const desktop = `
   <section class="page page-spread-desktop">
     <div class="spread-img-wrap">${img ? `<img src="${img}" alt="" loading="lazy">` : ''}</div>
-    ${leftCaption  ? `<div class="spread-caption-left">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
-    ${rightCaption ? `<div class="spread-caption-right">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
+    ${leftCaption  ? `<div class="spread-caption-left">${nl(t(p, 'captionLeft'))}</div>`  : ''}
+    ${rightCaption ? `<div class="spread-caption-right">${nl(t(p, 'captionRight'))}</div>` : ''}
   </section>`;
 
   // ── 모바일: imageLeft/imageRight 있으면 그대로, 없으면 splitX 크롭 ──
@@ -821,12 +853,12 @@ function renderSpread(p) {
     mobileLeft = `
   <section class="page page-spread half-left">
     <div class="spread-img-wrap"><img src="${esc(p.imageLeft)}"  alt="" loading="lazy" style="${imgStyle}"></div>
-    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
+    ${leftCaption  ? `<div class="spread-caption">${nl(t(p, 'captionLeft'))}</div>`  : ''}
   </section>`;
     mobileRight = `
   <section class="page page-spread half-right">
     <div class="spread-img-wrap"><img src="${esc(p.imageRight)}" alt="" loading="lazy" style="${imgStyle}"></div>
-    ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
+    ${rightCaption ? `<div class="spread-caption">${nl(t(p, 'captionRight'))}</div>` : ''}
   </section>`;
   } else {
     // 구 발행본: splitX 기반 object-position (기존 방식 유지)
@@ -837,12 +869,12 @@ function renderSpread(p) {
     mobileLeft = `
   <section class="page page-spread half-left" data-splitx="${sx}">
     <div class="spread-img-wrap">${src ? `<img src="${src}" alt="" loading="lazy" style="${imgStyle}object-position:${leftPos}" class="spread-half-img">` : ''}</div>
-    ${leftCaption  ? `<div class="spread-caption">${nl(t(leftCaption,  p.captionLeft_en))}</div>`  : ''}
+    ${leftCaption  ? `<div class="spread-caption">${nl(t(p, 'captionLeft'))}</div>`  : ''}
   </section>`;
     mobileRight = `
   <section class="page page-spread half-right" data-splitx="${sx}">
     <div class="spread-img-wrap">${src ? `<img src="${src}" alt="" loading="lazy" style="${imgStyle}object-position:${rightPos}" class="spread-half-img">` : ''}</div>
-    ${rightCaption ? `<div class="spread-caption">${nl(t(rightCaption, p.captionRight_en))}</div>` : ''}
+    ${rightCaption ? `<div class="spread-caption">${nl(t(p, 'captionRight'))}</div>` : ''}
   </section>`;
   }
 
@@ -854,9 +886,9 @@ function renderEssay(p) {
   return `
   <section class="page page-essay${darkCls}">
     <div class="essay-inner">
-      ${p.label ? `<div class="essay-label">${esc(t(p.label, p.label_en))}</div>` : ''}
-      ${p.title ? `<div class="essay-title">${esc(t(p.title, p.title_en))}</div>` : ''}
-      <div class="essay-body">${nl(t(p.text, p.text_en))}</div>
+      ${p.label ? `<div class="essay-label">${esc(t(p, 'label'))}</div>` : ''}
+      ${p.title ? `<div class="essay-title">${esc(t(p, 'title'))}</div>` : ''}
+      <div class="essay-body">${nl(t(p, 'text'))}</div>
     </div>
   </section>`;
 }
@@ -871,7 +903,7 @@ function renderDialogue(p) {
   }
   const lineHtml = lines.map(l => {
     const sideCls = l.side === 'right' ? ' right' : '';
-    const lineText = t(l.text, l.text_en);
+    const lineText = t(l, 'text');
     return `
     <div class="dlg-line${sideCls}">
       ${l.speaker ? `<div class="dlg-speaker">${esc(l.speaker)}</div>` : ''}
@@ -881,7 +913,7 @@ function renderDialogue(p) {
   return `
   <section class="page page-dialogue">
     <div class="dlg-inner">
-      ${p.label ? `<div class="dlg-label">${esc(t(p.label, p.label_en))}</div>` : ''}
+      ${p.label ? `<div class="dlg-label">${esc(t(p, 'label'))}</div>` : ''}
       ${title ? `<div class="dlg-title">${esc(title)}</div>` : ''}
       ${lineHtml}
     </div>
@@ -907,7 +939,7 @@ function renderListPage(p) {
   return `
   <section class="page page-list-type">
     <div class="list-inner">
-      ${p.label ? `<div class="list-label">${esc(t(p.label, p.label_en))}</div>` : ''}
+      ${p.label ? `<div class="list-label">${esc(t(p, 'label'))}</div>` : ''}
       ${title ? `<div class="list-title">${esc(title)}</div>` : ''}
       <div class="list-items">${items}</div>
     </div>
@@ -918,8 +950,8 @@ function renderMilestone(p) {
   return `
   <section class="page page-milestone">
     <div class="ms-number">${esc(p.number || '')}</div>
-    ${p.label ? `<div class="ms-label">${esc(t(p.label, p.label_en))}</div>` : ''}
-    ${p.text ? `<div class="ms-desc">${nl(t(p.text, p.text_en))}</div>` : ''}
+    ${p.label ? `<div class="ms-label">${esc(t(p, 'label'))}</div>` : ''}
+    ${p.text ? `<div class="ms-desc">${nl(t(p, 'text'))}</div>` : ''}
   </section>`;
 }
 
@@ -946,14 +978,14 @@ function renderBotanical(p) {
         <div class="bot-tag">${esc(tag)}</div>
         ${number ? `<div class="bot-number">${esc(number)}</div>` : ''}
       </div>
-      ${title ? `<div class="bot-title">${nl(t(title, p.title_en))}</div>` : ''}
+      ${title ? `<div class="bot-title">${nl(t(p, 'title'))}</div>` : ''}
       ${(subKo || subEn) ? `
       <div class="bot-sublabels">
         ${subKo ? `<div class="bot-sublabel-item"><span class="sub-heading">Exhibition</span>${esc(subKo)}</div>` : ''}
         ${subEn ? `<div class="bot-sublabel-item"><span class="sub-heading">전시</span>${esc(subEn)}</div>` : ''}
       </div>` : ''}
       <div class="bot-frame">${img ? `<img src="${esc(img)}" alt="" loading="lazy">` : ''}</div>
-      ${caption ? `<div class="bot-caption">${esc(t(caption, p.caption_en))}</div>` : ''}
+      ${caption ? `<div class="bot-caption">${esc(t(p, 'caption'))}</div>` : ''}
     </div>
   </section>`;
 }
