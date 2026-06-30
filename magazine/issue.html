@@ -582,8 +582,13 @@ async function load() {
   _currentIssue = issue;
   document.title = `SAPMANRI · ${issue.title || ''}`;
   renderIssue(issue);
+  initInteractions();
+}
 
-  // 스크롤에 따라 topbar 톤 전환 (다크 페이지 위에서는 다크바)
+// 스크롤/관찰자/패럴랙스 등 DOM 상호작용 초기화
+// renderIssue()로 DOM이 다시 그려질 때마다(언어 전환 등) 재호출 필요
+let _scrollHandlerAttached = false;
+function initInteractions() {
   const pageEls = [...document.querySelectorAll('.page')];
   const topbar = document.getElementById('topbar');
 
@@ -591,24 +596,27 @@ async function load() {
     return pageEls.filter(el => getComputedStyle(el).display !== 'none');
   }
 
-  // ── 탑바 자동 숨김: 스크롤 다운 → 숨김 / 업 → 표시 ──
-  let lastScrollY = window.scrollY;
-  let ticking = false;
-  window.addEventListener('scroll', () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      const currentY = window.scrollY;
-      const diff = currentY - lastScrollY;
-      if (diff > 8 && currentY > 80) {
-        topbar.classList.add('hidden');
-      } else if (diff < -8 || currentY < 60) {
-        topbar.classList.remove('hidden');
-      }
-      lastScrollY = currentY;
-      ticking = false;
-    });
-  }, { passive: true });
+  // ── 탑바 자동 숨김: 스크롤 다운 → 숨김 / 업 → 표시 (리스너는 최초 1회만 부착) ──
+  if (!_scrollHandlerAttached) {
+    _scrollHandlerAttached = true;
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const currentY = window.scrollY;
+        const diff = currentY - lastScrollY;
+        if (diff > 8 && currentY > 80) {
+          topbar.classList.add('hidden');
+        } else if (diff < -8 || currentY < 60) {
+          topbar.classList.remove('hidden');
+        }
+        lastScrollY = currentY;
+        ticking = false;
+      });
+    }, { passive: true });
+  }
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(e => {
