@@ -223,6 +223,7 @@
       uploaded_at: entry.uploaded_at,
       analyzed_at: entry.analyzed_at,
       analysis_status: entry.analysis_status || (entry.mood ? 'ok' : 'pending'),
+      schema_version: entry.schema_version, // reanalyzeAll()의 v3 완료 판별에 필요 (index만으로도 판단 가능해야 함)
       mood: entry.mood,
       suggested_caption: entry.suggested_caption,
       season: entry.season,
@@ -235,6 +236,14 @@
     requireSharedStorage();
     if (!hash) return null;
     return await global.SharedStorage.getImage(hash);
+  };
+
+  // index.json만 읽는다 (가벼운 필드만, 사진별 전체 JSON은 건드리지 않음).
+  // 갤러리 그리드처럼 "목록을 빠르게 보여주기"가 목적인 곳에서 쓴다.
+  _r2.getIndex = async function () {
+    requireSharedStorage();
+    const { entries } = await global.SharedStorage.getIndex();
+    return { entries };
   };
 
   // getAll()은 index.json으로 해시 목록을 받은 뒤, 각 사진의 전체 데이터를
@@ -315,6 +324,21 @@
     return await _github.getAll(forceRefresh);
   }
 
+  // 가벼운 목록만 필요한 곳(갤러리 그리드 등)에서 쓴다. R2일 때는 index.json만
+  // 읽으므로 빠르다 — 사진별 전체 JSON(cache/images/<hash>.json)은 건드리지 않는다.
+  // GitHub 백엔드일 땐 어차피 분리 구조가 없으므로 getAll()과 동일하게 동작한다.
+  async function getIndex(forceRefresh) {
+    if (backend() === 'r2') {
+      try {
+        return await _r2.getIndex();
+      } catch (e) {
+        console.error('[SharedCache] R2 getIndex 실패, GitHub로 fallback:', e.message);
+        return await _github.getAll(forceRefresh);
+      }
+    }
+    return await _github.getAll(forceRefresh);
+  }
+
   async function set(hash, data, message) {
     if (backend() === 'r2') {
       // 조건 3: R2 실패 시 GitHub는 절대 건드리지 않는다 — 에러만 표시(throw)하고 끝낸다.
@@ -335,7 +359,7 @@
   async function setLegacy(hash, service, data) { return set(hash, data); }
 
   global.SharedCache = {
-    hashImage, get, getAll, set, setBatch,
+    hashImage, get, getAll, getIndex, set, setBatch,
     // GitHub 직접 접근이 필요한 비상/디버그용 (예: 마이그레이션 도구, 수동 점검)
     loadCacheRaw: _github.loadCacheRaw, backupCache: _github.backupCache,
     decodeGithubContent, encodeGithubContent,

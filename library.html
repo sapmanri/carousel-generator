@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-30b-r2fix</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-30c-idx</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -1121,15 +1121,15 @@ async function loadGallery() {
 }
 
 async function loadCache() {
-  // 2026-06-30: 예전엔 이 함수가 GitHub Contents API를 별도로 직접 호출했는데,
-  // 그게 바로 1MB 응답 한계로 조용히 실패하던 그 경로였다 (정적 .vercelignore된
-  // 옛 스냅샷으로 폴백 → 최근 분석 데이터가 안 보이는 증상). SharedCache.getAll()로
-  // 위임해서 R2 우선 + GitHub fallback 경로를 그대로 타도록 통합한다.
+  // 2026-06-30b: SharedCache.getAll()로 바꿨더니 263장 전체 개별 JSON을 한꺼번에
+  // fetch해서 초기 로딩이 느려짐 (R2 분리 구조 설계 의도와 어긋남). 그리드는
+  // cache/index.json 하나만 읽는 getIndex()로 충분 — 전체 분석 필드는
+  // openDetail()에서 클릭한 1장만 lazy fetch한다.
   try {
-    const { entries } = await SharedCache.getAll();
+    const { entries } = await SharedCache.getIndex();
     return repairMojibakeDeep(entries || {});
   } catch (e) {
-    console.warn('SharedCache.getAll() 실패:', e.message);
+    console.warn('SharedCache.getIndex() 실패:', e.message);
     return {};
   }
 }
@@ -1559,11 +1559,9 @@ async function deleteSelected() {
   }
 }
 
-function openDetail(idx) {
-  const item = allItems[idx];
-  if (!item) return;
-  const overlay = document.getElementById('detailOverlay');
+function renderDetailPanel(item, opts) {
   const panel = document.getElementById('detailPanel');
+  const loading = opts && opts.loading;
 
   const metaRows = [
     // 텍스트
@@ -1631,6 +1629,7 @@ function openDetail(idx) {
     <div class="detail-img"><img src="${escapeHtml(getOriginalUrl(item))}" alt="" loading="lazy"></div>
     <div class="detail-info">
       <div style="font-size:11px;font-family:var(--mono);color:var(--dim);margin-bottom:16px;word-break:break-all">${escapeHtml(item.hash || item.image_id || '')}</div>
+      ${loading ? '<div style="font-size:11px;color:var(--dim);margin-bottom:12px;">상세 정보 불러오는 중…</div>' : ''}
       ${metaRows.map(([label, val]) => `
         <div class="meta-row">
           <div class="meta-label">${label}</div>
@@ -1643,7 +1642,41 @@ function openDetail(idx) {
       </div>
     </div>
   `;
+}
+
+// index.json의 가벼운 필드(캡션/분위기 등 일부)로 먼저 즉시 렌더링하고,
+// 그 1장의 전체 분석 데이터(cache/images/<hash>.json)는 클릭한 시점에만 lazy fetch한다.
+// 그리드 전체를 미리 받아오지 않는 것이 R2 분리 구조의 핵심이다.
+async function openDetail(idx) {
+  const item = allItems[idx];
+  if (!item) return;
+  const overlay = document.getElementById('detailOverlay');
   overlay.classList.add('active');
+
+  const hash = item.hash || item.image_id || deriveImageId(item);
+  // 이미 한 번 펼쳐서 전체 데이터를 받아둔 적 있으면(_fullLoaded) 재요청하지 않는다.
+  if (item._fullLoaded) {
+    renderDetailPanel(item);
+    return;
+  }
+
+  renderDetailPanel(item, { loading: true });
+
+  try {
+    const full = await SharedCache.get(hash);
+    if (full) {
+      Object.assign(item, full, { _fullLoaded: true });
+    } else {
+      item._fullLoaded = true; // 없으면 없는 대로, 매번 재요청하지 않게 표시만
+    }
+  } catch (e) {
+    console.warn('전체 분석 데이터 lazy fetch 실패:', e.message);
+  }
+
+  // 그 사이 다른 사진을 열어 모달이 바뀌었으면 더 이상 그릴 필요 없음
+  if (!overlay.classList.contains('active')) return;
+  const stillSame = (allItems[idx] === item);
+  if (stillSame) renderDetailPanel(item);
 }
 
 function closeDetail(e) {
