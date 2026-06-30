@@ -11,6 +11,21 @@ const GITHUB_REPO = 'sapmanri/carousel-generator';
 const ISSUES_FILE = 'magazine/issues.json';
 const PROFILE_FILE = 'profile_data.json';
 
+// ── 지원 언어 설정 ──────────────────────────────────────────────
+// 새 언어 추가 시 이 목록에 한 줄만 추가하면 에디터 UI/생성/뷰어가 모두 따라감.
+// key: 필드 접미사로 사용 (ko는 접미사 없음, 나머지는 _en, _ja, _zhTw 형태)
+// label: 에디터 체크박스에 표시될 이름
+// promptName: AI 생성 시 결과 JSON 키 접두사로 사용 (예: en_caption)
+const LANGUAGES = [
+  { key: 'ko',   label: '한국어',   promptName: 'ko' },
+  { key: 'en',   label: 'English', promptName: 'en' },
+  { key: 'ja',   label: '日本語',   promptName: 'ja' },
+  { key: 'zhTw', label: '繁體中文', promptName: 'zhTw' },
+];
+const DEFAULT_LANGS = ['ko', 'en']; // 새 호 만들 때 기본 선택
+
+let currentLangs = [...DEFAULT_LANGS]; // 현재 편집 중인 호가 발행할 언어 목록
+
 // ── 공통 이미지 분석 캐시 (carousel_ai_generator.html과 동일 모듈) ──
 (function (global) {
   const REPO = GITHUB_REPO;
@@ -187,6 +202,32 @@ function initKeys() {
     document.getElementById('ghTokenBtn').classList.add('ok');
     document.getElementById('ghTokenBtn').textContent = 'GitHub ✓';
   }
+}
+
+// ── 언어 선택 체크박스 ──────────────────────────────────────────
+function renderLangCheckboxes() {
+  const container = document.getElementById('langCheckboxes');
+  if (!container) return;
+  container.innerHTML = LANGUAGES.map(lang => `
+    <label class="lang-chip ${currentLangs.includes(lang.key) ? 'active' : ''}" data-lang="${lang.key}">
+      <input type="checkbox" ${currentLangs.includes(lang.key) ? 'checked' : ''} onchange="toggleLang('${lang.key}')">
+      ${lang.label}
+    </label>
+  `).join('');
+}
+
+function toggleLang(langKey) {
+  if (currentLangs.includes(langKey)) {
+    if (currentLangs.length === 1) {
+      toast('최소 1개 언어는 선택되어야 합니다.');
+      renderLangCheckboxes(); // 체크박스 원복
+      return;
+    }
+    currentLangs = currentLangs.filter(l => l !== langKey);
+  } else {
+    currentLangs.push(langKey);
+  }
+  renderLangCheckboxes();
 }
 
 // ── 토스트 ──
@@ -1742,6 +1783,8 @@ function clearForm() {
   document.getElementById('fSubtitle').value = '';
   document.getElementById('fDate').value = new Date().toISOString().slice(0, 10);
   document.getElementById('fYoutubeUrl').value = '';
+  currentLangs = [...DEFAULT_LANGS];
+  renderLangCheckboxes();
   photos = [];
   pages = [];
   coverPhotoId = null;
@@ -1757,6 +1800,9 @@ function loadIssueIntoForm(issue) {
   document.getElementById('fTitle').value = issue.title || '';
   document.getElementById('fSubtitle').value = issue.subtitle || '';
   document.getElementById('fDate').value = issue.date || new Date().toISOString().slice(0, 10);
+  // 저장된 언어 목록 복원 (없으면 기존 호는 ko+en으로 간주 — 하위호환)
+  currentLangs = Array.isArray(issue.langs) && issue.langs.length ? [...issue.langs] : [...DEFAULT_LANGS];
+  renderLangCheckboxes();
   document.getElementById('fYoutubeUrl').value = issue.youtubeUrl || '';
 
   // 기존 이미지들을 photos 배열에 참조 형태로 등록 (path만, dataUrl 없음 → 재업로드 전까지 그대로 사용)
@@ -2099,6 +2145,7 @@ async function publish() {
       date: document.getElementById('fDate').value || new Date().toISOString().slice(0, 10),
       youtubeUrl: document.getElementById('fYoutubeUrl').value.trim(),
       cover: coverPath || '',
+      langs: [...currentLangs],
       pages: exportedPages,
     };
     if (existingIssue && existingIssue.hidden) issueData.hidden = true;
@@ -2268,6 +2315,7 @@ async function loadIssuesFromGithubSilent() {
 // ══════════════════════════════════════════════════════════════
 function init() {
   initKeys();
+  renderLangCheckboxes();
   setupUploadZone();
   renderPhotoGrid();
   renderPageList();
