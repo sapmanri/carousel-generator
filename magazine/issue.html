@@ -467,8 +467,11 @@ function setLang(lang) {
   SAPMANRI_LANG = lang;
   document.getElementById('btnKo').className = 'lang-btn' + (lang === 'ko' ? ' active' : '');
   document.getElementById('btnEn').className = 'lang-btn' + (lang === 'en' ? ' active' : '');
-  // 현재 호 다시 렌더링
-  if (_currentIssue) renderIssue(_currentIssue);
+  // 현재 호 다시 렌더링 + 옵저버 재초기화 (블러 reveal, 패럴랙스 등)
+  if (_currentIssue) {
+    renderIssue(_currentIssue);
+    initInteractions();
+  }
 }
 
 // 한/영 텍스트 선택 헬퍼 — EN 없으면 KO fallback
