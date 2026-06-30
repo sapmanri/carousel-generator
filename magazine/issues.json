@@ -1369,14 +1369,14 @@
         },
         {
           "type": "spread",
-          "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/svag_2a889a64_68b5f82a.jpg",
-          "splitX": 50,
-          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_t1p2v3299uj_left.jpg",
-          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_t1p2v3299uj_right.jpg",
-          "captionLeft": "가방은 의자에 걸려 있었다",
-          "captionLeft_en": "the bag still hung on the chair",
-          "captionRight": "사람은 이미 움직이는 중이었다",
-          "captionRight_en": "the person had already moved on"
+          "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/1o8r8_5a6f29fb_275a16d5.jpg",
+          "splitX": 46,
+          "imageLeft": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_h85wp60f26u_left.jpg",
+          "imageRight": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/existing_h85wp60f26u_right.jpg",
+          "captionLeft": "잎들 사이에 오래 있었다",
+          "captionLeft_en": "stayed a while among the leaves",
+          "captionRight": "벽은 그 빛을 받고만 있었다",
+          "captionRight_en": "the wall just held the light"
         },
         {
           "type": "split",
