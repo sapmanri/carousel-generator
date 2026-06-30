@@ -153,7 +153,7 @@ header{
 <body>
 
 <header>
-  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-30a-r2</span></div>
+  <div class="logo"><em>SAPMANRI</em> · Image Library<span class="build-tag">v2026-06-30b-r2fix</span></div>
   <div class="header-right">
     <button class="btn-ghost" onclick="window.SapConfig.openSettingsModal({theme:'dark', onSave: loadGallery})">⚙️ 설정</button>
     <a class="btn-ghost" href="/index.html">← Tools</a>
@@ -1121,31 +1121,15 @@ async function loadGallery() {
 }
 
 async function loadCache() {
-  const token = window.SapConfig?.getGithubToken?.();
-  const API = `https://api.github.com/repos/sapmanri/carousel-generator/contents/image_cache.json`;
-
-  // GitHub 토큰이 있으면 GitHub contents API 사용
-  if (token) {
-    try {
-      const res = await fetch(API, { headers: { Authorization: `token ${token}` }, cache: 'no-store' });
-      if (res.ok) {
-        const json = await res.json();
-        const data = JSON.parse(decodeGithubContent(json.content));
-        return repairMojibakeDeep(data.entries || {});
-      }
-    } catch(e) {
-      console.warn('GitHub cache load failed, trying local file:', e.message);
-    }
-  }
-
-  // 토큰이 없어도 배포된 정적 image_cache.json을 읽는다.
+  // 2026-06-30: 예전엔 이 함수가 GitHub Contents API를 별도로 직접 호출했는데,
+  // 그게 바로 1MB 응답 한계로 조용히 실패하던 그 경로였다 (정적 .vercelignore된
+  // 옛 스냅샷으로 폴백 → 최근 분석 데이터가 안 보이는 증상). SharedCache.getAll()로
+  // 위임해서 R2 우선 + GitHub fallback 경로를 그대로 타도록 통합한다.
   try {
-    const res = await fetch(`/image_cache.json?ts=${Date.now()}`, { cache: 'no-store' });
-    if (!res.ok) return {};
-    const data = await res.json();
-    return repairMojibakeDeep(data.entries || {});
-  } catch(e) {
-    console.warn('local cache load failed:', e.message);
+    const { entries } = await SharedCache.getAll();
+    return repairMojibakeDeep(entries || {});
+  } catch (e) {
+    console.warn('SharedCache.getAll() 실패:', e.message);
     return {};
   }
 }
