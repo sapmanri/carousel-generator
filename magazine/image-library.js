@@ -424,7 +424,7 @@
     const body = document.createElement('div');
     body.style.cssText = `
       padding:16px 20px; overflow-y:auto; flex:1;
-      display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:14px 10px;
+      display:grid; grid-template-columns:repeat(auto-fill, minmax(90px, 1fr)); grid-auto-rows:min-content; gap:14px 10px;
     `;
     body.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;opacity:0.6;">불러오는 중...</div>`;
 
@@ -529,7 +529,7 @@
 
       slice.forEach(item => {
         const thumb = document.createElement('div');
-        thumb.style.cssText = `position:relative;width:100%;padding-bottom:100%;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;background:${isDark ? '#2c2c2e' : '#f0f0f0'};`;
+        thumb.style.cssText = `position:relative;width:100%;aspect-ratio:1/1;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;background:${isDark ? '#2c2c2e' : '#f0f0f0'};flex-shrink:0;`;
         const img = document.createElement('img');
         img.src = item.thumbnail_url || item.download_url || item.url;
         img.loading = 'lazy';
