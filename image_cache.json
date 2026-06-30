@@ -34608,7 +34608,7 @@
       "contrast_level": "medium",
       "visual_density": "medium",
       "negative_space": "low",
-      "season": "winter",
+      "season": "autumn",
       "time_of_day": "afternoon",
       "weather": "indoor",
       "precipitation_presence": "none",
@@ -34618,86 +34618,88 @@
         "아늑한",
         "고요한",
         "따뜻한",
-        "느긋한"
+        "여유로운"
       ],
       "atmosphere_tags": [
         "벽난로빛",
         "실내온기",
-        "겨울오후",
-        "나무결온도"
+        "가을저녁",
+        "슬로우라이프"
       ],
       "object_tags_ko": [
         "핸드드립커피",
         "드리퍼",
         "커피서버",
-        "통나무받침",
-        "바구니",
+        "나무토막",
         "벽난로",
-        "유리컵",
-        "초콜릿",
-        "식물"
+        "바구니",
+        "유리잔",
+        "커피필터",
+        "촛불"
       ],
       "object_tags_en": [
         "pour over coffee",
         "dripper",
         "coffee server",
         "wood stump",
-        "basket",
         "fireplace",
+        "basket",
         "glass cup",
-        "chocolate",
-        "plant"
+        "coffee filter",
+        "candle"
       ],
       "scene_tags_ko": [
         "핸드드립세팅",
-        "벽난로앞카페",
-        "슬로우커피",
+        "벽난로앞커피",
+        "나무토막테이블",
         "농가거실",
-        "겨울실내",
-        "통나무테이블"
+        "슬로우커피"
       ],
       "scene_tags_en": [
         "pour over setup",
-        "fireside coffee",
-        "slow coffee",
-        "rustic living room",
-        "winter interior",
-        "wood stump table"
+        "fireplace coffee",
+        "log table",
+        "farmhouse living room",
+        "slow coffee ritual"
       ],
       "search_keywords_ko": [
         "핸드드립",
         "드리퍼",
         "벽난로",
-        "통나무",
+        "나무토막",
+        "커피서버",
+        "아늑한",
+        "농가",
+        "가을",
         "슬로우라이프",
-        "겨울커피",
-        "아늑함",
-        "농촌거실",
-        "따뜻한음료",
+        "바구니",
+        "따뜻한",
+        "거실",
         "수제커피",
-        "바구니인테리어",
-        "돌담벽",
-        "커피타임",
-        "느린오후"
+        "화로",
+        "원목"
       ],
       "search_keywords_en": [
-        "pour over coffee",
+        "pour over",
+        "dripper",
         "fireplace",
         "wood stump",
+        "coffee server",
+        "cozy",
+        "farmhouse",
+        "autumn",
         "slow life",
-        "winter coffee",
-        "cozy interior",
-        "handcrafted coffee",
-        "rustic home",
-        "basket decor",
-        "stone wall",
-        "afternoon brew",
-        "slow morning"
+        "basket",
+        "warm",
+        "living room",
+        "handmade coffee",
+        "hearth",
+        "natural wood"
       ],
       "location_type": "indoor",
       "primary_subject": "핸드드립 커피 세팅",
       "secondary_subjects": [
-        "통나무 받침대",
+        "나무토막 테이블",
         "벽난로",
         "바구니",
         "유리잔"
@@ -34706,11 +34708,11 @@
       "human_presence": "none",
       "animal_presence": "none",
       "material_texture": [
+        "원목",
         "유리",
-        "나무결",
-        "마끈편직",
+        "로프/마크라메",
         "종이필터",
-        "돌담"
+        "돌벽"
       ],
       "has_text": false,
       "text_area_position": "none",
@@ -34720,27 +34722,27 @@
       "focus_clarity": "soft",
       "text_safe_area": "top",
       "thumbnail_potential": "high",
-      "thumbnail_reason": "벽난로 배경과 통나무 위 핸드드립 세팅이 슬로우라이프 감성을 직관적으로 전달해 채널 썸네일로 높은 클릭 유도 가능",
+      "thumbnail_reason": "벽난로 배경과 핸드드립 세팅의 따뜻한 조합이 슬로우라이프 감성 썸네일로 매우 적합",
       "mood": "아늑함",
       "suggested_caption": "불 앞의 한 잔",
-      "suggested_caption_en": "Slow brew by the fire",
-      "suggested_caption_left": "나무 위에서",
-      "suggested_caption_right": "천천히 내리다",
-      "suggested_label": "불가의 커피",
+      "suggested_caption_en": "Coffee by the fire",
+      "suggested_caption_left": "벽난로 앞에서",
+      "suggested_caption_right": "천천히 내리는 커피",
+      "suggested_label": "화롯가 드립",
       "suggested_label_en": "Fireside Brew",
       "domesticity_score": 5,
       "rurality_score": 4,
       "craft_score": 4,
       "visual_dna_tags": [
         "화로불",
-        "나무결",
-        "드리퍼향",
-        "마끈바구니",
-        "겨울온기"
+        "원목결",
+        "드립향",
+        "마크라메바구니",
+        "농가온기"
       ],
       "sapmanri_score": 9,
       "schema_version": "image-analysis-v3",
-      "analyzed_at": "2026-06-30T13:47:03.668Z",
+      "analyzed_at": "2026-06-30T13:47:33.365Z",
       "model": "claude-sonnet-4-6"
     }
   }
