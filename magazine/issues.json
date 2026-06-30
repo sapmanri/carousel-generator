@@ -2310,18 +2310,18 @@
           "type": "cover",
           "image": "https://pub-9960ef4e646f475d91cb80f66c3e41b2.r2.dev/library/5xwso_144fd032_13bb6ac4.jpg",
           "headline": [
-            "소리보다 먼저, 떠나기로 한 마음",
-            "등에 지면 악기가 된다"
+            "등에 메고 다닐 수 있는 기타",
+            "소리보다 먼저, 어딘가로 떠나는 마음"
           ],
           "headline_en": [
-            "A guitar that fits in a backpack,",
-            "and a life that might do the same."
+            "Small enough to carry,",
+            "loud enough to matter."
           ],
           "toc": [],
           "toc_en": [],
           "headline_ja": [
-            "背負えるほどの音楽を、",
-            "旅に連れていく日があった。"
+            "旅に出るなら、音も一緒に。",
+            "弦はまだ、どこへでも行ける顔をしている。"
           ]
         },
         {
@@ -2411,7 +2411,7 @@
         },
         {
           "type": "closing",
-          "text": "",
+          "text": "내용을 입력해주시지 않으셨네요.\n\n어떤 장면이나 상황, 사진, 혹은 주제를 바탕으로 클로징 문구를 써드릴까요?",
           "text_en": "",
           "cta": ""
         }
