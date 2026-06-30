@@ -430,6 +430,8 @@
 
     let footer = null;
     const selected = new Set();
+    const pagingBar = document.createElement('div');
+    pagingBar.style.cssText = `display:flex; align-items:center; justify-content:center; gap:12px; padding:10px 20px; border-top:1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'};`;
 
     if (multiple) {
       footer = document.createElement('div');
@@ -463,6 +465,7 @@
 
     modal.appendChild(header);
     modal.appendChild(body);
+    modal.appendChild(pagingBar);
     if (footer) modal.appendChild(footer);
     overlay.appendChild(modal);
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
@@ -556,10 +559,9 @@
         body.appendChild(thumb);
       });
 
-      // 페이징 컨트롤
+      // 페이징 컨트롤 — body 그리드가 아니라 별도 pagingBar에 렌더링
       const totalPages = Math.ceil(allItems.length / PAGE_SIZE);
-      const pagingDiv = document.createElement('div');
-      pagingDiv.style.cssText = 'grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;padding:12px 0;';
+      pagingBar.innerHTML = '';
 
       const prevBtn = document.createElement('button');
       prevBtn.textContent = '◀';
@@ -577,10 +579,9 @@
       nextBtn.style.cssText = `padding:6px 14px;border-radius:6px;border:1px solid ${isDark?'rgba(255,255,255,0.2)':'rgba(0,0,0,0.15)'};background:transparent;color:inherit;cursor:pointer;opacity:${page>=totalPages-1?'0.3':'1'};`;
       nextBtn.onclick = () => { currentPage++; renderPage(currentPage); };
 
-      pagingDiv.appendChild(prevBtn);
-      pagingDiv.appendChild(pageInfo);
-      pagingDiv.appendChild(nextBtn);
-      body.appendChild(pagingDiv);
+      pagingBar.appendChild(prevBtn);
+      pagingBar.appendChild(pageInfo);
+      pagingBar.appendChild(nextBtn);
     }
 
     renderPage(0);
