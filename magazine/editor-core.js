@@ -536,45 +536,53 @@ async function generateMagazineText(pageType, photo, extraContext, options) {
     );
   }
 
-  // bilingual JSON 스키마 (페이지 타입별)
-  const BILINGUAL_SCHEMA = {
-    fullbleed : '{"ko_caption":"한 줄 캡션","en_caption":"one line caption"}',
-    split     : '{"ko_label":"라벨","ko_text":"본문 (문단 구분은 \\n\\n 사용)","en_label":"label","en_text":"body text"}',
-    grid      : '{"ko_label":"라벨","ko_caption":"캡션","en_label":"label","en_caption":"caption"}',
-    quote     : null,  // 직접 텍스트 구분자 방식
-    spread    : '{"ko_left":"왼쪽 캡션","ko_right":"오른쪽 캡션","en_left":"left caption","en_right":"right caption"}',
-    // 에세이: 본문이 길어 JSON 파싱 실패 위험 → ko/en 본문을 ===KO=== / ===EN=== 구분자로 받음
-    // 단, 라벨/제목만 JSON으로 먼저 받고, 본문은 별도 처리
-    essay     : null,  // 별도 2-step 처리
-    dialogue  : '{"ko_label":"라벨","en_label":"label"}',
-    list      : '{"ko_label":"라벨","ko_title":"제목","en_label":"label","en_title":"title"}',
-    milestone : '{"ko_label":"라벨","ko_text":"한 줄 문장","en_label":"label","en_text":"one sentence"}',
-    botanical : '{"ko_caption":"캡션 (12자 이내)","en_caption":"caption (under 8 words)"}',
-    closing   : '{"ko_text":"클로징 문장","en_text":"closing sentence"}',
+  // ── 다국어 동적 스키마 ──────────────────────────────────────────
+  const FIELD_SETS = {
+    fullbleed : ['caption'],
+    split     : ['label', 'text'],
+    grid      : ['label', 'caption'],
+    quote     : ['text'],
+    spread    : ['left', 'right'],
+    essay     : ['label', 'title', 'text'],
+    dialogue  : ['label'],
+    list      : ['label', 'title'],
+    milestone : ['label', 'text'],
+    botanical : ['caption'],
+    closing   : ['text'],
   };
-  const schema = BILINGUAL_SCHEMA[pageType];
-  // essay는 구분자 방식으로 따로 처리
-  const useDelimiter = (schema === null && (pageType === 'essay' || pageType === 'quote'));
+  const FIELD_HINTS = {
+    caption: { ko: '한 줄 캡션', other: 'one line caption' },
+    label:   { ko: '라벨', other: 'label' },
+    text:    { ko: '본문 (문단 구분은 \\n\\n 사용)', other: 'body text' },
+    title:   { ko: '제목', other: 'title' },
+    left:    { ko: '왼쪽 캡션', other: 'left caption' },
+    right:   { ko: '오른쪽 캡션', other: 'right caption' },
+  };
+  const langs = currentLangs.length ? currentLangs : DEFAULT_LANGS;
+  const fields = FIELD_SETS[pageType] || null;
+  const useDelimiter = (pageType === 'essay' || pageType === 'quote');
+
+  function buildSchema() {
+    if (!fields) return null;
+    const parts = [];
+    fields.forEach(f => {
+      langs.forEach(langKey => {
+        const hint = FIELD_HINTS[f] || { ko: f, other: f };
+        const hintText = langKey === 'ko' ? hint.ko : hint.other;
+        parts.push(`"${langKey}_${f}":"${hintText}"`);
+      });
+    });
+    return `{${parts.join(',')}}`;
+  }
+  const schema = useDelimiter ? null : buildSchema();
+  const langLabel = LANGUAGES.filter(l => langs.includes(l.key)).map(l => l.label).join(', ');
+
   const bilingualNote = useDelimiter
     ? pageType === 'quote'
-      ? `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):
-===KO===
-한국어 인용 문장 한 줄 (Vase 문체, 명조체 어울리는 한 문장)
-===EN===
-English quote sentence (one line, poetic)`
-      : `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):
-===LABEL===
-라벨|영문라벨
-===TITLE===
-제목|영문제목
-===KO===
-한국어 본문 (Vase 문체, 여러 문단 가능)
-===EN===
-English body (poetic, natural, multiple paragraphs ok)`
+      ? `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):\n` + langs.map(l => `===${l.toUpperCase()}===\n` + (l === 'ko' ? '한국어 인용 문장 한 줄 (Vase 문체, 명조체 어울리는 한 문장)' : `${(LANGUAGES.find(x=>x.key===l)||{}).label || l} quote sentence (one line, poetic)`)).join('\n')
+      : `\n\n결과는 아래 형식으로만 반환 (다른 텍스트 없이):\n===LABEL===\n` + langs.map(l => l==='ko'?'라벨':`${l} label`).join('|') + `\n===TITLE===\n` + langs.map(l => l==='ko'?'제목':`${l} title`).join('|') + `\n` + langs.map(l => `===${l.toUpperCase()}===\n` + (l === 'ko' ? '한국어 본문 (Vase 문체, 여러 문단 가능)' : `${(LANGUAGES.find(x=>x.key===l)||{}).label || l} body (poetic, natural, multiple paragraphs ok)`)).join('\n')
     : schema
-      ? `\n\n반드시 아래 JSON 형식으로만 반환하세요 (다른 텍스트 없이, JSON 값 안에서 줄바꿈은 반드시 \\n으로 이스케이프):
-${schema}
-한국어는 Vase 문체로, 영어는 poetic하고 자연스러운 영문으로.`
+      ? `\n\n반드시 아래 JSON 형식으로만 반환하세요 (다른 텍스트 없이, JSON 값 안에서 줄바꿈은 반드시 \\n으로 이스케이프):\n${schema}\n한국어는 Vase 문체로, 그 외 언어(${langLabel})는 각 언어로 자연스럽고 시적으로.`
       : '';
 
   let system = `당신은 한국 크리에이터 Vase Lim(@sapmanri)의 웹매거진 글쓰기 도구입니다.
@@ -651,26 +659,40 @@ ${instruction}${bilingualNote}`;
   if (data.error) throw new Error(data.error.message);
   const raw = data.content?.[0]?.text?.trim() || '';
 
-  // essay: 구분자 방식 파싱
+  // essay/quote: 구분자 방식 파싱 (동적 언어 대응)
   if (useDelimiter) {
     try {
+      const result = {};
       if (pageType === 'essay') {
         const labelMatch = raw.match(/===LABEL===\s*([\s\S]*?)===TITLE===/);
-        const titleMatch = raw.match(/===TITLE===\s*([\s\S]*?)===KO===/);
-        const koMatch    = raw.match(/===KO===\s*([\s\S]*?)===EN===/);
-        const enMatch    = raw.match(/===EN===\s*([\s\S]*?)(?:$|===)/);
-        const [ko_label, en_label] = (labelMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
-        const [ko_title, en_title] = (titleMatch?.[1]?.trim() || '|').split('|').map(s => s.trim());
-        const ko_text = koMatch?.[1]?.trim() || '';
-        const en_text = enMatch?.[1]?.trim() || '';
-        if (ko_text) return { ko_label, en_label, ko_title, en_title, ko_text, en_text };
+        const titleMatch = raw.match(/===TITLE===\s*([\s\S]*?)===[A-Z]+===/);
+        const labelParts = (labelMatch?.[1]?.trim() || '').split('|').map(s => s.trim());
+        const titleParts = (titleMatch?.[1]?.trim() || '').split('|').map(s => s.trim());
+        langs.forEach((l, i) => {
+          result[`${l}_label`] = labelParts[i] || '';
+          result[`${l}_title`] = titleParts[i] || '';
+        });
+        let hasText = false;
+        langs.forEach((l, i) => {
+          const nextDelim = langs[i+1] ? `===${langs[i+1].toUpperCase()}===` : '$';
+          const re = new RegExp(`===${l.toUpperCase()}===\\s*([\\s\\S]*?)(?:${nextDelim}|$)`);
+          const m = raw.match(re);
+          const text = m?.[1]?.trim() || '';
+          result[`${l}_text`] = text;
+          if (l === 'ko' && text) hasText = true;
+        });
+        if (hasText) return result;
       } else if (pageType === 'quote') {
-        // quote: ===KO=== 한 문장 ===EN=== English sentence
-        const koMatch = raw.match(/===KO===\s*([\s\S]*?)(?:===EN===|$)/);
-        const enMatch = raw.match(/===EN===\s*([\s\S]*?)(?:$|===)/);
-        const ko_text = koMatch?.[1]?.trim() || raw.trim();
-        const en_text = enMatch?.[1]?.trim() || '';
-        if (ko_text) return { ko_text, en_text };
+        let hasText = false;
+        langs.forEach((l, i) => {
+          const nextDelim = langs[i+1] ? `===${langs[i+1].toUpperCase()}===` : '$';
+          const re = new RegExp(`===${l.toUpperCase()}===\\s*([\\s\\S]*?)(?:${nextDelim}|$)`);
+          const m = raw.match(re);
+          const text = m?.[1]?.trim() || (l === 'ko' && i === 0 ? raw.trim() : '');
+          result[`${l}_text`] = text;
+          if (l === 'ko' && text) hasText = true;
+        });
+        if (hasText) return result;
       }
     } catch(err) {}
     return { _raw: raw, _parseError: true };
@@ -1577,70 +1599,65 @@ async function genPageText(idx, extraContext) {
 
     const result = await generateMagazineText(pg.type, photo, effectiveContext, { needsTitle });
 
-    // bilingual JSON 결과 처리
+    // 다국어 결과 매핑: 페이지 타입의 필드(label/title/text/caption/left/right)를
+    // pg.{field}(ko), pg.{field}_{lang}(그외)로 자동 분배.
+    // 기존 _en 필드 패턴은 그대로 유지하되, 다른 언어는 _ja, _zhTw 등으로 추가.
+    function applyField(field, pgKey) {
+      langs.forEach(l => {
+        const val = result[`${l}_${field}`];
+        if (val === undefined) return;
+        const targetKey = l === 'ko' ? pgKey : `${pgKey}_${l}`;
+        pg[targetKey] = val;
+      });
+    }
+
     if (result && typeof result === 'object' && !result._parseError) {
-      // 각 페이지 타입별로 ko/en 필드 매핑
       switch (pg.type) {
         case 'fullbleed':
         case 'grid':
-          pg.caption    = result.ko_caption || pg.caption;
-          pg.caption_en = result.en_caption || '';
-          if (result.ko_label !== undefined) { pg.label    = result.ko_label; pg.label_en = result.en_label || ''; }
+          applyField('caption', 'caption');
+          if (result.ko_label !== undefined) applyField('label', 'label');
           break;
         case 'split':
-          pg.label    = result.ko_label || pg.label;
-          pg.label_en = result.en_label || '';
-          pg.text     = result.ko_text  || pg.text;
-          pg.text_en  = result.en_text  || '';
+          applyField('label', 'label');
+          applyField('text', 'text');
           break;
         case 'quote':
-          pg.text    = result.ko_text || pg.text;
-          pg.text_en = result.en_text || '';
+          applyField('text', 'text');
           break;
         case 'spread':
-          pg.captionLeft     = result.ko_left  || pg.captionLeft;
-          pg.captionLeft_en  = result.en_left  || '';
-          pg.captionRight    = result.ko_right || pg.captionRight;
-          pg.captionRight_en = result.en_right || '';
+          applyField('left', 'captionLeft');
+          applyField('right', 'captionRight');
           break;
         case 'essay':
           if (needsTitle) {
-            pg.label    = result.ko_label || pg.label;
-            pg.label_en = result.en_label || '';
-            pg.title    = result.ko_title || pg.title;
-            pg.title_en = result.en_title || '';
+            applyField('label', 'label');
+            applyField('title', 'title');
           }
-          pg.text    = result.ko_text || pg.text;
-          pg.text_en = result.en_text || '';
+          applyField('text', 'text');
           break;
         case 'dialogue':
-          pg.label    = result.ko_label || pg.label;
-          pg.label_en = result.en_label || '';
+          applyField('label', 'label');
           break;
         case 'list':
-          pg.label    = result.ko_label || pg.label;
-          pg.label_en = result.en_label || '';
-          pg.title    = result.ko_title || pg.title;
-          pg.title_en = result.en_title || '';
+          applyField('label', 'label');
+          applyField('title', 'title');
           break;
         case 'milestone':
-          pg.label    = result.ko_label || pg.label;
-          pg.label_en = result.en_label || '';
-          pg.text     = result.ko_text  || pg.text;
-          pg.text_en  = result.en_text  || '';
+          applyField('label', 'label');
+          applyField('text', 'text');
           break;
         case 'botanical':
-          pg.caption    = result.ko_caption || result._raw || pg.caption;
-          pg.caption_en = result.en_caption || '';
+          applyField('caption', 'caption');
+          if (!pg.caption && result._raw) pg.caption = result._raw;
           if (!pg.title) pg.title = pg.caption;
           break;
         case 'closing':
-          pg.text    = result.ko_text || pg.text;
-          pg.text_en = result.en_text || '';
+          applyField('text', 'text');
           break;
       }
     } else {
-      // fallback: 파싱 실패 또는 구조 없는 경우 기존 방식
+      // fallback: 파싱 실패 또는 구조 없는 경우 — ko 텍스트만이라도 채움
       const text = result?._raw || result || '';
       if (pg.type === 'fullbleed' || pg.type === 'grid') pg.caption = text;
       else if (pg.type === 'split') pg.text = text;
@@ -1676,25 +1693,28 @@ async function genCoverHeadline(idx) {
   const pg = pages[idx];
   const photoId = pg.imageId;
   const photo = photos.find(p => p.id === photoId);
+  const langs = currentLangs.length ? currentLangs : DEFAULT_LANGS;
   try {
     toast('생성 중…');
-    // KO headline
-    const koText = await generateMagazineText('cover', photo, '두 줄로 줄바꿈하여 작성. 한국어로만.');
-    const koLines = (typeof koText === 'string' ? koText : koText?._raw || '').split('\n').filter(Boolean);
-    pg.headline = [koLines[0] || '', koLines[1] || ''];
+    for (const langKey of langs) {
+      const langInfo = LANGUAGES.find(l => l.key === langKey);
+      const langName = langInfo ? langInfo.label : langKey;
+      const instruction = langKey === 'ko'
+        ? '두 줄로 줄바꿈하여 작성. 한국어로만.'
+        : `Write 2 lines in ${langName} only. Poetic, short. Newline between lines. No other language.`;
+      const text = await generateMagazineText('cover', photo, instruction);
+      const lines = (typeof text === 'string' ? text : text?._raw || '').split('\n').filter(Boolean);
+      const targetKey = langKey === 'ko' ? 'headline' : `headline_${langKey}`;
+      pg[targetKey] = [lines[0] || '', lines[1] || ''];
 
-    // EN headline (별도 호출)
-    const enText = await generateMagazineText('cover', photo, 'Write 2 lines in English only. Poetic, short. Newline between lines. No Korean.');
-    const enLines = (typeof enText === 'string' ? enText : enText?._raw || '').split('\n').filter(Boolean);
-    pg.headline_en = [enLines[0] || '', enLines[1] || ''];
-
-    // TOC도 EN으로 자동 번역
-    if ((pg.toc || []).length) {
-      const tocKo = pg.toc.join('\n');
-      const tocEnText = await generateMagazineText('cover', null,
-        `이 목차 항목들을 영문으로 번역해줘 (각 항목은 줄바꿈으로 구분, 번역본만 반환): ${tocKo}`);
-      const tocEnLines = (typeof tocEnText === 'string' ? tocEnText : tocEnText?._raw || '').split('\n').filter(Boolean);
-      pg.toc_en = tocEnLines;
+      // TOC 번역 (ko는 원문 그대로 두므로 스킵)
+      if (langKey !== 'ko' && (pg.toc || []).length) {
+        const tocKo = pg.toc.join('\n');
+        const tocText = await generateMagazineText('cover', null,
+          `이 목차 항목들을 ${langName}로 번역해줘 (각 항목은 줄바꿈으로 구분, 번역본만 반환): ${tocKo}`);
+        const tocLines = (typeof tocText === 'string' ? tocText : tocText?._raw || '').split('\n').filter(Boolean);
+        pg[`toc_${langKey}`] = tocLines;
+      }
     }
 
     renderPageList();
@@ -2133,6 +2153,12 @@ async function publish() {
           out.cta     = pg.cta     || '';
           break;
       }
+      // en 외 추가 언어(ja, zhTw 등) 필드 자동 복사 — pg에 있는 모든 _{lang} 필드를 그대로 out에 반영
+      currentLangs.filter(l => l !== 'ko' && l !== 'en').forEach(langKey => {
+        Object.keys(pg).forEach(k => {
+          if (k.endsWith(`_${langKey}`)) out[k] = pg[k];
+        });
+      });
       exportedPages.push(out);
     }
 
