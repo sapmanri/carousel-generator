@@ -526,6 +526,13 @@ ${instruction}${bilingualNote}`;
     userContent = `다음 내용을 바탕으로 글을 써주세요.${ctxText}`;
   }
 
+  // closing/milestone 페이지는 사진도 컨텍스트도 없을 때 빈 프롬프트가 되어
+  // Claude가 "내용이 없다"는 메타 발화를 리턴하는 문제 방지.
+  // 지시문이 이미 system에 들어있으므로, 최소한의 시작 신호만 제공한다.
+  if (!ctxText && !photo && ['closing', 'milestone'].includes(pageType)) {
+    userContent = `위 지시에 따라 이 호의 마무리에 어울리는 짧은 문구를 써주세요. 지정된 형식(JSON)으로만 반환하세요.`;
+  }
+
   // 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체
   // 모델은 기존과 동일하게 claude-sonnet-4-6 유지. 프롬프트/파싱 로직 변경 없음.
   const maxTok = pageType === 'botanical' ? 80 : (pageType === 'essay' ? 2000 : schema ? 1600 : 1200);
@@ -1483,6 +1490,7 @@ async function genPageText(idx, extraContext) {
       const PLACEHOLDER_MARKERS = [
         '내용이 전달되지 않았습니다', '주제나 컨텍스트를 입력', '어떤 장면, 사진',
         '내용이 비어 있네요', '바탕이 될 내용을 함께 보내', '어떤 내용을 담을지',
+        '내용이 입력되지 않은', '어떤 이야기를 바탕으로',
       ];
       const isPlaceholder = (t) => t && PLACEHOLDER_MARKERS.some(m => t.includes(m));
 
