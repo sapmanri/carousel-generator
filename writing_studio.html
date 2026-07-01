@@ -998,6 +998,12 @@ header {
 
 <div class="toast" id="toast"></div>
 
+<!-- Shared Writing Engine 모듈 (sapmanri_constitution → sapmanri_qc → shared_writing_engine 순서 필수) -->
+<script src="/shared-config.js"></script>
+<script src="/sapmanri_constitution.js?v=20260701a"></script>
+<script src="/sapmanri_qc.js?v=20260701a"></script>
+<script src="/shared_writing_engine.js?v=20260701a"></script>
+
 <script>
 // ══════════════════════════════════════════
 // 설정 상수
@@ -1007,368 +1013,27 @@ const GITHUB_FILE = 'profile_data.json';
 const GH_TOKEN_KEY = 'ws_gh_token';
 const API_KEY_KEY  = 'ws_api_key';
 
-const WATCH_PHRASES = [
-  '문득','어쩌면','어느새','조용히','따뜻하게',
-  '작은 행복','소소한 행복','위로','힐링',
-  '그 정도면 충분했다','대단한 일은 아니었다',
-  '괜찮다','잘하고 있다','삶은','우리는','소중함','마음 한켠'
-];
 
-const LESSON_PATTERNS = [
-  '그래서 우리는','삶은 결국','행복이란',
-  '소중함을 알게','괜찮아도 된다','그것만으로 충분','작은 위로가'
-];
-
-const OPEN_OPTIONS  = ['사물','행동','소리','빛','대화','상태'];
-const DEV_OPTIONS   = ['관찰','기억','비교','발견','대조','누락된 것'];
-const END_OPTIONS   = ['열린 끝','장면 끝','질문 끝','침묵 끝','사물 끝','행동 끝'];
-
-const TYPE_LABEL = {
-  webmag:'웹매거진',
-  sapmanri_blog:'삽만리닷컴 블로그',
-  naver_blog:'네이버 블로그',
-  pause_book:'잠깐 멈춰.',
-  instagram:'인스타 캡션',
-  youtube:'유튜브',
-  carousel:'인스타 캐러셀',
-  postcard:'포스트카드',
-  skyline:'Skyline Music Matcher',
-  // legacy compatibility
-  poem:'시·산문',
-  blog:'블로그'
-};
-
-const VOICE_LABEL = {
-  sapmanri:'Sapmanri Voice',
-  pause_book:'잠깐 멈춰 Voice'
-};
-
-const OUTPUT_PRIORITY = ['webmag','sapmanri_blog','naver_blog','pause_book','instagram','youtube','carousel','postcard','skyline'];
-
-const OUTPUT_PROFILES = {
-  webmag: {
-    label:'웹매거진', defaultChars:2600, shortChars:1600, normalChars:2600, longChars:4200,
-    minChars:1800, maxChars:5000,
-    spec:[
-      '제목 1개, 리드 1개, 본문 4~8개 섹션',
-      '사진/장면을 기반으로 하지만 사진 설명문처럼 쓰지 않음',
-      'SEO는 약하게. 읽는 흐름과 문체 우선',
-      '마지막은 정리문이 아니라 장면 안의 사물/움직임으로 닫음'
-    ]
-  },
-  sapmanri_blog: {
-    label:'삽만리닷컴 블로그', defaultChars:1500, shortChars:900, normalChars:1500, longChars:2200,
-    minChars:1200, maxChars:2600,
-    spec:[
-      '제목, 본문, SEO Focus keyphrase, Meta description, Slug 후보 3개, 태그 포함',
-      '본문 1200자 이상 권장. 웹사이트용이라 너무 일기처럼 흐르지 않음',
-      'Focus keyphrase와 Meta description은 반드시 출력',
-      '태그는 #버전과 키워드형을 함께 고려'
-    ]
-  },
-  naver_blog: {
-    label:'네이버 블로그', defaultChars:2200, shortChars:1500, normalChars:2200, longChars:3000,
-    minChars:1500, maxChars:3500,
-    spec:[
-      '전체 본문 최소 1500자 이상',
-      '핵심 키워드 8~12회 자연 반복. 사용자가 키워드를 넣으면 그 키워드를 우선',
-      '첫 두 줄에 핵심 키워드 포함',
-      '중간 소제목 3~5개, 사진 위치 [사진 1] 등 5~10개 제안',
-      '태그 10~20개. 검색용이지만 광고문처럼 쓰지 않음'
-    ]
-  },
-  pause_book: {
-    label:'잠깐 멈춰.', defaultChars:800, shortChars:450, normalChars:800, longChars:1200,
-    minChars:400, maxChars:1600,
-    spec:[
-      '책 원고 후보. SEO, 해시태그, 홍보문 금지',
-      '짧은 행갈이, 여백, 잔향 유지',
-      '관찰을 충분히 쌓은 뒤 아주 작은 인식만 남김',
-      '추상명사보다 구체적인 사물로 끝냄'
-    ]
-  },
-  instagram: {
-    label:'인스타', defaultChars:500, shortChars:250, normalChars:500, longChars:800,
-    minChars:200, maxChars:900,
-    spec:[
-      '첫 줄은 장면을 붙잡는 짧은 문장',
-      '본문 2~6문장 또는 짧은 행갈이',
-      '해시태그는 반드시 5개만 출력',
-      '서두르지 않았다/별것 없다/충분했다 남발 금지'
-    ]
-  },
-  youtube: {
-    label:'유튜브', defaultChars:900, shortChars:500, normalChars:900, longChars:1300,
-    minChars:500, maxChars:1600,
-    spec:[
-      '제목 후보 5개, 설명란, 고정댓글, 해시태그 포함',
-      '첫 두 줄은 검색과 클릭을 고려',
-      '시골살이/전원주택/마당있는 집/먼저 살아보고 있습니다 맥락 반영',
-      '필요하면 타임라인 섹션 포함'
-    ]
-  },
-  carousel: {
-    label:'캐러셀', defaultChars:420, shortChars:250, normalChars:420, longChars:700,
-    minChars:200, maxChars:900,
-    spec:[
-      '카드 5~8장',
-      '각 카드 1~3줄',
-      '첫 카드는 제목, 마지막 카드는 장면 또는 여운',
-      '카드별 문장만 명확히 분리'
-    ]
-  },
-  postcard: {
-    label:'포스트카드', defaultChars:120, shortChars:40, normalChars:120, longChars:220,
-    minChars:30, maxChars:300,
-    spec:[
-      '1줄 문장 5개 + 2~4행 짧은 문장 3개',
-      '명언처럼 완성하지 않음',
-      '이미지 위 여백을 고려',
-      '사물/빛/거리/손/속도 중 하나가 남게 함'
-    ]
-  },
-  skyline: {
-    label:'Skyline', defaultChars:180, shortChars:80, normalChars:180, longChars:350,
-    minChars:60, maxChars:500,
-    spec:[
-      '음악 매칭용 장면 해석',
-      'mood words, tempo words, texture words 포함',
-      '긴 산문 금지. 음악 추천에 필요한 감정/속도/밀도 중심',
-      '한 줄 요약 포함'
-    ]
-  }
-};
-
-
-const TYPE_INSTRUCTION = {
-  webmag: `웹매거진 원고를 생성한다.
-- 입력이 이미지든 텍스트든 둘 다든, 먼저 Vase가 쓴 것 같은 Original Draft를 만든 뒤 웹매거진 문장으로 정리한다
-- 제목 1개, 리드문 1개, 본문 4~8개 섹션을 출력한다
-- 지정 글자수에 맞춘다. 기본은 2600자 안팎이다
-- 사진 설명문처럼 쓰지 말고 장면에서 시작한다
-- 본문은 삽만리 웹매거진에 바로 넣을 수 있는 길이와 호흡
-- 마지막은 교훈이 아니라 장면/사물/행동으로 닫는다`,
-
-  sapmanri_blog: `삽만리닷컴 블로그 글을 생성한다.
-- 제목, 본문, SEO Focus keyphrase, Meta description, slug 후보, 태그를 반드시 포함한다
-- 본문은 지정 글자수에 맞춘다. 기본은 1500자, 최소 1200자 이상이다
-- 검색 키워드는 자연스럽게 넣되 문체를 해치지 않는다
-- 한글 중심, 필요하면 짧은 영문 보조 문장 허용
-- 반드시 Focus keyphrase와 Meta description을 함께 제공한다
-- Meta description은 120~155자 안팎으로 작성한다`,
-
-  naver_blog: `네이버 블로그 글을 생성한다.
-- 제목, 첫 두 줄 SEO 도입, 본문, 소제목 3~5개, 마무리, 태그를 포함한다
-- 전체 본문은 지정 글자수에 맞춘다. 기본은 2200자, 최소 1500자 이상이다
-- 핵심 키워드는 8~12회 자연스럽게 반복한다. 키워드를 모르면 제목/입력에서 하나를 정하고 명시한다
-- 사진이 들어갈 위치를 [사진 1], [사진 2]처럼 5~10개 제안한다
-- 삽만리 문체를 유지하되 네이버 검색 유입을 위해 조금 더 설명적이어도 된다
-- 광고문처럼 쓰지 않는다`,
-
-  pause_book: `산문집 《잠깐 멈춰.》 원고 후보를 생성한다.
-- 책 문체 전용. 블로그처럼 설명하지 않는다
-- 짧은 행갈이, 여백, 잔향을 유지한다
-- 감정을 직접 말하지 말고 사물, 손, 빛, 거리, 속도, 이름과 몸의 차이로 남긴다
-- 교훈, 홍보, SEO, 해시태그 금지
-- 오래 보존될 문장처럼 쓰되 과하게 예쁘게 꾸미지 않는다`,
-
-  instagram: `인스타그램 캡션을 생성한다.
-- 첫 줄은 장면을 붙잡는 짧은 문장
-- 본문은 2~5문장 또는 짧은 행갈이 산문
-- 해시태그는 반드시 5개만 제공한다
-- 같은 말(서두르지 않았다, 별것 없다, 충분했다) 반복 금지
-- 홍보문보다 오늘의 장면 기록에 가깝게`,
-
-  youtube: `유튜브 텍스트를 생성한다.
-- 제목 후보 5개
-- 설명란 본문
-- 고정댓글 1개
-- 해시태그 5~8개
-- 첫 두 줄은 검색과 클릭을 고려하되 삽만리 톤을 해치지 않는다
-- 시골살이/전원주택/마당있는 집/먼저 살아보고 있습니다 맥락을 필요할 때 반영한다`,
-
-  carousel: `인스타 캐러셀용 문장을 생성한다.
-- 카드 1~7장 구조로 나눈다
-- 각 카드는 1~3줄, 짧고 명확하게
-- 카드 문장은 이미지 위에 얹어도 읽히는 길이여야 한다
-- 첫 카드는 제목, 마지막 카드는 여운 또는 장면으로 닫는다
-- 출력은 카드 번호와 카드별 문장으로 정리한다`,
-
-  postcard: `포스트카드용 짧은 문장을 생성한다.
-- 1줄 문장 5개, 2~4행 짧은 문장 3개를 제안한다
-- 너무 완성된 명언처럼 쓰지 않는다
-- 이미지 위에 얹었을 때 여백이 살아야 한다
-- 사물/빛/거리/손/속도 중 하나가 남게 한다`,
-
-  skyline: `Skyline Music Matcher용 텍스트를 생성한다.
-- 장면의 감정, 리듬, 속도, 밀도, 색온도를 짧게 정리한다
-- 음악 매칭에 쓸 수 있도록 mood words, tempo words, texture words를 포함한다
-- 설명은 기술적이기보다 감각적으로 쓴다
-- 필요하면 추천 문장 3개와 검색 키워드 8~12개를 제공한다`,
-
-  poem: `짧은 시 또는 산문시 후보를 생성한다.
-- 한 호흡 단위로 행을 끊는다
-- 장면과 사물로 감정을 드러내고, 감정을 직접 설명하지 않는다
-- 교훈형 결말을 붙이지 않는다
-- 해시태그 없음`,
-
-  blog: `블로그 포스트 후보를 생성한다.
-- 목적이 불분명하면 삽만리닷컴 블로그 기준으로 작성한다
-- 제목, 본문, SEO Focus keyphrase, Meta description을 포함한다`
-};
-
-function getVoiceForType(type) {
-  return type === 'pause_book' ? 'pause_book' : 'sapmanri';
-}
-
-function getOutputInstruction(type) {
-  return TYPE_INSTRUCTION[type] || TYPE_INSTRUCTION.webmag;
-}
-
-function getOutputProfile(type) {
-  return OUTPUT_PROFILES[type] || OUTPUT_PROFILES.webmag;
-}
-
-function getTargetLengthSpec(type) {
-  const profile = getOutputProfile(type);
-  const presetEl = document.getElementById('lengthPreset');
-  const customEl = document.getElementById('customCharTarget');
-  const preset = presetEl ? presetEl.value : 'default';
-  let target = profile.defaultChars;
-  if (preset === 'short') target = profile.shortChars;
-  else if (preset === 'normal') target = profile.normalChars;
-  else if (preset === 'long') target = profile.longChars;
-  else if (preset === 'custom') {
-    const n = parseInt(customEl && customEl.value, 10);
-    if (!Number.isNaN(n) && n > 0) target = n;
-  }
-  target = Math.max(profile.minChars || 40, Math.min(profile.maxChars || 5000, target));
-  return { preset, target, min: profile.minChars, max: profile.maxChars };
-}
-
-function getFocusKeyword() {
-  const el = document.getElementById('focusKeywordInput');
-  return el ? el.value.trim() : '';
-}
-
-function estimateMaxTokensForType(type) {
-  const spec = getTargetLengthSpec(type);
-  return Math.max(1500, Math.min(7000, Math.ceil(spec.target * 2.2)));
-}
-
-function buildOutputProfileText(type) {
-  const profile = getOutputProfile(type);
-  const len = getTargetLengthSpec(type);
-  const keyword = getFocusKeyword();
-  const lines = [
-    `출력 규격: ${profile.label}`,
-    `목표 글자수: 약 ${len.target.toLocaleString()}자 (허용 범위 ${len.min.toLocaleString()}~${len.max.toLocaleString()}자)`,
-    keyword ? `핵심 키워드: ${keyword}` : '핵심 키워드: 입력에서 자연스럽게 추출하되, 필요하면 제목에 맞춰 하나를 정한다.',
-    '',
-    '반드시 지킬 출력 규격:',
-    ...(profile.spec || []).map(s => `- ${s}`)
-  ];
-  if (type === 'naver_blog') {
-    lines.push('', '네이버 블로그 특별 규칙:', '- 첫 두 줄에 핵심 키워드를 자연스럽게 넣는다.', '- 핵심 키워드를 본문 전체에 8~12회 자연 반복한다.', '- 1500자 미만이면 실패로 간주한다.', '- 소제목 3~5개와 [사진 n] 위치 제안을 포함한다.');
-  }
-  if (type === 'sapmanri_blog') {
-    lines.push('', '삽만리닷컴 특별 규칙:', '- SEO Focus keyphrase와 Meta description을 반드시 출력한다.', '- Slug 후보는 영어 소문자와 하이픈만 사용한다.', '- 본문이 너무 짧으면 실패로 간주한다.');
-  }
-  return lines.join('\n');
-}
-
-function buildOutputContractText(type) {
-  const label = TYPE_LABEL[type] || type;
-  return `현재 출력 목적: ${label}\nVoice: ${VOICE_LABEL[getVoiceForType(type)]}\n\n${buildOutputProfileText(type)}\n\n${getOutputInstruction(type)}`;
-}
-
-function updateOutputProfileUI() {
-  const profile = getOutputProfile(autoType || 'webmag');
-  const len = getTargetLengthSpec(autoType || 'webmag');
-  const out = document.getElementById('outputProfilePreview');
-  const lenOut = document.getElementById('lengthProfilePreview');
-  if (out) {
-    out.innerHTML = `<strong style="color:var(--accent)">${escHtml(profile.label)}</strong><br>${(profile.spec||[]).slice(0,3).map(s=>'· '+escHtml(s)).join('<br>')}`;
-  }
-  if (lenOut) {
-    lenOut.innerHTML = `목표 약 <strong style="color:var(--accent)">${len.target.toLocaleString()}자</strong> · 허용 ${len.min.toLocaleString()}~${len.max.toLocaleString()}자`;
-  }
-}
-
-// ══════════════════════════════════════════
-// 상태
-// ══════════════════════════════════════════
-let state = {
-  type: 'webmag',
-  rawInput: '',
-  materials: [],           // { id, category, text, selected }
-  scenes: [],              // 선택된 장면 텍스트 배열
-  persp: '나',
-  grain: '관찰형',
-  openMode: '사물',
-  devMode: '관찰',
-  endMode: '열린 끝',
-  candidates: [],          // { type, text, selected }
-  editorText: '',
-  generationHistory: [],   // 최근 30개 생성 텍스트
-};
-
-let db = { examples: [], pairs: [], rules: [] };
-let githubFileSha = null;
-
-// ══════════════════════════════════════════
-// v4.0 — Sapmanri Constitution / Perception / Thinking / QC Bridge
-// ══════════════════════════════════════════
-const SAPMANRI_CONSTITUTION = {
-  philosophy: [
-    '글은 감정을 설명하는 것이 아니라, 익숙한 장면에서 처음 보는 틈을 발견하는 일이다.',
-    '잘 쓰는 것보다 잘 멈추는 것이 먼저다.',
-    '장면은 배경이 아니라 생각보다 먼저 독자를 세워두는 자리다.',
-    '하나의 글에는 하나의 발견만 남긴다.',
-    '독자를 설득하지 않는다. 장면 앞에 같이 세워둔다.'
-  ],
-  observation: [
-    '가장 눈에 띄는 것보다 오래 보게 된 것을 고른다.',
-    '사람의 감정보다 손, 빛, 거리, 천, 바람, 그림자, 표면, 온도 같은 물성을 먼저 본다.',
-    '사진이 이미 말하고 있는 것을 다시 설명하지 않는다.',
-    '속도를 설명하지 말고 속도가 보이게 한다.',
-    '예쁜 풍경보다 생활의 작은 어긋남, 늦게 알아차린 것, 이름과 몸의 차이를 본다.'
-  ],
-  thinking: [
-    '이 장면 앞에서 왜 멈췄는지 한 줄만 남긴다.',
-    '감정의 이름보다 인식의 변화를 우선한다.',
-    '큰 결론으로 확장하지 않는다. 그날의 작은 오류와 발견 안에서 끝낸다.',
-    '질문이 생기면 답하지 말고 질문 가까이에 둔다.'
-  ],
-  sentence: [
-    '짧은 행갈이를 쓰되, 리듬을 꾸미기 위해 억지로 끊지 않는다.',
-    '좋은 문장은 예쁜 문장이 아니라 독자가 한 번 멈추게 만드는 문장이다.',
-    '마지막 문장은 의미 정리가 아니라 장면 안에 아직 남아 있는 사물, 움직임, 빛, 거리 중 하나로 둔다.',
-    '설명형 비교문(A는 B지만 C는 D다)을 기본적으로 피한다.'
-  ],
-  avoid: [
-    '좋았다, 충분했다, 괜찮다, 조용히, 천천히 같은 안전한 결말로 도망가지 않는다.',
-    '보여준다, 알게 된다, 의미한다, 생각했다 같은 해석 동사를 남발하지 않는다.',
-    '우리는, 삶은, 결국, 소중함, 위로처럼 큰 말로 확장하지 않는다.',
-    '최근 글과 같은 시작 방식, 같은 결말 구조, 같은 감정 처리 방식을 반복하지 않는다.'
-  ],
-  evolution: [
-    '최근 문체는 감정보다 인지에 가깝다.',
-    '사물을 오래 보는 것보다, 알고 있다고 생각한 것의 틈을 다시 보는 쪽으로 진화했다.',
-    '사진 산문은 예쁜 묘사보다 생활 속 발견의 기록에 가깝다.'
-  ]
-};
-const RUNTIME_RULES = [
-  ...SAPMANRI_CONSTITUTION.philosophy.slice(0, 3),
-  ...SAPMANRI_CONSTITUTION.observation.slice(0, 4),
-  ...SAPMANRI_CONSTITUTION.thinking.slice(0, 3),
-  ...SAPMANRI_CONSTITUTION.sentence.slice(1, 4),
-  ...SAPMANRI_CONSTITUTION.avoid.slice(0, 3)
-];
-const OBSERVATION_AXES = ['시간','습관','온도','거리','손의 움직임','사용감','기다림','남은 것','사라진 것','소리','무게','빛','반복','어긋남','흔적','빈자리','인지의 차이','이름과 몸','늦게 본 것','작은 오류'];
-const VIEWPOINTS = ['기록','관찰','발견','질문','회상','메모','혼잣말','인지','생활 기록'];
-const THINKING_AXES = ['발견','인지의 균열','이름과 실제의 차이','늦게 알아차림','사라진 것','남은 것','거리감','속도감','몸의 방향','생활의 작은 오류'];
-const IMAGE_CACHE_FILE = 'image_cache.json';
+// ── 공유 모듈 위임 ──────────────────────────────────────────────
+// 아래 상수/데이터는 sapmanri_constitution.js(SapConstitution)가
+// Single Source of Truth. writing_studio.html은 참조만 한다.
+// 기존 코드가 이 이름을 직접 참조하므로 로컬 alias로 유지한다.
+const WATCH_PHRASES         = SapConstitution.WATCH_PHRASES;
+const LESSON_PATTERNS       = SapConstitution.LESSON_PATTERNS;
+const OPEN_OPTIONS          = SapConstitution.OPEN_OPTIONS;
+const DEV_OPTIONS           = SapConstitution.DEV_OPTIONS;
+const END_OPTIONS           = SapConstitution.END_OPTIONS;
+const TYPE_LABEL            = SapConstitution.TYPE_LABEL;
+const VOICE_LABEL           = SapConstitution.VOICE_LABEL;
+const OUTPUT_PRIORITY       = SapConstitution.OUTPUT_PRIORITY;
+const OUTPUT_PROFILES       = SapConstitution.OUTPUT_PROFILES;
+const TYPE_INSTRUCTION      = SapConstitution.TYPE_INSTRUCTION;
+const SAPMANRI_CONSTITUTION = SapConstitution.SAPMANRI_CONSTITUTION;
+const RUNTIME_RULES         = SapConstitution.RUNTIME_RULES;
+const OBSERVATION_AXES      = SapConstitution.OBSERVATION_AXES;
+const VIEWPOINTS            = SapConstitution.VIEWPOINTS;
+const THINKING_AXES         = SapConstitution.THINKING_AXES;
+const IMAGE_CACHE_FILE      = 'image_cache.json'; // writing_studio.html 로컬 DB 경로 — 보존
 let libraryCacheEntries = {};
 let libraryPickerTarget = 'auto';
 let autoImageMeta = null;
@@ -1397,31 +1062,67 @@ function updateImageMetaStatus() {
   if (a) a.textContent = imageMetaSummary(autoImageMeta);
   if (m) m.textContent = imageMetaSummary(manualImageMeta);
 }
-function buildRuntimeRulesText() {
-  return RUNTIME_RULES.map((r,i)=>`${i+1}. ${r}`).join('\n');
+// ── 빌더 함수 위임 wrapper ───────────────────────────────────────
+// 내부 로직은 sapmanri_constitution.js로 이전.
+// 함수 이름/시그니처는 기존 호출부가 그대로 쓸 수 있도록 유지.
+function safeJsonFromText(raw) { return SharedWritingEngine.safeJsonFromText(raw); }
+function safeArray(v)           { return SharedWritingEngine.safeArray(v); }
+function buildRuntimeRulesText()  { return SapConstitution.buildRuntimeRulesText(); }
+function buildConstitutionText()  { return SapConstitution.buildConstitutionText(); }
+function buildRecentStyleMemoryText() { return SapConstitution.buildRecentStyleMemoryText(state.generationHistory); }
+function buildAvoidPhraseText()   { return SapConstitution.buildAvoidPhraseText(state.generationHistory); }
+
+// DOM 읽기가 필요한 함수 — wrapper로 유지하고 SapConstitution에 opts로 전달
+function getFocusKeyword() {
+  const el = document.getElementById('focusKeywordInput');
+  return el ? el.value.trim() : '';
 }
-function buildConstitutionText() {
-  const sections = [
-    ['Philosophy', SAPMANRI_CONSTITUTION.philosophy],
-    ['Observation', SAPMANRI_CONSTITUTION.observation],
-    ['Thinking', SAPMANRI_CONSTITUTION.thinking],
-    ['Sentence', SAPMANRI_CONSTITUTION.sentence],
-    ['Avoid', SAPMANRI_CONSTITUTION.avoid],
-    ['Evolution', SAPMANRI_CONSTITUTION.evolution],
-  ];
-  return sections.map(([title, arr]) => `## ${title}\n` + arr.map((r,i)=>`${i+1}. ${r}`).join('\n')).join('\n\n');
+function getTargetLengthSpec(type) {
+  const presetEl = document.getElementById('lengthPreset');
+  const customEl = document.getElementById('customCharTarget');
+  return SapConstitution.getTargetLengthSpec(type, {
+    preset:       presetEl ? presetEl.value : 'default',
+    customTarget: customEl ? parseInt(customEl.value, 10) : 0,
+  });
 }
-function buildRecentStyleMemoryText() {
-  const recent = state.generationHistory.slice(-12).join('\n---\n');
-  if (!recent.trim()) return '최근 생성 기록 없음';
-  return recent.slice(-3000);
+function estimateMaxTokensForType(type) {
+  return SapConstitution.estimateMaxTokensForType(type, {
+    preset:       (document.getElementById('lengthPreset') || {}).value || 'default',
+    customTarget: parseInt((document.getElementById('customCharTarget') || {}).value, 10) || 0,
+  });
 }
-function buildAvoidPhraseText() {
-  const recentText = state.generationHistory.slice(-30).join('\n');
-  const overused = WATCH_PHRASES.filter(p => (recentText.match(new RegExp(p,'g'))||[]).length >= 2);
-  const base = ['한참 보고 있었다','그 손이 좋았다','서두르지 않았다','그 정도면 충분했다','그런 오후였다','마음이 늦어졌다','좋았다','충분했다','괜찮았다','조용히','천천히','보여준다','알게 된다','생각했다','의미한다'];
-  return [...new Set([...base, ...overused])];
+function buildOutputProfileText(type) {
+  return SapConstitution.buildOutputProfileText(type, {
+    preset:       (document.getElementById('lengthPreset') || {}).value || 'default',
+    customTarget: parseInt((document.getElementById('customCharTarget') || {}).value, 10) || 0,
+    focusKeyword: getFocusKeyword(),
+  });
 }
+function buildOutputContractText(type) {
+  return SapConstitution.buildOutputContractText(type, {
+    preset:       (document.getElementById('lengthPreset') || {}).value || 'default',
+    customTarget: parseInt((document.getElementById('customCharTarget') || {}).value, 10) || 0,
+    focusKeyword: getFocusKeyword(),
+  });
+}
+function getVoiceForType(type)      { return SapConstitution.getVoiceForType(type); }
+function getOutputInstruction(type) { return SapConstitution.getOutputInstruction(type); }
+function getOutputProfile(type)     { return SapConstitution.getOutputProfile(type); }
+
+function updateOutputProfileUI() {
+  const type = autoType || 'webmag';
+  const profile = getOutputProfile(type);
+  const len = getTargetLengthSpec(type);
+  const out = document.getElementById('outputProfilePreview');
+  const lenOut = document.getElementById('lengthProfilePreview');
+  if (out) {
+    out.innerHTML = `<strong style="color:var(--accent)">${escHtml(profile.label)}</strong><br>${(profile.spec||[]).slice(0,3).map(s=>'· '+escHtml(s)).join('<br>')}`;
+  }
+  if (lenOut) {
+    lenOut.innerHTML = `목표 약 <strong style="color:var(--accent)">${len.target.toLocaleString()}자</strong> · 허용 ${len.min.toLocaleString()}~${len.max.toLocaleString()}자`;
+  }
+}
+
 function metaToMaterialData(meta) {
   if (!meta) return null;
   return {
@@ -1648,129 +1349,30 @@ async function ensureManualImageMeta(key, text='') {
   }
   return null;
 }
-async function buildPerceptionPlan(key, payload) {
-  const avoid = buildAvoidPhraseText();
-  const system = `너는 MIMESIS Writing Studio v4의 Perception + Thinking Engine이다. 글을 쓰지 않는다. 입력에서 무엇을 볼지, 왜 멈출지, 무엇을 버릴지만 정한다. JSON만 출력한다.`;
-  const user = `입력 정보를 보고 글쓰기 전 사고 계획을 만든다.
+// ── Perception / QC 함수 위임 wrapper ───────────────────────────
+// 내부 로직은 공유 모듈로 이전.
+// 기존 호출부는 시그니처가 동일하므로 수정 없이 그대로 동작한다.
 
-Sapmanri Writing Constitution:
-${buildConstitutionText()}
-
-입력 타입: ${payload.input_type}
-원문/메모: ${payload.text || ''}
-선택 소재: ${payload.materials || ''}
-이미지 메타 JSON:
-${payload.image_meta || ''}
-
-최근 생성 기록 일부:
-${buildRecentStyleMemoryText()}
-
-선택 가능한 observation_axis: ${OBSERVATION_AXES.join(', ')}
-선택 가능한 thinking_axis: ${THINKING_AXES.join(', ')}
-선택 가능한 viewpoint: ${VIEWPOINTS.join(', ')}
-피해야 할 표현: ${avoid.join(', ')}
-
-중요:
-- 글을 쓰지 말 것.
-- 예쁜 소재를 고르지 말고, 사용자가 멈출 만한 작은 틈을 고를 것.
-- 사진/메모에 보이는 것을 전부 쓰려 하지 말고 하나를 버리고 하나만 남길 것.
-- small_shift는 감정 이름이 아니라 인식의 변화여야 한다.
-
-반드시 아래 JSON만 출력:
-{
-  "selected_material": "오늘 중심으로 볼 소재 하나",
-  "discarded_materials": ["이번 글에서 일부러 버릴 소재 2~4개"],
-  "focus_reason": "왜 그것을 골랐는지 한 문장",
-  "observation_axis": "${OBSERVATION_AXES.join('|')}",
-  "thinking_axis": "${THINKING_AXES.join('|')}",
-  "viewpoint": "${VIEWPOINTS.join('|')}",
-  "small_shift": "장면 앞에서 생긴 작은 인식 변화 한 줄",
-  "final_image": "마지막에 남길 수 있는 장면/물성 후보 하나",
-  "do_not_write": ["이번 글에서 쓰지 말아야 할 것 2~4개"],
-  "avoid_phrases": []
-}`;
-  const raw = await callClaude(key, user, system, 1000, 2);
-  const plan = safeJsonFromText(raw);
-  plan.avoid_phrases = [...new Set([...(plan.avoid_phrases||[]), ...avoid])];
-  return plan;
+// buildPerceptionPlan: key 인자는 더 이상 받지 않음 (SharedWritingEngine이 내부에서 처리)
+// 하위 호환을 위해 key를 첫 번째 인자로 받아도 무시한다.
+async function buildPerceptionPlan(_key, payload) {
+  return SharedWritingEngine.buildPerceptionPlan(payload, state.generationHistory, toast);
 }
 function planToText(plan) {
-  if (!plan) return '';
-  return `선택 소재: ${plan.selected_material || ''}\n버린 소재: ${safeArray(plan.discarded_materials).join(', ')}\n선택 이유: ${plan.focus_reason || ''}\n관찰 축: ${plan.observation_axis || ''}\n사고 축: ${plan.thinking_axis || ''}\n관점: ${plan.viewpoint || ''}\n작은 변화: ${plan.small_shift || ''}\n마지막 이미지: ${plan.final_image || ''}\n금지: ${safeArray(plan.do_not_write).join(', ')}\n피할 표현: ${safeArray(plan.avoid_phrases).join(', ')}`;
+  return SharedWritingEngine.planToText(plan);
 }
 function detectSapmanriIssues(text) {
-  const t = String(text || '');
-  const issues = [];
-  const patterns = [
-    [/앞모습은[\s\S]{0,100}뒷모습은/g, '개념 비교문이 장면보다 앞섬'],
-    [/방향보다[\s\S]{0,60}속도/g, '해석을 법칙처럼 정리함'],
-    [/보여준다|알게 된다|알게 되는|의미한다/g, '해석 동사가 많음'],
-    [/그래서 우리는|삶은 결국|행복이란|소중함을 알게|위로가 된다/g, '교훈형 문장'],
-    [/빠르지도 느리지도 않았다|그냥\s*걷고 있었다|조금 남아 있었다/g, '안전한 관찰 리듬 반복'],
-    [/좋았다|충분했다|괜찮았다|그런 오후였다|마음이 늦어졌다/g, '익숙한 결말로 수렴']
-  ];
-  patterns.forEach(([re, label]) => { if (re.test(t)) issues.push(label); });
-  const lines = t.split('\n').map(x=>x.trim()).filter(Boolean);
-  const last = lines.slice(-3).join(' ');
-  if (/(있었다|생각했다|알게 됐다|알게 된다|보인다|보여준다|충분했다|괜찮다)$/.test(last.trim())) issues.push('마지막이 의미 정리로 끝남');
-  if ((t.match(/\b(것|일|마음|생각)\b/g)||[]).length >= 8) issues.push('추상 명사가 많음');
-  const sentenceLike = t.split(/[.!?。]|\n\n/).filter(x=>x.trim().length>10);
-  if (sentenceLike.length && sentenceLike.filter(x=>/은|는/.test(x) && /다$/.test(x.trim())).length >= 4) issues.push('설명문 리듬이 강함');
-  return [...new Set(issues)].slice(0, 10);
+  return SapQC.detectSapmanriIssues(text);
 }
 function scoreSapmanriWriting(text) {
-  const issues = detectSapmanriIssues(text);
-  const t = String(text || '');
-  const hasScene = /(빛|손|바람|그림자|천|옷자락|흙|창|나무|커피|발|거리|온도|소리|표면|색|냄새)/.test(t);
-  const hasDiscovery = /(몰랐다|처음|이상했다|다르다|알고 있었다|본 적|이름|몸|늦게|문득|깨달았다|생각했다)/.test(t);
-  const explanation = Math.min(100, issues.length * 14);
-  const scene = hasScene ? 85 : 55;
-  const discovery = hasDiscovery ? 88 : 58;
-  const aiSmell = Math.min(100, (t.match(/좋았다|충분했다|소중|위로|힐링|괜찮/g)||[]).length * 20 + issues.length * 5);
-  const sapmanri = Math.max(0, Math.min(100, Math.round((scene + discovery + (100-explanation) + (100-aiSmell)) / 4)));
-  return { scene, discovery, explanation, ai_smell: aiSmell, sapmanri_score: sapmanri, issues };
+  return SapQC.scoreSapmanriWriting(text);
 }
-async function enforceSapmanriQC(key, draft, context={}) {
-  const score = scoreSapmanriWriting(draft);
-  if (score.issues.length === 0 && score.sapmanri_score >= 82) return draft;
-  const system = `너는 삽만리 Writing Studio v5의 Sapmanri QC + Rewrite Engine이다. 새 글을 만들지 말고, 초안의 시선과 장면은 유지한 채 설명, 교훈, 반복, 안전한 결말만 덜어낸다. 단, 출력 매체별 분량/SEO/구조 규격은 절대 줄이지 않는다.`;
-  const user = `아래 초안을 Sapmanri Writing Constitution 기준으로 한 번만 정리한다.
-
-Sapmanri Writing Constitution:
-${buildConstitutionText()}
-
-수정 원칙:
-- 내용과 장면은 유지한다.
-- 초안이 선택한 소재와 Perception Plan을 벗어나지 않는다.
-- 설명형 비교문과 일반 법칙 문장을 줄인다.
-- "보여준다/알게 된다/생각했다/의미한다" 같은 해석 동사를 줄인다.
-- 마지막은 의미 정리가 아니라 장면 안의 물성, 움직임, 거리, 빛, 손, 옷자락 중 하나로 끝낸다.
-- 더 예쁘게 만들지 말고 덜어낸다.
-- 제목 포함, 본문만 출력한다. 설명 금지.
-- 아래 출력 규격의 글자수/구조/SEO 항목을 유지한다. 특히 블로그/웹매거진은 짧은 산문으로 줄이지 않는다.
-
-Writing DNA 점수:
-${JSON.stringify(score, null, 2)}
-
-Perception/Thinking Plan:
-${context.planText || ''}
-
-이미지 메타 요약:
-${context.metaText || ''}
-
-출력 규격:
-${context.outputProfileText || ''}
-
-초안:
-${draft}`;
-  try {
-    const fixed = await callClaude(key, user, system, context.maxTokens || 2200, 1);
-    return fixed && fixed.trim() ? fixed.trim() : draft;
-  } catch(e) {
-    console.warn('Sapmanri QC rewrite failed', e);
-    return draft;
-  }
+// enforceSapmanriQC: key 인자는 더 이상 받지 않음 (SharedWritingEngine.callClaude가 내부 처리)
+async function enforceSapmanriQC(_key, draft, context) {
+  const callClaudeForQC = (u, s, t) => SharedWritingEngine.callClaude(u, s, t, toast);
+  return SapQC.enforceSapmanriQC(callClaudeForQC, draft, context || {});
 }
+
 // ══════════════════════════════════════════
 // GitHub / API Key
 // ══════════════════════════════════════════
@@ -1805,11 +1407,24 @@ function saveApiKey() {
 }
 function getGhToken() { return localStorage.getItem(GH_TOKEN_KEY) || ''; }
 function getApiKey() {
-  const v = document.getElementById('apiKey').value.trim() || localStorage.getItem(API_KEY_KEY) || '';
+  // SapConfig 통합 키 우선, 없으면 ws_api_key 레거시, 없으면 DOM 입력값
+  const v = (window.SapConfig && window.SapConfig.getAnthropicKey()) ||
+            localStorage.getItem(API_KEY_KEY) ||
+            (document.getElementById('apiKey') && document.getElementById('apiKey').value.trim()) || '';
   if (!v) { toast('API Key를 입력해주세요.'); toggleApiKey(); return null; }
   return v;
 }
-
+function saveApiKey() {
+  const v = document.getElementById('apiKey').value.trim();
+  if (!v) return;
+  // SapConfig와 레거시 키 둘 다 저장 (다른 도구와 통합 키 공유)
+  if (window.SapConfig) window.SapConfig.set('anthropic', v);
+  localStorage.setItem(API_KEY_KEY, v);
+  document.getElementById('apiWrap').style.display = 'none';
+  document.getElementById('apiBtn').textContent = 'API Key ✓';
+  document.getElementById('apiBtn').style.color = 'var(--green)';
+  toast('API Key 저장됨');
+}
 // ══════════════════════════════════════════
 // GitHub DB
 // ══════════════════════════════════════════
@@ -2520,60 +2135,12 @@ function updateRefCount() {
 // ══════════════════════════════════════════
 // Claude API 호출
 // ══════════════════════════════════════════
-async function callClaude(key, userMsg, systemMsg='', maxTokens=1500, retryCount=3) {
-  // userMsg는 string 또는 배열(이미지+텍스트) 둘 다 지원
-  const content = Array.isArray(userMsg) ? userMsg : userMsg;
-  const body = {
-    model: 'claude-sonnet-4-5',
-    max_tokens: maxTokens,
-    messages: [{ role:'user', content: content }],
-  };
-  if (systemMsg) body.system = systemMsg;
-
-  let lastError = null;
-  for (let attempt = 0; attempt <= retryCount; attempt++) {
-    try {
-      if (attempt > 0) {
-        toast(`API 혼잡 — ${attempt}번째 재시도 중…`);
-        await new Promise(r => setTimeout(r, 1200 * attempt));
-      }
-
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'x-api-key': key,
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true',
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-      if (data.error) {
-        const msg = data.error.message || data.error.type || 'API error';
-        const retryable =
-          res.status === 429 ||
-          res.status === 500 ||
-          res.status === 529 ||
-          /overload|overloaded|rate|temporarily/i.test(msg);
-
-        if (retryable && attempt < retryCount) {
-          lastError = new Error(msg);
-          continue;
-        }
-        throw new Error(msg);
-      }
-
-      return data.content?.[0]?.text || '';
-    } catch (err) {
-      lastError = err;
-      const msg = err.message || '';
-      const retryable = /overload|overloaded|rate|temporarily|fetch/i.test(msg);
-      if (!retryable || attempt >= retryCount) break;
-    }
-  }
-  throw lastError || new Error('API 호출 실패');
+// 2026-07-01: 실제 API 호출은 shared_writing_engine.js(SharedWritingEngine.callClaude)로 이전.
+// writing_studio.html 내 모든 callClaude(key, user, system, tokens) 호출은
+// 시그니처 변경 없이 이 wrapper를 통해 공유 모듈로 위임된다.
+// key 인자는 하위 호환을 위해 받지만 무시한다 — SharedWritingEngine이 SapConfig에서 직접 읽음.
+async function callClaude(_key, userMsg, systemMsg='', maxTokens=1500, _retryCount=3) {
+  return SharedWritingEngine.callClaude(userMsg, systemMsg, maxTokens, toast);
 }
 
 // ══════════════════════════════════════════
@@ -3435,9 +3002,12 @@ async function init() {
     document.getElementById('ghBtn').textContent = 'GitHub ✓';
     document.getElementById('ghBtn').style.color = 'var(--green)';
   }
-  const apiKey = localStorage.getItem(API_KEY_KEY);
+  // SapConfig 통합 키 우선, 없으면 레거시 ws_api_key
+  const apiKey = (window.SapConfig && window.SapConfig.getAnthropicKey()) ||
+                 localStorage.getItem(API_KEY_KEY);
   if (apiKey) {
-    document.getElementById('apiKey').value = apiKey;
+    const input = document.getElementById('apiKey');
+    if (input) input.value = apiKey;
     document.getElementById('apiBtn').textContent = 'API Key ✓';
     document.getElementById('apiBtn').style.color = 'var(--green)';
   }
