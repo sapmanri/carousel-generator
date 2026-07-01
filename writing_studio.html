@@ -1293,8 +1293,24 @@ function clearManualImageMeta() { manualImageMeta=null; manualImageSource='none'
 async function analyzeImageV2FromBase64(_key, base64, mediaType, extraText='') {
   const meta = await SharedImageAnalyzer.analyze(base64, mediaType, extraText || '');
   meta.source  = 'writing_studio_direct_upload';
-  meta.image_id = 'local_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
-  rememberLocalImageMeta(meta);
+
+  // R2 공유 캐시에 저장 — 같은 이미지를 다른 도구에서 쓰거나 나중에
+  // 라이브러리에 올렸을 때 hash가 일치하면 재분석 없이 재사용 가능.
+  try {
+    const dataUrl = `data:${mediaType};base64,${base64}`;
+    const hash = await SharedCache.hashImage(dataUrl);
+    if (hash) {
+      meta.image_id = hash; // 일관된 hash를 image_id로 사용
+      SharedCache.set(hash, meta); // fire-and-forget (기다리지 않음)
+    } else {
+      meta.image_id = 'local_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+    }
+  } catch(e) {
+    console.warn('[writing_studio] R2 캐시 저장 실패 (분석은 정상):', e.message);
+    meta.image_id = 'local_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+  }
+
+  rememberLocalImageMeta(meta); // localStorage도 유지 (빠른 재접근용)
   return meta;
 }
 function rememberLocalImageMeta(meta) {
