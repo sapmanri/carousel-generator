@@ -1480,7 +1480,10 @@ async function genPageText(idx, extraContext) {
     let effectiveContext = extraContext || '';
     if (!photo && pg.type !== 'fullbleed' && pg.type !== 'spread') {
       // 플레이스홀더 텍스트 감지 (AI가 컨텍스트 없을 때 뱉는 메타 발화)
-      const PLACEHOLDER_MARKERS = ['내용이 전달되지 않았습니다', '주제나 컨텍스트를 입력', '어떤 장면, 사진'];
+      const PLACEHOLDER_MARKERS = [
+        '내용이 전달되지 않았습니다', '주제나 컨텍스트를 입력', '어떤 장면, 사진',
+        '내용이 비어 있네요', '바탕이 될 내용을 함께 보내', '어떤 내용을 담을지',
+      ];
       const isPlaceholder = (t) => t && PLACEHOLDER_MARKERS.some(m => t.includes(m));
 
       const existingBits = [
@@ -1848,8 +1851,8 @@ async function regenAllAndPublish() {
         }
       } else if (pg.type === 'cover') {
         await genCoverHeadline(i);
-      } else if (['essay','dialogue','quote','list'].includes(pg.type)) {
-        // 텍스트 전용 페이지: 주변 사진 분위기 컨텍스트
+      } else if (['essay','dialogue','quote','list','closing','milestone'].includes(pg.type)) {
+        // 텍스트 전용 페이지: 주변 사진 분위기 + 호 제목을 컨텍스트로 수집
         const nearbyMoods = [];
         for (let off = -2; off <= 2; off++) {
           const nb = pages[i + off];
@@ -1859,6 +1862,11 @@ async function regenAllAndPublish() {
             if (nbPhoto.analysis.mood) nearbyMoods.push(nbPhoto.analysis.mood);
             if (nbPhoto.analysis.suggested_caption) nearbyMoods.push(nbPhoto.analysis.suggested_caption);
           }
+        }
+        // closing/milestone은 호 제목도 함께 넘겨 방향을 잡게 함
+        const issueTitle = document.getElementById('fTitle')?.value?.trim();
+        if (issueTitle && ['closing','milestone'].includes(pg.type)) {
+          nearbyMoods.unshift(`이번 호 제목: ${issueTitle}`);
         }
         const ctx = nearbyMoods.filter(Boolean).slice(0, 6).join(', ');
         await genPageText(i, ctx ? `주변 페이지들의 분위기: ${ctx}` : undefined);
