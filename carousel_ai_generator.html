@@ -317,13 +317,8 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 <div class="header">
   <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.5.2-r2</span></div>
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <div id="keyWrap" style="display:flex;align-items:center;gap:8px">
-      <input type="password" id="apiKeyInput" placeholder="sk-ant-..." autocomplete="off"
-        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:200px"
-        oninput="saveApiKey(this.value)" />
-    </div>
-    <div id="apiKeyStatus" style="display:none;cursor:pointer;font-size:10px;letter-spacing:0.1em;color:var(--mute);text-transform:uppercase;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.1);border-radius:2px"
-      onclick="document.getElementById('keyWrap').style.display='flex';document.getElementById('apiKeyStatus').style.display='none';">🔑 KEY 설정됨</div>
+    <div id="apiKeyStatus" style="cursor:pointer;font-size:10px;letter-spacing:0.1em;color:var(--mute);text-transform:uppercase;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.1);border-radius:2px"
+      onclick="window.SapConfig ? window.SapConfig.openSettingsModal() : alert('shared-config.js가 로드되지 않았습니다.')">⚙ 설정</div>
 
     <div id="ghKeyWrap" style="display:flex;align-items:center;gap:8px">
       <input type="password" id="ghTokenInput" placeholder="github_pat_... (이미지 캐시 공유)" autocomplete="off"
@@ -619,20 +614,36 @@ body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padd
 
 
 // ── API Key ──
+// 2026-06-30: 예전엔 'anthropic_key'(로컬 키)만 읽고 썼는데,
+// shared-config.js(SapConfig)는 통합 키 'sapmanri_anthropic_key'를 쓴다.
+// library.html 등에서 설정 모달로 저장하면 통합 키에만 들어가고
+// 캐러셀은 옛날 키만 보다 보니 "키 없음"으로 보였던 것.
+// SapConfig.getAnthropicKey()로 통일하고, SapConfig가 없으면 레거시 폴백.
 function saveApiKey(val) {
-  try { localStorage.setItem('anthropic_key', val); } catch(e) {}
+  try {
+    if (window.SapConfig) { window.SapConfig.set('anthropic', val); }
+    else { localStorage.setItem('anthropic_key', val); }
+  } catch(e) {}
   updateKeyVisibility();
 }
 function getApiKey() {
-  try { return localStorage.getItem('anthropic_key') || ''; } catch(e) { return ''; }
+  try {
+    if (window.SapConfig) {
+      const v = window.SapConfig.getAnthropicKey();
+      if (v) return v;
+    }
+    // SapConfig 없거나 통합 키 비어있으면 레거시 키에서 폴백
+    return localStorage.getItem('anthropic_key') || '';
+  } catch(e) { return ''; }
 }
 function updateKeyVisibility() {
+  // API 키 입력란은 SapConfig 설정 모달로 통합됨 — 상태 표시만 버튼 텍스트로 처리
   const apiKey = getApiKey();
-  const wrap = document.getElementById('keyWrap');
   const status = document.getElementById('apiKeyStatus');
-  if (!wrap || !status) return;
-  if (apiKey) { wrap.style.display = 'none'; status.style.display = 'block'; }
-  else { wrap.style.display = 'flex'; status.style.display = 'none'; }
+  if (!status) return;
+  status.textContent = apiKey ? '⚙ 설정됨' : '⚙ 설정 필요';
+  status.style.borderColor = apiKey ? 'rgba(122,154,126,0.5)' : 'rgba(196,122,106,0.5)';
+  status.style.color = apiKey ? 'var(--green, #7a9a7e)' : 'var(--orange, #c47a6a)';
 }
 
 // ── GitHub Token (이미지 분석 캐시 공유용) ──
@@ -653,9 +664,6 @@ function updateGhKeyVisibility() {
 
 // 페이지 로드 시 저장된 키 복원
 window.addEventListener('load', () => {
-  const saved = getApiKey();
-  const input = document.getElementById('apiKeyInput');
-  if (saved && input) input.value = saved;
   updateKeyVisibility();
 
   const ghToken = SapmanriCache.getToken();
