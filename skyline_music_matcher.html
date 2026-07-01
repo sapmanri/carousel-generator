@@ -1004,6 +1004,9 @@ Respond ONLY as valid JSON:
       try{
         _imgHash = await SapmanriCache.hashImage(imgSrc);
         if(_imgHash) step1 = await SapmanriCache.get(_imgHash, 'skyline');
+        // getLegacy가 라이브러리 flat 구조(mood/suggested_caption 등)를 반환할 수 있음.
+        // skyline step1은 waveform 필드가 필수이므로 없으면 캐시 미스로 처리.
+        if(step1 && !step1.waveform) step1 = null;
       }catch(e){ /* 캐시 조회 실패 시 정상 분석으로 진행 */ }
     }
 
