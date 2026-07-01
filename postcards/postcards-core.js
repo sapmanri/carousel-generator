@@ -10,11 +10,20 @@ const POSTCARDS_FILE = 'postcards/postcards.json';
 const ISSUES_FILE = 'magazine/issues.json';
 const IMAGE_CACHE_FILE = 'image_cache.json';
 
-// ── API Key / GitHub Token (editor-core.js와 동일 패턴) ──
+// ── API Key / GitHub Token ─────────────────────────────────────
+// 2026-07-01: SapConfig 통합 키 우선 + 레거시 폴백 (매거진/캐러셀과 동일 패턴)
 function getApiKey() {
+  if (window.SapConfig) {
+    const v = window.SapConfig.getAnthropicKey();
+    if (v) return v;
+  }
   return document.getElementById('apiKeyField').value.trim() || localStorage.getItem(API_KEY_STORAGE) || '';
 }
 function getGhToken() {
+  if (window.SapConfig) {
+    const v = window.SapConfig.get && window.SapConfig.get('github');
+    if (v) return v;
+  }
   return document.getElementById('ghTokenField').value.trim() || localStorage.getItem(GH_TOKEN_KEY) || '';
 }
 function toggleField(fieldId, btnId, storageKey) {
@@ -23,6 +32,11 @@ function toggleField(fieldId, btnId, storageKey) {
   if (field.classList.contains('open')) {
     if (field.value.trim()) {
       localStorage.setItem(storageKey, field.value.trim());
+      // SapConfig 통합 저장소에도 동기화
+      if (window.SapConfig) {
+        if (storageKey === API_KEY_STORAGE) window.SapConfig.set('anthropic', field.value.trim());
+        if (storageKey === GH_TOKEN_KEY) window.SapConfig.set('github', field.value.trim());
+      }
       btn.classList.add('ok');
     }
     field.classList.remove('open');
@@ -34,45 +48,20 @@ function toggleField(fieldId, btnId, storageKey) {
   }
 }
 document.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem(API_KEY_STORAGE)) document.getElementById('apiKeyBtn').classList.add('ok');
-  if (localStorage.getItem(GH_TOKEN_KEY)) document.getElementById('ghTokenBtn').classList.add('ok');
+  if (getApiKey()) document.getElementById('apiKeyBtn').classList.add('ok');
+  if (getGhToken()) document.getElementById('ghTokenBtn').classList.add('ok');
 });
 
-// ── 이미지 분석 캐시 (editor-core.js의 SapmanriCache와 동일 구조/파일, 읽기 전용 접근) ──
-const PostcardCache = (function () {
-  let _cache = null;
-  let _loadPromise = null;
-
-  async function _load() {
-    const token = getGhToken();
-    try {
-      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${IMAGE_CACHE_FILE}`, {
-        headers: token ? { Authorization: `token ${token}` } : {}
-      });
-      if (!res.ok) { _cache = { entries: {} }; return; }
-      const json = await res.json();
-      const b64 = (json.content || '').replace(/\n/g, '');
-      const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      const text = new TextDecoder().decode(bytes);
-      _cache = JSON.parse(text);
-      if (!_cache.entries) _cache.entries = {};
-    } catch (e) {
-      _cache = { entries: {} };
-    }
+// ── 이미지 분석 캐시 ────────────────────────────────────────────
+// 2026-07-01: 독자적인 GitHub Contents API 직접 호출(PostcardCache) 제거 →
+// SharedCache(R2 우선 + GitHub fallback)로 위임.
+// autoFillFromAnalysis의 get(hash, service) 호출을 SharedCache.get(hash)로 통일.
+const PostcardCache = {
+  get: async function(hash, _service) {
+    if (!hash || !window.SharedCache) return null;
+    return window.SharedCache.get(hash);
   }
-  function _ensureLoaded() {
-    if (!_loadPromise) _loadPromise = _load();
-    return _loadPromise;
-  }
-  async function get(hash, service) {
-    if (!hash || !service) return null;
-    await _ensureLoaded();
-    const entry = _cache.entries[hash];
-    if (!entry || !entry[service]) return null;
-    return entry[service].data;
-  }
-  return { get };
-})();
+};
 
 // ══════════════════════════════════════════════════════════════
 // 라이브러리 그리드
@@ -276,54 +265,51 @@ async function autoFillFromAnalysis(pc, item) {
   if (!pc.title) pc.title = '제목 없음';
 }
 
-// 캐시가 없을 때 새로 분석 (magazine 분석과 동일한 스키마 중 필요한 항목만 요청)
+// 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체.
+// 이미지 v3 분석(SharedImageAnalyzer)과 포스트카드 텍스트 생성을 통합.
 async function analyzeImageForPostcard(dataUrl) {
   const base64 = dataUrl.split(',')[1];
-  const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
-  const key = getApiKey();
-  // profile_data.json에서 Vase 문체 규칙 로드
-  let pcStyleBlock = '';
+  const mediaType = (dataUrl.match(/data:(image\/[^;]+)/) || [])[1] || 'image/jpeg';
+
+  // 1단계: v3 이미지 분석 (SharedImageAnalyzer — library와 동일 스키마)
+  let v3 = null;
   try {
-    const profRes = await fetch('../profile_data.json');
-    const prof = await profRes.json();
-    const rules = (prof.rules || []).slice(0, 5);
-    if (rules.length) pcStyleBlock = `\nVase 문체 규칙:\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
-  } catch(e) {}
+    v3 = await window.SharedImageAnalyzer.analyzeFromDataUrl(dataUrl);
+  } catch(e) { /* 실패해도 2단계에서 직접 처리 */ }
 
-  const prompt = `이 이미지를 보고 포스트카드용 텍스트를 한국어/영어 각각 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-${pcStyleBlock}
+  // v3 분석에서 이미 label/caption 필드가 있으면 그대로 사용
+  if (v3 && (v3.suggested_label || v3.suggested_caption)) {
+    return {
+      label_ko: v3.suggested_label || '',
+      label_en: v3.suggested_label_en || '',
+      caption_ko: v3.suggested_caption || '',
+      caption_en: v3.suggested_caption_en || '',
+      // v3 전체 데이터도 함께 반환 (autoFillFromAnalysis의 필드 매핑 대비)
+      ...v3,
+    };
+  }
 
-절대 금지: "문득", "따뜻하게", "소소한 행복", "위로", "힐링", 교훈형 결말, 입력에 없는 장면 지어내기.
+  // v3 분석 실패 시 포스트카드 전용 텍스트만 요청 (fallback)
+  const pcStyleBlock = SapConstitution
+    ? `\n## Sapmanri 문체 규칙 (일부)\n${SapConstitution.SAPMANRI_CONSTITUTION.avoid.slice(0,3).map((r,i)=>`${i+1}. ${r}`).join('\n')}`
+    : '';
+  const prompt = `이 이미지를 보고 포스트카드용 텍스트를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.${pcStyleBlock}
+절대 금지: "문득", "따뜻하게", "소소한 행복", "위로", "힐링", 교훈형 결말.
 장면과 사물로 감정을 드러낼 것. 감정 직접 설명 금지.
+{"label_ko":"소제목 한국어 (4-8자)","label_en":"Short English label (2-4 words)","caption_ko":"Vase 문체 한국어 캡션 한 줄 (12자 이내)","caption_en":"English caption one line (under 8 words)"}`;
 
-{
-  "label_ko": "소제목 한국어 (4-8자, 장면 묘사, 감정 설명 금지)",
-  "label_en": "Short English label (2-4 words, scene-based)",
-  "caption_ko": "Vase 문체 한국어 캡션 한 줄 (감각적 장면, 12자 이내, 교훈·위로 금지)",
-  "caption_en": "English caption one line (scene-based, poetic, under 8 words)"
-}`;
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 400,
-      messages: [{ role: 'user', content: [
-        { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-        { type: 'text', text: prompt }
-      ]}]
-    })
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  const text = data.content?.find(b => b.type === 'text')?.text || '{}';
-  const s = text.indexOf('{'), e = text.lastIndexOf('}');
-  return JSON.parse(text.slice(s, e + 1));
+  const raw = await window.SharedWritingEngine.callClaude(
+    [
+      { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+      { type: 'text', text: prompt }
+    ],
+    '',
+    400,
+    null,
+    'claude-sonnet-4-6'
+  );
+  const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
+  return JSON.parse(raw.slice(s, e + 1));
 }
 
 // ══════════════════════════════════════════════════════════════
