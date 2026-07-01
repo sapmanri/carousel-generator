@@ -1044,6 +1044,27 @@ const LIBRARY_PAGE_SIZE = 36;
 let libraryPickerPage = 0;
 let libraryPickerFiltered = [];
 
+// ── 앱 상태 ─────────────────────────────────────────────────────
+// (이전에 정적 데이터 블록과 같은 구역에 있다가 실수로 제거됨 — 복구)
+let state = {
+  type: 'webmag',
+  rawInput: '',
+  materials: [],           // { id, category, text, selected }
+  scenes: [],              // 선택된 장면 텍스트 배열
+  persp: '나',
+  grain: '관찰형',
+  openMode: '사물',
+  devMode: '관찰',
+  endMode: '열린 끝',
+  candidates: [],          // { type, text, selected }
+  editorText: '',
+  generationHistory: [],   // 최근 30개 생성 텍스트
+};
+
+let db = { examples: [], pairs: [], rules: [] };
+let githubFileSha = null;
+
+
 function safeJsonFromText(raw) {
   const text = String(raw || '').replace(/```json|```/g,'').trim();
   const s = text.indexOf('{'), e = text.lastIndexOf('}');
