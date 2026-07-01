@@ -1003,6 +1003,7 @@ header {
 <script src="/sapmanri_constitution.js?v=20260701a"></script>
 <script src="/sapmanri_qc.js?v=20260701a"></script>
 <script src="/shared_writing_engine.js?v=20260701a"></script>
+<script src="/shared_image_analyzer.js?v=20260701a"></script>
 
 <script>
 // ══════════════════════════════════════════
@@ -1287,55 +1288,11 @@ function chooseLibraryImage(target, id) {
 function clearAutoImageMeta() { autoImageMeta=null; autoImageSource='none'; updateImageMetaStatus(); toast('자동 메타 초기화'); }
 function clearManualImageMeta() { manualImageMeta=null; manualImageSource='none'; updateImageMetaStatus(); toast('수동 메타 초기화'); }
 
-async function analyzeImageV2FromBase64(key, base64, mediaType, extraText='') {
-  const prompt = `이 사진을 분석해서 아래 JSON 형식으로만 반환해줘. 다른 텍스트 없이 JSON만. 삽만리(@sapmanri)는 한국 농촌/슬로우라이프/생활공예/사진 산문 채널이고, 글쓰기 도구에서 재사용할 수 있게 관찰 재료를 풍부하게 뽑는다.${extraText ? `\n추가 메모: ${extraText}` : ''}
-{
-  "subject_position": "left|center|right|top|bottom|full",
-  "focal_x": 0,
-  "focal_y": 0,
-  "aspect_ratio": "wide|square|tall",
-  "best_page_type": "fullbleed|split|grid|quote|spread|botanical",
-  "overall_brightness": "dark|mid|bright",
-  "dominant_color": "#hex",
-  "color_temperature": "warm|cool|neutral",
-  "contrast_level": "low|medium|high",
-  "visual_density": "low|medium|high",
-  "negative_space": "low|medium|high",
-  "season": "spring|summer|autumn|winter|unknown",
-  "time_of_day": "dawn|morning|day|afternoon|evening|night|unknown",
-  "location_type": "indoor|outdoor|garden|kitchen|workshop|countryside|city|cafe|unknown",
-  "primary_subject": "주요 피사체 한국어 키워드",
-  "secondary_subjects": [],
-  "activity_type": "cooking|gardening|craft|coffee|walking|resting|cleaning|travel|animal|object|unknown",
-  "human_presence": "none|hands|back|side|face|multiple",
-  "animal_presence": "none|cat|dog|bird|other",
-  "material_texture": [],
-  "has_text": false,
-  "text_area_position": "none|top|center|bottom|left|right",
-  "camera_distance": "closeup|medium|wide",
-  "camera_angle": "top_down|eye_level|low_angle|side|unknown",
-  "motion_implied": "still|hand_action|walking|pouring|cutting|making|unknown",
-  "focus_clarity": "clear|soft|busy",
-  "thumbnail_potential": "low|medium|high",
-  "thumbnail_reason": "썸네일 적합도 이유 한 줄",
-  "mood": "한 단어 한국어",
-  "suggested_caption": "한국어 캡션 1줄",
-  "suggested_label": "소제목 한국어",
-  "domesticity_score": 0,
-  "rurality_score": 0,
-  "craft_score": 0,
-  "visual_dna_tags": ["한국어 태그 3~6개"],
-  "sapmanri_score": 0
-}`;
-  const raw = await callClaude(key, [
-    { type:'image', source:{ type:'base64', media_type:mediaType, data:base64 } },
-    { type:'text', text: prompt }
-  ], '이미지 분석 도구입니다. JSON만 출력합니다.', 1600, 2);
-  const meta = safeJsonFromText(raw);
-  meta.schema_version = 'image-analysis-v2';
-  meta.analyzed_at = new Date().toISOString();
-  meta.model = 'claude-sonnet-4-5';
-  meta.source = 'writing_studio_direct_upload';
+// 2026-07-01: v2 분석 함수 → shared_image_analyzer.js(v3)로 위임.
+// 시그니처는 하위 호환을 위해 유지 (key 인자는 무시 — SharedWritingEngine이 내부에서 처리).
+async function analyzeImageV2FromBase64(_key, base64, mediaType, extraText='') {
+  const meta = await SharedImageAnalyzer.analyze(base64, mediaType, extraText || '');
+  meta.source  = 'writing_studio_direct_upload';
   meta.image_id = 'local_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
   rememberLocalImageMeta(meta);
   return meta;
@@ -1351,7 +1308,7 @@ function rememberLocalImageMeta(meta) {
 async function ensureAutoImageMeta(key, text='') {
   if (autoImageMeta) return autoImageMeta;
   if (autoImageBase64) {
-    toast('이미지 v2 분석 중…');
+    toast('이미지 v3 분석 중…');
     autoImageMeta = await analyzeImageV2FromBase64(key, autoImageBase64, autoImageType, text);
     autoImageSource = 'direct-analyzed';
     updateImageMetaStatus();
@@ -1362,7 +1319,7 @@ async function ensureAutoImageMeta(key, text='') {
 async function ensureManualImageMeta(key, text='') {
   if (manualImageMeta) return manualImageMeta;
   if (manualImageBase64) {
-    toast('이미지 v2 분석 중…');
+    toast('이미지 v3 분석 중…');
     manualImageMeta = await analyzeImageV2FromBase64(key, manualImageBase64, manualImageType, text);
     manualImageSource = 'direct-analyzed';
     updateImageMetaStatus();

@@ -151,85 +151,13 @@ function esc(s) {
 // ══════════════════════════════════════════════════════════════
 // 이미지 분석 (carousel_ai_generator.html의 analyzeImage와 동일 패턴)
 // ══════════════════════════════════════════════════════════════
+// 2026-07-01: v2 분석 → SharedImageAnalyzer(v3)로 위임.
+// hints는 하위 호환 유지를 위해 받지만 v3에서는 extraText로 변환.
 async function analyzeImage(dataUrl, hints) {
-  const base64 = dataUrl.split(',')[1];
-  const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
-  const key = getApiKey();
-  if (!key) throw new Error('API Key가 필요합니다.');
-
-  const hintText = hints ? `\n\n이전 분석 참고 (달라도 됨): subject_position=${hints.subject_position}, brightness=${hints.overall_brightness}, color=${hints.dominant_color}, mood=${hints.mood}` : '';
-
-  const prompt = `이 사진을 분석해서 아래 JSON 형식으로만 반환해줘. 다른 텍스트 없이 JSON만. 삽만리(@sapmanri) 는 한국 농촌/슬로우라이프 채널이고, 이 맥락을 반영해서 분석할 것.
-
-{
-  "subject_position": "left|center|right|top|bottom|full",
-  "focal_x": 피사체 가로위치 0~100 숫자,
-  "focal_y": 피사체 세로위치 0~100 숫자,
-  "aspect_ratio": "wide|square|tall",
-  "best_page_type": "fullbleed|split|grid|quote|spread|botanical 중 택1. spread=가로풍경/그룹샷, botanical=정물/클로즈업/식물",
-  "spread_focal_left": 스프레드 왼쪽 크롭 중심 0~100,
-  "spread_focal_right": 스프레드 오른쪽 크롭 중심 0~100,
-
-  "overall_brightness": "dark|mid|bright",
-  "dominant_color": "#hex",
-  "color_temperature": "warm|cool|neutral",
-  "contrast_level": "low|medium|high",
-  "visual_density": "low|medium|high",
-  "negative_space": "low|medium|high",
-
-  "season": "spring|summer|autumn|winter|unknown",
-  "time_of_day": "dawn|morning|day|afternoon|evening|night|unknown",
-  "location_type": "indoor|outdoor|garden|kitchen|workshop|countryside|city|cafe|unknown",
-
-  "primary_subject": "주요 피사체 한국어 키워드 1-2단어",
-  "secondary_subjects": ["배경/보조 피사체 배열"],
-  "activity_type": "cooking|gardening|craft|coffee|walking|resting|cleaning|travel|animal|object|unknown",
-  "human_presence": "none|hands|back|side|face|multiple",
-  "animal_presence": "none|cat|dog|bird|other",
-  "material_texture": ["재질 배열: wood|soil|fabric|metal|water|glass|food|plant|paper|ceramic"],
-  "has_text": true/false,
-  "text_area_position": "none|top|center|bottom|left|right",
-
-  "camera_distance": "closeup|medium|wide",
-  "camera_angle": "top_down|eye_level|low_angle|side|unknown",
-  "motion_implied": "still|hand_action|walking|pouring|cutting|making|unknown",
-  "focus_clarity": "clear|soft|busy",
-
-  "text_safe_area": "left|right|top|bottom|center|none",
-  "thumbnail_potential": "low|medium|high",
-  "thumbnail_reason": "썸네일 적합도 이유 한 줄",
-
-  "mood": "한 단어 한국어 분위기",
-  "suggested_caption": "Vase 문체 한국어 캡션 1줄 (12자 이내, 명조체 어울리는 문장)",
-  "suggested_caption_en": "English caption (poetic, under 8 words)",
-  "suggested_caption_left": "스프레드 왼쪽 캡션 한국어 (10자 이내)",
-  "suggested_caption_right": "스프레드 오른쪽 캡션 한국어 (10자 이내)",
-  "suggested_label": "소제목 한국어 (4-8자)",
-  "suggested_label_en": "English sublabel (2-4 words)",
-
-  "domesticity_score": 0~5 (일상/가정 느낌 강도),
-  "rurality_score": 0~5 (농촌/자연 느낌 강도),
-  "craft_score": 0~5 (수공예/만들기 느낌 강도)
-}${hintText}`;
-
-  // 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체 (API 호출 단일화)
-  // 모델은 기존과 동일하게 claude-sonnet-4-6 유지
-  const raw = await window.SharedWritingEngine.callClaude(
-    [
-      { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-      { type: 'text', text: prompt }
-    ],
-    '',   // system: analyzeImage는 system 없이 user만 사용
-    1200,
-    null,
-    'claude-sonnet-4-6'
-  );
-  const s2 = raw.indexOf('{'), e2 = raw.lastIndexOf('}');
-  const result = JSON.parse(raw.slice(s2, e2 + 1));
-  result.schema_version = 'image-analysis-v2';
-  result.analyzed_at    = new Date().toISOString();
-  result.model          = 'claude-sonnet-4-6';
-  return result;
+  const hintText = hints
+    ? `이전 분석 참고 (달라도 됨): subject_position=${hints.subject_position}, brightness=${hints.overall_brightness}, color=${hints.dominant_color}, mood=${hints.mood}`
+    : '';
+  return window.SharedImageAnalyzer.analyzeFromDataUrl(dataUrl, hintText || undefined);
 }
 
 

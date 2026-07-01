@@ -1016,7 +1016,9 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
       // 공유 캐시 조회 (다른 서비스/이전 세션 결과 재사용)
       if (images[i].hash) {
         const cached = await SapmanriCache.get(images[i].hash, 'carousel');
-        if (cached) {
+        // SapmanriCache.getLegacy가 라이브러리 flat 데이터(suggested_caption 등)를 반환할 수 있음.
+        // 캐러셀 분석은 bright_zone 필드가 있어야 유효 — 없으면 캐시 미스로 처리.
+        if (cached && cached.bright_zone !== undefined) {
           images[i].analysis = cached;
           sharedHits++;
           if (thumb) { thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }

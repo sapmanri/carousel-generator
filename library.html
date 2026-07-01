@@ -238,6 +238,10 @@ header{
 <script src="/shared-config.js?v=20260628r"></script>
 <script src="/shared_storage.js?v=20260630a"></script>
 <script src="/shared_cache.js?v=20260630b"></script>
+<script src="/sapmanri_constitution.js?v=20260701a"></script>
+<script src="/sapmanri_qc.js?v=20260701a"></script>
+<script src="/shared_writing_engine.js?v=20260701a"></script>
+<script src="/shared_image_analyzer.js?v=20260701a"></script>
 <!-- 이미지 라이브러리 모듈 -->
 <script src="/magazine/image-library.js?v=20260628r"></script>
 
@@ -752,42 +756,27 @@ async function analyzeImage(dataUrl, mediaType, apiKey) {
     ]}]
   };
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify(requestBody)
-  });
-
-  const raw = await res.text();
-  let data = null;
-  try { data = raw ? JSON.parse(raw) : null; }
-  catch(e) { console.error('[analyzeImage] non-json response', raw); }
-
-  if (!res.ok || data?.error) {
-    console.error('[analyzeImage] Anthropic error', {
-      status: res.status,
-      statusText: res.statusText,
-      mediaType,
-      base64Length: base64.length,
-      estimatedBytes,
-      response: data || raw
-    });
-    const msg = data?.error?.message || raw || `${res.status} ${res.statusText}`;
-    throw new Error(`analysis failed: ${msg}`);
+  // 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체
+  // SharedImageAnalyzer가 로드돼 있으면 위임, 없으면 직접 callClaude
+  if (window.SharedImageAnalyzer) {
+    const result = await window.SharedImageAnalyzer.analyze(base64, mediaType);
+    return result;
   }
 
-  const text = data?.content?.[0]?.text || '{}';
-  const s = text.indexOf('{'), e = text.lastIndexOf('}');
-  if (s < 0 || e < 0 || e <= s) {
-    console.error('[analyzeImage] JSON parse target missing', text);
-    throw new Error('analysis failed: Claude response did not contain JSON');
-  }
-  const result = JSON.parse(text.slice(s, e + 1));
+  // fallback: SharedImageAnalyzer 미로드 시 직접 호출 (기존 동작 보존)
+  const raw = await window.SharedWritingEngine.callClaude(
+    [
+      { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+      { type: 'text', text: prompt }
+    ],
+    '이미지 분석 도구입니다. JSON만 출력합니다.',
+    1200,
+    null,
+    'claude-sonnet-4-6'
+  );
+  const s2 = raw.indexOf('{'), e2 = raw.lastIndexOf('}');
+  if (s2 < 0 || e2 < 0 || e2 <= s2) throw new Error('analysis failed: Claude response did not contain JSON');
+  const result = JSON.parse(raw.slice(s2, e2 + 1));
   result.schema_version = 'image-analysis-v3';
   result.analyzed_at    = new Date().toISOString();
   result.model          = 'claude-sonnet-4-6';
