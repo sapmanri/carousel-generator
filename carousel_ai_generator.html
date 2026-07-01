@@ -1231,32 +1231,17 @@ async function fetchAndFillFromYoutube() {
 자막 내용(일부): ${transcript}`
       : `영상 제목: "${videoTitle}"`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true',
-        'x-api-key': getApiKey(),
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 250,
-        messages: [{
-          role: 'user',
-          content: `${contextText}
+    // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+    const _ytRaw = await SharedWritingEngine.callClaude(
+      `${contextText}
 
 이 영상 내용을 바탕으로 아래 JSON만 반환해. 다른 텍스트 없이.
-{"topic":"핵심 주제 15자 이내 한국어","text_slide":"인스타 감성 한 문장 20-30자 한국어","mood":"분위기 한 단어"}`
-        }]
-      })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const raw = data.content?.find(b => b.type === 'text')?.text || '';
-    const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
-    if (s === -1) throw new Error('응답에서 JSON을 찾지 못했어요');
-    const result = JSON.parse(raw.slice(s, e + 1));
+{"topic":"핵심 주제 15자 이내 한국어","text_slide":"인스타 감성 한 문장 20-30자 한국어","mood":"분위기 한 단어"}`,
+      '', 250, null, 'claude-haiku-4-5-20251001'
+    );
+    const _yts = _ytRaw.indexOf('{'), _yte = _ytRaw.lastIndexOf('}');
+    if (_yts === -1) throw new Error('응답에서 JSON을 찾지 못했어요');
+    const result = JSON.parse(_ytRaw.slice(_yts, _yte + 1));
 
     // 폼에 자동 채우기
     if (result.topic) {
@@ -1282,21 +1267,17 @@ async function fetchAndFillFromYoutube() {
 async function analyzeImage(dataUrl, topic, style) {
   const base64 = dataUrl.split(',')[1];
   const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
-    body: JSON.stringify({
-      model:'claude-sonnet-4-5', max_tokens:600,
-      messages:[{ role:'user', content:[
-        { type:'image', source:{ type:'base64', media_type:mediaType, data:base64 }},
-        { type:'text', text:`이 이미지를 분석해서 Instagram 캐러셀 슬라이드 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
+  // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+  const _aiRaw = await SharedWritingEngine.callClaude(
+    [
+      { type:'image', source:{ type:'base64', media_type:mediaType, data:base64 }},
+      { type:'text', text:`이 이미지를 분석해서 Instagram 캐러셀 슬라이드 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
 {"subject_position":"left|center|right|top|bottom|full","bright_zone":"top|bottom|left|right|center","dark_zone":"top|bottom|left|right|none","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_copy":"2~4단어 한국어 헤드라인","suggested_body":"감성적 한국어 본문 1~2문장 (주제: ${topic})","best_text_position":"bottom_left|bottom_right|top_left|center_left|center|split_bottom","text_color":"white|dark"}`}
-      ]}]
-    })
-  });
-  const data = await res.json();
-  const text = data.content?.find(b=>b.type==='text')?.text || '{}';
-  const s=text.indexOf('{'), e=text.lastIndexOf('}');
-  return JSON.parse(text.slice(s,e+1));
+    ],
+    '', 600, null, 'claude-sonnet-4-5'
+  );
+  const _ais=_aiRaw.indexOf('{'), _aie=_aiRaw.lastIndexOf('}');
+  return JSON.parse(_aiRaw.slice(_ais,_aie+1));
 }
 
 // ── Claude API: generate plan ──
@@ -1336,13 +1317,9 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
     } catch(e) { /* profile_data.json 없으면 기본 스타일로 진행 */ }
   }
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
-    body: JSON.stringify({
-      model:'claude-sonnet-4-5',
-      max_tokens: style === 'jeonwon' ? 4000 : 2000,
-      messages:[{ role:'user', content:
+  // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+  const _planMaxTok = style === 'jeonwon' ? 4000 : 2000;
+  const _planRaw = await SharedWritingEngine.callClaude(
 `이미지 분석 결과를 바탕으로 Instagram 캐러셀 계획을 순수 JSON으로만 반환해줘. 마크다운 없이 JSON만.
 
 스타일: ${style} / 주제: ${topic||'(이미지 분석 기반)'} / 채널태그: ${tag} / 마무리: ${closing}
@@ -1406,17 +1383,11 @@ ${infographicMode ? `
 - x,y는 0~1 사이 비율 좌표 (이미지 내 해당 사물 위치)
 - direction: "right"|"left"|"up"|"down" (화살표 방향)
 - 인포그래픽이 아닌 슬라이드는 labels 없이 그대로` : ''}`
-      }]
-    })
-  });
-  const data = await res.json();
-  // API 에러 체크
-  if (data.error) throw new Error('API 오류: ' + data.error.message);
-  const raw = data.content?.find(b=>b.type==='text')?.text || '';
-  if (!raw) throw new Error('응답이 비어있어요. 상태: ' + data.stop_reason);
-  if (data.stop_reason === 'max_tokens') {
-    throw new Error('응답이 max_tokens 한도로 잘렸어요. 슬라이드 수를 줄이거나 다시 시도해주세요.');
-  }
+    , '', _planMaxTok, null, 'claude-sonnet-4-5'
+  );
+  // API 에러는 callClaude가 throw하므로 별도 체크 불필요
+  const raw = _planRaw || '';
+  if (!raw) throw new Error('응답이 비어있어요.');
   const s=raw.indexOf('{'), e=raw.lastIndexOf('}');
   if(s===-1||e===-1) throw new Error('JSON 없음: '+raw.slice(0,120));
   let jsonStr = raw.slice(s,e+1);
@@ -2965,20 +2936,16 @@ async function exportPanorama() {
     let panoTxt2 = document.getElementById('panoTextInput')?.value?.trim() || '';
     if (!panoTxt2 && images.length) {
       btn.textContent = '텍스트 생성 중...';
+      // 2026-07-01: fetch → SharedWritingEngine.callClaude()
       try {
-        const res2 = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true','x-api-key':getApiKey(),'anthropic-version':'2023-06-01'},
-          body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001', max_tokens: 60,
-            messages: [{ role: 'user', content: [
-              { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: images[0].dataUrl.split(',')[1] } },
-              { type: 'text', text: '이 이미지의 분위기에 맞는 짧은 감성 문구를 한 줄로 만들어줘. 글자수는 10~20자 한국어. 텍스트만 반환.' }
-            ]}]
-          })
-        });
-        const data2 = await res2.json();
-        panoTxt2 = data2.content?.find(b=>b.type==='text')?.text?.trim() || 'SAPMANRI';
+        const _pRaw = await SharedWritingEngine.callClaude(
+          [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: images[0].dataUrl.split(',')[1] } },
+            { type: 'text', text: '이 이미지의 분위기에 맞는 짧은 감성 문구를 한 줄로 만들어줘. 글자수는 10~20자 한국어. 텍스트만 반환.' }
+          ],
+          '', 60, null, 'claude-haiku-4-5-20251001'
+        );
+        panoTxt2 = _pRaw.trim() || 'SAPMANRI';
       } catch(e) { panoTxt2 = 'SAPMANRI'; }
     } else if (!panoTxt2) { panoTxt2 = 'SAPMANRI'; }
     slides = Array.from({length: slideCount}, (_, i) => ({ headline: panoTxt2, body: '', label: '' }));

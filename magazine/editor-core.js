@@ -212,29 +212,20 @@ async function analyzeImage(dataUrl, hints) {
   "craft_score": 0~5 (수공예/만들기 느낌 강도)
 }${hintText}`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-dangerous-direct-browser-access': 'true',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1200,
-      messages: [{ role: 'user', content: [
-        { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
-        { type: 'text', text: prompt }
-      ]}]
-    })
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  const text = data.content?.find(b => b.type === 'text')?.text || '{}';
-  const s = text.indexOf('{'), e = text.lastIndexOf('}');
-  const result = JSON.parse(text.slice(s, e + 1));
-  // QC 메타 — 스키마 버전/분석일/모델명 항상 기록
+  // 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체 (API 호출 단일화)
+  // 모델은 기존과 동일하게 claude-sonnet-4-6 유지
+  const raw = await window.SharedWritingEngine.callClaude(
+    [
+      { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+      { type: 'text', text: prompt }
+    ],
+    '',   // system: analyzeImage는 system 없이 user만 사용
+    1200,
+    null,
+    'claude-sonnet-4-6'
+  );
+  const s2 = raw.indexOf('{'), e2 = raw.lastIndexOf('}');
+  const result = JSON.parse(raw.slice(s2, e2 + 1));
   result.schema_version = 'image-analysis-v2';
   result.analyzed_at    = new Date().toISOString();
   result.model          = 'claude-sonnet-4-6';
@@ -388,26 +379,16 @@ ${videoCtx ? `\n${videoCtx}\n` : ''}
 결과는 정확히 이 형식의 JSON만 반환하세요. 다른 텍스트 없이:
 {"title":"...","subtitle":"..."}`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 300,
-      system,
-      messages: [{ role: 'user', content: '제목과 부제를 만들어주세요.' }],
-    }),
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  const text = data.content?.[0]?.text || '{}';
-  const s = text.indexOf('{'), e = text.lastIndexOf('}');
-  return JSON.parse(text.slice(s, e + 1));
+  // 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체
+  const raw = await window.SharedWritingEngine.callClaude(
+    '제목과 부제를 만들어주세요.',
+    system,
+    300,
+    null,
+    'claude-sonnet-4-5'
+  );
+  const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
+  return JSON.parse(raw.slice(s, e + 1));
 }
 
 const PAGE_TEXT_INSTRUCTION = {
@@ -545,24 +526,16 @@ ${instruction}${bilingualNote}`;
     userContent = `다음 내용을 바탕으로 글을 써주세요.${ctxText}`;
   }
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: pageType === 'botanical' ? 80 : (pageType === 'essay' ? 2000 : schema ? 1600 : 1200),
-      system,
-      messages: [{ role: 'user', content: userContent }],
-    }),
-  });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  const raw = data.content?.[0]?.text?.trim() || '';
+  // 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체
+  // 모델은 기존과 동일하게 claude-sonnet-4-6 유지. 프롬프트/파싱 로직 변경 없음.
+  const maxTok = pageType === 'botanical' ? 80 : (pageType === 'essay' ? 2000 : schema ? 1600 : 1200);
+  const raw = await window.SharedWritingEngine.callClaude(
+    userContent,
+    system,
+    maxTok,
+    null,
+    'claude-sonnet-4-6'
+  );
 
   // essay/quote: 구분자 방식 파싱 (동적 언어 대응)
   if (useDelimiter) {

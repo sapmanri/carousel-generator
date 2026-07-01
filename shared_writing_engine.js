@@ -52,14 +52,15 @@
   // writing_studio.html의 callClaude()와 100% 동일.
   // 모델, 재시도 횟수, 헤더, 에러 분류 모두 그대로 추출.
   // 이 함수가 이 파일 외에 존재하면 안 된다.
-  async function callClaude(userMsg, systemMsg, maxTokens, toastFn) {
+  // model: 기본값 'claude-sonnet-4-5'. 도구별로 다른 모델이 필요하면 명시적으로 전달.
+  async function callClaude(userMsg, systemMsg, maxTokens, toastFn, model) {
     const key = getApiKey();
     if (!key) throw new Error('Anthropic API Key가 설정되지 않았습니다 (SapConfig 또는 localStorage ws_api_key).');
 
     const retryCount = 3;
     const content = Array.isArray(userMsg) ? userMsg : userMsg;
     const body = {
-      model: 'claude-sonnet-4-5',
+      model: model || 'claude-sonnet-4-5',
       max_tokens: maxTokens || 1500,
       messages: [{ role: 'user', content: content }],
     };

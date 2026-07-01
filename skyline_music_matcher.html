@@ -1005,14 +1005,9 @@ Respond ONLY as valid JSON:
     }
 
     if(!step1){
-      const res1=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1600,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}]}]})
-      });
-      const data1=await res1.json();
-      if(data1.error)throw new Error(data1.error.message);
-      step1=JSON.parse(data1.content[0].text.replace(/```json|```/g,'').trim());
+      // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+      const _s1raw=await window.SharedWritingEngine.callClaude([{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}],'',1600,null,'claude-sonnet-4-6');
+      step1=JSON.parse(_s1raw.replace(/```json|```/g,'').trim());
 
       // 캐시에 저장 (fire-and-forget, 수동 보정 결과는 저장하지 않음)
       if(_imgHash && !window.manualPath){
@@ -1069,14 +1064,9 @@ Respond ONLY as valid JSON:
   "caption_line3": "— 세 번째 줄"
 }`;
 
-    const res2=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:promptStep2}]})
-    });
-    const data2=await res2.json();
-    if(data2.error)throw new Error(data2.error.message);
-    const step2=JSON.parse(data2.content[0].text.replace(/```json|```/g,'').trim());
+    // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+    const _s2raw=await window.SharedWritingEngine.callClaude(promptStep2,'',800,null,'claude-sonnet-4-6');
+    const step2=JSON.parse(_s2raw.replace(/```json|```/g,'').trim());
 
     // 두 결과 합치기
     cachedResult={...step1, ...step2};
@@ -1273,14 +1263,9 @@ Pick the 3 most thematically and emotionally fitting videos. Consider: season, l
 Respond ONLY as JSON, no markdown:
 {"picks":[{"id":"videoId","title":"title","reason":"한국어로 1문장 추천 이유"}]}`;
 
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':akey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
-    });
-    const aiData=await res.json();
-    if(aiData.error)throw new Error(aiData.error.message);
-    const picks=JSON.parse(aiData.content[0].text.replace(/```json|```/g,'').trim()).picks;
+    // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+    const _mpraw=await window.SharedWritingEngine.callClaude(prompt,'',600,null,'claude-sonnet-4-6');
+    const picks=JSON.parse(_mpraw.replace(/```json|```/g,'').trim()).picks;
 
     recList.innerHTML=picks.map(p=>`
       <a href="https://www.youtube.com/watch?v=${p.id}" target="_blank"
@@ -1372,14 +1357,8 @@ All prose in ${lang}. No labels. No markdown.`
 
 
   try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await res.json();
-    if(data.error)throw new Error(data.error.message);
-    const raw=data.content[0].text.trim();
+    // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+    const raw=await window.SharedWritingEngine.callClaude(prompt,'',1200,null,'claude-sonnet-4-6');
     // Split caption and pin comment — separated by ===COMMENT===
     const parts=raw.split('===COMMENT===');
     let body=parts[0].trim();
@@ -1749,14 +1728,9 @@ Pick the 3 most thematically and emotionally fitting videos. Consider: season, l
 Respond ONLY as JSON, no markdown:
 {"picks":[{"id":"videoId","title":"title","reason":"한국어로 1문장 추천 이유"}]}`;
 
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':akey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,messages:[{role:'user',content:prompt}]})
-    });
-    const aiData=await res.json();
-    if(aiData.error)throw new Error(aiData.error.message);
-    const picks=JSON.parse(aiData.content[0].text.replace(/```json|```/g,'').trim()).picks;
+    // 2026-07-01: fetch → SharedWritingEngine.callClaude()
+    const _mp2raw=await window.SharedWritingEngine.callClaude(prompt,'',600,null,'claude-sonnet-4-6');
+    const picks=JSON.parse(_mp2raw.replace(/```json|```/g,'').trim()).picks;
 
     recList.innerHTML=picks.map(p=>`
       <a href="https://www.youtube.com/watch?v=${p.id}" target="_blank"
