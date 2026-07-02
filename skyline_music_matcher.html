@@ -1310,6 +1310,7 @@ async function generateInstaCaption(){
       const prof = await profRes.json();
       const rules = prof.rules || [];
       const examples = (prof.examples || []).slice(-4);
+      const pairs = (prof.pairs || []).slice(-3); // 2026-07-02: skyline도 pairs 연결
       if(rules.length){
         styleBlock += `\n\nVASE 문체 규칙 (반드시 따를 것):\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
       }
@@ -1318,12 +1319,13 @@ async function generateInstaCaption(){
         styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬 참고, 복사 금지):\n`;
         filteredEx.forEach((e,i)=>{ styleBlock += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,400)}\n`; });
       }
-      // v3 강화: 절대 금지 패턴
-      styleBlock += `\n\n절대 금지:\n`;
-      styleBlock += `- 교훈형 결말: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게"\n`;
-      styleBlock += `- 감성 상투어: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"\n`;
-      styleBlock += `- 입력에 없는 장면 지어내기\n`;
-      styleBlock += `- 감정 직접 설명 (장면·사물로 드러낼 것)`;
+      if(pairs.length){
+        styleBlock += `\n\nVASE 수정 패턴 (AI 초안 → 수정본, 이 패턴에서 선호 파악):\n`;
+        pairs.forEach((p,i)=>{ styleBlock += `\n[AI]: ${(p.original||'').slice(0,200)}\n[수정]: ${(p.edited||'').slice(0,200)}\n`; });
+      }
+      // 2026-07-02: 하드코딩 절대금지 목록 제거 → SapConstitution SSOT 사용
+      styleBlock += `\n\n${SapConstitution.buildConstitutionText()}`;
+      styleBlock += `\n\n${SapConstitution.buildAvoidExamplesText()}`;
     }catch(e){ /* profile_data.json 없으면 기본 스타일로 진행 */ }
   }
 
