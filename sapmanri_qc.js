@@ -37,9 +37,14 @@
       issues.push('마지막이 의미 정리로 끝남');
     if ((t.match(/\b(것|일|마음|생각)\b/g)||[]).length >= 8)
       issues.push('추상 명사가 많음');
+    // 2026-07-02 완화: 단순 '~다'/은-는 문장 개수만으로 판정하지 않는다.
+    // 한국어 산문은 짧은 문장이 '~다'로 끝나고 은/는을 쓰는 것이 자연스러운 기본 리듬이라,
+    // 이 카운트만으로는 삽만리 특유의 짧은 시적 문체(예: "촛불 하나. 차는 뜨거웠는데, 불은 작았다.")까지
+    // 오탐으로 잡는 문제가 있었다. 해석/설명 연결어가 함께 있을 때만 '설명문 리듬'으로 판정한다.
     const sentenceLike = t.split(/[.!?。]|\n\n/).filter(x => x.trim().length > 10);
-    if (sentenceLike.length &&
-        sentenceLike.filter(x => /은|는/.test(x) && /다$/.test(x.trim())).length >= 4)
+    const shortDeclarativeCount = sentenceLike.filter(x => /은|는/.test(x) && /다$/.test(x.trim())).length;
+    const explanatoryConnector = /그래서|때문에|의미(한다|했다|하는)?|결국|나는\s*생각했다|생각한다|알게\s*되었다|알게\s*됐다|알게\s*된다|깨달았다/;
+    if (shortDeclarativeCount >= 4 && explanatoryConnector.test(t))
       issues.push('설명문 리듬이 강함');
     return [...new Set(issues)].slice(0, 10);
   }
