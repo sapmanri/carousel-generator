@@ -450,7 +450,7 @@ ${instruction}${bilingualNote}`;
       filteredExamples.forEach((e, i) => { system += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,500)}\n`; });
     }
     // 2026-07-02 추가: AI 초안 → vase 실제 수정본 pairs (carousel/skyline과 동일 패턴)
-    const filteredPairs = (profile.pairs || []).slice(-3);
+    const filteredPairs = (profile.pairs || []).filter(p => !p.qc_flag).slice(-3);
     if (filteredPairs.length > 0) {
       system += `\n\n## Vase 수정 패턴 (AI 초안 → 수정본, 이 패턴에서 선호 파악)\n`;
       filteredPairs.forEach((p, i) => {
