@@ -1012,7 +1012,7 @@ Respond ONLY as valid JSON:
 
     if(!step1){
       // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-      const _s1raw=await window.SharedWritingEngine.callClaude([{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}],'',1600,null,'claude-sonnet-4-6');
+      const _s1raw=await window.SharedWritingEngine.callClaude([{type:'image',source:{type:'base64',media_type:mtype,data:b64}},{type:'text',text:promptStep1}],'',1600,null,'claude-sonnet-5');
       step1=JSON.parse(_s1raw.replace(/```json|```/g,'').trim());
 
       // 캐시에 저장 (fire-and-forget, 수동 보정 결과는 저장하지 않음)
@@ -1071,7 +1071,7 @@ Respond ONLY as valid JSON:
 }`;
 
     // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-    const _s2raw=await window.SharedWritingEngine.callClaude(promptStep2,'',800,null,'claude-sonnet-4-6');
+    const _s2raw=await window.SharedWritingEngine.callClaude(promptStep2,'',800,null,'claude-sonnet-5');
     const step2=JSON.parse(_s2raw.replace(/```json|```/g,'').trim());
 
     // 두 결과 합치기
@@ -1270,7 +1270,7 @@ Respond ONLY as JSON, no markdown:
 {"picks":[{"id":"videoId","title":"title","reason":"한국어로 1문장 추천 이유"}]}`;
 
     // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-    const _mpraw=await window.SharedWritingEngine.callClaude(prompt,'',600,null,'claude-sonnet-4-6');
+    const _mpraw=await window.SharedWritingEngine.callClaude(prompt,'',600,null,'claude-sonnet-5');
     const picks=JSON.parse(_mpraw.replace(/```json|```/g,'').trim()).picks;
 
     recList.innerHTML=picks.map(p=>`
@@ -1366,7 +1366,7 @@ All prose in ${lang}. No labels. No markdown.`
 
   try{
     // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-    const raw=await window.SharedWritingEngine.callClaude(prompt,'',1200,null,'claude-sonnet-4-6');
+    const raw=await window.SharedWritingEngine.callClaude(prompt,'',1200,null,'claude-sonnet-5');
     // Split caption and pin comment — separated by ===COMMENT===
     const parts=raw.split('===COMMENT===');
     let body=parts[0].trim();
@@ -1737,7 +1737,7 @@ Respond ONLY as JSON, no markdown:
 {"picks":[{"id":"videoId","title":"title","reason":"한국어로 1문장 추천 이유"}]}`;
 
     // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-    const _mp2raw=await window.SharedWritingEngine.callClaude(prompt,'',600,null,'claude-sonnet-4-6');
+    const _mp2raw=await window.SharedWritingEngine.callClaude(prompt,'',600,null,'claude-sonnet-5');
     const picks=JSON.parse(_mp2raw.replace(/```json|```/g,'').trim()).picks;
 
     recList.innerHTML=picks.map(p=>`
