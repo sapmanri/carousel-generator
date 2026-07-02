@@ -3,3013 +3,423 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>감성찾아삽만리 · AI 캐러셀 생성기</title>
+<title>SAPMANRI · Magazine Editor</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Sans+KR:wght@300;400;500&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#1a1a1a;--canvas:#faf9f7;--paper:#f2f0ec;--paper-warm:#ede9e3;
-  --mid:#888580;--mute:#b5b2ad;--hairline:#d8d5d0;
-  --accent:#b87a6e;
-  --serif:"Cormorant Garamond","Noto Serif KR",Georgia,serif;
+  --bg:#1a1a1a;--s1:#222222;--s2:#2a2a2a;--s3:#323232;
+  --border:#333333;--border2:#444444;
+  --text:#ffffff;--muted:rgba(255,255,255,0.6);--dim:rgba(255,255,255,0.3);
+  --accent:#b87a6e;--accent2:#8a5a50;--green:#8aaa88;--red:#c47a6a;--orange:#E8762C;
+  --serif:"Gowun Batang","Cormorant Garamond",Georgia,serif;
   --sans:"Noto Sans KR","Helvetica Neue",Arial,sans-serif;
+  --mono:'JetBrains Mono',monospace;
 }
-body{background:#1a1a1a;font-family:var(--sans);color:#fff;min-height:100vh;padding:24px 16px}
-.app{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh}
+a{color:inherit}
 
-.header{display:flex;justify-content:space-between;align-items:baseline}
-.logo{font-family:var(--serif);font-size:18px;font-weight:300;color:var(--canvas);letter-spacing:0.04em}
-.logo span{font-family:var(--sans);font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--mute);display:block;margin-top:2px}
-
-/* upload */
-.upload-zone{border:1px dashed rgba(255,255,255,0.15);border-radius:4px;padding:28px 24px;text-align:center;cursor:pointer;background:rgba(255,255,255,0.02);position:relative;transition:border-color 0.2s}
-.upload-zone:hover,.upload-zone.dragover{border-color:rgba(255,255,255,0.35)}
-.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:24px;opacity:0.35;margin-bottom:8px}
-.upload-label{font-size:12px;color:var(--mute);letter-spacing:0.06em}
-.upload-sub{font-size:10px;color:rgba(255,255,255,0.2);margin-top:4px}
-
-/* image grid */
-.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.img-thumb{aspect-ratio:16/9;border-radius:2px;overflow:hidden;position:relative;background:#111}
-.img-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.img-thumb .remove-btn{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;font-size:11px;cursor:pointer;opacity:0;transition:opacity 0.15s;display:flex;align-items:center;justify-content:center}
-.img-thumb:hover .remove-btn{opacity:1}
-.img-thumb .img-num{position:absolute;bottom:5px;left:7px;font-size:8px;color:rgba(255,255,255,0.5);letter-spacing:0.08em}
-.img-thumb.analyzing .img-num{color:var(--accent)}
-.img-thumb.done .img-num{color:#7ec98a}
-
-/* form */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field label{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mute)}
-.field input,.field select,.field textarea{
-  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
-  border-radius:2px;padding:8px 10px;color:#fff;font-family:var(--sans);
-  font-size:12px;outline:none;transition:border-color 0.15s;
+header{
+  height:48px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;
 }
-.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(255,255,255,0.3)}
-.field textarea{resize:none;height:64px;line-height:1.6}
-.field select option{background:#1a1a1a}
-.field .hint{font-size:10px;color:rgba(255,255,255,0.2);margin-top:2px}
+.logo{font-family:var(--serif);font-size:14px;letter-spacing:0.08em;color:var(--muted)}
+.logo em{color:var(--orange);font-style:normal}
+.header-right{display:flex;align-items:center;gap:8px}
+.btn-ghost{
+  background:none;border:1px solid var(--border);color:var(--muted);
+  font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:4px;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-ghost.ok{color:var(--green);border-color:var(--green)}
+.key-field{
+  background:var(--s1);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:4px;
+  width:0;overflow:hidden;opacity:0;transition:width .3s,opacity .3s;outline:none;
+}
+.key-field.open{width:190px;opacity:1}
+.key-field:focus{border-color:var(--accent)}
 
-/* generate btn */
-.generate-btn{width:100%;padding:13px;border:none;border-radius:2px;background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s}
-.generate-btn:hover{opacity:0.85}
-.generate-btn:disabled{opacity:0.3;cursor:not-allowed}
+.app{max-width:1100px;margin:0 auto;padding:20px;display:flex;flex-direction:column;gap:20px}
 
-/* progress */
-.progress-area{display:none;padding:14px;background:rgba(255,255,255,0.03);border-radius:2px;border:1px solid rgba(255,255,255,0.07)}
-.progress-area.visible{display:block}
-.progress-log{font-size:11px;color:var(--mute);line-height:2.2}
-.progress-log .step{display:flex;gap:8px;align-items:flex-start}
-.step-icon{color:var(--accent);min-width:14px}
-.step-icon.done{color:#7ec98a}
+/* ── 섹션 ── */
+.section{border:1px solid var(--border);border-radius:6px;padding:16px;background:var(--s1)}
+.section-title{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;
+}
+
+/* ── 호 정보 ── */
+.issue-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lang-checkboxes{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.lang-chip{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;border:1px solid var(--border,#3a3a3a);cursor:pointer;font-size:13px;user-select:none;transition:all .15s;}
+.lang-chip.active{background:var(--accent,#e8714a);border-color:var(--accent,#e8714a);color:#fff;}
+.lang-chip input{display:none;}
+.issue-meta .full{grid-column:1/-1}
+.field label{display:block;font-size:10px;letter-spacing:0.1em;color:var(--dim);margin-bottom:6px;text-transform:uppercase}
+.field input,.field textarea{
+  width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--sans);font-weight:300;font-size:13px;padding:8px 10px;border-radius:4px;outline:none;
+}
+.field input:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:60px;font-family:var(--serif);line-height:1.7}
+
+/* ── 업로드 ── */
+.upload-zone{
+  border:1px dashed var(--border);border-radius:6px;padding:24px;text-align:center;
+  cursor:pointer;transition:all .2s;color:var(--dim);font-size:12px;
+}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);color:var(--muted)}
+.upload-zone input{display:none}
+
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:14px}
+.photo-card{
+  position:relative;border:1px solid var(--border);border-radius:4px;overflow:hidden;
+  cursor:grab;background:var(--s2);
+}
+.photo-card img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.photo-card .pc-num{
+  position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:var(--text);
+  font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:3px;
+}
+.photo-card .pc-remove{
+  position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;
+  background:var(--red);border:none;color:#fff;font-size:11px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.photo-card .pc-status{
+  position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.55);
+  color:var(--dim);font-family:var(--mono);font-size:8px;padding:3px 5px;letter-spacing:0.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.photo-card.analyzed .pc-status{color:var(--green)}
+.photo-card.dragging{opacity:0.4}
+
+/* ── 페이지 빌더 ── */
+.page-list{display:flex;flex-direction:column;gap:10px}
+.page-card{
+  border:1px solid var(--border);border-radius:6px;background:var(--s2);
+  padding:12px;display:flex;flex-direction:column;gap:10px;
+}
+.page-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.page-card-head .ptag{
+  font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--accent);
+  background:var(--s3);padding:3px 8px;border-radius:3px;
+}
+.page-card-head select{
+  background:var(--s1);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:10px;padding:4px 6px;border-radius:4px;
+}
+.page-card-head .pc-actions{display:flex;gap:6px;margin-left:auto}
+.page-card-head .icon-btn{
+  background:none;border:1px solid var(--border);color:var(--dim);
+  width:24px;height:24px;border-radius:4px;cursor:pointer;font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+}
+.page-card-head .icon-btn:hover{color:var(--text);border-color:var(--border2)}
+.page-card-body{display:flex;flex-direction:column;gap:8px}
+.page-card-body .row{display:flex;gap:8px;flex-wrap:wrap}
+.page-card-body .row input,
+.page-card-body .row select,
+.page-card-body .row textarea{
+  background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--sans);font-weight:300;font-size:13px;padding:8px 10px;border-radius:4px;outline:none;
+}
+.page-card-body .row input:focus,
+.page-card-body .row select:focus,
+.page-card-body .row textarea:focus{border-color:var(--accent)}
+.page-card-body .row input::placeholder,
+.page-card-body .row textarea::placeholder{color:var(--dim)}
+.page-card-body .row input{flex:1;min-width:0}
+.page-card-body .row .w-fixed{flex:0 0 90px}
+.page-card-body .row select{flex:none;cursor:pointer}
+.page-card-body .row textarea{flex:1;font-family:var(--serif);line-height:1.7;resize:vertical;min-height:60px}
+.thumb-pick{
+  width:60px;height:60px;border:1px solid var(--border);border-radius:4px;object-fit:cover;
+  cursor:pointer;background:var(--s1);flex-shrink:0;
+}
+.thumb-pick.empty{display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:9px;text-align:center;font-family:var(--mono)}
+.thumb-pick.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent2)}
+
+.gen-row{display:flex;gap:6px;align-items:flex-start}
+.gen-row textarea{flex:1}
+.gen-row input{
+  flex:1;background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--sans);font-weight:300;font-size:13px;padding:8px 10px;border-radius:4px;outline:none;
+}
+.gen-row input:focus{border-color:var(--accent)}
+.gen-row input::placeholder{color:var(--dim)}
+.btn-gen{
+  background:var(--s3);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:10px;padding:8px 10px;border-radius:4px;cursor:pointer;
+  white-space:nowrap;transition:all .15s;
+}
+.btn-gen:hover{border-color:var(--accent);color:var(--accent)}
+.btn-gen:disabled{opacity:0.35;cursor:not-allowed}
+
+.add-page-row{display:flex;gap:8px;flex-wrap:wrap}
+.add-page-row select{
+  background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:4px;flex:1;min-width:140px;
+}
+.btn-primary{
+  background:var(--accent2);border:1px solid var(--accent);color:var(--text);
+  font-family:var(--sans);font-size:12px;font-weight:400;padding:10px 16px;border-radius:4px;
+  cursor:pointer;transition:all .15s;
+}
+.btn-primary:hover{background:var(--accent)}
+.btn-primary:disabled{opacity:0.35;cursor:not-allowed}
+
+.build-tag{font-family:var(--mono);font-size:8px;letter-spacing:0.05em;color:var(--dim);margin-left:8px;}
+.r2-field{
+  background:#111;border:1px solid #333;color:#f5f5f5;
+  font-family:var(--mono);font-size:12px;padding:8px 10px;border-radius:4px;
+  width:100%;outline:none;
+}
+.r2-field:focus{border-color:#E8762C}
+.publish-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.publish-status{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.publish-status.ok{color:var(--green)}
+.publish-status.err{color:var(--red)}
+
+/* ── 호 선택 ── */
+.issue-select-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.issue-select-row select{
+  background:var(--s2);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:11px;padding:7px 10px;border-radius:4px;flex:1;min-width:160px;
+}
+
+/* ── 미니 라벨 ── */
+.hint{font-size:11px;color:var(--dim);line-height:1.6}
+
+/* ── 토스트 ── */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--s3);border:1px solid var(--border2);color:var(--text);
+  font-size:12px;padding:10px 18px;border-radius:6px;opacity:0;
+  transition:all .25s;pointer-events:none;z-index:200;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.spinner{
+  display:inline-block;width:10px;height:10px;border:1.5px solid var(--dim);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;
+  margin-right:6px;vertical-align:-1px;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.step-icon.spin{animation:spin 1s linear infinite;display:inline-block}
-
-/* carousel */
-.carousel-section{display:none}
-.carousel-section.visible{display:flex;flex-direction:column;gap:12px}
-.section-label{font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--mute)}
-.slides-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-
-.slide-card{aspect-ratio:1/1;border-radius:2px;overflow:hidden;position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.08);transition:border-color 0.2s}
-.slide-card.tall{aspect-ratio:9/16}
-.slide-card:hover{border-color:rgba(255,255,255,0.25)}
-
-/* slide canvas base */
-.slide-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:var(--sans)}
-.slide-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-.ov-bottom{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,6,0.78) 0%,transparent 55%)}
-.ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,8,6,0.72) 0%,transparent 50%)}
-.ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(10,8,6,0.75) 0%,transparent 60%)}
-.ov-right{position:absolute;inset:0;background:linear-gradient(to left,rgba(10,8,6,0.75) 0%,transparent 60%)}
-.ov-full{position:absolute;inset:0;background:rgba(10,8,6,0.45)}
-
-/* text zones */
-.txt-bottom-left{position:absolute;bottom:0;left:0;right:0;padding:12px 14px 16px;z-index:2}
-.txt-top-left{position:absolute;top:0;left:0;right:0;padding:14px 14px 0;z-index:2}
-.txt-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:14px;z-index:2}
-.txt-left-half{position:absolute;top:0;left:0;bottom:0;width:55%;padding:14px 12px;display:flex;flex-direction:column;justify-content:flex-end;z-index:2}
-.txt-split{position:absolute;bottom:0;left:0;right:0;height:44%;background:var(--canvas);padding:10px 14px 12px;display:flex;flex-direction:column;justify-content:center;z-index:2}
-.txt-dark{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:16px;z-index:2;background:var(--ink)}
-.txt-pull{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:18px 20px;z-index:2;background:var(--paper)}
-
-/* text styles — mag B */
-.s-masthead{font-family:var(--sans);font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:8px;display:block}
-.s-masthead-dark{font-family:var(--sans);font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;display:block}
-.s-label{font-family:var(--sans);font-size:7px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;display:block}
-.s-label-ink{font-family:var(--sans);font-size:7px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;display:block}
-.s-headline-lg{font-family:var(--serif);font-size:28px;font-weight:300;line-height:0.95;letter-spacing:-0.01em;color:#fff;margin-bottom:6px}
-.s-headline-md{font-family:var(--serif);font-size:20px;font-weight:300;line-height:1.15;letter-spacing:-0.01em;color:var(--ink);margin-bottom:4px}
-.s-headline-pull{font-family:var(--serif);font-size:19px;font-weight:300;line-height:1.3;letter-spacing:-0.005em;color:var(--ink);margin-bottom:8px}
-.s-headline-dark{font-family:var(--serif);font-size:24px;font-weight:300;line-height:1.0;letter-spacing:-0.01em;color:#fff;margin-bottom:8px}
-.s-body{font-family:var(--serif);font-size:9px;font-style:italic;font-weight:300;line-height:1.65;color:rgba(255,255,255,0.75)}
-.s-body-ink{font-family:var(--serif);font-size:9px;font-style:italic;font-weight:300;line-height:1.65;color:var(--mid)}
-.s-body-dark{font-family:var(--serif);font-size:9px;font-style:italic;font-weight:300;line-height:1.65;color:rgba(255,255,255,0.5);margin-bottom:14px}
-.s-rule{width:2px;height:28px;background:var(--accent);margin-bottom:12px;flex-shrink:0}
-.s-closing-tag{font-family:var(--sans);font-size:7px;letter-spacing:0.18em;text-transform:uppercase}
-.s-folio{position:absolute;bottom:8px;right:10px;font-family:var(--sans);font-size:7px;letter-spacing:0.12em;color:rgba(255,255,255,0.3);z-index:3}
-.s-folio-dark{position:absolute;bottom:8px;right:10px;font-family:var(--sans);font-size:7px;letter-spacing:0.12em;color:rgba(255,255,255,0.18);z-index:3}
-.s-folio-ink{position:absolute;bottom:8px;right:10px;font-family:var(--sans);font-size:7px;letter-spacing:0.12em;color:var(--mute);z-index:3}
-
-/* nike overrides */
-.nike-headline{font-family:"Helvetica Neue",Arial,sans-serif;font-size:30px;font-weight:700;line-height:0.9;text-transform:uppercase;letter-spacing:-0.01em;color:#fff;margin-bottom:6px}
-.nike-headline-md{font-family:"Helvetica Neue",Arial,sans-serif;font-size:20px;font-weight:700;line-height:1.0;text-transform:uppercase;color:#fff;margin-bottom:4px}
-.nike-label{font-family:"Helvetica Neue",Arial,sans-serif;font-size:7px;font-weight:500;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:5px;display:block}
-.nike-closing{position:absolute;inset:0;background:#111;display:flex;flex-direction:column;justify-content:center;padding:16px}
-.nike-closing-hl{font-family:"Helvetica Neue",Arial,sans-serif;font-size:32px;font-weight:700;line-height:0.88;text-transform:uppercase;color:#fff;margin-bottom:10px}
-
-/* ohouse */
-:root{--oh:#00C896;--oh-pale:#E6FAF4;--oh-cream:#FAFAF8;--oh-warm:#F5F3EF}
-.oh-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--oh-cream);font-family:var(--sans)}
-.oh-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-.oh-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.58) 0%,transparent 52%)}
-.oh-card{position:absolute;bottom:0;left:0;right:0;background:var(--oh-cream);border-radius:14px 14px 0 0;padding:10px 14px 14px}
-.oh-split{position:absolute;bottom:0;left:0;right:0;height:43%;background:var(--oh-cream);padding:8px 14px 12px;display:flex;flex-direction:column;justify-content:center}
-.oh-close{position:absolute;inset:0;background:var(--oh-pale);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:14px}
-.oh-full{position:absolute;inset:0;background:var(--oh-warm);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:16px}
-.oh-tag{display:inline-block;background:var(--oh);color:#fff;font-size:7px;font-weight:600;letter-spacing:0.04em;padding:3px 8px;border-radius:9999px;margin-bottom:6px}
-.oh-masthead{position:absolute;top:10px;left:12px;z-index:3;font-size:7px;font-weight:500;letter-spacing:0.12em;color:rgba(255,255,255,0.6)}
-.oh-masthead-brand{font-size:7px;font-weight:600;letter-spacing:0.12em;color:var(--oh);margin-bottom:10px}
-.oh-headline-cover{font-size:20px;font-weight:600;line-height:1.2;letter-spacing:-0.02em;color:#fff;margin-bottom:4px}
-.oh-headline{font-size:16px;font-weight:600;line-height:1.25;letter-spacing:-0.02em;color:var(--ink);margin-bottom:3px}
-.oh-headline-c{font-size:18px;font-weight:600;line-height:1.3;letter-spacing:-0.02em;color:var(--ink);margin-bottom:8px;text-align:center}
-.oh-body{font-size:9px;font-weight:400;line-height:1.6;color:#888}
-.oh-body-c{font-size:9px;font-weight:400;line-height:1.6;color:#888;text-align:center;margin-bottom:10px}
-.oh-cta{display:inline-block;background:var(--oh);color:#fff;font-size:8px;font-weight:600;padding:6px 14px;border-radius:9999px;margin-top:4px}
-.oh-line{width:100%;height:2px;background:var(--oh);position:absolute;bottom:0;left:0}
-.oh-folio{position:absolute;bottom:8px;right:10px;font-size:7px;color:var(--mute);z-index:3}
-.oh-num{width:18px;height:18px;border-radius:50%;background:var(--oh);color:#fff;font-size:7px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
-
-/* export / caption */
-.action-row{display:flex;gap:8px}
-.action-btn{flex:1;padding:11px;border-radius:2px;font-family:var(--sans);font-size:10px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:opacity 0.15s;border:none}
-.action-btn:hover{opacity:0.8}
-.btn-primary{background:var(--canvas);color:var(--ink)}
-.btn-secondary{background:transparent;color:var(--mute);border:1px solid rgba(255,255,255,0.12)!important}
-.caption-box{display:none;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:2px}
-.caption-box.open{display:block}
-.caption-title{font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--mute);margin-bottom:8px}
-.caption-text{font-family:var(--serif);font-size:13px;font-style:italic;line-height:1.85;color:rgba(255,255,255,0.7);white-space:pre-wrap}
-.caption-hint{font-size:9px;color:rgba(255,255,255,0.2);margin-top:8px;letter-spacing:0.06em;text-transform:uppercase}
-
-/* ── 모바일 반응형 ── */
-@media (max-width: 600px) {
-  body{padding:16px 12px}
-  .form-grid{grid-template-columns:1fr}
-  .image-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
-  .slides-row{grid-template-columns:repeat(2,1fr);gap:8px}
-  .action-row{flex-direction:column}
-  .action-btn{width:100%}
-  .header{flex-direction:column;gap:4px}
-}
-
-/* ── 디에디트 스타일 ── */
-:root{--te-black:#111;--te-white:#fff;--te-gray:#f5f5f5;--te-mid:#888;--te-accent:#ff3c00}
-.te-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:"Helvetica Neue",Arial,var(--sans);background:var(--te-white)}
-.te-masthead{font-size:7px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--te-black);display:block;margin-bottom:10px}
-.te-label{font-size:7px;font-weight:500;letter-spacing:0.14em;text-transform:uppercase;color:var(--te-accent);display:block;margin-bottom:6px}
-.te-headline{font-size:26px;font-weight:700;line-height:1.0;letter-spacing:-0.02em;color:var(--te-black);margin-bottom:6px}
-.te-headline-sm{font-size:18px;font-weight:700;line-height:1.1;letter-spacing:-0.02em;color:var(--te-black);margin-bottom:5px}
-.te-body{font-size:9px;font-weight:400;line-height:1.65;color:#555}
-.te-body-white{font-size:9px;font-weight:400;line-height:1.65;color:rgba(255,255,255,0.8)}
-.te-rule{width:24px;height:3px;background:var(--te-accent);margin-bottom:10px}
-.te-folio{position:absolute;bottom:8px;right:10px;font-size:7px;font-weight:500;letter-spacing:0.1em;color:#bbb;z-index:3}
-.te-folio-dark{position:absolute;bottom:8px;right:10px;font-size:7px;font-weight:500;letter-spacing:0.1em;color:rgba(255,255,255,0.3);z-index:3}
-.te-txt-bottom{position:absolute;bottom:0;left:0;right:0;padding:14px 14px 18px;z-index:2}
-.te-txt-white{position:absolute;bottom:0;left:0;right:0;padding:14px 14px 18px;z-index:2;background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 100%)}
-.te-txt-box{position:absolute;bottom:16px;left:14px;right:14px;background:var(--te-white);padding:12px 14px;z-index:2}
-.te-txt-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:18px;z-index:2;background:var(--te-gray)}
-.te-closing{position:absolute;inset:0;background:var(--te-black);display:flex;flex-direction:column;justify-content:center;padding:18px}
-
-/* ── 스테이폴리오 스타일 ── */
-:root{--sf-cream:#f7f4ef;--sf-dark:#1c1917;--sf-mid:#7a7570;--sf-accent:#8c7355;--sf-line:#d4cfc8}
-.sf-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:var(--serif);background:var(--sf-cream)}
-.sf-masthead{font-family:var(--sans);font-size:6px;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--sf-mid);display:block;margin-bottom:12px}
-.sf-label{font-family:var(--sans);font-size:6px;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--sf-accent);display:block;margin-bottom:8px}
-.sf-headline{font-size:24px;font-weight:300;line-height:1.15;letter-spacing:-0.005em;color:var(--sf-dark);margin-bottom:8px}
-.sf-headline-lg{font-size:28px;font-weight:300;line-height:1.1;letter-spacing:-0.01em;color:#fff;margin-bottom:8px}
-.sf-headline-sm{font-size:18px;font-weight:300;line-height:1.2;color:var(--sf-dark);margin-bottom:6px}
-.sf-body{font-size:8px;font-style:italic;font-weight:300;line-height:1.75;color:var(--sf-mid)}
-.sf-body-white{font-size:8px;font-style:italic;font-weight:300;line-height:1.75;color:rgba(255,255,255,0.7)}
-.sf-rule{width:100%;height:1px;background:var(--sf-line);margin-bottom:12px}
-.sf-folio{position:absolute;bottom:10px;right:12px;font-family:var(--sans);font-size:6px;letter-spacing:0.14em;color:var(--sf-line);z-index:3}
-.sf-folio-dark{position:absolute;bottom:10px;right:12px;font-family:var(--sans);font-size:6px;letter-spacing:0.14em;color:rgba(255,255,255,0.2);z-index:3}
-.sf-folio-ink{position:absolute;bottom:10px;right:12px;font-family:var(--sans);font-size:6px;letter-spacing:0.14em;color:var(--sf-mid);z-index:3}
-.sf-txt-bottom{position:absolute;bottom:0;left:0;right:0;padding:16px 16px 20px;z-index:2}
-.sf-txt-split{position:absolute;bottom:0;left:0;right:0;height:42%;background:var(--sf-cream);padding:12px 16px;display:flex;flex-direction:column;justify-content:center;z-index:2}
-.sf-txt-center{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:20px;z-index:2;background:var(--sf-cream)}
-.sf-closing{position:absolute;inset:0;background:var(--sf-dark);display:flex;flex-direction:column;justify-content:center;padding:20px}
-
-/* ── 감성찾아삽만리 스타일 ── */
-:root{--sm-purple:rgba(190,170,255,0.9);--sm-purpleglow:rgba(140,100,255,0.35)}
-.sm-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:#0e0e0e;font-family:"Helvetica Neue",Arial,var(--sans)}
-.sm-overlay-top{position:absolute;top:0;left:0;right:0;height:38%;background:linear-gradient(to bottom,rgba(0,0,0,0.3),transparent);z-index:1}
-.sm-overlay-bottom{position:absolute;bottom:0;left:0;right:0;height:58%;background:linear-gradient(to top,rgba(0,0,0,0.97) 0%,rgba(0,0,0,0.78) 48%,transparent 100%);z-index:1}
-.sm-txt{position:absolute;bottom:0;left:0;right:0;padding:14px 14px 20px;z-index:2}
-.sm-title{font-size:22px;font-weight:700;line-height:1.05;color:rgba(255,255,255,0.97);letter-spacing:-0.01em;margin-bottom:4px}
-.sm-sub{font-size:9px;font-weight:400;color:rgba(255,255,255,0.45);margin-bottom:8px;letter-spacing:0.06em}
-.sm-rule{width:18%;height:1px;background:rgba(255,255,255,0.12);margin-bottom:8px}
-.sm-body{font-size:8px;font-weight:300;color:rgba(255,255,255,0.5);line-height:1.7;letter-spacing:0.03em}
-.sm-body2{font-size:9px;font-weight:500;color:rgba(255,255,255,0.9);line-height:1.6}
-.sm-folio{position:absolute;bottom:8px;right:10px;font-size:7px;letter-spacing:0.1em;color:rgba(255,255,255,0.15);z-index:3}
-.sm-closing{position:absolute;inset:0;background:#0e0e0e;display:flex;flex-direction:column;justify-content:center;padding:18px;z-index:2}
-
-/* ── Apple MD 스타일 ── */
-.amd-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:#000;font-family:"Helvetica Neue","Noto Sans KR",Arial,sans-serif}
-.amd-vignette{position:absolute;top:0;left:0;right:0;height:55%;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.22) 100%);z-index:1}
-.amd-panel{position:absolute;bottom:0;left:0;right:0;height:45%;background:#000;border-top:0.5px solid rgba(255,255,255,0.08);z-index:2;padding:12px 14px 16px;display:flex;flex-direction:column;justify-content:center}
-.amd-label{font-size:7px;font-weight:400;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.32);margin-bottom:8px}
-.amd-title{font-size:26px;font-weight:200;line-height:1.05;color:#fff;letter-spacing:-0.02em;margin-bottom:5px}
-.amd-sub{font-size:9px;font-weight:300;color:rgba(255,255,255,0.35);margin-bottom:10px}
-.amd-rule{width:100%;height:0.5px;background:rgba(255,255,255,0.1);margin-bottom:10px}
-.amd-body{font-size:8px;font-weight:300;color:rgba(255,255,255,0.42);text-align:center;line-height:1.7;letter-spacing:0.02em}
-.amd-body2{font-size:7px;font-weight:300;color:rgba(255,255,255,0.2);text-align:center;letter-spacing:0.02em;margin-top:4px}
-.amd-folio{position:absolute;bottom:8px;right:10px;font-size:7px;font-weight:300;letter-spacing:0.1em;color:rgba(255,255,255,0.12);z-index:3}
-.amd-closing{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;justify-content:center;padding:18px;z-index:2}
-
-/* ── 전원생활 매거진 스타일 ── */
-:root{--jw-orange:#E8762C;--jw-cream:#FAF5EE;--jw-dark:#120E0C;--jw-sage:#B2CDA8;--jw-terracotta:#C8633A}
-.jw-canvas{width:100%;height:100%;position:relative;overflow:hidden;font-family:var(--serif);background:var(--jw-cream)}
-.jw-wordmark{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;letter-spacing:0.12em;color:var(--jw-orange);text-align:center}
-.jw-wordmark-sub{font-family:var(--sans);font-size:6px;font-weight:300;letter-spacing:0.18em;color:#999;text-align:center;margin-top:3px}
-.jw-mini-mark{position:absolute;top:10px;left:12px;font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:8px;letter-spacing:0.1em;color:var(--jw-orange);z-index:3}
-.jw-mini-page{position:absolute;top:10px;right:12px;font-family:var(--sans);font-size:7px;letter-spacing:0.08em;color:rgba(255,255,255,0.6);z-index:3}
-.jw-mini-page-dark{position:absolute;top:10px;right:12px;font-family:var(--sans);font-size:7px;letter-spacing:0.08em;color:#999;z-index:3}
-.jw-label{display:inline-block;font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:#fff;background:var(--jw-orange);padding:2px 7px;margin-bottom:6px}
-.jw-label-ink{display:inline-block;font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:var(--jw-orange);margin-bottom:6px}
-.jw-headline{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:20px;line-height:1.25;letter-spacing:0.01em;color:var(--jw-dark)}
-.jw-headline-white{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:20px;line-height:1.25;letter-spacing:0.01em;color:#fff}
-.jw-headline-lg{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:15px;line-height:1.35;letter-spacing:0.02em;color:#fff}
-.jw-body{font-family:var(--sans);font-size:8px;font-weight:300;line-height:1.7;color:#666}
-.jw-body-white{font-family:var(--sans);font-size:8px;font-weight:300;line-height:1.7;color:rgba(255,255,255,0.75)}
-.jw-caption{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:400;font-size:14px;line-height:1.5;color:#fff}
-
-/* 표지 */
-.jw-cover-top{position:absolute;top:0;left:0;right:0;padding:12px 0;z-index:2;background:linear-gradient(to bottom,rgba(250,245,238,0.95) 0%,rgba(250,245,238,0.7) 70%,transparent 100%)}
-.jw-cover-feature{position:absolute;top:18%;left:14px;right:14px;z-index:2}
-.jw-cover-bottom{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;z-index:2;display:flex;justify-content:space-between;align-items:flex-end;background:linear-gradient(to top,rgba(250,245,238,0.97) 0%,rgba(250,245,238,0.75) 60%,transparent 100%)}
-.jw-issue-num{font-family:var(--sans);font-weight:700;font-size:16px;color:var(--jw-dark);line-height:1}
-.jw-issue-sub{font-family:var(--sans);font-size:7px;color:#999;letter-spacing:0.05em;margin-top:2px}
-.jw-article-list{font-family:"Gowun Batang","Noto Serif KR",serif;font-size:8px;line-height:1.9;color:#444;text-align:right}
-
-/* 풀블리드 화보 */
-.jw-fullbleed-overlay{position:absolute;bottom:0;left:0;right:0;height:38%;background:linear-gradient(to top,rgba(18,14,12,0.85) 0%,transparent 100%);z-index:1}
-.jw-fullbleed-caption{position:absolute;bottom:16px;left:14px;right:14px;z-index:2}
-
-/* 인용/하이라이트 */
-.jw-quote-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--jw-dark);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center}
-.jw-quote-rule{width:24px;height:2px;background:var(--jw-orange)}
-.jw-quote-text{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:20px;line-height:1.5;color:#fff;margin:14px 0}
-.jw-quote-context{font-family:var(--sans);font-size:7px;color:rgba(255,255,255,0.35);letter-spacing:0.05em}
-
-/* 클로징 */
-.jw-closing-canvas{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:18px 16px;background:var(--jw-dark)}
-.jw-closing-overlay{position:absolute;inset:0;background:rgba(18,14,12,0.55);z-index:1}
-.jw-closing-content{position:relative;z-index:2}
-.jw-closing-cta{font-family:var(--sans);font-size:7px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;margin-top:10px}
-.jw-closing-wordmark{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:18px;letter-spacing:0.14em;color:var(--jw-orange);margin-top:16px}
-
-/* 인덱스/목차 */
-.jw-index-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--jw-dark);padding:20px 16px;display:flex;flex-direction:column}
-.jw-index-label{font-family:var(--sans);font-size:7px;letter-spacing:0.2em;text-transform:uppercase;color:var(--jw-orange);margin-bottom:4px}
-.jw-index-title{font-family:"Gowun Batang","Noto Serif KR",serif;font-weight:700;font-size:16px;color:#fff;margin-bottom:18px}
-.jw-index-list{display:flex;flex-direction:column;gap:12px;flex:1}
-.jw-index-item{display:flex;align-items:baseline;gap:10px}
-.jw-index-num{font-family:var(--sans);font-size:11px;font-weight:700;color:var(--jw-orange);min-width:18px}
-.jw-index-item-title{font-family:"Gowun Batang","Noto Serif KR",serif;font-size:11px;color:rgba(255,255,255,0.85)}
-
-/* 2단 사진+텍스트 */
-.jw-split-canvas{width:100%;height:100%;position:relative;overflow:hidden;display:flex;flex-direction:column}
-.jw-split-photo{flex:0 0 60%;position:relative;overflow:hidden}
-.jw-split-text{flex:1;background:var(--jw-cream);padding:12px 14px;display:flex;flex-direction:column;justify-content:center}
-.jw-split-label{font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:var(--jw-orange);text-transform:uppercase;margin-bottom:6px}
-.jw-split-text-lines{font-family:"Gowun Batang","Noto Serif KR",serif;font-size:10px;line-height:1.85;color:var(--jw-dark)}
-
-/* 그리드 콜라주 */
-.jw-grid-canvas{width:100%;height:100%;position:relative;overflow:hidden;background:var(--jw-cream);padding:14px;display:flex;flex-direction:column}
-.jw-grid-title{font-family:var(--sans);font-size:7px;font-weight:600;letter-spacing:0.1em;color:#999;text-transform:uppercase;margin-bottom:8px}
-.jw-grid-wrap{flex:1;display:grid;gap:6px}
-.jw-grid-wrap.g2x2{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
-.jw-grid-wrap.g1p2{grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr}
-.jw-grid-cell{position:relative;overflow:hidden;background:#ddd}
-.jw-grid-big{grid-row:1 / 3}
-
-/* ── 파노라마 스타일 ── */
-:root{--pf-cream:#f7f4ef;--pf-dark:#111;--pf-accent:#c8a97e}
-.pano-preview-wrap{width:100%;overflow-x:auto;border-radius:4px;background:#1a1a1a;padding:12px}
-.pano-preview-inner{display:flex;gap:0;height:220px}
-.pano-slide-preview{flex:0 0 220px;height:220px;position:relative;overflow:hidden;border:0.5px solid rgba(255,255,255,0.08)}
 </style>
-
-<script src="/shared-config.js"></script>
-<script src="/shared_storage.js?v=20260630a"></script>
-<script src="/shared_cache.js?v=20260630c"></script>
-<script src="/sapmanri_constitution.js?v=20260701a"></script>
-<script src="/sapmanri_qc.js?v=20260702d"></script>
-<script src="/shared_writing_engine.js?v=20260701a"></script>
-<script src="/magazine/image-library.js?v=20260630b"></script>
 </head>
 <body>
+
+<header>
+  <div class="logo"><em>SAPMANRI</em> · Magazine Editor<span class="build-tag">v2026-07-02b</span></div>
+  <div class="header-right">
+    <input type="password" class="key-field" id="apiKeyField" placeholder="Anthropic API Key">
+    <button class="btn-ghost" id="apiKeyBtn" onclick="toggleField('apiKeyField','apiKeyBtn',API_KEY_STORAGE)">API Key</button>
+    <input type="password" class="key-field" id="ghTokenField" placeholder="GitHub Token">
+    <button class="btn-ghost" id="ghTokenBtn" onclick="toggleField('ghTokenField','ghTokenBtn',GH_TOKEN_KEY)">GitHub</button>
+    <button class="btn-ghost" id="r2Btn" onclick="openR2Settings()">R2 ☁</button>
+    <a class="btn-ghost" href="./index.html" target="_blank">매거진 보기 ↗</a>
+    <a class="btn-ghost" href="../postcards/editor.html" target="_blank">포스트카드 ↗</a>
+  </div>
+</header>
+
+<!-- R2 설정 모달 -->
+<div id="r2Modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#1c1c1e;color:#f5f5f5;border-radius:12px;width:100%;max-width:480px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,0.4);">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:15px;font-weight:600;letter-spacing:0.03em;">Cloudflare R2 설정</div>
+      <button onclick="closeR2Settings()" style="background:none;border:none;color:#f5f5f5;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.45);line-height:1.6;">
+      R2 자격증명은 이 브라우저 localStorage에만 저장됩니다. 모든 서비스(캐러셀, 스카이라인, 포스트카드, 매거진)가 공유합니다.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <input class="r2-field" id="r2AccountId"  placeholder="Account ID (Cloudflare 대시보드)">
+      <input class="r2-field" id="r2AccessKey"  placeholder="R2 Access Key ID">
+      <input class="r2-field" type="password" id="r2SecretKey"  placeholder="R2 Secret Access Key">
+      <input class="r2-field" id="r2Bucket"     placeholder="Bucket 이름">
+      <input class="r2-field" id="r2PublicUrl"  placeholder="Public URL (https://pub-xxxx.r2.dev)">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">
+      <button onclick="testR2()" style="background:#333;border:1px solid #555;color:#f5f5f5;padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px;">연결 테스트</button>
+      <button onclick="saveR2Settings()" style="background:#E8762C;border:none;color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;">저장</button>
+    </div>
+    <div id="r2Status" style="font-size:11px;color:rgba(255,255,255,0.45);text-align:center;min-height:16px;"></div>
+  </div>
+</div>
+
 <div class="app">
 
-<div class="header">
-  <div class="logo">감성찾아삽만리<span>AI Carousel Generator v2.5.2-r2</span></div>
-  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <div id="apiKeyStatus" style="cursor:pointer;font-size:10px;letter-spacing:0.1em;color:var(--mute);text-transform:uppercase;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.1);border-radius:2px"
-      onclick="window.SapConfig ? window.SapConfig.openSettingsModal() : alert('shared-config.js가 로드되지 않았습니다.')">⚙ 설정</div>
-
-    <div id="ghKeyWrap" style="display:flex;align-items:center;gap:8px">
-      <input type="password" id="ghTokenInput" placeholder="github_pat_... (이미지 캐시 공유)" autocomplete="off"
-        style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:6px 10px;color:#fff;font-family:sans-serif;font-size:11px;outline:none;width:230px"
-        oninput="saveGhToken(this.value)" />
+  <!-- 호 선택 -->
+  <div class="section">
+    <div class="section-title">발행 호 선택</div>
+    <div class="issue-select-row">
+      <select id="issueSelect" onchange="onIssueSelect()">
+        <option value="__new__">+ 새 호 만들기</option>
+      </select>
+      <button class="btn-ghost" onclick="loadIssuesFromGithub()">새로고침</button>
+      <button class="btn-ghost" id="hideIssueBtn" onclick="toggleHideIssue()" style="display:none">숨김</button>
+      <button class="btn-ghost" id="deleteIssueBtn" onclick="deleteIssue()" style="display:none;color:var(--red,#e07070);border-color:var(--red,#e07070)">삭제</button>
     </div>
-    <div id="ghKeyStatus" style="display:none;cursor:pointer;font-size:10px;letter-spacing:0.1em;color:var(--mute);text-transform:uppercase;padding:6px 10px;border:0.5px solid rgba(255,255,255,0.1);border-radius:2px"
-      onclick="document.getElementById('ghKeyWrap').style.display='flex';document.getElementById('ghKeyStatus').style.display='none';">🗂 CACHE 연결됨</div>
+    <div class="hint" id="ghLoadStatus"></div>
   </div>
-</div>
 
-<div class="upload-zone" id="uploadZone">
-  <input type="file" id="fileInput" accept="image/*" multiple />
-  <div class="upload-icon">⬆</div>
-  <div class="upload-label">이미지를 끌어다 놓거나 클릭해서 업로드</div>
-  <div class="upload-sub">JPG · PNG · 최대 10장</div>
-</div>
-
-<div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-  <button onclick="openLibraryPicker()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.6);font-size:11px;padding:6px 14px;border-radius:4px;cursor:pointer;letter-spacing:0.06em;white-space:nowrap" onmouseover="this.style.borderColor='rgba(255,255,255,0.5)';this.style.color='#fff'" onmouseout="this.style.borderColor='rgba(255,255,255,0.2)';this.style.color='rgba(255,255,255,0.6)'">
-    📁 라이브러리에서 선택
-  </button>
-  <span style="font-size:10px;color:rgba(255,255,255,0.25)">R2에 저장된 이미지를 바로 불러옵니다</span>
-</div>
-<div class="image-grid" id="imageGrid"></div>
-
-<!-- 파노라마 구간 픽커 (파노라마 스타일 + 이미지 1장일 때만 표시) -->
-<div id="panoPicker" style="display:none;margin-top:8px">
-  <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px">파노라마 구간 선택</div>
-  <div style="position:relative;width:100%;border-radius:2px;overflow:hidden;background:#111;cursor:crosshair" id="panoPickerWrap">
-    <img id="panoPickerImg" style="width:100%;display:block;opacity:0.75;user-select:none;pointer-events:none" />
-    <!-- 선택 구간 오버레이 -->
-    <div id="panoSelOverlay" style="position:absolute;top:0;bottom:0;background:rgba(184,122,110,0.25);border-left:2px solid #b87a6e;border-right:2px solid #b87a6e;pointer-events:none"></div>
-    <!-- 왼쪽 핸들 -->
-    <div id="panoHandleL" style="position:absolute;top:0;bottom:0;width:18px;background:rgba(184,122,110,0.5);cursor:ew-resize;display:flex;align-items:center;justify-content:center">
-      <div style="width:2px;height:24px;background:#fff;border-radius:1px"></div>
-    </div>
-    <!-- 오른쪽 핸들 -->
-    <div id="panoHandleR" style="position:absolute;top:0;bottom:0;width:18px;background:rgba(184,122,110,0.5);cursor:ew-resize;display:flex;align-items:center;justify-content:center">
-      <div style="width:2px;height:24px;background:#fff;border-radius:1px"></div>
+  <!-- 호 정보 -->
+  <div class="section">
+    <div class="section-title">호 정보</div>
+    <div class="issue-meta">
+      <div class="field"><label>ID (URL용, 영문/숫자/하이픈)</label><input id="fId" placeholder="2026-06-2"></div>
+      <div class="field"><label>호 번호</label><input id="fNumber" placeholder="Vol. 12"></div>
+      <div class="field"><label>제목</label><input id="fTitle" placeholder="내 손으로 만든 작은 불빛 하나"></div>
+      <div class="field"><label>부제</label><input id="fSubtitle" placeholder="Wigong-ri, Gapyeong"></div>
+      <div class="field"><label>발행일</label><input id="fDate" type="date"></div>
+      <div class="field full"><label>유튜브 영상 링크 (선택)</label><input id="fYoutubeUrl" placeholder="https://www.youtube.com/watch?v=..."></div>
+      <div class="field"><label>표지 이미지 (사진 업로드 후 선택)</label>
+        <img id="fCoverPreview" class="thumb-pick empty" onclick="pickCover()">
+      </div>
+      <div class="field full">
+        <label>발행 언어 (최소 1개 선택)</label>
+        <div id="langCheckboxes" class="lang-checkboxes"></div>
+      </div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap">
-    <span style="font-size:9px;color:var(--mute)">슬라이드 수</span>
-    <div style="display:flex;gap:4px">
-      <button onclick="setPanoSlides(2)" id="panoN2" style="padding:4px 10px;font-size:9px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:2px;cursor:pointer">2장</button>
-      <button onclick="setPanoSlides(3)" id="panoN3" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">3장</button>
-      <button onclick="setPanoSlides(4)" id="panoN4" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">4장</button>
-      <button onclick="setPanoSlides(5)" id="panoN5" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">5장</button>
-    </div>
-    <span id="panoPickerInfo" style="font-size:9px;color:rgba(255,255,255,0.3)">좌우 핸들로 구간 조정</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
-    <span style="font-size:9px;color:var(--mute);white-space:nowrap">세로 중심</span>
-    <input type="range" id="panoVCenter" min="0" max="1" step="0.01" value="0.5"
-      style="flex:1;accent-color:var(--accent);cursor:pointer"
-      oninput="panoVCenterVal=parseFloat(this.value);updateVCenterLabel(this.value)">
-    <span id="panoVCenterLabel" style="font-size:9px;color:rgba(255,255,255,0.3);min-width:28px">중앙</span>
-  </div>
-</div>
 
-<div class="field" style="margin-bottom:4px">
-  <label>유튜브 URL <span style="font-size:8px;color:var(--accent);letter-spacing:0.06em;text-transform:none;font-weight:normal">선택 — 넣으면 영상 분석으로 주제/문구 자동 완성</span></label>
-  <div style="display:flex;gap:8px">
-    <input type="text" id="youtubeUrl" placeholder="https://www.youtube.com/watch?v=..."
-      style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:8px 10px;color:#fff;font-family:var(--sans);font-size:12px;outline:none" />
-    <button id="fetchTranscriptBtn" onclick="fetchAndFillFromYoutube()"
-      style="padding:8px 14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:2px;color:rgba(255,255,255,0.7);font-family:var(--sans);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;white-space:nowrap">분석</button>
-  </div>
-  <span id="transcriptStatus" style="font-size:10px;color:var(--mute);margin-top:3px;display:block"></span>
-</div>
-
-<div class="form-grid">
-  <div class="field">
-    <label>영상 주제</label>
-    <input type="text" id="metaTopic" placeholder="예: 오디 수확과 장미 만개한 6월" />
-    <span class="hint">비워두면 AI가 이미지 보고 판단해요</span>
-  </div>
-  <div class="field">
-    <label>스타일</label>
-    <select id="metaStyle">
-      <option value="magazine-b">Magazine B (에디토리얼)</option>
-      <option value="theedit">디에디트 (큐레이션 매거진)</option>
-      <option value="stayfolio">스테이폴리오 (파인스테이)</option>
-      <option value="nike">Nike (강렬 · 대문자)</option>
-      <option value="ohouse">오늘의집 (따뜻한 라이프스타일)</option>
-      <option value="sapmanri">감성찾아삽만리 (다크 · 감성)</option>
-      <option value="applemd">Apple (미니멀 · 여백)</option>
-      <option value="jeonwon">전원생활 (매거진 표지·내지)</option>
-      <optgroup label="── 파노라마 ──">
-      <option value="pano-light">Panorama Light (크림 · 연속 화보)</option>
-      <option value="pano-dark">Panorama Dark (다크 · 흐르는 텍스트)</option>
-      <option value="pano-film">Panorama Film (필름 스트립 · 타이포)</option>
-      <option value="pano-text">Panorama Text (텍스트 흐름 · 단색배경)</option>
-      <option value="pano-stretch">Pixel Stretch (픽셀 스트레치 효과)</option>
-      </optgroup>
-    </select>
-  </div>
-  <div class="field">
-    <label>채널 태그</label>
-    <input type="text" id="metaTag" value="오늘도 느리게 · slow days" />
-  </div>
-  <div class="field">
-    <label>마무리 문구</label>
-    <input type="text" id="metaClosing" value="매주 토요일 정오, 유튜브에서 만나요" />
-  </div>
-  <div class="field" style="grid-column:1/-1">
-    <label>텍스트 슬라이드 문구 (선택)</label>
-    <textarea id="metaTextSlide" placeholder="직접 쓴 문장을 넣으면 캐러셀 중간에 텍스트 슬라이드로 들어가요. 비워두면 AI가 필요할 때 자동으로 만들어요."></textarea>
-  </div>
-</div>
-
-<div style="display:flex;align-items:center;gap:10px;padding:4px 0 6px">
-  <span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mute)">텍스트 언어</span>
-  <div style="display:flex;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">
-    <button id="langKo" onclick="setLang('ko')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:rgba(255,255,255,0.15);color:#fff">한국어</button>
-    <button id="langEn" onclick="setLang('en')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:transparent;color:rgba(255,255,255,0.35)">English</button>
-  </div>
-</div>
-
-<div style="display:flex;align-items:center;gap:10px;padding:4px 0 6px">
-  <span style="font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mute)">화면 비율</span>
-  <div style="display:flex;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:2px;overflow:hidden">
-    <button id="ratioSquare" onclick="setRatio('square')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:rgba(255,255,255,0.15);color:#fff">1:1 정사각형</button>
-    <button id="ratioTall" onclick="setRatio('tall')" style="padding:5px 14px;font-size:10px;letter-spacing:0.06em;border:none;cursor:pointer;font-family:var(--sans);background:transparent;color:rgba(255,255,255,0.35)">9:16 릴스</button>
-  </div>
-</div>
-
-<div id="panoNotice" style="display:none;padding:8px 12px;background:rgba(180,160,255,0.08);border:1px solid rgba(180,160,255,0.2);border-radius:2px;font-size:9px;color:rgba(255,255,255,0.45);line-height:1.7;letter-spacing:0.03em">
-  파노라마 모드 — 하나의 넓은 화폭이 슬라이드마다 이어지는 방식으로 생성돼요.<br>PNG 저장 시 각 슬라이드가 자동으로 잘려서 저장돼요.
-</div>
-
-<!-- 픽셀 스트레치 전용 UI -->
-<div id="panoStretchUI" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:2px">
-  <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px">픽셀 스트레치 설정</div>
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-    <span style="font-size:9px;color:var(--mute);white-space:nowrap">스트레치 위치</span>
-    <input type="range" id="stretchPosSlider" min="0" max="1" step="0.01" value="0.3"
-      style="flex:1;accent-color:var(--accent);cursor:pointer"
-      oninput="stretchPos=parseFloat(this.value);document.getElementById('stretchPosLabel').textContent=Math.round(this.value*100)+'%'">
-    <span id="stretchPosLabel" style="font-size:9px;color:rgba(255,255,255,0.4);min-width:30px">30%</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-    <span style="font-size:9px;color:var(--mute);white-space:nowrap">스트레치 폭</span>
-    <input type="range" id="stretchHeightSlider" min="0.05" max="0.5" step="0.01" value="0.18"
-      style="flex:1;accent-color:var(--accent);cursor:pointer"
-      oninput="stretchHeight=parseFloat(this.value);document.getElementById('stretchHeightLabel').textContent=Math.round(this.value*100)+'%'">
-    <span id="stretchHeightLabel" style="font-size:9px;color:rgba(255,255,255,0.4);min-width:30px">18%</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <span style="font-size:9px;color:var(--mute)">방향</span>
-    <div style="display:flex;gap:4px">
-      <button onclick="setStretchDir('both')" id="strDirBoth" style="padding:4px 10px;font-size:9px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:2px;cursor:pointer">양방향</button>
-      <button onclick="setStretchDir('up')" id="strDirUp" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">위로</button>
-      <button onclick="setStretchDir('down')" id="strDirDown" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">아래로</button>
+  <!-- 사진 업로드 -->
+  <div class="section">
+    <div class="section-title">사진 업로드 <span class="hint" id="photoCount"></span></div>
+    <label class="upload-zone" id="uploadZone">
+      여기를 클릭하거나 사진을 드래그해서 업로드하세요<br>
+      <span class="hint">"전체 사진 분석"을 누르면 분석 + 페이지 구성 + 글까지 자동으로 채워드려요. 이후 자유롭게 수정하세요.</span>
+      <input type="file" id="fileInput" accept="image/*" multiple onchange="onFilesSelected(this.files)">
+    </label>
+    <div class="photo-grid" id="photoGrid"></div>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn-ghost" onclick="analyzeAllPhotos()">전체 사진 분석 → 자동 구성</button>
+      <button class="btn-ghost" onclick="openMagazineLibraryPicker()">📁 라이브러리에서 선택</button>
+      <span class="hint" id="analyzeStatus"></span>
     </div>
   </div>
-</div>
 
-<!-- 텍스트 파노라마 전용 UI -->
-<div id="panoTextUI" style="display:none;margin-top:8px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:2px">
-  <div style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);margin-bottom:8px">텍스트 파노라마 설정</div>
-  <div style="display:flex;gap:8px;margin-bottom:8px">
-    <input type="text" id="panoTextInput" placeholder="텍스트 입력 (비우면 AI 자동 생성)"
-      style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:2px;padding:7px 10px;color:#fff;font-family:var(--sans);font-size:12px;outline:none" />
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap">
-    <span style="font-size:9px;color:var(--mute)">배경색</span>
-    <div style="display:flex;gap:4px;flex-wrap:wrap">
-      <button onclick="setPanoTextBg('#c8191a')" style="width:22px;height:22px;background:#c8191a;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg0"></button>
-      <button onclick="setPanoTextBg('#111111')" style="width:22px;height:22px;background:#111111;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg1"></button>
-      <button onclick="setPanoTextBg('#f7f4ef')" style="width:22px;height:22px;background:#f7f4ef;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg2"></button>
-      <button onclick="setPanoTextBg('#1a2a4a')" style="width:22px;height:22px;background:#1a2a4a;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg3"></button>
-      <button onclick="setPanoTextBg('#2d4a2d')" style="width:22px;height:22px;background:#2d4a2d;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptBg4"></button>
-      <input type="color" id="ptBgCustom" value="#c8191a" onchange="setPanoTextBg(this.value)"
-        style="width:22px;height:22px;padding:0;border:none;border-radius:2px;cursor:pointer;background:none">
-    </div>
-    <span style="font-size:9px;color:var(--mute)">글자색</span>
-    <div style="display:flex;gap:4px">
-      <button onclick="setPanoTextColor('#ffffff')" style="width:22px;height:22px;background:#fff;border:2px solid rgba(255,255,255,0.3);border-radius:2px;cursor:pointer" id="ptCol0"></button>
-      <button onclick="setPanoTextColor('#111111')" style="width:22px;height:22px;background:#111;border:2px solid transparent;border-radius:2px;cursor:pointer" id="ptCol1"></button>
-      <input type="color" id="ptColCustom" value="#ffffff" onchange="setPanoTextColor(this.value)"
-        style="width:22px;height:22px;padding:0;border:none;border-radius:2px;cursor:pointer;background:none">
+  <!-- 페이지 빌더 -->
+  <div class="section">
+    <div class="section-title">페이지 구성</div>
+    <div class="page-list" id="pageList"></div>
+    <div class="add-page-row" style="margin-top:14px">
+      <select id="newPageType">
+        <option value="cover">표지 (Cover)</option>
+        <option value="fullbleed">풀블리드 화보 (Full Bleed)</option>
+        <option value="index">목차 (Index)</option>
+        <option value="split">2단 사진+글 (Split)</option>
+        <option value="grid">그리드 콜라주 (Grid)</option>
+        <option value="quote">인용 (Quote)</option>
+        <option value="spread">스프레드 (와이드 사진 2페이지)</option>
+        <option value="essay">에세이 (글만)</option>
+        <option value="dialogue">대화형 캡션</option>
+        <option value="list">리스트 (레시피/정보)</option>
+        <option value="milestone">마일스톤 (숫자/단어 강조)</option>
+        <option value="botanical">보태니컬 (잡지 속 잡지)</option>
+        <option value="closing">클로징 (Closing)</option>
+      </select>
+      <button class="btn-primary" onclick="addPage()">+ 페이지 추가</button>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <span style="font-size:9px;color:var(--mute)">슬라이드 수</span>
-    <div style="display:flex;gap:4px">
-      <button onclick="setPanoSlides(2)" id="ptN2" style="padding:4px 10px;font-size:9px;background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:2px;cursor:pointer">2장</button>
-      <button onclick="setPanoSlides(3)" id="ptN3" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">3장</button>
-      <button onclick="setPanoSlides(4)" id="ptN4" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">4장</button>
-      <button onclick="setPanoSlides(5)" id="ptN5" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">5장</button>
-      <button onclick="setPanoSlides(6)" id="ptN6" style="padding:4px 10px;font-size:9px;background:transparent;color:rgba(255,255,255,0.35);border:none;border-radius:2px;cursor:pointer">6장</button>
+
+  <!-- 발행 -->
+  <div class="section">
+    <div class="section-title">발행</div>
+    <div class="publish-bar">
+      <button class="btn-primary" onclick="regenAllAndPublish()" id="regenPublishBtn">✦ 전체 텍스트 재생성 + 발행</button>
+      <button class="btn-primary" onclick="publish()" id="publishBtn" style="background:var(--s3);border-color:var(--border2)">발행하기</button>
+      <span class="publish-status" id="publishStatus"></span>
+    </div>
+    <div class="hint" style="margin-top:8px">
+      <strong>전체 재생성</strong>: 모든 페이지 텍스트를 AI가 한/영 동시 재생성 후 발행. &nbsp;
+      <strong>발행하기</strong>: 현재 내용 그대로 발행.
+      이미지는 Cloudflare R2에 저장됩니다.
     </div>
   </div>
-</div>
-
-<div style="display:flex;align-items:center;gap:10px;padding:4px 0 8px">
-  <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
-    <input type="checkbox" id="infographicMode"
-      style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer">
-    <span style="font-size:10px;letter-spacing:0.08em;color:var(--mute)">인포그래픽 모드 <span style="color:rgba(255,255,255,0.2)">— 적합한 이미지에 레이블·화살표 자동 생성</span></span>
-  </label>
-</div>
-
-<button class="generate-btn" id="generateBtn" disabled>AI 분석 후 캐러셀 생성</button>
-
-<div class="progress-area" id="progressArea">
-  <div class="progress-log" id="progressLog"></div>
-</div>
-
-<div class="carousel-section" id="carouselSection">
-  <div class="section-label">생성된 캐러셀</div>
-  <div class="slides-row" id="slidesRow"></div>
-  <div style="display:flex;align-items:center;gap:12px;padding:10px 0 4px">
-    <span style="font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--mute);white-space:nowrap">PNG 텍스트 크기</span>
-    <input type="range" id="textScaleSlider" min="0.5" max="1.5" step="0.05" value="1.0"
-      style="flex:1;accent-color:var(--accent);cursor:pointer"
-      oninput="updateTextScale(this.value)">
-    <span id="textScaleVal" style="font-size:10px;color:var(--canvas);min-width:32px;text-align:right">1.0×</span>
-  </div>
-  <div class="action-row">
-    <button class="action-btn btn-primary" onclick="const _s=document.getElementById('metaStyle').value; _s==='pano-stretch' ? exportStretch() : isPanoStyle(_s) ? exportPanorama() : exportSlides()" >PNG 저장</button>
-    <button class="action-btn btn-secondary" onclick="toggleCaption()">인스타 캡션</button>
-  </div>
-  <div class="caption-box" id="captionBox">
-    <div class="caption-title">Instagram Caption</div>
-    <div class="caption-text" id="captionText"></div>
-    <div class="caption-hint">텍스트 선택 후 복사하세요</div>
-  </div>
-</div>
-
-<!-- iOS PNG 저장 모달 -->
-<div id="iosModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);flex-direction:column;align-items:center;justify-content:center;padding:16px">
-  <div style="width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:14px">
-    <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
-      <span id="iosModalCount" style="font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4)"></span>
-      <button onclick="closeIosModal()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:18px;cursor:pointer;padding:4px 8px">✕</button>
-    </div>
-    <img id="iosModalImg" style="width:100%;max-width:420px;max-height:60vh;object-fit:contain;border-radius:4px" />
-    <p style="font-size:11px;color:rgba(255,255,255,0.45);text-align:center;line-height:1.7;letter-spacing:0.04em">
-      이미지를 <strong style="color:rgba(255,255,255,0.75)">길게 눌러</strong> 사진 앱에 저장하세요
-    </p>
-    <div style="display:flex;gap:10px;width:100%">
-      <button id="iosPrevBtn" onclick="iosModalPrev()" style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:2px;color:rgba(255,255,255,0.6);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">◀ 이전</button>
-      <button id="iosNextBtn" onclick="iosModalNext()" style="flex:1;padding:12px;background:rgba(255,255,255,0.9);border:none;border-radius:2px;color:#1a1a1a;font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer">다음 ▶</button>
-    </div>
-  </div>
-</div>
 
 </div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../shared-config.js"></script>
+<script src="../shared_storage.js?v=20260630a"></script>
+<script src="../shared_cache.js?v=20260630c"></script>
+<script src="../sapmanri_constitution.js?v=20260702c"></script>
+<script src="../sapmanri_qc.js?v=20260702d"></script>
+<script src="../shared_writing_engine.js?v=20260701a"></script>
+<script src="../shared_image_analyzer.js?v=20260701a"></script>
+<script src="./image-library.js?v=20260630b"></script>
+<script src="./editor-core.js?v=20260702b"></script>
 <script>
-// ── SAPMANRI 공통 이미지 분석 캐시 ──
-// 2026-06-30: 예전엔 이 블록이 독자적으로 GitHub Contents API를 직접
-// 호출하면서 entries[hash][service] = {data, ts} 형태(A구조)로
-// image_cache.json에 썼다 — library.html이 쓰던 flat(B구조)과 같은 hash
-// 키 아래 다른 모양으로 섞여 들어가는 구조적 충돌이었고, 같은 1MB 응답
-// 한계 문제도 그대로 안고 있었다. (get()에 이미 flat fallback 매핑이
-// 있었던 건 그 충돌을 우회하려던 임시방편이었음.)
-// 이제는 shared_cache.js의 SharedCache.getLegacy/setLegacy로 위임한다 —
-// service 인자는 무시되고 flat(B구조)으로 통일되어 R2 우선 + GitHub
-// fallback을 그대로 탄다. carousel_ai_generator.html에서
-// shared_storage.js + shared_cache.js가 이 스크립트보다 먼저 로드되어야 한다.
-(function (global) {
-  function ensure() {
-    if (!global.SharedCache) {
-      throw new Error('shared_cache.js가 로드되지 않았습니다 (스크립트 순서 확인).');
-    }
-    return global.SharedCache;
-  }
-
-  async function hashImage(dataUrl) { return ensure().hashImage(dataUrl); }
-  async function get(hash, service) { return ensure().getLegacy(hash, service); }
-  async function set(hash, service, data) { return ensure().setLegacy(hash, service, data); }
-  function isEnabled() { return ensure().isEnabled(); }
-  function getToken() { return ensure().getToken(); }
-  function setToken(val) { return ensure().setToken(val); }
-
-  // 가벼운 집계용 (index.json만 읽음, R2일 때 빠름)
-  async function stats() {
-    const { entries } = await ensure().getIndex();
-    const imageCount = Object.keys(entries).length;
-    return { imageCount };
-  }
-  // 미사용 + 파괴적 동작이라 의도적으로 비활성화 (전체 삭제는 별도 도구로만 수행)
-  function clear() {
-    throw new Error('clear()는 안전을 위해 비활성화되어 있습니다. 전체 삭제가 필요하면 별도로 요청하세요.');
-  }
-
-  global.SapmanriCache = { hashImage, get, set, isEnabled, getToken, setToken, clear, stats };
-})(typeof window !== 'undefined' ? window : globalThis);
-
-
-
-// ── API Key ──
-// 2026-06-30: 예전엔 'anthropic_key'(로컬 키)만 읽고 썼는데,
-// shared-config.js(SapConfig)는 통합 키 'sapmanri_anthropic_key'를 쓴다.
-// library.html 등에서 설정 모달로 저장하면 통합 키에만 들어가고
-// 캐러셀은 옛날 키만 보다 보니 "키 없음"으로 보였던 것.
-// SapConfig.getAnthropicKey()로 통일하고, SapConfig가 없으면 레거시 폴백.
-function saveApiKey(val) {
-  try {
-    if (window.SapConfig) { window.SapConfig.set('anthropic', val); }
-    else { localStorage.setItem('anthropic_key', val); }
-  } catch(e) {}
-  updateKeyVisibility();
-}
-function getApiKey() {
-  try {
-    if (window.SapConfig) {
-      const v = window.SapConfig.getAnthropicKey();
-      if (v) return v;
-    }
-    // SapConfig 없거나 통합 키 비어있으면 레거시 키에서 폴백
-    return localStorage.getItem('anthropic_key') || '';
-  } catch(e) { return ''; }
-}
-function updateKeyVisibility() {
-  // API 키 입력란은 SapConfig 설정 모달로 통합됨 — 상태 표시만 버튼 텍스트로 처리
-  const apiKey = getApiKey();
-  const status = document.getElementById('apiKeyStatus');
-  if (!status) return;
-  status.textContent = apiKey ? '⚙ 설정됨' : '⚙ 설정 필요';
-  status.style.borderColor = apiKey ? 'rgba(122,154,126,0.5)' : 'rgba(196,122,106,0.5)';
-  status.style.color = apiKey ? 'var(--green, #7a9a7e)' : 'var(--orange, #c47a6a)';
-}
-
-// ── GitHub Token (이미지 분석 캐시 공유용) ──
-function saveGhToken(val) {
-  SapmanriCache.setToken(val);
-  updateGhKeyVisibility();
-  initPanoPicker();
-  setPanoSlides(3);
-}
-function updateGhKeyVisibility() {
-  const token = SapmanriCache.getToken();
-  const wrap = document.getElementById('ghKeyWrap');
-  const status = document.getElementById('ghKeyStatus');
-  if (!wrap || !status) return;
-  if (token) { wrap.style.display = 'none'; status.style.display = 'block'; }
-  else { wrap.style.display = 'flex'; status.style.display = 'none'; }
-}
-
-// 페이지 로드 시 저장된 키 복원
-window.addEventListener('load', () => {
-  updateKeyVisibility();
-
-  const ghToken = SapmanriCache.getToken();
-  const ghInput = document.getElementById('ghTokenInput');
-  if (ghToken && ghInput) ghInput.value = ghToken;
-  updateGhKeyVisibility();
-  // 텍스트 스케일 복원
-  try {
-    const savedScale = localStorage.getItem('png_text_scale');
-    if (savedScale) {
-      textScale = parseFloat(savedScale);
-      const slider = document.getElementById('textScaleSlider');
-      const label = document.getElementById('textScaleVal');
-      if (slider) slider.value = textScale;
-      if (label) label.textContent = textScale.toFixed(2) + '×';
-    }
-  } catch(e) {}
-  // 화면 비율 복원
-  try {
-    const savedRatio = localStorage.getItem('cg_aspect_ratio');
-    if (savedRatio === 'tall') setRatio('tall');
-  } catch(e) {}
-});
-
-function updateTextScale(val) {
-  textScale = parseFloat(val);
-  document.getElementById('textScaleVal').textContent = textScale.toFixed(2) + '×';
-  try { localStorage.setItem('png_text_scale', textScale); } catch(e) {}
-}
-
-let images = [];
-let generatedSlides = [];
-let generatedCaption = '';
-let textScale = 1.0;
-let textLang = 'ko';
-let aspectRatio = 'square'; // 'square' | 'tall'
-function setLang(lang) {
-  textLang = lang;
-  const ko = document.getElementById('langKo');
-  const en = document.getElementById('langEn');
-  if (!ko || !en) return;
-  ko.style.background = lang === 'ko' ? 'rgba(255,255,255,0.15)' : 'transparent';
-  ko.style.color       = lang === 'ko' ? '#fff' : 'rgba(255,255,255,0.35)';
-  en.style.background  = lang === 'en' ? 'rgba(255,255,255,0.15)' : 'transparent';
-  en.style.color       = lang === 'en' ? '#fff' : 'rgba(255,255,255,0.35)';
-}
-function setRatio(ratio) {
-  aspectRatio = ratio;
-  const sq = document.getElementById('ratioSquare');
-  const tall = document.getElementById('ratioTall');
-  if (!sq || !tall) return;
-  sq.style.background   = ratio === 'square' ? 'rgba(255,255,255,0.15)' : 'transparent';
-  sq.style.color        = ratio === 'square' ? '#fff' : 'rgba(255,255,255,0.35)';
-  tall.style.background = ratio === 'tall' ? 'rgba(255,255,255,0.15)' : 'transparent';
-  tall.style.color      = ratio === 'tall' ? '#fff' : 'rgba(255,255,255,0.35)';
-  try { localStorage.setItem('cg_aspect_ratio', ratio); } catch(e) {}
-  if (generatedSlides.length) renderCarousel(generatedSlides);
-}
-
-// ── upload ──
-const uploadZone = document.getElementById('uploadZone');
-const fileInput = document.getElementById('fileInput');
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-uploadZone.addEventListener('drop', e => { e.preventDefault(); uploadZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-// ── 이미지 라이브러리 피커 ─────────────────────────────────────
-async function openLibraryPicker() {
-  if (!window.ImageLibrary) {
-    alert('ImageLibrary 모듈이 로드되지 않았습니다. 페이지를 새로고침해 주세요.');
-    return;
-  }
-  const maxAdd = 10 - images.length;
-  if (maxAdd <= 0) { alert('이미지는 최대 10장까지 추가할 수 있습니다.'); return; }
-
-  window.ImageLibrary.openPicker(async (selected) => {
-    // 단일 선택 또는 다중 선택 모두 처리
-    const items = Array.isArray(selected) ? selected : [selected];
-    for (const item of items.slice(0, maxAdd)) {
-      try {
-        // R2 URL → dataUrl 변환 (이미 dataUrl이면 그대로)
-        let dataUrl = item.dataUrl;
-        if (!dataUrl || !dataUrl.startsWith('data:')) {
-          dataUrl = await window.ImageLibrary.fetchAsDataUrl(item.url || item.path);
-        }
-        if (!dataUrl) continue;
-        // hash는 캐시에서 가져온 것 사용
-        const hash = item.hash || await window.SapmanriCache.hashImage(dataUrl);
-        images.push({ dataUrl, hash, analysis: null, fromLibrary: true, r2_url: item.url });
-        renderThumbs(); updateBtn(); updatePanoPickerVisibility();
-      } catch(e) {
-        console.warn('라이브러리 이미지 로드 실패:', e.message);
-      }
-    }
-  }, { multiple: maxAdd > 1, theme: 'dark' });
-}
-
-function handleFiles(files) {
-  Array.from(files).slice(0, 10 - images.length).forEach(file => {
-    const objectUrl = URL.createObjectURL(file);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      images.push({ file, dataUrl: ev.target.result, objectUrl, analysis: null });
-      renderThumbs(); updateBtn();
-      updatePanoPickerVisibility();
-    };
-    reader.readAsDataURL(file);
-  });
-}
-function removeImg(i) {
-  if (images[i]?.objectUrl) URL.revokeObjectURL(images[i].objectUrl);
-  images.splice(i, 1); renderThumbs(); updateBtn();
-  updatePanoPickerVisibility();
-}
-
-// ── 파노라마 픽커 ──
-let panoSlideCount = 3;
-let panoSelLeft = 0.0;   // 0~1 비율
-let panoSelRight = 1.0;
-let panoVCenterVal = 0.5; // 세로 중심점 (0=상단, 0.5=중앙, 1=하단)
-let panoTextBgColor = '#c8191a';
-let stretchPos = 0.3;
-let stretchHeight = 0.18;
-let stretchDir = 'both';
-
-function setStretchDir(dir) {
-  stretchDir = dir;
-  ['Both','Up','Down'].forEach(d => {
-    const btn = document.getElementById('strDir'+d);
-    if (!btn) return;
-    btn.style.background = d.toLowerCase()===dir ? 'rgba(255,255,255,0.15)' : 'transparent';
-    btn.style.color = d.toLowerCase()===dir ? '#fff' : 'rgba(255,255,255,0.35)';
-  });
-}
-let panoTextColor = '#ffffff';
-
-function setPanoTextBg(color) {
-  panoTextBgColor = color;
-  document.getElementById('ptBgCustom').value = color;
-  ['ptBg0','ptBg1','ptBg2','ptBg3','ptBg4'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.borderColor = el.style.background === color || el.style.backgroundColor === color ? '#fff' : 'transparent';
-  });
-}
-function setPanoTextColor(color) {
-  panoTextColor = color;
-  document.getElementById('ptColCustom').value = color;
-  ['ptCol0','ptCol1'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.borderColor = el.style.background === color || el.style.backgroundColor === color ? 'var(--accent)' : 'transparent';
-  });
-}
-
-function updateVCenterLabel(v) {
-  const labels = ['상단','','','','','','','','','','중앙','','','','','','','','','','하단'];
-  const pct = Math.round(v * 100);
-  const lbl = document.getElementById('panoVCenterLabel');
-  if (lbl) lbl.textContent = pct === 50 ? '중앙' : pct < 50 ? '↑' + pct + '%' : '↓' + pct + '%';
-}
-function setPanoSlides(n) {
-  panoSlideCount = n;
-  [2,3,4,5,6].forEach(i => {
-    ['panoN','ptN'].forEach(prefix => {
-      const btn = document.getElementById(prefix+i);
-      if (!btn) return;
-      btn.style.background = i===n ? 'rgba(255,255,255,0.15)' : 'transparent';
-      btn.style.color = i===n ? '#fff' : 'rgba(255,255,255,0.35)';
-    });
-  });
-  updatePanoPickerOverlay();
-}
-
-function updatePanoPickerOverlay() {
-  const wrap = document.getElementById('panoPickerWrap');
-  const overlay = document.getElementById('panoSelOverlay');
-  const handleL = document.getElementById('panoHandleL');
-  const handleR = document.getElementById('panoHandleR');
-  const info = document.getElementById('panoPickerInfo');
-  if (!wrap || !overlay) return;
-  const W = wrap.offsetWidth;
-  const lx = panoSelLeft * W;
-  const rx = panoSelRight * W;
-  overlay.style.left = lx + 'px';
-  overlay.style.width = (rx - lx) + 'px';
-  handleL.style.left = (lx - 9) + 'px';
-  handleR.style.left = (rx - 9) + 'px';
-  // 슬라이드 구분선 표시
-  const existing = wrap.querySelectorAll('.pano-divider');
-  existing.forEach(e => e.remove());
-  for (let i = 1; i < panoSlideCount; i++) {
-    const divX = lx + (rx - lx) * (i / panoSlideCount);
-    const div = document.createElement('div');
-    div.className = 'pano-divider';
-    div.style.cssText = `position:absolute;top:0;bottom:0;left:${divX}px;width:1px;background:rgba(255,255,255,0.4);pointer-events:none`;
-    wrap.appendChild(div);
-  }
-  if (info) {
-    const pct = Math.round((panoSelRight - panoSelLeft) * 100);
-    info.textContent = `구간 ${pct}% · ${panoSlideCount}장으로 분할`;
-  }
-}
-
-function initPanoPicker() {
-  const wrap = document.getElementById('panoPickerWrap');
-  if (!wrap) return;
-  let dragging = null; // 'L' | 'R'
-
-  function getX(e) {
-    const rect = wrap.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-  }
-
-  document.getElementById('panoHandleL').addEventListener('mousedown', e => { dragging='L'; e.preventDefault(); });
-  document.getElementById('panoHandleL').addEventListener('touchstart', e => { dragging='L'; }, {passive:true});
-  document.getElementById('panoHandleR').addEventListener('mousedown', e => { dragging='R'; e.preventDefault(); });
-  document.getElementById('panoHandleR').addEventListener('touchstart', e => { dragging='R'; }, {passive:true});
-
-  function onMove(e) {
-    if (!dragging) return;
-    const x = getX(e);
-    if (dragging === 'L') {
-      panoSelLeft = Math.min(x, panoSelRight - 0.1);
-    } else {
-      panoSelRight = Math.max(x, panoSelLeft + 0.1);
-    }
-    updatePanoPickerOverlay();
-  }
-  function onUp() { dragging = null; }
-
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('touchmove', onMove, {passive:true});
-  window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchend', onUp);
-}
-
-function updatePanoPickerVisibility() {
-  const style = document.getElementById('metaStyle').value;
-  const picker = document.getElementById('panoPicker');
-  const textUI = document.getElementById('panoTextUI');
-  const notice = document.getElementById('panoNotice');
-  if (!picker) return;
-  const isPano = style.startsWith('pano-');
-  const isTextPano = style === 'pano-text';
-
-  // 텍스트 파노라마: 이미지 없어도 가능 (배경색만 있으면 됨)
-  picker.style.display = (isPano && !isTextPano && images.length === 1) ? 'block' : 'none';
-  if (textUI) textUI.style.display = isTextPano ? 'block' : 'none';
-  if (notice) notice.style.display = (isPano && !isTextPano) ? 'block' : 'none';
-
-  const isStretchPano = style === 'pano-stretch';
-  const stretchUI = document.getElementById('panoStretchUI');
-  if (stretchUI) stretchUI.style.display = isStretchPano ? 'block' : 'none';
-
-  if (isPano && !isTextPano && !isStretchPano && images.length === 1 && images[0]) {
-    const img = document.getElementById('panoPickerImg');
-    img.src = images[0].dataUrl;
-    setTimeout(updatePanoPickerOverlay, 50);
-  }
-
-  // stretch도 이미지 없어도 버튼 활성화 안 함 (이미지 필수)
-  if (isStretchPano && generateBtn) {
-    generateBtn.disabled = images.length === 0;
-  }
-
-  // 생성 버튼 활성화: 텍스트 파노라마는 이미지 없어도 가능
-  const generateBtn = document.getElementById('generateBtn');
-  if (generateBtn && isTextPano) {
-    generateBtn.disabled = false;
-  }
-}
-
-function renderThumbs() {
-  document.getElementById('imageGrid').innerHTML = images.map((img, i) => `
-    <div class="img-thumb" id="thumb-${i}">
-      <img src="${img.dataUrl}" />
-      <button class="remove-btn" onclick="removeImg(${i})">✕</button>
-      <div class="img-num">${i+1} / ${images.length}</div>
-    </div>`).join('');
-}
-function updateBtn() {
-  const style = document.getElementById('metaStyle').value;
-  const isTextPano = style === 'pano-text';
-  document.getElementById('generateBtn').disabled = !isTextPano && images.length === 0;
-}
-
-// ── progress ──
-function log(text, done=false) {
-  const id = 'step-' + Date.now() + Math.random();
-  document.getElementById('progressLog').innerHTML +=
-    `<div class="step" id="${id}"><span class="step-icon ${done?'done':'spin'}">${done?'✓':'◌'}</span><span>${text}</span></div>`;
-  return id;
-}
-function doneStep(id, suffix='') {
-  const el = document.getElementById(id);
-  if (el) {
-    const ic = el.querySelector('.step-icon'); ic.className='step-icon done'; ic.textContent='✓';
-    if (suffix) {
-      const span = el.querySelector('span:last-child');
-      if (span) span.textContent += suffix;
-    }
-  }
-}
-
-// ── generate ──
-// 스타일 변경 시 파노라마 안내 표시
-document.getElementById('metaStyle').addEventListener('change', function() {
-  const isPano = this.value.startsWith('pano-');
-  document.getElementById('panoNotice').style.display = isPano && this.value !== 'pano-text' ? 'block' : 'none';
-  updatePanoPickerVisibility();
-  updateBtn();
-});
-
-document.getElementById('generateBtn').addEventListener('click', async () => {
-  if (!images.length) return;
-  document.getElementById('progressArea').classList.add('visible');
-  document.getElementById('carouselSection').classList.remove('visible');
-  document.getElementById('progressLog').innerHTML = '';
-  document.getElementById('generateBtn').disabled = true;
-
-  const style = document.getElementById('metaStyle').value;
-  const topic = document.getElementById('metaTopic').value || '';
-  const tag = document.getElementById('metaTag').value;
-  const closing = document.getElementById('metaClosing').value;
-  const manualText = document.getElementById('metaTextSlide').value.trim();
-  const infographicMode = document.getElementById('infographicMode').checked;
-  const isPanorama = style.startsWith('pano-') && style !== 'pano-stretch';
-  const isStretch = style === 'pano-stretch';
-
-  // 이미지 해시 계산 (아직 없으면)
-  for (let i = 0; i < images.length; i++) {
-    if (!images[i].hash) {
-      try { images[i].hash = await SapmanriCache.hashImage(images[i].dataUrl); } catch(e) {}
-    }
-  }
-
-  const needsAnalysis = images.some(img => !img.analysis) && style !== 'pano-text';
-  if (needsAnalysis && images.length) {
-    const s1 = log(`이미지 ${images.length}장 분석 중...`);
-    let sharedHits = 0;
-    for (let i = 0; i < images.length; i++) {
-      if (images[i].analysis) continue; // 메모리 캐시(이미 분석됨) 스킵
-
-      const thumb = document.getElementById(`thumb-${i}`);
-
-      // 공유 캐시 조회 (다른 서비스/이전 세션 결과 재사용)
-      if (images[i].hash) {
-        const cached = await SapmanriCache.get(images[i].hash, 'carousel');
-        // SapmanriCache.getLegacy가 라이브러리 flat 데이터(suggested_caption 등)를 반환할 수 있음.
-        // 캐러셀 분석은 bright_zone 필드가 있어야 유효 — 없으면 캐시 미스로 처리.
-        if (cached && cached.bright_zone !== undefined) {
-          images[i].analysis = cached;
-          sharedHits++;
-          if (thumb) { thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }
-          continue;
-        }
-      }
-
-      if (thumb) thumb.classList.add('analyzing');
-      try {
-        images[i].analysis = await analyzeImage(images[i].dataUrl, topic, style);
-        if (images[i].hash) SapmanriCache.set(images[i].hash, 'carousel', images[i].analysis); // fire-and-forget
-      }
-      catch(e) { images[i].analysis = { subject_position:'center', best_text_position:'bottom_left', text_color:'white', suggested_copy:'감성의 순간', suggested_body:'오늘도 천천히.', overall_brightness:'mid', dominant_color:'#b87a6e', mood:'고요함' }; }
-      if (thumb) { thumb.classList.remove('analyzing'); thumb.classList.add('done'); thumb.querySelector('.img-num').textContent = '✓'; }
-    }
-    doneStep(s1, sharedHits > 0 ? ` (공유 캐시 ${sharedHits}장 재사용)` : '');
-  } else {
-    log('이미지 분석 완료 (캐시)', true);
-  }
-
-  const s2 = log('슬라이드 계획 중...');
-  let plan;
-
-  if (isStretch) {
-    plan = { slides: images.map((img,i)=>({ image_index:i })), caption: '' };
-    doneStep(s2);
-  } else if (isPanorama) {
-    if (style === 'pano-text') {
-      // 텍스트 파노라마: 미리보기 없이 바로 완성 (PNG 저장 시 exportPanorama에서 처리)
-      plan = { slides: [], caption: '' };
-      doneStep(s2);
-    } else {
-      // 파노라마: AI 플랜 없이 이미지 분석 결과로 바로 슬라이드 생성
-      const panoSlides = images.map((img, i) => ({
-        type: 'feature',
-        image_index: i,
-        headline: img.analysis?.suggested_copy || '',
-        body: img.analysis?.suggested_body || '',
-        label: i === 0 ? (img.analysis?.mood || '') : '',
-        layout: 'overlay_bottom',
-        text_position: 'bottom_left',
-        accent_color: img.analysis?.dominant_color || '#c8a97e',
-        folio: String(i+1).padStart(2,'0') + ' / ' + String(images.length).padStart(2,'0'),
-      }));
-      const panoMood = images[0]?.analysis?.mood || '';
-      const panoCopy = images[0]?.analysis?.suggested_copy || '';
-      const panoBody = images[0]?.analysis?.suggested_body || '';
-      const panoCaption = [panoCopy, panoBody].filter(Boolean).join('\n') +
-        (tag ? '\n\n' + tag : '') +
-        '\n\n#슬로우라이프 #감성사진 #오늘도느리게 #slowdays #감성찾아삽만리';
-      plan = { slides: panoSlides, caption: panoCaption };
-      doneStep(s2);
-    }
-  } else {
-    try { plan = await generatePlan(images, topic, tag, closing, style, manualText, infographicMode, textLang); doneStep(s2); }
-    catch(e) { doneStep(s2); log('플랜 생성 실패: ' + e.message, true); document.getElementById('generateBtn').disabled=false; return; }
-  }
-
-  const s3 = log('렌더링 중...');
-  try {
-    if (!plan || !plan.slides || !Array.isArray(plan.slides)) {
-      throw new Error('슬라이드 데이터가 없어요. plan: ' + JSON.stringify(plan).slice(0,100));
-    }
-    generatedSlides = plan.slides;
-    generatedCaption = plan.caption || '';
-
-    if (isStretch) {
-      // 픽셀 스트레치: 미리보기 — 원본 이미지 썸네일 그리드
-      const row = document.getElementById('slidesRow');
-      row.style.overflowX = 'auto';
-      row.style.flexWrap = 'nowrap';
-      row.style.gridTemplateColumns = 'unset';
-      row.style.display = 'flex';
-      row.innerHTML = images.map((img, i) =>
-        `<div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:#111;position:relative;overflow:hidden">
-          <img style="width:100%;height:100%;object-fit:cover;opacity:0.7" src="${img.dataUrl}"/>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
-            <span style="font-size:9px;color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);padding:3px 8px;border-radius:2px">스트레치 적용 예정</span>
-          </div>
-        </div>`
-      ).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
-      log('PNG 저장으로 픽셀 스트레치 효과를 적용해서 다운로드하세요.', true);
-    } else if (isPanorama) {
-      if (style === 'pano-text') {
-        // 텍스트 파노라마: 미리보기 대신 색상 블록으로 표시
-        const row = document.getElementById('slidesRow');
-        row.style.overflowX = 'auto';
-        row.style.flexWrap = 'nowrap';
-        row.style.gridTemplateColumns = 'unset';
-        row.style.display = 'flex';
-        const txt = document.getElementById('panoTextInput')?.value?.trim() || '텍스트';
-        row.innerHTML = Array.from({length: panoSlideCount}, (_, i) => `
-          <div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:${panoTextBgColor};position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
-            <div style="font-size:28px;font-weight:700;color:${panoTextColor};opacity:0.4;font-family:var(--sans);text-align:center;padding:8px;word-break:break-all">${txt}</div>
-            <div style="position:absolute;top:6px;right:8px;font-size:7px;color:${panoTextColor};opacity:0.4">${String(i+1).padStart(2,'0')}</div>
-          </div>`).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
-        log('텍스트 파노라마 준비됨. PNG 저장으로 각 슬라이드를 다운로드하세요.', true);
-      } else {
-        // 파노라마: 미리보기는 가로 스크롤 슬라이드 행
-        const row = document.getElementById('slidesRow');
-        row.style.overflowX = 'auto';
-        row.style.flexWrap = 'nowrap';
-        row.style.gridTemplateColumns = 'unset';
-        row.style.display = 'flex';
-        row.innerHTML = plan.slides.map((s, i) => {
-          const img = images[s.image_index];
-          const src = img ? img.dataUrl : '';
-          return `<div class="slide-card" style="flex:0 0 200px;aspect-ratio:1/1;background:#111;position:relative;overflow:hidden">
-            ${src ? `<img style="width:100%;height:100%;object-fit:cover;opacity:0.8" src="${src}"/>` : ''}
-            <div style="position:absolute;bottom:10px;left:10px;right:10px;z-index:2">
-              <div style="font-size:6px;letter-spacing:0.14em;color:rgba(255,255,255,0.5);text-transform:uppercase;margin-bottom:3px">${(s.label||'').toUpperCase()}</div>
-              <div style="font-family:var(--serif);font-size:12px;font-weight:300;color:#fff;line-height:1.3">${s.headline||''}</div>
-            </div>
-            <div style="position:absolute;top:6px;right:8px;font-size:7px;color:rgba(255,255,255,0.3)">${String(i+1).padStart(2,'0')}</div>
-          </div>`;
-        }).join('<div style="flex:0 0 2px;background:rgba(255,255,255,0.06);align-self:stretch"></div>');
-        log('파노라마 미리보기 완성! PNG 저장으로 각 슬라이드를 잘라서 다운로드하세요.', true);
-      }
-    } else {
-      // 모든 이미지가 사용됐는지 검증
-      const usedIndices = new Set();
-      plan.slides.forEach(s => {
-        if (s.image_index != null) usedIndices.add(s.image_index);
-        if (Array.isArray(s.image_indices)) s.image_indices.forEach(ix => usedIndices.add(ix));
-      });
-      const missing = [];
-      for (let i = 0; i < images.length; i++) if (!usedIndices.has(i)) missing.push(i+1);
-      if (missing.length) {
-        log(`⚠️ ${missing.length}장(${missing.join(', ')}번)이 결과에 포함되지 않았어요. 재생성하면 다른 구성이 나올 수 있어요.`, true);
-      }
-      renderCarousel(plan.slides);
-    }
-    doneStep(s3);
-    log('완성!', true);
-    document.getElementById('carouselSection').classList.add('visible');
-  } catch(e) {
-    doneStep(s3);
-    log('렌더링 실패: ' + e.message, true);
-  }
-  document.getElementById('generateBtn').disabled = false;
-});
-
-
-// ── YouTube 트랜스크립트 분석 ──
-function extractVideoId(url) {
-  const match = url.match(/(?:v=|youtu\.be\/|shorts\/)([\w-]{11})/);
-  return match ? match[1] : null;
-}
-
-async function fetchAndFillFromYoutube() {
-  const url = document.getElementById('youtubeUrl').value.trim();
-  if (!url) return;
-  const videoId = extractVideoId(url);
-  if (!videoId) {
-    document.getElementById('transcriptStatus').textContent = '❌ 유효한 유튜브 URL이 아니에요';
-    return;
-  }
-
-  const btn = document.getElementById('fetchTranscriptBtn');
-  const status = document.getElementById('transcriptStatus');
-  btn.disabled = true;
-  btn.textContent = '분석 중...';
-  status.textContent = '영상 내용 분석 중...';
-  status.style.color = 'var(--mute)';
-
-  try {
-    // 1단계: oEmbed로 영상 제목 취득
-    status.textContent = '영상 정보 가져오는 중...';
-    let videoTitle = '';
-    try {
-      const oembedRes = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
-      if (oembedRes.ok) { const d = await oembedRes.json(); videoTitle = d.title || ''; }
-    } catch(e) {}
-    if (!videoTitle) throw new Error('영상 정보를 가져오지 못했어요. URL을 확인해주세요.');
-    status.textContent = `"${videoTitle}" — 자막 가져오는 중...`;
-
-    // 2단계: YouTube 자막 가져오기 (CORS 프록시 경유)
-    let transcript = '';
-    try {
-      const proxyBase = 'https://corsproxy.io/?url=';
-      const ytPageRes = await fetch(proxyBase + encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`));
-      if (ytPageRes.ok) {
-        const html = await ytPageRes.text();
-        // 한국어 자막 우선, 없으면 첫 번째 자막 URL 추출
-        let captionUrl = '';
-        const koMatch = html.match(/"baseUrl":"(https:[^"]+timedtext[^"]+)"[^}]{0,200}"languageCode":"ko"/);
-        if (koMatch) {
-          captionUrl = koMatch[1].replace(/\u0026/g, '&');
-        } else {
-          const anyMatch = html.match(/"captionTracks":\[{"baseUrl":"([^"]+)"/);
-          if (anyMatch) captionUrl = anyMatch[1].replace(/\u0026/g, '&');
-        }
-        if (captionUrl) {
-          const captionRes = await fetch(proxyBase + encodeURIComponent(captionUrl + '&fmt=json3'));
-          if (captionRes.ok) {
-            const captionData = await captionRes.json();
-            transcript = (captionData.events || [])
-              .slice(0, 180)
-              .map(e => (e.segs || []).map(s => s.utf8 || '').join(''))
-              .filter(t => t.trim() && t !== '\n')
-              .join(' ')
-              .slice(0, 1200);
-          }
-        }
-      }
-    } catch(e) { console.warn('자막 오류:', e.message); }
-
-    status.textContent = transcript
-      ? `자막 ${transcript.length}자 — 분석 중...`
-      : `자막 없음 — 제목으로 분석 중...`;
-
-    // 3단계: 제목 + 자막으로 Haiku 분석
-    const contextText = transcript
-      ? `영상 제목: "${videoTitle}"
-자막 내용(일부): ${transcript}`
-      : `영상 제목: "${videoTitle}"`;
-
-    // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-    const _ytRaw = await SharedWritingEngine.callClaude(
-      `${contextText}
-
-이 영상 내용을 바탕으로 아래 JSON만 반환해. 다른 텍스트 없이.
-{"topic":"핵심 주제 15자 이내 한국어","text_slide":"인스타 감성 한 문장 20-30자 한국어","mood":"분위기 한 단어"}`,
-      '', 250, null, 'claude-haiku-4-5-20251001'
-    );
-    const _yts = _ytRaw.indexOf('{'), _yte = _ytRaw.lastIndexOf('}');
-    if (_yts === -1) throw new Error('응답에서 JSON을 찾지 못했어요');
-    const result = JSON.parse(_ytRaw.slice(_yts, _yte + 1));
-
-    // 폼에 자동 채우기
-    if (result.topic) {
-      document.getElementById('metaTopic').value = result.topic;
-    }
-    if (result.text_slide) {
-      document.getElementById('metaTextSlide').value = result.text_slide;
-    }
-
-    status.textContent = '✓ 완성! 주제와 텍스트 슬라이드 문구가 채워졌어요';
-    status.style.color = '#7ec98a';
-
-  } catch(e) {
-    status.textContent = '❌ 오류: ' + e.message;
-    status.style.color = '#e07070';
-  }
-
-  btn.disabled = false;
-  btn.textContent = '분석';
-}
-
-// ── Claude API: analyze image ──
-async function analyzeImage(dataUrl, topic, style) {
-  const base64 = dataUrl.split(',')[1];
-  const mediaType = dataUrl.match(/data:(image\/\w+)/)[1];
-  // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-  const _aiRaw = await SharedWritingEngine.callClaude(
-    [
-      { type:'image', source:{ type:'base64', media_type:mediaType, data:base64 }},
-      { type:'text', text:`이 이미지를 분석해서 Instagram 캐러셀 슬라이드 레이아웃에 필요한 정보를 JSON으로만 반환해줘. 다른 텍스트 없이 JSON만.
-{"subject_position":"left|center|right|top|bottom|full","bright_zone":"top|bottom|left|right|center","dark_zone":"top|bottom|left|right|none","overall_brightness":"dark|mid|bright","dominant_color":"#hex","mood":"한 단어 한국어","suggested_copy":"2~4단어 한국어 헤드라인","suggested_body":"감성적 한국어 본문 1~2문장 (주제: ${topic})","best_text_position":"bottom_left|bottom_right|top_left|center_left|center|split_bottom","text_color":"white|dark"}`}
-    ],
-    '', 600, null, 'claude-sonnet-4-5'
-  );
-  const _ais=_aiRaw.indexOf('{'), _aie=_aiRaw.lastIndexOf('}');
-  return JSON.parse(_aiRaw.slice(_ais,_aie+1));
-}
-
-// ── Claude API: generate plan ──
-async function generatePlan(images, topic, tag, closing, style, manualText, infographicMode=false, textLang='ko') {
-  const total = images.length + 1;
-  const imageData = images.map((img,i) => ({ index:i, analysis:img.analysis||{} }));
-
-  // Vase 문체 프로필 로드 (writing_studio / skyline과 공유, 한국어 캡션에만 적용)
-  let styleBlock = '';
-  if (textLang !== 'en') {
-    try {
-      const profRes = await fetch('./profile_data.json');
-      const prof = await profRes.json();
-      const rules = prof.rules || [];
-      const examples = (prof.examples || []).filter(e => e.type === 'instagram' || e.type === 'poem').slice(-4);
-      const pairs = (prof.pairs || []).filter(p => p.type === 'instagram' && !p.qc_flag).slice(-2);
-
-      if (rules.length) {
-        styleBlock += `\n\nVASE 문체 규칙 (반드시 따를 것):\n${rules.map((r,i)=>`${i+1}. ${r}`).join('\n')}`;
-      }
-      if (examples.length) {
-        styleBlock += `\n\nVASE가 직접 쓴 예시 글 (이 문체와 리듬 참고, 복사 금지):\n`;
-        examples.forEach((e,i) => { styleBlock += `\n--- 예시 ${i+1} ---\n${e.text.slice(0,400)}\n`; });
-      }
-      if (pairs.length) {
-        styleBlock += `\n\nVASE 수정 패턴 (AI 초안 → 수정본, 이 패턴에서 선호 파악):\n`;
-        pairs.forEach((p,i) => { styleBlock += `\n[AI]: ${p.original.slice(0,200)}\n[수정]: ${p.edited.slice(0,200)}\n`; });
-      }
-
-      // 2026-07-02: 하드코딩 절대금지 목록 제거 → SapConstitution SSOT 사용
-      styleBlock += `\n\n${SapConstitution.buildConstitutionText()}`;
-      styleBlock += `\n\n${SapConstitution.buildAvoidExamplesText()}`;
-      styleBlock += `\n\n생성 순서 원칙: 장면 → 사실 → 리듬 → 감정 → 의미`;
-    } catch(e) { /* profile_data.json 없으면 기본 스타일로 진행 */ }
-  }
-
-  // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-  const _planMaxTok = style === 'jeonwon' ? 4000 : 2000;
-  const _planRaw = await SharedWritingEngine.callClaude(
-`이미지 분석 결과를 바탕으로 Instagram 캐러셀 계획을 순수 JSON으로만 반환해줘. 마크다운 없이 JSON만.
-
-스타일: ${style} / 주제: ${topic||'(이미지 분석 기반)'} / 채널태그: ${tag} / 마무리: ${closing}
-스타일 특성: ${{'magazine-b':'에디토리얼 감성, 세리프 중심, 여백','theedit':'큐레이션 매거진, 산세리프 굵게, 흰배경, 텍스트박스 오버레이','stayfolio':'파인스테이, 세리프 우아함, 크림배경, 여백 넉넉','nike':'강렬 대문자 스포츠','ohouse':'따뜻한 라이프스타일'}[style]||''}
-이미지수: ${images.length} / 화면비율: ${aspectRatio === 'tall' ? "9:16 (세로형, 릴스/스토리)" : "1:1 (정사각형)"} / manualText: "${manualText}"
-
-분석결과: ${JSON.stringify(imageData, (k,v) => (v instanceof File ? undefined : v))}
-
-반환형식 (slides 총 ${total}개):
-{"slides":[{"type":"cover","image_index":0,"layout":"overlay_bottom","text_position":"bottom_left","label":"","headline":"헤드라인","body":"본문","folio":"01 — 0${total}","accent_color":"#b87a6e"},{"type":"feature","image_index":1,"layout":"split_bottom","text_position":"split_bottom","label":"garden · 정원","headline":"헤드라인","body":"본문","folio":"02 — 0${total}","accent_color":"#b87a6e"}],"caption":"캡션\n\n#해시태그"}
-
-규칙:
-- 첫 슬라이드: type cover
-- 마지막 슬라이드: type closing, image_index ${images.length-1}
-- image_index는 반드시 0~${images.length-1} 범위 안에서만 사용 (범위 초과 금지)
-- 이미지가 없는 슬라이드(pull_quote 제외)에도 반드시 유효한 image_index 할당
-- 중요: 0~${images.length-1}의 모든 인덱스가 전체 슬라이드의 image_index 또는 image_indices 중 최소 한 번씩은 등장해야 함. 누락된 이미지가 있으면 안 됨. 슬라이드 수보다 이미지 수가 많으면 일부 슬라이드의 image_indices(grid 등)에 나머지를 분배할 것
-- layout: overlay_bottom/overlay_top/overlay_left/overlay_right/split_bottom/dark_full 중 하나
-- text_position: bottom_left/top_left/center/left_half/split_bottom/dark_center 중 하나
-- 슬라이드마다 다른 layout 사용, 이미지 분석 반영
-- 헤드라인 2~4단어 감성적 한국어
-- 1번 슬라이드(표지) 헤드라인: 첫 인상에서 멈춰서 보고 싶게 만드는 가장 강한 한 줄. "오늘", "어느 날" 같은 흔한 시작 대신 구체적 장면이나 의외의 단어로 시작
-- 마지막 슬라이드(클로징) headline/body: 단순 인사가 아니라, 이 시리즈를 계속 보고 싶게 만드는 한 줄(여운, 다음 이야기에 대한 궁금증, 또는 소박한 다짐)
-- "오늘도 평범한 하루" "소소한 행복" "느린 일상" 같은 표현이 이미 다른 슬라이드에 쓰였다면 반복하지 말고 매번 다른 구체적 장면/감각 단어로 변주
-${aspectRatio === 'tall' ? '- 9:16 세로형이므로 사진의 세로 영역이 넓어짐. body 텍스트는 1~2문장으로 짧게 유지' : ''}
-- manualText가 있으면 중간에 pull_quote 타입으로 삽입 (image_index: null)
-- manualText 없어도 주제가 감성적이거나 이미지 흐름에 호흡 필요하면 AI가 pull_quote 1장 자동 삽입 판단
-- pull_quote는 image_index null, layout pull_quote, text_position pull_quote
-- 모든 텍스트(headline, body, label, caption, hashtag)는 ${textLang === 'en' ? '영어로만 작성 (한국어 금지)' : '한국어로만 작성 (label은 영어 단어 허용)'}
-- caption에 해시태그 10개 포함
-- caption은 headline/body와 달리 2-4문장의 짧은 글로, 사진 속 장면에서 시작해 조용한 일상의 감상으로 이어지는 글 (시적 비유나 과한 수사 지양)
-- caption 첫 문장은 "오늘은", "오늘도" 같은 뻔한 시작 대신, 그 순간의 구체적 디테일(소리, 냄새, 손의 감각, 빛의 변화 등)로 시작${styleBlock}
-${style === 'jeonwon' ? `
-전원생활 매거진 모드 추가 규칙 — 슬라이드 수에 따라 7개 page_type을 적절히 조합:
-중요: JSON 문자열 안에서 줄바꿈은 반드시 \\n (백슬래시+n) 두 글자로 표기할 것. 실제 개행 문자 사용 금지. 트레일링 콤마 금지.
-- 1번 슬라이드(표지): page_type="cover", type="cover"
-  - label: "이주의 이야기" 같은 특집 라벨
-  - headline: 2줄로 나뉘는 메인 헤드라인 (\n으로 구분)
-  - article_list: 부가 기사 제목 2~4개 배열
-  - issue_year: "2026", issue_sub: "6월 2주" 같은 발행 주차
-- 2번 슬라이드(이미지 6장 이상일 때): page_type="index"
-  - headline: "이번 호 이야기" 류 제목
-  - index_list: 이번 영상 소주제 3~5개 배열 (예: ["장미 울타리","산딸기 수확","직조 전등 만들기"])
-- 마지막 슬라이드(클로징): page_type="closing", type="closing"
-  - headline: "오늘도 느리게, 잘 보냈습니다" 류의 클로징 문구
-  - body: 짧은 마무리 문장
-- 중간 슬라이드 중 1개는 page_type="quote": 가장 인상적인 한 문장을 headline에, label에 출처/맥락
-- 중간 슬라이드 중 1개(이미지 8장 이상일 때)는 page_type="split":
-  - label: 소제목 (예: "아침의 루틴")
-  - body: 나레이션 2-3문장, \n으로 줄바꿈
-- 중간 슬라이드 중 1개(이미지 8장 이상일 때)는 page_type="grid":
-  - label: "오후의 장면들" 류 소제목
-  - image_indices: 사용할 이미지 인덱스 배열 2~3개. 다른 슬라이드에서 한 번도 쓰이지 않은 이미지를 우선 배치할 것
-- 나머지 중간 슬라이드는 page_type="fullbleed": headline 또는 body에 짧은 명조 캡션 한 줄
-- 모든 슬라이드에 page_type 필드 필수` : ''}
-${infographicMode ? `
-인포그래픽 모드 추가 규칙:
-- 이미지들 중 사물·공간·제품이 여러 개 있는 이미지 1~2개를 골라 type을 "infographic"으로 설정
-- infographic 슬라이드에는 labels 배열 추가: 이미지 내 주요 사물/포인트 3~5개
-- labels 형식: [{"text":"레이블명","x":0.3,"y":0.4,"direction":"right"}]
-- x,y는 0~1 사이 비율 좌표 (이미지 내 해당 사물 위치)
-- direction: "right"|"left"|"up"|"down" (화살표 방향)
-- 인포그래픽이 아닌 슬라이드는 labels 없이 그대로` : ''}`
-    , '', _planMaxTok, null, 'claude-sonnet-4-5'
-  );
-  // API 에러는 callClaude가 throw하므로 별도 체크 불필요
-  const raw = _planRaw || '';
-  if (!raw) throw new Error('응답이 비어있어요.');
-  const s=raw.indexOf('{'), e=raw.lastIndexOf('}');
-  if(s===-1||e===-1) throw new Error('JSON 없음: '+raw.slice(0,120));
-  let jsonStr = raw.slice(s,e+1);
-  try {
-    return JSON.parse(jsonStr);
-  } catch(err) {
-    // 흔한 JSON 오류 자동 보정: 트레일링 콤마, 제어문자
-    const cleaned = jsonStr
-      .replace(/,(\s*[\]}])/g, '$1')      // 트레일링 콤마 제거
-      .replace(/[\u0000-\u001F]+/g, ' '); // 제어문자(개행 등) 제거
-    try {
-      return JSON.parse(cleaned);
-    } catch(err2) {
-      throw new Error('JSON 파싱 실패: ' + err2.message + ' / 마지막 200자: ' + jsonStr.slice(-200));
-    }
-  }
-}
-
-// ── render ──
-function renderCarousel(slides) {
-  document.getElementById('slidesRow').innerHTML = slides.map((s,i) => renderSlide(s,i)).join('');
-}
-
-function renderSlide(slide, i) {
-  const html = renderSlideInner(slide, i);
-  if (aspectRatio === 'tall') {
-    // <div class="slide-card"> → <div class="slide-card tall">
-    return html.replace('class="slide-card"', 'class="slide-card tall"');
-  }
-  return html;
-}
-
-function renderSlideInner(slide, i) {
-  const style = document.getElementById('metaStyle').value;
-  // image_index 범위 초과 방어
-  const imgObj = (slide.image_index != null && slide.image_index < images.length) ? images[slide.image_index] : null;
-  const img = imgObj ? imgObj.dataUrl : null;
-  const folio = slide.folio || `0${i+1} — 0${generatedSlides.length}`;
-  const accent = slide.accent_color || '#b87a6e';
-  const tag = document.getElementById('metaTag').value;
-
-  if (slide.layout === 'pull_quote' || slide.type === 'pull_quote') return renderPullQuote(slide, i, style, accent, folio);
-  if (slide.type === 'infographic') return renderInfographic(slide, i, img, folio, accent);
-  if (style === 'ohouse') return renderOhouse(slide, i, img, folio, tag);
-  if (style === 'theedit') return renderTheEdit(slide, i, img, folio, accent, tag);
-  if (style === 'sapmanri') return renderSapmanriStyle(slide, i, img, folio, accent, tag);
-  if (style === 'applemd') return renderAppleMD(slide, i, img, folio, accent, tag);
-  if (style === 'jeonwon') return renderJeonwon(slide, i, img, folio, accent, tag, images);
-  if (style === 'stayfolio') return renderStayfolio(slide, i, img, folio, accent, tag);
-
-  // Magazine B / Nike
-  const isNike = style === 'nike';
-  const overlayMap = {overlay_bottom:'ov-bottom',overlay_top:'ov-top',overlay_left:'ov-left',overlay_right:'ov-right',split_bottom:'',dark_full:'ov-full'};
-  const isSplit = slide.layout === 'split_bottom';
-  const isDark = slide.type === 'closing';
-
-  let bgHtml = '';
-  if (img) {
-    const ov = overlayMap[slide.layout] || 'ov-bottom';
-    bgHtml = `<img class="slide-bg-img" src="${img}" />${ov ? `<div class="${ov}"></div>` : ''}`;
-  }
-
-  const txtClass = {bottom_left:'txt-bottom-left',top_left:'txt-top-left',center:'txt-center',left_half:'txt-left-half',split_bottom:'txt-split',dark_center:'txt-dark'}[slide.text_position] || 'txt-bottom-left';
-
-  const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
-  const headlineCls = isDark ? (isNike?'nike-closing-hl':'s-headline-dark') : isSplit ? (isNike?'nike-headline-md':'s-headline-md') : (isNike?'nike-headline':'s-headline-lg');
-  const bodyCls = isDark ? 's-body-dark' : isSplit ? 's-body-ink' : 's-body';
-  const labelCls = isNike ? 'nike-label' : (isSplit?'s-label-ink':'s-label');
-
-  let inner = '';
-  if (slide.type === 'cover') {
-    inner = `<span class="s-masthead">SAPMANRI</span><div style="flex:1"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
-  } else if (slide.type === 'closing') {
-    inner = `<span class="s-masthead-dark">SAPMANRI</span><div class="s-rule" style="background:${accent}"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div><span class="s-closing-tag" style="color:${accent}">${tag}</span>`;
-  } else {
-    inner = `<span class="${labelCls}" style="color:${accent}">${slide.label||''}</span><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
-  }
-
-  const bgColor = isDark ? '#1a1a1a' : isSplit ? 'transparent' : '#f2f0ec';
-  const folioClass = isDark ? 's-folio-dark' : isSplit ? 's-folio-ink' : 's-folio';
-
-  return `<div class="slide-card"><div class="slide-canvas" style="background:${bgColor}">${bgHtml}<div class="${txtClass}">${inner}</div><div class="${folioClass}">${folio}</div></div></div>`;
-}
-
-function renderPullQuote(slide, i, style, accent, folio) {
-  if (style === 'ohouse') {
-    return `<div class="slide-card"><div class="oh-canvas"><div class="oh-full"><div class="oh-num">${i+1}</div><div class="oh-headline-c" style="font-size:15px;line-height:1.5">${slide.headline||''}</div><div class="oh-body-c">${slide.body||''}</div><div class="oh-line"></div></div><div class="oh-folio">${folio}</div></div></div>`;
-  }
-  if (style === 'nike') {
-    return `<div class="slide-card"><div class="slide-canvas" style="background:#111"><div class="txt-dark"><span style="font-family:Helvetica Neue,Arial,sans-serif;font-size:7px;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px;display:block">SAPMANRI</span><div class="nike-headline" style="font-size:22px">${(slide.headline||'').toUpperCase()}</div><div class="s-body" style="color:rgba(255,255,255,0.5)">${slide.body||''}</div></div><div class="s-folio-dark">${folio}</div></div></div>`;
-  }
-  if (style === 'theedit') {
-    return `<div class="slide-card"><div class="te-canvas"><div class="te-txt-center"><div class="te-rule"></div><div class="te-headline-sm">${slide.headline||''}</div><div class="te-body">${slide.body||''}</div></div><div class="te-folio">${folio}</div></div></div>`;
-  }
-  if (style === 'stayfolio') {
-    return `<div class="slide-card"><div class="sf-canvas"><div class="sf-txt-center"><div class="sf-rule"></div><div class="sf-headline-sm">${slide.headline||''}</div><div class="sf-body">${slide.body||''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
-  }
-  if (style === 'sapmanri') {
-    return `<div class="slide-card"><div class="sm-canvas"><div class="sm-closing"><div style="width:16px;height:2px;background:${accent};margin-bottom:12px"></div><div class="sm-title" style="font-size:18px">${slide.headline||''}</div><div class="sm-body" style="margin-top:8px">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
-  }
-  if (style === 'applemd') {
-    return `<div class="slide-card"><div class="amd-canvas"><div class="amd-closing"><div class="amd-rule"></div><div class="amd-title" style="font-size:20px;text-align:center">${slide.headline||''}</div><div class="amd-body" style="margin-top:10px">${slide.body||''}</div></div><div class="amd-folio">${folio}</div></div></div>`;
-  }
-  return `<div class="slide-card"><div class="slide-canvas" style="background:var(--paper)"><div class="txt-pull"><div class="s-rule" style="background:${accent}"></div><div class="s-headline-pull">${slide.headline||''}</div><div class="s-body-ink">${slide.body||''}</div></div><div class="s-folio-ink">${folio}</div></div></div>`;
-}
-
-function renderOhouse(slide, i, img, folio, tag) {
-  const accent = 'var(--oh)';
-  if (slide.type === 'cover') {
-    return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="slide-bg-img" src="${img}" /><div class="oh-ov"></div>`:''}<span class="oh-masthead">SAPMANRI</span><div class="oh-card"><div class="oh-tag">${slide.label||'공간'}</div><div class="oh-headline-cover">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
-  }
-  if (slide.type === 'closing') {
-    return `<div class="slide-card"><div class="oh-canvas"><div class="oh-close"><div class="oh-masthead-brand">SAPMANRI</div><div class="oh-headline-c">${slide.headline||''}</div><div class="oh-body-c">${slide.body||''}</div><div class="oh-cta">${tag}</div></div><div class="oh-folio" style="color:var(--mid)">${folio}</div></div></div>`;
-  }
-  const layout = slide.layout || 'split_bottom';
-  if (layout === 'split_bottom' || layout === 'overlay_bottom') {
-    return `<div class="slide-card"><div class="oh-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 57%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}" /></div>`:'<div style="flex:0 0 57%;background:var(--oh-warm)"></div>'}<div style="flex:1;background:var(--oh-cream);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;position:relative"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div><div class="oh-line"></div></div><div class="oh-folio">${folio}</div></div></div>`;
-  }
-  return `<div class="slide-card"><div class="oh-canvas">${img?`<img class="oh-bg" src="${img}" />`:''}${img?'<div class="oh-ov"></div>':''}<div class="oh-card"><div class="oh-tag">${slide.label||''}</div><div class="oh-headline">${slide.headline||''}</div><div class="oh-body">${slide.body||''}</div></div><div class="oh-folio">${folio}</div></div></div>`;
-}
-
-function renderTheEdit(slide, i, img, folio, accent, tag) {
-  const isDark = slide.type === 'closing';
-  const isSplit = slide.layout === 'split_bottom';
-
-  if (isDark) {
-    const bgHtml = img ? `<img class="slide-bg-img" src="${img}" /><div style="position:absolute;inset:0;background:rgba(0,0,0,0.72)"></div>` : '';
-    return `<div class="slide-card"><div class="te-canvas">${bgHtml}<div class="te-closing" style="${img?'background:transparent':''}"><span class="te-masthead" style="color:rgba(255,255,255,0.4)">THE EDIT × SAPMANRI</span><div style="width:20px;height:3px;background:var(--te-accent);margin-bottom:12px"></div><div class="te-headline" style="color:#fff;font-size:22px">${slide.headline||''}</div><div class="te-body-white">${slide.body||''}</div><span style="font-size:7px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--te-accent);margin-top:14px;display:block">${tag}</span></div><div class="te-folio-dark">${folio}</div></div></div>`;
-  }
-  if (isSplit) {
-    return `<div class="slide-card"><div class="te-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 55%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}"/></div>`:'<div style="flex:0 0 55%;background:#eee"></div>'}<div style="flex:1;background:#fff;padding:10px 14px;display:flex;flex-direction:column;justify-content:center"><span class="te-label">${slide.label||''}</span><div class="te-headline-sm">${slide.headline||''}</div><div class="te-body">${slide.body||''}</div></div><div class="te-folio">${folio}</div></div></div>`;
-  }
-  if (slide.type === 'cover') {
-    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.65) 0%,transparent 50%)"></div>` : '';
-    return `<div class="slide-card"><div class="te-canvas">${bgHtml}<div class="te-txt-white"><span style="font-size:7px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.6);display:block;margin-bottom:8px">THE EDIT × SAPMANRI</span><div class="te-headline" style="color:#fff">${slide.headline||''}</div><div class="te-body-white">${slide.body||''}</div></div><div class="te-folio-dark">${folio}</div></div></div>`;
-  }
-  // feature — 흰 박스 오버레이
-  const overlayMap = {overlay_bottom:'',overlay_top:'',overlay_left:'',overlay_right:'',split_bottom:'',dark_full:''};
-  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:var(--te-gray)"></div>`;
-  return `<div class="slide-card"><div class="te-canvas">${bgHtml}<div class="te-txt-box"><span class="te-label">${slide.label||''}</span><div class="te-headline-sm">${slide.headline||''}</div><div class="te-body">${slide.body||''}</div></div><div class="te-folio">${folio}</div></div></div>`;
-}
-
-function renderStayfolio(slide, i, img, folio, accent, tag) {
-  const isDark = slide.type === 'closing';
-  const isSplit = slide.layout === 'split_bottom';
-
-  if (isDark) {
-    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:rgba(28,25,23,0.78)"></div>` : '';
-    return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-closing" style="${img?'background:transparent':''}"><span class="sf-masthead" style="color:rgba(255,255,255,0.3)">STAYFOLIO × SAPMANRI</span><div style="width:100%;height:1px;background:rgba(255,255,255,0.15);margin-bottom:16px"></div><div class="sf-headline" style="color:#fff;font-size:22px">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div><span style="font-family:var(--sans);font-size:6px;letter-spacing:0.22em;text-transform:uppercase;color:var(--sf-accent);margin-top:18px;display:block">${tag}</span></div><div class="sf-folio-dark">${folio}</div></div></div>`;
-  }
-  if (isSplit) {
-    return `<div class="slide-card"><div class="sf-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 58%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}"/></div>`:'<div style="flex:0 0 58%;background:var(--sf-line)"></div>'}<div style="flex:1;background:var(--sf-cream);padding:10px 16px;display:flex;flex-direction:column;justify-content:center"><span class="sf-label">${slide.label||''}</span><div class="sf-headline-sm">${slide.headline||''}</div><div class="sf-body">${slide.body||''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
-  }
-  if (slide.type === 'cover') {
-    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(28,25,23,0.72) 0%,rgba(0,0,0,0.1) 55%,transparent 100%)"></div>` : '';
-    return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-txt-bottom"><span style="font-family:var(--sans);font-size:6px;letter-spacing:0.26em;text-transform:uppercase;color:rgba(255,255,255,0.45);display:block;margin-bottom:10px">STAYFOLIO × SAPMANRI</span><div class="sf-headline-lg">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div></div><div class="sf-folio-dark">${folio}</div></div></div>`;
-  }
-  // feature
-  const isText = !img;
-  if (isText) {
-    const hl = slide.headline || slide.body || '·';
-    return `<div class="slide-card"><div class="sf-canvas"><div class="sf-txt-center"><span class="sf-masthead">SAPMANRI</span><div class="sf-rule"></div><div class="sf-headline">${hl}</div><div class="sf-body">${slide.headline ? (slide.body||'') : ''}</div></div><div class="sf-folio-ink">${folio}</div></div></div>`;
-  }
-  const bgHtml = `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(28,25,23,0.75) 0%,transparent 52%)"></div>`;
-  return `<div class="slide-card"><div class="sf-canvas">${bgHtml}<div class="sf-txt-bottom"><span class="sf-label">${slide.label||''}</span><div class="sf-headline-lg">${slide.headline||''}</div><div class="sf-body-white">${slide.body||''}</div></div><div class="sf-folio-dark">${folio}</div></div></div>`;
-}
-
-function renderInfographic(slide, i, img, folio, accent) {
-  const labels = slide.labels || [];
-  const labelsHtml = labels.map(lb => {
-    const xPct = (lb.x * 100).toFixed(1) + '%';
-    const yPct = (lb.y * 100).toFixed(1) + '%';
-    const dir = lb.direction || 'right';
-    const lineLen = 28;
-    const lineStyle = {
-      right:  `left:100%;top:50%;width:${lineLen}px;height:1px`,
-      left:   `right:100%;top:50%;width:${lineLen}px;height:1px`,
-      up:     `left:50%;bottom:100%;width:1px;height:${lineLen}px`,
-      down:   `left:50%;top:100%;width:1px;height:${lineLen}px`,
-    }[dir] || `left:100%;top:50%;width:${lineLen}px;height:1px`;
-    const textPos = {
-      right: 'left:calc(100% + ' + lineLen + 'px);top:50%;transform:translateY(-50%)',
-      left:  'right:calc(100% + ' + lineLen + 'px);top:50%;transform:translateY(-50%);text-align:right',
-      up:    'left:50%;bottom:calc(100% + ' + lineLen + 'px);transform:translateX(-50%);text-align:center',
-      down:  'left:50%;top:calc(100% + ' + lineLen + 'px);transform:translateX(-50%);text-align:center',
-    }[dir] || 'left:calc(100% + ' + lineLen + 'px);top:50%;transform:translateY(-50%)';
-
-    return `<div style="position:absolute;left:${xPct};top:${yPct};transform:translate(-50%,-50%);z-index:4">
-      <div style="width:6px;height:6px;border-radius:50%;background:${accent};border:1.5px solid #fff;position:relative">
-        <div style="position:absolute;background:${accent};${lineStyle}"></div>
-        <div style="position:absolute;${textPos};font-family:var(--sans);font-size:7px;font-weight:500;letter-spacing:0.06em;color:#fff;white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.8)">${lb.text||''}</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#222"></div>`;
-  return `<div class="slide-card"><div class="slide-canvas" style="background:#1a1a1a">${bgHtml}<div style="position:absolute;inset:0;background:rgba(0,0,0,0.15)"></div>${labelsHtml}<div class="s-folio" style="z-index:5">${folio}</div></div></div>`;
-}
-
-function renderSapmanriStyle(slide, i, img, folio, accent, tag) {
-  const isDark = slide.type === 'closing';
-  const isSplit = slide.layout === 'split_bottom';
-  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : '<div style="position:absolute;inset:0;background:#1a1a1a"></div>';
-
-  if (isDark) {
-    const bg = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:rgba(14,14,14,0.82)"></div>` : '';
-    return `<div class="slide-card"><div class="sm-canvas">${bg}<div class="sm-closing"><span style="font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.22);display:block;margin-bottom:14px">SAPMANRI</span><div style="width:18px;height:2px;background:${accent};margin-bottom:14px"></div><div class="sm-title" style="font-size:20px">${slide.headline||''}</div><div class="sm-body" style="margin-top:8px">${slide.body||''}</div><span style="font-size:7px;letter-spacing:0.18em;text-transform:uppercase;color:${accent};margin-top:18px;display:block">${tag}</span></div><div class="sm-folio">${folio}</div></div></div>`;
-  }
-  if (isSplit) {
-    return `<div class="slide-card"><div class="sm-canvas" style="display:flex;flex-direction:column">${img?`<div style="flex:0 0 57%;overflow:hidden;position:relative"><img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}"/><div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(14,14,14,0.6))"></div></div>`:'<div style="flex:0 0 57%;background:#1a1a1a"></div>'}<div style="flex:1;background:#0e0e0e;padding:10px 14px;display:flex;flex-direction:column;justify-content:center"><span style="font-size:6px;letter-spacing:0.18em;text-transform:uppercase;color:${accent};display:block;margin-bottom:5px">${slide.label||''}</span><div class="sm-title" style="font-size:16px">${slide.headline||''}</div><div class="sm-body" style="margin-top:5px">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
-  }
-  // cover / feature
-  const isText = !img;
-  if (isText) {
-    return `<div class="slide-card"><div class="sm-canvas"><div class="sm-closing"><span style="font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.22);display:block;margin-bottom:10px">SAPMANRI</span><div class="sm-title">${slide.headline||''}</div><div class="sm-body" style="margin-top:8px">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
-  }
-  const isCover = slide.type === 'cover';
-  return `<div class="slide-card"><div class="sm-canvas">${bgHtml}<div class="sm-overlay-top"></div><div class="sm-overlay-bottom"></div><div class="sm-txt">${isCover?`<span style="font-size:7px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.3);display:block;margin-bottom:10px">SAPMANRI</span>`:`<span style="font-size:6px;letter-spacing:0.18em;text-transform:uppercase;color:${accent};display:block;margin-bottom:6px">${slide.label||''}</span>`}<div class="sm-title">${slide.headline||''}</div><div class="sm-rule"></div><div class="sm-body">${slide.body||''}</div></div><div class="sm-folio">${folio}</div></div></div>`;
-}
-
-function renderAppleMD(slide, i, img, folio, accent, tag) {
-  const isDark = slide.type === 'closing';
-  const isSplit = slide.layout === 'split_bottom';
-
-  if (isDark) {
-    const bg = img ? `<img class="slide-bg-img" src="${img}"/><div style="position:absolute;inset:0;background:rgba(0,0,0,0.85)"></div>` : '';
-    return `<div class="slide-card"><div class="amd-canvas">${bg}<div class="amd-closing"><div class="amd-label">SAPMANRI</div><div class="amd-title" style="font-size:20px">${slide.headline||''}</div><div class="amd-rule" style="margin-top:12px"></div><div class="amd-body">${slide.body||''}</div><div class="amd-body2">${tag}</div></div><div class="amd-folio">${folio}</div></div></div>`;
-  }
-  if (isSplit || !img) {
-    // Apple은 상단 이미지 + 하단 블랙 패널 구조
-    return `<div class="slide-card"><div class="amd-canvas">${img?`<div style="position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden"><img style="width:100%;height:100%;object-fit:cover" src="${img}"/><div class="amd-vignette"></div></div>`:'<div style="position:absolute;top:0;left:0;right:0;height:55%;background:#111"></div>'}<div class="amd-panel"><div class="amd-label">${slide.label||'SAPMANRI'}</div><div class="amd-title" style="font-size:18px">${slide.headline||''}</div><div class="amd-sub">${slide.body||''}</div></div><div class="amd-folio">${folio}</div></div></div>`;
-  }
-  // cover / feature — 상단 이미지 + 하단 패널
-  const isCover = slide.type === 'cover';
-  return `<div class="slide-card"><div class="amd-canvas"><div style="position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden"><img style="width:100%;height:100%;object-fit:cover" src="${img}"/><div class="amd-vignette"></div></div><div class="amd-panel"><div class="amd-label">${isCover?'SAPMANRI':(slide.label||'')}</div><div class="amd-title">${slide.headline||''}</div><div class="amd-sub">${slide.body?.slice(0,40)||''}</div><div class="amd-rule"></div><div class="amd-body">${!isCover?(slide.body||''):''}</div></div><div class="amd-folio">${folio}</div></div></div>`;
-}
-
-
-function renderJeonwon(slide, i, img, folio, accent, tag, allImages) {
-  const pageType = slide.page_type || (slide.type === 'cover' ? 'cover' : slide.type === 'closing' ? 'closing' : 'fullbleed');
-  const pageNum = folio || String(i+1).padStart(2,'0') + '/07';
-
-  // ── 표지 ──
-  if (pageType === 'cover') {
-    const articles = (slide.article_list || []).slice(0,4);
-    const articlesHtml = articles.map(a => `<div>${a}</div>`).join('');
-    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#ddd"></div>`;
-    return `<div class="slide-card"><div class="jw-canvas">${bgHtml}
-      <div class="jw-cover-top">
-        <div class="jw-wordmark" style="font-size:22px">SAPMANRI</div>
-        <div class="jw-wordmark-sub">오늘도 느리게 · slow days</div>
-      </div>
-      <div class="jw-cover-feature">
-        <span class="jw-label">${slide.label || '이주의 이야기'}</span>
-        <div class="jw-headline-lg" style="color:#fff;text-shadow:0 2px 12px rgba(0,0,0,0.4)">${(slide.headline||'').replace(/\\n/g,'<br>')}</div>
-      </div>
-      <div class="jw-cover-bottom">
-        <div>
-          <div class="jw-issue-num">${slide.issue_year || '2026'}</div>
-          <div class="jw-issue-sub">${slide.issue_sub || ''}</div>
-        </div>
-        <div class="jw-article-list">${articlesHtml}</div>
-      </div>
-    </div></div>`;
-  }
-
-  // ── 클로징 ──
-  if (pageType === 'closing') {
-    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : '';
-    return `<div class="slide-card"><div class="jw-closing-canvas">${bgHtml}<div class="jw-closing-overlay"></div>
-      <div class="jw-closing-content">
-        <div class="jw-headline-white">${slide.headline||''}</div>
-        <div class="jw-body-white" style="margin-top:6px">${slide.body||''}</div>
-        <div class="jw-closing-cta">${tag || '@sapmanri · 유튜브에서 전체 영상 보기'}</div>
-        <div class="jw-closing-wordmark">SAPMANRI</div>
-      </div>
-      <div class="jw-mini-page">${pageNum}</div>
-    </div></div>`;
-  }
-
-  // ── 인용/하이라이트 ──
-  if (pageType === 'quote') {
-    return `<div class="slide-card"><div class="jw-quote-canvas">
-      <div class="jw-quote-rule"></div>
-      <div class="jw-quote-text">${slide.headline || slide.body || ''}</div>
-      <div class="jw-quote-rule"></div>
-      <div class="jw-quote-context">${slide.label || ''}</div>
-      <div class="jw-mini-page-dark" style="color:rgba(255,255,255,0.3)">${pageNum}</div>
-    </div></div>`;
-  }
-
-  // ── 인덱스/목차 ──
-  if (pageType === 'index') {
-    const items = (slide.index_list || []).slice(0,5);
-    const itemsHtml = items.map((t,j) => `<div class="jw-index-item"><span class="jw-index-num">0${j+1}</span><span class="jw-index-item-title">${t}</span></div>`).join('');
-    return `<div class="slide-card"><div class="jw-index-canvas">
-      <div class="jw-index-label">CONTENTS</div>
-      <div class="jw-index-title">${slide.headline || '이번 호 이야기'}</div>
-      <div class="jw-index-list">${itemsHtml}</div>
-      <div class="jw-mini-page-dark" style="position:static;text-align:right;color:rgba(255,255,255,0.25)">${pageNum}</div>
-    </div></div>`;
-  }
-
-  // ── 2단 사진+텍스트 ──
-  if (pageType === 'split') {
-    const lines = (slide.body || '').split('\n').filter(l=>l.trim());
-    const linesHtml = lines.map(l => `<div>${l}</div>`).join('');
-    const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#ccc"></div>`;
-    return `<div class="slide-card"><div class="jw-split-canvas">
-      <div class="jw-split-photo">${bgHtml}<div class="jw-mini-mark" style="color:#fff">SAPMANRI</div><div class="jw-mini-page">${pageNum}</div></div>
-      <div class="jw-split-text">
-        <div class="jw-split-label">${slide.label || ''}</div>
-        <div class="jw-split-text-lines">${linesHtml}</div>
-      </div>
-    </div></div>`;
-  }
-
-  // ── 그리드 콜라주 ──
-  if (pageType === 'grid') {
-    const idxs = (slide.image_indices || []).filter(idx => idx != null && allImages && idx < allImages.length);
-    const layout = idxs.length >= 3 ? 'g1p2' : 'g2x2';
-    const cellsHtml = idxs.slice(0,3).map((idx,j) => {
-      const src = allImages[idx]?.dataUrl || '';
-      const bigCls = (layout === 'g1p2' && j === 0) ? ' jw-grid-big' : '';
-      return `<div class="jw-grid-cell${bigCls}">${src?`<img class="slide-bg-img" src="${src}"/>`:''}</div>`;
-    }).join('');
-    return `<div class="slide-card"><div class="jw-grid-canvas">
-      <div class="jw-grid-title">${slide.label || '오후의 장면들'}</div>
-      <div class="jw-grid-wrap ${layout}">${cellsHtml}</div>
-      <div class="jw-mini-page-dark" style="position:static;text-align:right;margin-top:6px">${pageNum}</div>
-    </div></div>`;
-  }
-
-  // ── 풀블리드 화보 (기본/fallback) ──
-  const bgHtml = img ? `<img class="slide-bg-img" src="${img}"/>` : `<div style="position:absolute;inset:0;background:#ccc"></div>`;
-  return `<div class="slide-card"><div class="jw-canvas">${bgHtml}
-    <div class="jw-fullbleed-overlay"></div>
-    <div class="jw-mini-mark" style="color:#fff">SAPMANRI</div>
-    <div class="jw-mini-page">${pageNum}</div>
-    <div class="jw-fullbleed-caption">
-      <div class="jw-caption">${slide.headline || slide.body || ''}</div>
-    </div>
-  </div></div>`;
-}
-
-
-// 이미지 dataUrl을 S×S 정사각형 cover canvas dataUrl로 변환
-function imgToCoverCanvas(dataUrl, S) {
-  return new Promise((resolve) => {
-    if (!dataUrl) { resolve(null); return; }
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = S; c.height = S;
-      const ctx = c.getContext('2d');
-      const scale = Math.max(S / img.width, S / img.height);
-      const w = img.width * scale, h = img.height * scale;
-      ctx.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
-      resolve(c.toDataURL('image/jpeg', 0.92));
-    };
-    img.onerror = () => resolve(null);
-    img.src = dataUrl;
-  });
-}
-
-// iOS 판별
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-// 렌더된 PNG dataURL 캐시
-let _iosPngs = [];
-let _iosIdx = 0;
-
-async function exportSlides() {
-  if (!generatedSlides.length) return;
-  const btn = document.querySelector('.btn-primary');
-  const orig = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '렌더링 중...';
-
-  try { await document.fonts.ready; } catch(e) {}
-  const SIZE = 1080;
-
-  // 모든 슬라이드 미리 렌더
-  _iosPngs = [];
-  for (let i = 0; i < generatedSlides.length; i++) {
-    btn.textContent = '렌더링 ' + (i+1) + '/' + generatedSlides.length + '...';
-    const slide = generatedSlides[i];
-    const imgSrc = (slide.image_index != null && images[slide.image_index])
-      ? images[slide.image_index].dataUrl : null;
-    try {
-      const canvas = await renderSlideToCanvas(slide, i, imgSrc, SIZE, images, aspectRatio);
-      _iosPngs.push(canvas.toDataURL('image/png'));
-    } catch(e) { _iosPngs.push(null); console.error(e); }
-  }
-
-  btn.textContent = orig;
-  btn.disabled = false;
-
-  if (isIOS) {
-    // iOS: 모달로 한 장씩 보여주기
-    _iosIdx = 0;
-    openIosModal();
-  } else {
-    // 데스크탑: 기존 일괄 다운로드
-    for (let i = 0; i < _iosPngs.length; i++) {
-      if (!_iosPngs[i]) continue;
-      const link = document.createElement('a');
-      link.download = 'sapmanri_slide_' + String(i+1).padStart(2,'0') + '.png';
-      link.href = _iosPngs[i];
-      link.click();
-      await new Promise(r => setTimeout(r, 400));
-    }
-  }
-}
-
-function openIosModal() {
-  const modal = document.getElementById('iosModal');
+// ── R2 설정 모달 ──────────────────────────────────────────────────
+function openR2Settings() {
+  const modal = document.getElementById('r2Modal');
   modal.style.display = 'flex';
-  updateIosModal();
+  // 저장된 값 불러오기
+  const cfg = window.ImageLibrary.getR2Config();
+  document.getElementById('r2AccountId').value = cfg.accountId || '';
+  document.getElementById('r2AccessKey').value = cfg.accessKey || '';
+  document.getElementById('r2SecretKey').value = cfg.secretKey || '';
+  document.getElementById('r2Bucket').value    = cfg.bucket    || '';
+  document.getElementById('r2PublicUrl').value = cfg.publicUrl || '';
+  updateR2Btn();
 }
 
-function updateIosModal() {
-  const img = document.getElementById('iosModalImg');
-  const count = document.getElementById('iosModalCount');
-  const prevBtn = document.getElementById('iosPrevBtn');
-  const nextBtn = document.getElementById('iosNextBtn');
-  img.src = _iosPngs[_iosIdx] || '';
-  img.style.aspectRatio = aspectRatio === 'tall' ? '9/16' : '1/1';
-  count.textContent = (_iosIdx+1) + ' / ' + _iosPngs.length;
-  prevBtn.style.opacity = _iosIdx === 0 ? '0.3' : '1';
-  prevBtn.disabled = _iosIdx === 0;
-  if (_iosIdx === _iosPngs.length - 1) {
-    nextBtn.textContent = '완료 ✓';
-    nextBtn.onclick = closeIosModal;
-  } else {
-    nextBtn.textContent = '다음 ▶';
-    nextBtn.onclick = iosModalNext;
-  }
+function closeR2Settings() {
+  document.getElementById('r2Modal').style.display = 'none';
 }
 
-function iosModalNext() {
-  if (_iosIdx < _iosPngs.length - 1) { _iosIdx++; updateIosModal(); }
-}
-function iosModalPrev() {
-  if (_iosIdx > 0) { _iosIdx--; updateIosModal(); }
-}
-function closeIosModal() {
-  document.getElementById('iosModal').style.display = 'none';
-}
-
-function renderSlideWithImages(slide, i, imgArr) {
-  const style = document.getElementById('metaStyle').value;
-  const img = slide.image_index != null ? imgArr[slide.image_index]?.dataUrl : null;
-  const folio = slide.folio || String(i+1).padStart(2,'0') + ' — ' + String(generatedSlides.length).padStart(2,'0');
-  const accent = slide.accent_color || '#b87a6e';
-  const tag = document.getElementById('metaTag').value;
-
-  if (slide.layout === 'pull_quote' || slide.type === 'pull_quote') return renderPullQuote(slide, i, style, accent, folio).replace(/<div class="slide-card"[^>]*>/, '').replace(/<\/div>\s*$/, '');
-  if (style === 'ohouse') return renderOhouse(slide, i, img, folio, tag).replace(/<div class="slide-card"[^>]*>/, '').replace(/<\/div>\s*$/, '');
-
-  const isNike = style === 'nike';
-  const overlayMap = {overlay_bottom:'ov-bottom',overlay_top:'ov-top',overlay_left:'ov-left',overlay_right:'ov-right',split_bottom:'',dark_full:'ov-full'};
-  const isSplit = slide.layout === 'split_bottom';
-  const isDark = slide.type === 'closing';
-
-  let bgHtml = '';
-  if (img) {
-    const ov = overlayMap[slide.layout] || 'ov-bottom';
-    bgHtml = `<img style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" src="${img}" />${ov ? `<div class="${ov}"></div>` : ''}`;
-  }
-
-  const txtClass = {bottom_left:'txt-bottom-left',top_left:'txt-top-left',center:'txt-center',left_half:'txt-left-half',split_bottom:'txt-split',dark_center:'txt-dark'}[slide.text_position] || 'txt-bottom-left';
-  const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
-  const headlineCls = isDark ? (isNike?'nike-closing-hl':'s-headline-dark') : isSplit ? (isNike?'nike-headline-md':'s-headline-md') : (isNike?'nike-headline':'s-headline-lg');
-  const bodyCls = isDark ? 's-body-dark' : isSplit ? 's-body-ink' : 's-body';
-  const labelCls = isNike ? 'nike-label' : (isSplit?'s-label-ink':'s-label');
-
-  let inner = '';
-  if (slide.type === 'cover') {
-    inner = `<span class="s-masthead">SAPMANRI</span><div style="flex:1"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
-  } else if (isDark) {
-    inner = `<span class="s-masthead-dark">SAPMANRI</span><div class="s-rule" style="background:${accent}"></div><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div><span class="s-closing-tag" style="color:${accent}">${tag}</span>`;
-  } else {
-    inner = `<span class="${labelCls}" style="color:${accent}">${slide.label||''}</span><div class="${headlineCls}">${hl}</div><div class="${bodyCls}">${slide.body||''}</div>`;
-  }
-
-  const bgColor = isDark ? '#1a1a1a' : isSplit ? 'transparent' : '#f2f0ec';
-  const folioClass = isDark ? 's-folio-dark' : isSplit ? 's-folio-ink' : 's-folio';
-
-  return `<div class="slide-canvas" style="width:100%;height:100%;background:${bgColor}">${bgHtml}<div class="${txtClass}">${inner}</div><div class="${folioClass}">${folio}</div></div>`;
-}
-
-async function renderSlideToCanvas(slide, idx, imgDataUrl, SIZE, allImages, ratio='square') {
-  const W = SIZE;
-  const H = ratio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
-  const canvas = document.createElement('canvas');
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  const style = document.getElementById('metaStyle').value;
-  const accent = slide.accent_color || '#b87a6e';
-  const tag = document.getElementById('metaTag').value;
-
-  // 배경 이미지 — cover 방식으로 정확히 그리기 (W×H 전체)
-  async function drawBgImage(dataUrl, overlayType) {
-    if (!dataUrl) return;
-    return new Promise((res) => {
-      const img = new Image();
-      img.onload = () => {
-        // cover: 이미지 비율 유지하며 canvas 꽉 채우기
-        const scale = Math.max(W / img.width, H / img.height);
-        const w = img.width * scale;
-        const h = img.height * scale;
-        const x = (W - w) / 2;
-        const y = (H - h) / 2;
-        ctx.drawImage(img, x, y, w, h);
-
-        // overlay gradient
-        const grad = ctx.createLinearGradient(0, 0, 0, H);
-        if (overlayType === 'overlay_bottom') {
-          grad.addColorStop(0, 'rgba(0,0,0,0)');
-          grad.addColorStop(0.45, 'rgba(0,0,0,0)');
-          grad.addColorStop(1, 'rgba(10,8,6,0.78)');
-        } else if (overlayType === 'overlay_top') {
-          grad.addColorStop(0, 'rgba(10,8,6,0.72)');
-          grad.addColorStop(0.5, 'rgba(0,0,0,0)');
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-        } else if (overlayType === 'overlay_left') {
-          const gl = ctx.createLinearGradient(0,0,W,0);
-          gl.addColorStop(0, 'rgba(10,8,6,0.75)');
-          gl.addColorStop(0.6, 'rgba(0,0,0,0)');
-          ctx.fillStyle = gl; ctx.fillRect(0,0,W,H);
-        } else if (overlayType === 'dark_full') {
-          ctx.fillStyle = 'rgba(10,8,6,0.45)'; ctx.fillRect(0,0,W,H);
-        }
-        if (overlayType !== 'overlay_left') {
-          ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
-        }
-        res();
-      };
-      img.onerror = res;
-      img.src = dataUrl;
-    });
-  }
-
-  // 폰트 설정
-  // 스타일별 폰트 설정
-  const serifFont = style === 'stayfolio'
-    ? '"Cormorant Garamond", "Noto Serif KR", Georgia, serif'
-    : '"Noto Serif KR", Georgia, serif';
-  const sansFont = (style === 'theedit' || style === 'nike')
-    ? '"Helvetica Neue", Arial, "Noto Sans KR", sans-serif'
-    : '"Noto Sans KR", "Helvetica Neue", Arial, sans-serif';
-
-  // 스타일별 헤드라인 폰트 — 디에디트는 산세리프 굵게, 스테이폴리오는 세리프 가늘게
-  const headFont = (style === 'theedit' || style === 'nike' || style === 'sapmanri')
-    ? '"Helvetica Neue", Arial, sans-serif'
-    : style === 'stayfolio'
-    ? '"Cormorant Garamond", "Noto Serif KR", serif'
-    : style === 'applemd'
-    ? '"Helvetica Neue", "Noto Sans KR", Arial, sans-serif'
-    : serifFont;
-
-  const headWeight = (style === 'theedit' || style === 'nike' || style === 'sapmanri') ? '700'
-    : style === 'applemd' ? '200'
-    : '300';
-
-  function setFont(size, weight, family) {
-    ctx.font = weight + ' ' + size + 'px ' + family;
-  }
-
-  function wrapText(text, maxW) {
-    const words = text.split('');
-    const lines = [];
-    let cur = '';
-    for (const ch of words) {
-      const test = cur + ch;
-      if (ctx.measureText(test).width > maxW && cur) {
-        lines.push(cur); cur = ch;
-      } else { cur = test; }
-    }
-    if (cur) lines.push(cur);
-    return lines;
-  }
-
-  // ── 전원생활 매거진 슬라이드 ──
-  if (style === 'jeonwon') {
-    const pageType = slide.page_type || (slide.type === 'cover' ? 'cover' : slide.type === 'closing' ? 'closing' : 'fullbleed');
-    const pageNum = slide.folio || String(idx+1).padStart(2,'0') + '/07';
-    const ORANGE = '#E8762C', CREAM = '#FAF5EE', DARK = '#120E0C';
-    const serif = '"Gowun Batang","Noto Serif KR",Georgia,serif';
-    const R2 = (SIZE / 220) * textScale;
-
-    if (pageType === 'cover') {
-      ctx.fillStyle = '#ddd'; ctx.fillRect(0,0,W,H);
-      if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
-      // 상단 그라디언트
-      let g = ctx.createLinearGradient(0,0,0,H*0.22);
-      g.addColorStop(0,'rgba(250,245,238,0.95)'); g.addColorStop(0.7,'rgba(250,245,238,0.7)'); g.addColorStop(1,'rgba(250,245,238,0)');
-      ctx.fillStyle = g; ctx.fillRect(0,0,W,H*0.22);
-      // 워드마크
-      setFont(Math.round(22*R2), '700', serif);
-      ctx.fillStyle = ORANGE; ctx.textAlign = 'center';
-      ctx.fillText('SAPMANRI', W/2, Math.round(16*R2));
-      setFont(Math.round(6*R2), '300', sansFont);
-      ctx.fillStyle = '#999';
-      ctx.fillText('오늘도 느리게 · slow days', W/2, Math.round(24*R2));
-      ctx.textAlign = 'left';
-
-      // 특집 라벨
-      const labelY = Math.round(H*0.16) + Math.round(7*R2);
-      setFont(Math.round(7*R2), '600', sansFont);
-      const labelText = slide.label || '이주의 이야기';
-      const labelW = ctx.measureText(labelText).width + Math.round(14*R2);
-      ctx.fillStyle = ORANGE; ctx.fillRect(Math.round(14*R2), labelY - Math.round(7*R2), labelW, Math.round(11*R2));
-      ctx.fillStyle = '#fff';
-      ctx.fillText(labelText, Math.round(14*R2)+Math.round(7*R2), labelY+Math.round(1*R2));
-
-      // 헤드라인 (최대 2줄)
-      setFont(Math.round(15*R2), '700', serif);
-      ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = Math.round(12*R2);
-      const hlLines = (slide.headline || '').split('\n').slice(0,2);
-      const hlY0 = labelY + Math.round(20*R2);
-      hlLines.forEach((l,j) => ctx.fillText(l, Math.round(14*R2), hlY0 + j*Math.round(19*R2)));
-      ctx.shadowBlur = 0;
-
-      // 하단 그라디언트
-      g = ctx.createLinearGradient(0,H*0.78,0,H);
-      g.addColorStop(0,'rgba(250,245,238,0)'); g.addColorStop(0.4,'rgba(250,245,238,0.75)'); g.addColorStop(1,'rgba(250,245,238,0.97)');
-      ctx.fillStyle = g; ctx.fillRect(0,H*0.78,W,H*0.22);
-
-      // 발행 정보
-      const botY = H - Math.round(14*R2);
-      setFont(Math.round(16*R2), '700', sansFont);
-      ctx.fillStyle = DARK;
-      ctx.fillText(slide.issue_year || '2026', Math.round(14*R2), botY - Math.round(6*R2));
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = '#999';
-      ctx.fillText(slide.issue_sub || '', Math.round(14*R2), botY + Math.round(4*R2));
-
-      // 기사 목록 (우측)
-      const articles = (slide.article_list || []).slice(0,4);
-      setFont(Math.round(8*R2), '400', serif);
-      ctx.fillStyle = '#444'; ctx.textAlign = 'right';
-      const lineH2 = Math.round(15*R2);
-      const startY = botY - (articles.length-1)*lineH2 - Math.round(4*R2);
-      articles.forEach((a,j) => ctx.fillText(a, W-Math.round(14*R2), startY + j*lineH2));
-      ctx.textAlign = 'left';
-      return canvas;
-    }
-
-    if (pageType === 'closing') {
-      ctx.fillStyle = DARK; ctx.fillRect(0,0,W,H);
-      if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
-      ctx.fillStyle = 'rgba(18,14,12,0.55)'; ctx.fillRect(0,0,W,H);
-
-      const pad = Math.round(16*R2);
-      let y = H - Math.round(14*R2);
-
-      // 워드마크 (맨 아래)
-      setFont(Math.round(18*R2), '700', serif);
-      ctx.fillStyle = ORANGE;
-      ctx.fillText('SAPMANRI', pad, y);
-      y -= Math.round(28*R2);
-
-      // CTA
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.fillText(tag || '@sapmanri · 유튜브에서 전체 영상 보기', pad, y);
-      y -= Math.round(18*R2);
-
-      // body
-      setFont(Math.round(8*R2), '300', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.75)';
-      const blines = wrapText(slide.body||'', W-pad*2);
-      const bodyY0 = y - (blines.length-1)*Math.round(13*R2);
-      blines.forEach((l,j) => ctx.fillText(l, pad, bodyY0 + j*Math.round(13*R2)));
-      y = bodyY0 - Math.round(14*R2);
-
-      // headline
-      setFont(Math.round(20*R2), '700', serif);
-      ctx.fillStyle = '#fff';
-      const hlines = wrapText(slide.headline||'', W-pad*2);
-      const hlY0 = y - (hlines.length-1)*Math.round(26*R2);
-      hlines.forEach((l,j) => ctx.fillText(l, pad, hlY0 + j*Math.round(26*R2)));
-
-      // page num
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
-      ctx.textAlign = 'left';
-      return canvas;
-    }
-
-    if (pageType === 'quote') {
-      ctx.fillStyle = DARK; ctx.fillRect(0,0,W,H);
-      const pad = Math.round(24*R2);
-      // rule top
-      const ruleW = Math.round(24*R2);
-      const cy = H/2;
-      setFont(Math.round(20*R2), '700', serif);
-      const qtext = slide.headline || slide.body || '';
-      const qlines = wrapText(qtext, W-pad*2);
-      const lineH3 = Math.round(30*R2);
-      const totalH = qlines.length*lineH3;
-      const startY = cy - totalH/2 + Math.round(20*R2);
-
-      // 위 rule
-      ctx.fillStyle = ORANGE;
-      ctx.fillRect(W/2 - ruleW/2, startY - Math.round(28*R2), ruleW, Math.round(2*R2));
-
-      ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
-      qlines.forEach((l,j) => ctx.fillText(l, W/2, startY + j*lineH3));
-
-      // 아래 rule
-      ctx.fillStyle = ORANGE;
-      ctx.fillRect(W/2 - ruleW/2, startY + qlines.length*lineH3 + Math.round(8*R2), ruleW, Math.round(2*R2));
-
-      // context
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.fillText(slide.label || '', W/2, startY + qlines.length*lineH3 + Math.round(26*R2));
-      ctx.textAlign = 'left';
-
-      // page num
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
-      ctx.textAlign = 'left';
-      return canvas;
-    }
-
-    // ── 인덱스/목차 ──
-    if (pageType === 'index') {
-      ctx.fillStyle = DARK; ctx.fillRect(0,0,W,H);
-      const pad = Math.round(16*R2);
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = ORANGE;
-      ctx.fillText('CONTENTS', pad, pad + Math.round(7*R2));
-      setFont(Math.round(16*R2), '700', serif);
-      ctx.fillStyle = '#fff';
-      ctx.fillText(slide.headline || '이번 호 이야기', pad, pad + Math.round(28*R2));
-
-      const items = (slide.index_list || []).slice(0,5);
-      const itemY0 = pad + Math.round(50*R2);
-      const itemGap = Math.round(20*R2);
-      items.forEach((t,j) => {
-        const y = itemY0 + j*itemGap;
-        setFont(Math.round(11*R2), '700', sansFont);
-        ctx.fillStyle = ORANGE;
-        ctx.fillText('0'+(j+1), pad, y);
-        setFont(Math.round(11*R2), '400', serif);
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.fillText(t, pad + Math.round(18*R2), y);
-      });
-
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, W-pad, H-pad);
-      ctx.textAlign = 'left';
-      return canvas;
-    }
-
-    // ── 2단 사진+텍스트 ──
-    if (pageType === 'split') {
-      const splitY = Math.round(H*0.55);
-      ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,W,H);
-      if (imgDataUrl) {
-        await new Promise(res => {
-          const im = new Image();
-          im.onload = () => {
-            const scale = Math.max(W/im.width, splitY/im.height);
-            const w = im.width*scale, h = im.height*scale;
-            ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,splitY); ctx.clip();
-            ctx.drawImage(im,(W-w)/2,(splitY-h)/2,w,h);
-            ctx.restore(); res();
-          };
-          im.onerror = res; im.src = imgDataUrl;
-        });
-      }
-      setFont(Math.round(8*R2), '700', serif);
-      ctx.fillStyle = '#fff';
-      ctx.fillText('SAPMANRI', Math.round(12*R2), Math.round(16*R2));
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
-      ctx.textAlign = 'left';
-
-      // 하단 텍스트 패널
-      ctx.fillStyle = CREAM; ctx.fillRect(0,splitY,W,H-splitY);
-      const pad = Math.round(14*R2);
-      setFont(Math.round(7*R2), '600', sansFont);
-      ctx.fillStyle = ORANGE;
-      ctx.fillText((slide.label||'').toUpperCase(), pad, splitY + Math.round(16*R2));
-
-      const lines = (slide.body || '').split('\n').filter(l=>l.trim());
-      setFont(Math.round(10*R2), '400', serif);
-      ctx.fillStyle = DARK;
-      const lineH = Math.round(16*R2);
-      const totalH = lines.length * lineH;
-      const startY = splitY + (H-splitY)/2 - totalH/2 + Math.round(20*R2);
-      lines.forEach((l,j) => ctx.fillText(l, pad, startY + j*lineH));
-      return canvas;
-    }
-
-    // ── 그리드 콜라주 ──
-    if (pageType === 'grid') {
-      ctx.fillStyle = CREAM; ctx.fillRect(0,0,W,H);
-      const pad = Math.round(14*R2);
-      setFont(Math.round(7*R2), '600', sansFont);
-      ctx.fillStyle = '#999';
-      ctx.fillText((slide.label||'오후의 장면들').toUpperCase(), pad, pad + Math.round(7*R2));
-
-      const gridTop = pad + Math.round(20*R2);
-      const gridBottom = H - pad - Math.round(14*R2);
-      const gridH = gridBottom - gridTop;
-      const gridW = W - pad*2;
-      const gap = Math.round(6*R2);
-
-      const idxs = (slide.image_indices || []).filter(ix => ix != null && allImages && ix < allImages.length).slice(0,3);
-
-      async function drawCell(dataUrl, x, y, w, h) {
-        ctx.fillStyle = '#ddd'; ctx.fillRect(x,y,w,h);
-        if (!dataUrl) return;
-        await new Promise(res => {
-          const im = new Image();
-          im.onload = () => {
-            const scale = Math.max(w/im.width, h/im.height);
-            const iw = im.width*scale, ih = im.height*scale;
-            ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
-            ctx.drawImage(im, x+(w-iw)/2, y+(h-ih)/2, iw, ih);
-            ctx.restore(); res();
-          };
-          im.onerror = res; im.src = dataUrl;
-        });
-      }
-
-      if (ratio === 'tall') {
-        // 9:16: 세로 스택 (큰 1장 + 작은 2장 가로 배치)
-        const bigH = gridH * 0.6;
-        const smallH2 = gridH - bigH - gap;
-        const smallW2 = (gridW - gap) / 2;
-        await drawCell(idxs[0]!=null ? allImages[idxs[0]]?.dataUrl : null, pad, gridTop, gridW, bigH);
-        await drawCell(idxs[1]!=null ? allImages[idxs[1]]?.dataUrl : null, pad, gridTop+bigH+gap, smallW2, smallH2);
-        await drawCell(idxs[2]!=null ? allImages[idxs[2]]?.dataUrl : null, pad+smallW2+gap, gridTop+bigH+gap, smallW2, smallH2);
-      } else if (idxs.length >= 3) {
-        // 1+2 비대칭
-        const bigW = gridW * 0.58;
-        const smallW = gridW - bigW - gap;
-        const smallH = (gridH - gap) / 2;
-        await drawCell(allImages[idxs[0]]?.dataUrl, pad, gridTop, bigW, gridH);
-        await drawCell(allImages[idxs[1]]?.dataUrl, pad+bigW+gap, gridTop, smallW, smallH);
-        await drawCell(allImages[idxs[2]]?.dataUrl, pad+bigW+gap, gridTop+smallH+gap, smallW, smallH);
-      } else {
-        // 2x2 (이미지 부족하면 빈 칸)
-        const cw = (gridW-gap)/2, ch = (gridH-gap)/2;
-        for (let r=0;r<2;r++) for (let c=0;c<2;c++) {
-          const k = r*2+c;
-          await drawCell(idxs[k]!=null ? allImages[idxs[k]]?.dataUrl : null, pad+c*(cw+gap), gridTop+r*(ch+gap), cw, ch);
-        }
-      }
-
-      setFont(Math.round(7*R2), '400', sansFont);
-      ctx.fillStyle = '#bbb'; ctx.textAlign = 'right';
-      ctx.fillText(pageNum, W-pad, H-Math.round(6*R2));
-      ctx.textAlign = 'left';
-      return canvas;
-    }
-
-    // fullbleed (기본)
-    ctx.fillStyle = '#ccc'; ctx.fillRect(0,0,W,H);
-    if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
-    let g2 = ctx.createLinearGradient(0,H*0.62,0,H);
-    g2.addColorStop(0,'rgba(18,14,12,0)'); g2.addColorStop(1,'rgba(18,14,12,0.85)');
-    ctx.fillStyle = g2; ctx.fillRect(0,H*0.62,W,H*0.38);
-
-    setFont(Math.round(8*R2), '700', serif);
-    ctx.fillStyle = '#fff';
-    ctx.fillText('SAPMANRI', Math.round(12*R2), Math.round(16*R2));
-
-    setFont(Math.round(7*R2), '400', sansFont);
-    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.textAlign = 'right';
-    ctx.fillText(pageNum, W-Math.round(12*R2), Math.round(16*R2));
-    ctx.textAlign = 'left';
-
-    setFont(Math.round(14*R2), '400', serif);
-    ctx.fillStyle = '#fff';
-    const captionText = slide.headline || slide.body || '';
-    const clines = wrapText(captionText, W-Math.round(28*R2));
-    const capY0 = H - Math.round(16*R2) - (clines.length-1)*Math.round(20*R2);
-    clines.forEach((l,j) => ctx.fillText(l, Math.round(14*R2), capY0 + j*Math.round(20*R2)));
-    return canvas;
-  }
-
-  // ── 인포그래픽 슬라이드 ──
-  if (slide.type === 'infographic') {
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,W,H);
-    if (imgDataUrl) await drawBgImage(imgDataUrl, 'none');
-    // 살짝 어두운 오버레이
-    ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(0,0,W,H);
-
-    const labels = slide.labels || [];
-    const accentRgb = accent || '#b87a6e';
-    for (const lb of labels) {
-      const cx = Math.round(lb.x * W);
-      const cy = Math.round(lb.y * H);
-      const dir = lb.direction || 'right';
-      const lineLen = Math.round(W * 0.09);
-      const dotR = Math.round(W * 0.007);
-
-      // 점
-      ctx.beginPath();
-      ctx.arc(cx, cy, dotR, 0, Math.PI*2);
-      ctx.fillStyle = accentRgb;
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(cx, cy, dotR+2, 0, Math.PI*2);
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = Math.round(W*0.002);
-      ctx.stroke();
-
-      // 선
-      let lx2 = cx, ly2 = cy;
-      if (dir === 'right') lx2 = cx + lineLen;
-      else if (dir === 'left') lx2 = cx - lineLen;
-      else if (dir === 'down') ly2 = cy + lineLen;
-      else if (dir === 'up') ly2 = cy - lineLen;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.lineTo(lx2, ly2);
-      ctx.strokeStyle = accentRgb;
-      ctx.lineWidth = Math.round(W*0.0015);
-      ctx.stroke();
-
-      // 레이블 텍스트
-      const fontSize = Math.round(W * 0.022);
-      setFont(fontSize, '500', sansFont);
-      ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.85)';
-      ctx.shadowBlur = 6;
-      const textGap = Math.round(W*0.012);
-      let tx = lx2, ty = ly2;
-      if (dir === 'right') { ctx.textAlign = 'left'; tx = lx2 + textGap; ty = ly2 + fontSize/3; }
-      else if (dir === 'left') { ctx.textAlign = 'right'; tx = lx2 - textGap; ty = ly2 + fontSize/3; }
-      else if (dir === 'down') { ctx.textAlign = 'center'; ty = ly2 + textGap + fontSize; }
-      else if (dir === 'up') { ctx.textAlign = 'center'; ty = ly2 - textGap; }
-      ctx.fillText(lb.text || '', tx, ty);
-      ctx.shadowBlur = 0;
-      ctx.textAlign = 'left';
-    }
-
-    // 폴리오
-    setFont(Math.round(W*0.022), '400', sansFont);
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.textAlign = 'right';
-    ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), W - Math.round(W*0.03), H - Math.round(W*0.025));
-    ctx.textAlign = 'left';
-    return canvas;
-  }
-
-  const isDark = slide.type === 'closing';
-  const isSplit = slide.layout === 'split_bottom';
-  const isPull = slide.layout === 'pull_quote' || slide.type === 'pull_quote';
-  const isNike = style === 'nike';
-  // CSS 슬라이드 카드 220px 기준 → 1080px Canvas 비율, textScale로 조정
-  const R = (SIZE / 220) * textScale;
-  const pad = Math.round(14 * R);  // CSS padding 14px
-
-  if (isPull) {
-    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = accent; ctx.fillRect(pad, pad+Math.round(40*R), Math.round(2*R), Math.round(28*R));
-    setFont(Math.round(19*R), '300', serifFont);
-    ctx.fillStyle = '#1a1a1a';
-    const lines = wrapText(slide.headline || '', W - pad*2 - 10);
-    lines.forEach((l, i) => ctx.fillText(l, pad+Math.round(10*R), pad+Math.round(80*R)+i*Math.round(26*R*1.5)));
-    ctx.font = 'italic 300 ' + Math.round(9*R) + 'px ' + serifFont;
-    ctx.fillStyle = '#888580';
-    const blines = wrapText(slide.body || '', W - pad*2 - 10);
-    const startY = pad + Math.round(80*R) + lines.length * Math.round(26*R*1.5) + Math.round(10*R);
-    blines.forEach((l,i) => ctx.fillText(l, pad+Math.round(10*R), startY+i*Math.round(9*R*1.9)));
-
-  } else if (isDark) {
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,W,H);
-    // closing 슬라이드도 이미지 있으면 어둡게 깔기
-    if (imgDataUrl) await drawBgImage(imgDataUrl, 'dark_full');
-    setFont(Math.round(7*R), '400', sansFont);
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillText('SAPMANRI', pad, pad+Math.round(10*R));
-    ctx.fillStyle = accent; ctx.fillRect(pad, pad+Math.round(20*R), Math.round(2*R), Math.round(28*R));
-    const hlSize = isNike ? Math.round(26*R) : Math.round(20*R);
-    setFont(hlSize, headWeight, headFont);
-    ctx.fillStyle = '#fff';
-    const hl = isNike ? (slide.headline||'').toUpperCase() : (slide.headline||'');
-    const lines = wrapText(hl, W - pad*2 - 10);
-    const hlY = pad + Math.round(65*R);
-    lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.25)));
-    ctx.font = (style==='theedit'?'400 ':'italic 300 ') + Math.round(9*R) + 'px ' + (style==='theedit'?sansFont:serifFont);
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    const startY = hlY + lines.length * Math.round(hlSize*1.25) + Math.round(8*R);
-    const blines = wrapText(slide.body||'', W-pad*2);
-    blines.forEach((l,i) => ctx.fillText(l, pad, startY+i*Math.round(9*R*1.9)));
-    setFont(Math.round(7*R), '400', sansFont);
-    ctx.fillStyle = accent;
-    ctx.fillText(tag, pad, H-pad);
-
-  } else if (isSplit) {
-    const splitY = ratio === 'tall' ? Math.round(H * 0.62) : Math.round(SIZE * 0.56);
-    ctx.fillStyle = '#f2f0ec'; ctx.fillRect(0,0,W,H);
-    if (imgDataUrl) {
-      await new Promise(res => {
-        const img = new Image();
-        img.onload = () => {
-          const scale = Math.max(W/img.width, splitY/img.height);
-          const w = img.width*scale, h = img.height*scale;
-          ctx.save(); ctx.beginPath(); ctx.rect(0,0,W,splitY); ctx.clip();
-          ctx.drawImage(img,(W-w)/2,(splitY-h)/2,w,h);
-          ctx.restore(); res();
-        };
-        img.onerror = res; img.src = imgDataUrl;
-      });
-    }
-    const textY = splitY + Math.round(10*R);
-    const labelBaseline = textY + Math.round(9*R);  // 베이스라인 기준 여백 충분히
-    setFont(Math.round(7*R), '400', sansFont); ctx.fillStyle = accent;
-    ctx.fillText((slide.label||'').toUpperCase(), pad, labelBaseline);
-    const hlSize = isNike ? Math.round(18*R) : Math.round(17*R);
-    setFont(hlSize, headWeight, headFont);
-    ctx.fillStyle = '#1a1a1a';
-    const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
-    const lines = wrapText(hl, W-pad*2);
-    const hlY = labelBaseline + Math.round(10*R) + hlSize;  // 레이블 베이스라인 + 여백 + 헤드라인 cap-height
-    lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.3)));
-    ctx.font = (style==='theedit'?'400 ':'italic 300 ') + Math.round(9*R) + 'px ' + (style==='theedit'?sansFont:serifFont); ctx.fillStyle = '#888';
-    const blines = wrapText(slide.body||'', W-pad*2);
-    const by = hlY + Math.min(lines.length,2)*Math.round(hlSize*1.3) + Math.round(6*R);
-    blines.forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
-
-  } else {
-    ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0,0,W,H);
-    await drawBgImage(imgDataUrl, slide.layout);
-
-    const isTop = slide.text_position === 'top_left';
-    const hlSize = isNike ? Math.round(26*R) : Math.round(22*R);
-    const labelFontH = Math.round(7*R);   // 레이블 폰트 높이
-    const labelGap  = Math.round(6*R);    // 레이블↔헤드라인 여백
-    const hlLineH   = Math.round(hlSize * 1.2);
-    const bodyLineH = Math.round(9*R * 1.9);
-    const bottomPad = Math.round(16*R);
-    // 아래 정렬: 바디2줄 + 헤드라인2줄 + 레이블 + 여백들을 합산해서 레이블 시작점 계산
-    const blockH = labelFontH + labelGap + hlLineH*2 + Math.round(6*R) + bodyLineH*2;
-    const textY = isTop ? pad + Math.round(16*R) : H - bottomPad - blockH;
-
-    // fillText Y = 베이스라인 기준
-    // 레이블 베이스라인 = textY + labelFontH (top에서 폰트 높이만큼 내려야 베이스라인)
-    const labelBase = textY + labelFontH;
-    if (slide.type === 'cover') {
-      setFont(labelFontH, '400', sansFont); ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.fillText('SAPMANRI', pad, pad + labelFontH);
-    } else {
-      setFont(labelFontH, '400', sansFont); ctx.fillStyle = accent;
-      ctx.fillText((slide.label||'').toUpperCase(), pad, labelBase);
-    }
-
-    const hlY = slide.type === 'cover'
-      ? H - hlLineH*2 - bodyLineH*2 - Math.round(10*R) - bottomPad
-      : labelBase + labelGap + hlSize;  // 레이블 베이스라인 + 여백 + 헤드라인 cap-height
-    setFont(hlSize, headWeight, headFont);
-    ctx.fillStyle = '#fff';
-    const hl = isNike?(slide.headline||'').toUpperCase():(slide.headline||'');
-    const lines = wrapText(hl, W-pad*2);
-    lines.slice(0,2).forEach((l,i) => ctx.fillText(l, pad, hlY+i*Math.round(hlSize*1.2)));
-    ctx.font = (style==='theedit'?'400 ':'italic 300 ') + Math.round(9*R) + 'px ' + (style==='theedit'?sansFont:serifFont);
-    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    const blines = wrapText(slide.body||'', W-pad*2);
-    const by = hlY + Math.min(lines.length,2)*Math.round(hlSize*1.2) + Math.round(6*R);
-    blines.slice(0,3).forEach((l,i) => ctx.fillText(l, pad, by+i*Math.round(9*R*1.9)));
-  }
-
-  // 폴리오
-  setFont(Math.round(7*R), '400', sansFont);
-  ctx.fillStyle = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.3)';
-  ctx.textAlign = 'right';
-  ctx.fillText(slide.folio || String(idx+1).padStart(2,'0'), W-Math.round(10*R), H-Math.round(8*R));
-  ctx.textAlign = 'left';
-
-  return canvas;
-}
-
-
-
-// ── 픽셀 스트레치 효과 ──
-async function applyPixelStretch(dataUrl, outputW, outputH, pos, stretchH, dir) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      // 1. 원본 이미지를 임시 캔버스에 그리기
-      const srcCanvas = document.createElement('canvas');
-      srcCanvas.width = img.width; srcCanvas.height = img.height;
-      const srcCtx = srcCanvas.getContext('2d');
-      srcCtx.drawImage(img, 0, 0);
-
-      // 2. 스트레치할 픽셀 행 위치 (Y좌표)
-      const srcY = Math.round(img.height * pos);
-      const srcRow = srcCtx.getImageData(0, srcY, img.width, 1);
-
-      // 3. 결과 캔버스
-      const outCanvas = document.createElement('canvas');
-      outCanvas.width = outputW; outCanvas.height = outputH;
-      const ctx = outCanvas.getContext('2d');
-
-      // 4. 원본 이미지를 결과 캔버스에 맞게 그리기 (cover)
-      const scale = Math.max(outputW / img.width, outputH / img.height);
-      const dw = img.width * scale, dh = img.height * scale;
-      const dx = (outputW - dw) / 2, dy = (outputH - dh) / 2;
-      ctx.drawImage(img, dx, dy, dw, dh);
-
-      // 5. 스트레치 영역 계산 (출력 캔버스 기준)
-      const stretchZoneH = Math.round(outputH * stretchH);
-      // 원본 이미지에서 스트레치 행의 출력 Y좌표
-      const centerY = Math.round(dy + srcY * scale);
-      const topY    = dir === 'down' ? centerY : Math.max(0, centerY - stretchZoneH);
-      const botY    = dir === 'up'   ? centerY : Math.min(outputH, centerY + stretchZoneH);
-
-      // 6. 스트레치 영역에 픽셀 row를 한 줄씩 그리기
-      // 임시 캔버스에 1행 그리고 outputW로 늘려서 사용
-      const rowCanvas = document.createElement('canvas');
-      rowCanvas.width = img.width; rowCanvas.height = 1;
-      const rowCtx = rowCanvas.getContext('2d');
-      rowCtx.putImageData(srcRow, 0, 0);
-
-      // 스트레치 영역: y=topY ~ botY 한 줄씩 그림
-      for (let y = topY; y < botY; y++) {
-        ctx.drawImage(rowCanvas, 0, 0, img.width, 1, 0, y, outputW, 1);
-      }
-
-      // 7. 원본 이미지 다시 그 위에 (스트레치 효과 위에 원본 얹기)
-      // 스트레치 영역 위아래의 원본만 복원
-      // 위쪽 원본 (topY 위)
-      if (topY > 0) {
-        ctx.drawImage(img, 0, 0, img.width, srcY,
-          dx, dy, dw, srcY * scale);
-      }
-      // 아래쪽 원본 (botY 아래)
-      const srcBotY = Math.round((botY - dy) / scale);
-      if (srcBotY < img.height) {
-        ctx.drawImage(img, 0, srcBotY, img.width, img.height - srcBotY,
-          dx, dy + srcBotY * scale, dw, (img.height - srcBotY) * scale);
-      }
-
-      resolve(outCanvas);
-    };
-    img.onerror = () => resolve(null);
-    img.src = dataUrl;
+function saveR2Settings() {
+  window.ImageLibrary.setR2Config({
+    accountId : document.getElementById('r2AccountId').value.trim(),
+    accessKey : document.getElementById('r2AccessKey').value.trim(),
+    secretKey : document.getElementById('r2SecretKey').value.trim(),
+    bucket    : document.getElementById('r2Bucket').value.trim(),
+    publicUrl : document.getElementById('r2PublicUrl').value.trim(),
   });
+  document.getElementById('r2Status').textContent = '저장됨 ✓';
+  updateR2Btn();
+  setTimeout(closeR2Settings, 800);
 }
 
-async function exportStretch() {
-  if (!images.length) return;
-  const btn = document.querySelector('.btn-primary');
-  const orig = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '스트레치 생성 중...';
-
-  try { await document.fonts.ready; } catch(e) {}
-
-  const SIZE = 1080;
-  const H = aspectRatio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
-  const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
-
-  if (isIOS) _iosPngs = [];
-
-  for (let i = 0; i < images.length; i++) {
-    btn.textContent = '처리 중 ' + (i+1) + '/' + images.length + '...';
-    const outCanvas = await applyPixelStretch(
-      images[i].dataUrl, SIZE, H, stretchPos, stretchHeight, stretchDir
-    );
-    if (!outCanvas) continue;
-
-    if (isIOS) {
-      _iosPngs.push(outCanvas.toDataURL('image/png'));
-    } else {
-      const link = document.createElement('a');
-      link.download = 'sapmanri_stretch_' + String(i+1).padStart(2,'0') + '.png';
-      link.href = outCanvas.toDataURL('image/png');
-      link.click();
-      await new Promise(r => setTimeout(r, 400));
-    }
-  }
-
-  btn.textContent = orig; btn.disabled = false;
-  if (isIOS && _iosPngs.length) { _iosIdx = 0; openIosModal(); }
-}
-
-// ── 파노라마 모드 ──
-function isPanoStyle(style) { return style && style.startsWith('pano-'); }
-
-async function renderPanoramaCanvas(images, slides, style, SIZE, ratio, singleMode=false, selLeft=0, selRight=1, nSlides=3) {
-  const W = SIZE;
-  const H = ratio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
-  const N = singleMode ? nSlides : Math.max(images.length, 1);
-  // 파노라마 전체 캔버스 (슬라이드 수만큼 가로로 긺)
-  const TOTAL_W = W * N;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = TOTAL_W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-
-  const CREAM = '#f7f4ef', DARK = '#111', ACCENT = '#c8a97e';
-  const serifFont = '"Cormorant Garamond","Noto Serif KR",Georgia,serif';
-  const sansFont = '"Helvetica Neue","Noto Sans KR",Arial,sans-serif';
-
-  function setFont(size, weight, family) { ctx.font = weight + ' ' + size + 'px ' + family; }
-
-  // 배경 사진들을 가로로 이어 붙이기 (singleMode: 1장을 구간 크롭해서 N등분)
-  async function drawBgImages() {
-    if (singleMode && images[0]) {
-      // 1장 모드: 픽커 구간을 N등분해서 각 슬라이드에 배치
-      await new Promise(res => {
-        const img = new Image();
-        img.onload = () => {
-          const imgW = img.width, imgH = img.height;
-          // 픽커 구간 → 이미지 픽셀 좌표
-          const cropX = Math.round(imgW * selLeft);
-          const cropW = Math.round(imgW * (selRight - selLeft));
-          const sliceW = cropW / nSlides; // 각 슬라이드에 해당하는 원본 너비
-          for (let i = 0; i < nSlides; i++) {
-            const srcX = cropX + sliceW * i;
-            const destX = i * W;
-            ctx.save();
-            ctx.beginPath(); ctx.rect(destX, 0, W, H); ctx.clip();
-            // cover fit: 슬라이드 비율(W:H)에 맞게 그리기
-            const scale = Math.max(W / sliceW, H / imgH);
-            const drawW = sliceW * scale, drawH = imgH * scale;
-            // 세로 중심점: 0=상단, 0.5=중앙, 1=하단
-            const vOffset = (H - drawH) * panoVCenterVal;
-            ctx.drawImage(img,
-              srcX, 0, sliceW, imgH,          // src
-              destX + (W - drawW)/2, vOffset, drawW, drawH  // dest
-            );
-            ctx.restore();
-          }
-          res();
-        };
-        img.onerror = res; img.src = images[0].dataUrl;
-      });
-    } else {
-      for (let i = 0; i < images.length; i++) {
-        const dataUrl = images[i].dataUrl;
-        if (!dataUrl) continue;
-        await new Promise(res => {
-          const img = new Image();
-          img.onload = () => {
-            const x = i * W;
-            const scale = Math.max(W / img.width, H / img.height);
-            const iw = img.width * scale, ih = img.height * scale;
-            ctx.save();
-            ctx.beginPath(); ctx.rect(x, 0, W, H); ctx.clip();
-            ctx.drawImage(img, x + (W - iw) / 2, (H - ih) / 2, iw, ih);
-            ctx.restore();
-            res();
-          };
-          img.onerror = res; img.src = dataUrl;
-        });
-      }
-    }
-  }
-
-  if (style === 'pano-light') {
-    // 크림 배경 + 사진들 + 큰 헤드라인이 경계 넘어 흐름
-    ctx.fillStyle = CREAM; ctx.fillRect(0, 0, TOTAL_W, H);
-
-    // 사진들: 각 슬라이드에서 중앙 60% 영역에 배치
-    for (let i = 0; i < images.length; i++) {
-      const dataUrl = images[i].dataUrl;
-      if (!dataUrl) continue;
-      await new Promise(res => {
-        const img = new Image();
-        img.onload = () => {
-          const x = i * W + W * 0.05;
-          const pw = W * 0.9, ph = H * 0.72;
-          const py = H * 0.08;
-          const scale = Math.max(pw / img.width, ph / img.height);
-          const iw = img.width * scale, ih = img.height * scale;
-          ctx.save();
-          ctx.beginPath(); ctx.rect(x, py, pw, ph); ctx.clip();
-          ctx.drawImage(img, x + (pw - iw) / 2, py + (ph - ih) / 2, iw, ih);
-          ctx.restore();
-          res();
-        };
-        img.onerror = res; img.src = dataUrl;
-      });
-    }
-
-    // 상단 마스트헤드
-    setFont(Math.round(H * 0.035), '400', sansFont);
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.letterSpacing = '0.18em';
-    ctx.fillText('SAPMANRI', Math.round(W * 0.05), Math.round(H * 0.06));
-    ctx.letterSpacing = '0';
-
-    // 슬라이드마다 텍스트 (하단)
-    slides.forEach((slide, i) => {
-      const x = i * W;
-      const textX = x + Math.round(W * 0.05);
-      const textY = H * 0.84;
-      // 레이블
-      setFont(Math.round(H * 0.022), '400', sansFont);
-      ctx.fillStyle = ACCENT;
-      ctx.fillText((slide.label || '').toUpperCase(), textX, textY);
-      // 헤드라인 — 경계를 살짝 넘어가도 OK (연속감)
-      setFont(Math.round(H * 0.062), '300', serifFont);
-      ctx.fillStyle = DARK;
-      ctx.fillText(slide.headline || '', textX, textY + Math.round(H * 0.075));
-      // 바디
-      setFont(Math.round(H * 0.025), '300', sansFont);
-      ctx.fillStyle = 'rgba(0,0,0,0.45)';
-      const body = (slide.body || '').slice(0, 40);
-      ctx.fillText(body, textX, textY + Math.round(H * 0.075) + Math.round(H * 0.038));
-    });
-
-    // 폴리오 (우하단)
-    slides.forEach((slide, i) => {
-      const x = i * W;
-      setFont(Math.round(H * 0.02), '400', sansFont);
-      ctx.fillStyle = 'rgba(0,0,0,0.2)';
-      ctx.textAlign = 'right';
-      ctx.fillText(String(i + 1).padStart(2, '0') + ' / ' + String(images.length).padStart(2, '0'), x + W - Math.round(W * 0.05), H - Math.round(H * 0.03));
-    });
-    ctx.textAlign = 'left';
-
-  } else if (style === 'pano-dark') {
-    // 다크 배경 + 전체 폭 사진 이어붙임 + 어두운 오버레이 + 흰 텍스트
-    ctx.fillStyle = DARK; ctx.fillRect(0, 0, TOTAL_W, H);
-    await drawBgImages();
-
-    // 전체 어두운 오버레이
-    ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0, 0, TOTAL_W, H);
-
-    // 하단 그라디언트
-    const grad = ctx.createLinearGradient(0, H * 0.55, 0, H);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.88)');
-    ctx.fillStyle = grad; ctx.fillRect(0, H * 0.55, TOTAL_W, H * 0.45);
-
-    // 상단 브랜드
-    setFont(Math.round(H * 0.03), '400', sansFont);
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.letterSpacing = '0.2em';
-    ctx.fillText('SAPMANRI', Math.round(W * 0.05), Math.round(H * 0.07));
-    ctx.letterSpacing = '0';
-
-    // 각 슬라이드 텍스트 블록
-    slides.forEach((slide, i) => {
-      const x = i * W;
-      const pad = Math.round(W * 0.07);
-
-      // 레이블
-      setFont(Math.round(H * 0.022), '400', sansFont);
-      ctx.fillStyle = ACCENT;
-      ctx.fillText((slide.label || '').toUpperCase(), x + pad, H * 0.72);
-
-      // 헤드라인 (크게, 경계 넘어도 자연스러움)
-      setFont(Math.round(H * 0.075), '300', serifFont);
-      ctx.fillStyle = '#fff';
-      ctx.fillText(slide.headline || '', x + pad, H * 0.72 + Math.round(H * 0.085));
-
-      // 바디
-      setFont(Math.round(H * 0.026), '300', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.font = 'italic 300 ' + Math.round(H * 0.026) + 'px ' + serifFont;
-      const body = (slide.body || '').slice(0, 45);
-      ctx.fillText(body, x + pad, H * 0.72 + Math.round(H * 0.085) + Math.round(H * 0.045));
-    });
-
-    // 폴리오
-    slides.forEach((slide, i) => {
-      const x = i * W;
-      setFont(Math.round(H * 0.02), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.2)';
-      ctx.textAlign = 'right';
-      ctx.fillText(String(i + 1).padStart(2, '0') + ' / ' + String(images.length).padStart(2, '0'), x + W - Math.round(W * 0.05), H - Math.round(H * 0.03));
-    });
-    ctx.textAlign = 'left';
-
-  } else if (style === 'pano-film') {
-    // 필름 스트립 — 사진이 고정 크기 프레임 안에, 큰 타이포가 배경에 흐름
-    ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, TOTAL_W, H);
-
-    // 큰 배경 타이포 (전체 폭에 걸쳐)
-    setFont(Math.round(H * 0.45), '700', sansFont);
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
-    ctx.textAlign = 'left';
-    ctx.fillText('SAPMANRI SLOW DAYS', Math.round(W * 0.03), H * 0.68);
-
-    // 필름 스프라켓 홀 (상단/하단)
-    const sprocketSize = Math.round(H * 0.028);
-    const sprocketCount = Math.ceil(TOTAL_W / (sprocketSize * 2.5));
-    for (let j = 0; j < sprocketCount; j++) {
-      const sx = Math.round(j * sprocketSize * 2.5 + sprocketSize * 0.5);
-      // 상단
-      ctx.fillStyle = 'rgba(255,255,255,0.08)';
-      ctx.beginPath();
-      ctx.roundRect(sx, Math.round(H * 0.028), sprocketSize, Math.round(sprocketSize * 0.7), 2);
-      ctx.fill();
-      // 하단
-      ctx.beginPath();
-      ctx.roundRect(sx, H - Math.round(H * 0.028) - Math.round(sprocketSize * 0.7), sprocketSize, Math.round(sprocketSize * 0.7), 2);
-      ctx.fill();
-    }
-
-    // 사진 프레임들
-    const frameH = Math.round(H * 0.62);
-    const frameW = Math.round(W * 0.82);
-    const frameY = (H - frameH) / 2;
-    for (let i = 0; i < images.length; i++) {
-      const frameX = i * W + Math.round(W * 0.09);
-      // 프레임 테두리
-      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(frameX, frameY, frameW, frameH);
-
-      const dataUrl = images[i].dataUrl;
-      if (!dataUrl) { ctx.fillStyle = '#222'; ctx.fillRect(frameX, frameY, frameW, frameH); continue; }
-      await new Promise(res => {
-        const img = new Image();
-        img.onload = () => {
-          const scale = Math.max(frameW / img.width, frameH / img.height);
-          const iw = img.width * scale, ih = img.height * scale;
-          ctx.save();
-          ctx.beginPath(); ctx.rect(frameX, frameY, frameW, frameH); ctx.clip();
-          ctx.drawImage(img, frameX + (frameW - iw) / 2, frameY + (frameH - ih) / 2, iw, ih);
-          ctx.restore(); res();
-        };
-        img.onerror = res; img.src = dataUrl;
-      });
-    }
-
-    // 슬라이드 텍스트 (하단)
-    slides.forEach((slide, i) => {
-      const x = i * W + Math.round(W * 0.09);
-      setFont(Math.round(H * 0.028), '700', sansFont);
-      ctx.fillStyle = '#fff';
-      ctx.fillText(slide.headline || '', x, frameY + frameH + Math.round(H * 0.06));
-
-      setFont(Math.round(H * 0.02), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.fillText((slide.label || '').toUpperCase(), x, frameY + frameH + Math.round(H * 0.06) + Math.round(H * 0.032));
-    });
-
-    // 번호
-    slides.forEach((slide, i) => {
-      const x = i * W;
-      setFont(Math.round(H * 0.018), '400', sansFont);
-      ctx.fillStyle = 'rgba(255,255,255,0.18)';
-      ctx.textAlign = 'right';
-      ctx.fillText(String(i + 1).padStart(2, '0'), x + W - Math.round(W * 0.09), frameY - Math.round(H * 0.025));
-    });
-    ctx.textAlign = 'left';
-  }
-
-  // ── pano-text: 단색 배경 + 큰 텍스트가 전체 폭에 흘러가는 방식 ──
-  if (style === 'pano-text') {
-    const bgColor = nSlides ? panoTextBgColor : '#111';
-    const txtColor = panoTextColor || '#fff';
-    ctx.fillStyle = bgColor; ctx.fillRect(0, 0, TOTAL_W, H);
-
-    // 마지막 슬라이드에만 이미지 배치 (텍스트는 그 위에 얹힘)
-    if (images.length && images[0]?.dataUrl) {
-      await new Promise(res => {
-        const img = new Image();
-        img.onload = () => {
-          const lastX = (N - 1) * W;
-          const scale = Math.max(W / img.width, H / img.height);
-          const iw = img.width * scale, ih = img.height * scale;
-          ctx.save();
-          ctx.beginPath(); ctx.rect(lastX, 0, W, H); ctx.clip();
-          ctx.drawImage(img, lastX + (W - iw) / 2, (H - ih) / 2, iw, ih);
-          // 오버레이 없이 사진 위에 텍스트만 얹힘
-          ctx.restore();
-          res();
-        };
-        img.onerror = res; img.src = images[0].dataUrl;
-      });
-    }
-
-    // 텍스트 준비 — slides[0].headline에 AI가 채운 텍스트
-    const rawText = slides[0]?.headline || 'SAPMANRI';
-    // 텍스트가 전체 가로폭에 꽉 차도록 폰트 크기 자동 계산
-    const targetFontSize = Math.round(H * 0.38);
-    setFont(targetFontSize, '700', sansFont);
-    const textW = ctx.measureText(rawText).width;
-    // 전체 폭의 90% 정도에 맞추되, 최소 H*0.2
-    const fitSize = Math.max(Math.round(H * 0.2), Math.round(targetFontSize * (TOTAL_W * 0.92) / textW));
-    const fontSize = Math.min(fitSize, Math.round(H * 0.52));
-    setFont(fontSize, '700', sansFont);
-
-    // 텍스트를 수직 중앙에 배치
-    const textY = H / 2 + fontSize * 0.35;
-    ctx.fillStyle = txtColor;
-    ctx.textAlign = 'left';
-    // 약간 왼쪽 패딩
-    const textX = Math.round(W * 0.08);
-    ctx.fillText(rawText, textX, textY);
-
-    // 하단 브랜드 + 슬라이드 번호
-    slides.forEach((slide, i) => {
-      const x = i * W;
-      setFont(Math.round(H * 0.022), '400', sansFont);
-      ctx.fillStyle = txtColor === '#ffffff' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)';
-      ctx.textAlign = 'right';
-      ctx.fillText(String(i + 1).padStart(2, '0') + ' / ' + String(N).padStart(2, '0'), x + W - Math.round(W * 0.05), H - Math.round(H * 0.04));
-    });
-
-    // 브랜드명 (첫 슬라이드 상단)
-    setFont(Math.round(H * 0.028), '400', sansFont);
-    ctx.fillStyle = txtColor === '#ffffff' ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)';
-    ctx.letterSpacing = '0.18em';
-    ctx.textAlign = 'left';
-    ctx.fillText('SAPMANRI', Math.round(W * 0.05), Math.round(H * 0.07));
-    ctx.letterSpacing = '0';
-  }
-
-  return canvas;
-}
-
-// 파노라마 슬라이드별로 잘라서 PNG 저장
-async function exportPanorama() {
-  if (!images.length) return;
-  const btn = document.querySelector('.btn-primary');
-  const orig = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '파노라마 렌더링 중...';
-
-  try { await document.fonts.ready; } catch(e) {}
-
-  const SIZE = 1080;
-  const style = document.getElementById('metaStyle').value;
-  const isSingleImage = images.length === 1;
-
-  let slideCount, slides;
-
-  if (style === 'pano-text') {
-    // 텍스트 파노라마: isSingleImage보다 먼저 처리 (이미지 없어도 가능)
-    slideCount = panoSlideCount;
-    let panoTxt2 = document.getElementById('panoTextInput')?.value?.trim() || '';
-    if (!panoTxt2 && images.length) {
-      btn.textContent = '텍스트 생성 중...';
-      // 2026-07-01: fetch → SharedWritingEngine.callClaude()
-      try {
-        const _pRaw = await SharedWritingEngine.callClaude(
-          [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: images[0].dataUrl.split(',')[1] } },
-            { type: 'text', text: '이 이미지의 분위기에 맞는 짧은 감성 문구를 한 줄로 만들어줘. 글자수는 10~20자 한국어. 텍스트만 반환.' }
-          ],
-          '', 60, null, 'claude-haiku-4-5-20251001'
-        );
-        panoTxt2 = _pRaw.trim() || 'SAPMANRI';
-      } catch(e) { panoTxt2 = 'SAPMANRI'; }
-    } else if (!panoTxt2) { panoTxt2 = 'SAPMANRI'; }
-    slides = Array.from({length: slideCount}, (_, i) => ({ headline: panoTxt2, body: '', label: '' }));
-  } else if (isSingleImage) {
-    // 1장 모드: 픽커 구간을 N등분
-    slideCount = panoSlideCount;
-    slides = Array.from({length: slideCount}, (_, i) => ({
-      headline: i === 0 ? (images[0].analysis?.suggested_copy || '') : '',
-      body: i === 0 ? (images[0].analysis?.suggested_body || '') : '',
-      label: i === 0 ? (images[0].analysis?.mood || '') : '',
-    }));
-  } else {
-    // 여러 장 모드: 장 수 = 이미지 수, 레이블은 첫 장만
-    slideCount = images.length;
-    slides = images.map((img, i) => ({
-      headline: img.analysis?.suggested_copy || '',
-      body: img.analysis?.suggested_body || '',
-      label: i === 0 ? (img.analysis?.mood || '') : '',
-    }));
-  }
-
-  btn.textContent = '파노라마 그리는 중...';
-  const panCanvas = await renderPanoramaCanvas(images, slides, style, SIZE, aspectRatio, isSingleImage, panoSelLeft, panoSelRight, slideCount);
-
-  // 슬라이드별로 잘라서 저장
-  const W = SIZE;
-  const H = aspectRatio === 'tall' ? Math.round(SIZE * 16 / 9) : SIZE;
-
-  if (isIOS) {
-    // iOS: 잘라낸 이미지 모달로 보여주기
-    _iosPngs = [];
-    for (let i = 0; i < slideCount; i++) {
-      const sliceCanvas = document.createElement('canvas');
-      sliceCanvas.width = W; sliceCanvas.height = H;
-      const sCtx = sliceCanvas.getContext('2d');
-      sCtx.drawImage(panCanvas, i * W, 0, W, H, 0, 0, W, H);
-      _iosPngs.push(sliceCanvas.toDataURL('image/png'));
-    }
-    btn.textContent = orig; btn.disabled = false;
-    _iosIdx = 0; openIosModal();
-  } else {
-    for (let i = 0; i < slideCount; i++) {
-      btn.textContent = '저장 중 ' + (i + 1) + '/' + slideCount + '...';
-      const sliceCanvas = document.createElement('canvas');
-      sliceCanvas.width = W; sliceCanvas.height = H;
-      const sCtx = sliceCanvas.getContext('2d');
-      sCtx.drawImage(panCanvas, i * W, 0, W, H, 0, 0, W, H);
-      const link = document.createElement('a');
-      link.download = 'sapmanri_pano_' + String(i + 1).padStart(2, '0') + '.png';
-      link.href = sliceCanvas.toDataURL('image/png');
-      link.click();
-      await new Promise(r => setTimeout(r, 400));
-    }
-    btn.textContent = orig; btn.disabled = false;
+async function testR2() {
+  const statusEl = document.getElementById('r2Status');
+  statusEl.textContent = '테스트 중…';
+  // 현재 폼 값으로 임시 설정
+  window.ImageLibrary.setR2Config({
+    accountId : document.getElementById('r2AccountId').value.trim(),
+    accessKey : document.getElementById('r2AccessKey').value.trim(),
+    secretKey : document.getElementById('r2SecretKey').value.trim(),
+    bucket    : document.getElementById('r2Bucket').value.trim(),
+    publicUrl : document.getElementById('r2PublicUrl').value.trim(),
+  });
+  try {
+    const items = await window.ImageLibrary.list();
+    statusEl.textContent = `✓ 연결 성공 — 라이브러리 이미지 ${items.length}개`;
+    statusEl.style.color = '#8aaa88';
+  } catch (e) {
+    statusEl.textContent = '✗ 연결 실패: ' + e.message;
+    statusEl.style.color = '#c47a6a';
   }
 }
 
-function toggleCaption() {
-  const box = document.getElementById('captionBox');
-  box.classList.toggle('open');
-  document.getElementById('captionText').textContent = generatedCaption;
+function updateR2Btn() {
+  const btn = document.getElementById('r2Btn');
+  if (btn) btn.textContent = window.ImageLibrary.hasR2() ? 'R2 ✓' : 'R2 ☁';
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  updateR2Btn();
+  document.getElementById('r2Modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('r2Modal')) closeR2Settings();
+  });
+});
 </script>
 </body>
 </html>
+
