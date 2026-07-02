@@ -102,7 +102,7 @@
       '이미지 분석 도구입니다. JSON만 출력합니다.',
       1200,
       null,
-      'claude-sonnet-4-6'
+      'claude-sonnet-5'
     );
 
     const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
@@ -110,7 +110,7 @@
     const result = JSON.parse(raw.slice(s, e + 1));
     result.schema_version = 'image-analysis-v3';
     result.analyzed_at    = new Date().toISOString();
-    result.model          = 'claude-sonnet-4-6';
+    result.model          = 'claude-sonnet-5';
     return result;
   }
 
