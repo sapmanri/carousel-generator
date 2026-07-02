@@ -336,7 +336,7 @@ ${videoCtx ? `\n${videoCtx}\n` : ''}
     system,
     300,
     null,
-    'claude-sonnet-4-5'
+    'claude-sonnet-5'
   );
   const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
   const _titleResult = JSON.parse(raw.slice(s, e + 1));
@@ -492,14 +492,14 @@ ${instruction}${bilingualNote}`;
   }
 
   // 2026-07-01: fetch 직접 호출 → SharedWritingEngine.callClaude()로 교체
-  // 모델은 기존과 동일하게 claude-sonnet-4-6 유지. 프롬프트/파싱 로직 변경 없음.
+  // 모델은 기존과 동일하게 claude-sonnet-5 유지. 프롬프트/파싱 로직 변경 없음.
   const maxTok = pageType === 'botanical' ? 80 : (pageType === 'essay' ? 2000 : schema ? 1600 : 1200);
   const raw = await window.SharedWritingEngine.callClaude(
     userContent,
     system,
     maxTok,
     null,
-    'claude-sonnet-4-6'
+    'claude-sonnet-5'
   );
 
   // essay/quote: 구분자 방식 파싱 (동적 언어 대응)
