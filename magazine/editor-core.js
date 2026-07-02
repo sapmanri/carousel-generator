@@ -269,6 +269,31 @@ function videoContextText() {
 }
 
 
+// ══════════════════════════════════════════════════════════════
+// Sapmanri QC 진단 (2026-07-02 추가)
+// 목적: 매거진 생성 결과의 한국어 필드에서 반복/설명 리듬 패턴을 감지해
+//       콘솔 경고만 남긴다.
+// 금지 사항 (의도적):
+//   - 텍스트를 절대 자동으로 고치지 않는다 (리라이트 없음)
+//   - enforceSapmanriQC()를 호출하지 않는다 (JSON/다국어 구조 파싱이 깨질 위험)
+//   - 반환 객체의 키/구조를 절대 바꾸지 않는다 (발행 스키마 불변)
+// ══════════════════════════════════════════════════════════════
+function runSapmanriQCDiagnostics(fieldsObj, sourceLabel) {
+  if (!window.SapQC || typeof window.SapQC.detectSapmanriIssues !== 'function') return;
+  if (!fieldsObj || typeof fieldsObj !== 'object') return;
+  Object.keys(fieldsObj).forEach(key => {
+    // 한국어 필드만 진단: ko_ 접두 필드(JSON/구분자 스키마), 또는 'title'(제목은 한국어로 생성됨)
+    const isKoField = key.startsWith('ko_') || key === 'title';
+    if (!isKoField) return;
+    const value = fieldsObj[key];
+    if (typeof value !== 'string' || !value.trim()) return;
+    const issues = window.SapQC.detectSapmanriIssues(value);
+    if (issues.length > 0) {
+      console.warn(`[Sapmanri QC] ${sourceLabel} · ${key} 반복/설명 패턴 감지:`, issues, '\n텍스트:', value.slice(0, 120));
+    }
+  });
+}
+
 async function generateIssueTitleSubtitle() {
   const key = getApiKey();
   if (!key) throw new Error('API Key가 필요합니다.');
@@ -316,7 +341,9 @@ ${videoCtx ? `\n${videoCtx}\n` : ''}
     'claude-sonnet-4-5'
   );
   const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
-  return JSON.parse(raw.slice(s, e + 1));
+  const _titleResult = JSON.parse(raw.slice(s, e + 1));
+  runSapmanriQCDiagnostics({ title: _titleResult.title }, 'magazine:issue_title');
+  return _titleResult;
 }
 
 const PAGE_TEXT_INSTRUCTION = {
@@ -494,7 +521,7 @@ ${instruction}${bilingualNote}`;
           result[`${l}_text`] = text;
           if (text) hasText = true;
         });
-        if (hasText) return result;
+        if (hasText) { runSapmanriQCDiagnostics(result, 'magazine:essay'); return result; }
         console.warn('[essay parse fail] raw response:', raw);
       } else if (pageType === 'quote') {
         let hasText = false;
@@ -506,7 +533,7 @@ ${instruction}${bilingualNote}`;
           result[`${l}_text`] = text;
           if (text) hasText = true;
         });
-        if (hasText) return result;
+        if (hasText) { runSapmanriQCDiagnostics(result, 'magazine:quote'); return result; }
         console.warn('[quote parse fail] raw response:', raw);
       }
     } catch(err) { console.warn('[delimiter parse error]', err); }
@@ -517,7 +544,9 @@ ${instruction}${bilingualNote}`;
   if (schema) {
     try {
       const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
-      return JSON.parse(raw.slice(s, e + 1));
+      const _parsed = JSON.parse(raw.slice(s, e + 1));
+      runSapmanriQCDiagnostics(_parsed, `magazine:${pageType}`);
+      return _parsed;
     } catch(err) {
       return { _raw: raw, _parseError: true };
     }
