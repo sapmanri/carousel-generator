@@ -1312,13 +1312,10 @@ async function generatePlan(images, topic, tag, closing, style, manualText, info
         pairs.forEach((p,i) => { styleBlock += `\n[AI]: ${p.original.slice(0,200)}\n[수정]: ${p.edited.slice(0,200)}\n`; });
       }
 
-      // v3 강화: 절대 금지 패턴
-      styleBlock += `\n\n절대 금지 (삽만리 글쓰기 원칙):\n`;
-      styleBlock += `- 교훈형 결말 금지: "그래서 우리는", "삶은 결국", "그것만으로 충분", "괜찮다", "소중함을 알게" 등\n`;
-      styleBlock += `- 감성 상투어 금지: "문득", "어쩌면", "어느새", "따뜻하게", "소소한 행복", "위로", "힐링"\n`;
-      styleBlock += `- 입력에 없는 장면 지어내기 금지\n`;
-      styleBlock += `- 감정을 직접 설명하는 문장 금지 (장면과 사물로 드러낼 것)\n`;
-      styleBlock += `\n생성 순서 원칙: 장면 → 사실 → 리듬 → 감정 → 의미`;
+      // 2026-07-02: 하드코딩 절대금지 목록 제거 → SapConstitution SSOT 사용
+      styleBlock += `\n\n${SapConstitution.buildConstitutionText()}`;
+      styleBlock += `\n\n${SapConstitution.buildAvoidExamplesText()}`;
+      styleBlock += `\n\n생성 순서 원칙: 장면 → 사실 → 리듬 → 감정 → 의미`;
     } catch(e) { /* profile_data.json 없으면 기본 스타일로 진행 */ }
   }
 
