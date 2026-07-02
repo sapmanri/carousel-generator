@@ -306,7 +306,7 @@ async function analyzeImageForPostcard(dataUrl) {
     '',
     400,
     null,
-    'claude-sonnet-4-6'
+    'claude-sonnet-5'
   );
   const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
   return JSON.parse(raw.slice(s, e + 1));
