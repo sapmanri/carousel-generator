@@ -6,10 +6,21 @@
  * 모든 데이터는 writing_studio.html v5에서 100% 추출.
  * 프롬프트, 문체, QC 규칙을 이 파일 외에서 정의하거나 복사하지 않는다.
  *
+ * ── 문체 소스 역할 정의 (2026-07-02, Decision Log 기록) ──────────
+ *   sapmanri_constitution.js = 문체 철학 / 금지 규칙 / QC 기준 /
+ *                              공통 프롬프트 규칙의 Single Source of Truth
+ *   profile_data.json        = vase 실제 예문 / AI 초안→vase 수정본 pairs /
+ *                              실사용 문체 데이터 저장소 (규칙의 원천 아님,
+ *                              Writing Studio 편집 UI가 실시간으로 관리하는
+ *                              살아있는 예문 DB)
+ * 새 문체 규칙/금지 패턴이 생기면 반드시 이 파일에만 추가한다.
+ * Magazine/Carousel/Skyline/Postcard에 별도로 하드코딩하지 않는다.
+ *
  * 사용법:
  *   <script src="/sapmanri_constitution.js"></script>
  *   window.SapConstitution.SAPMANRI_CONSTITUTION
  *   window.SapConstitution.buildConstitutionText()
+ *   window.SapConstitution.buildAvoidExamplesText()
  *   window.SapConstitution.buildOutputContractText(type, opts)
  */
 (function (global) {
@@ -249,6 +260,46 @@
       '최근 문체는 감정보다 인지에 가깝다.',
       '사물을 오래 보는 것보다, 알고 있다고 생각한 것의 틈을 다시 보는 쪽으로 진화했다.',
       '사진 산문은 예쁜 묘사보다 생활 속 발견의 기록에 가깝다.'
+    ],
+    // 2026-07-02 추가: bad → good 대조 예시.
+    // 규칙 나열만으로는 모델이 금지어만 피해서 새 변형(paraphrase)으로 옮겨가는
+    // 문제가 반복 확인되었다 (QC 정규식이 "그냥 있었다" 류를 계속 쫓아가야 했던 사례).
+    // 대조 예시는 정확한 문구를 외우게 하려는 게 아니라 "방향"을 보여주는 용도이므로,
+    // 사용하는 프롬프트 쪽에서 "이 예시를 그대로 반복하지 말고 매번 새로 찾아내라"는
+    // 문구를 함께 붙여야 한다 (buildAvoidExamplesText()가 이미 포함함).
+    // source: 'vase_pair' = profile_data.json의 실제 AI초안→vase수정본에서 추출.
+    //         'vase_dictated' = vase가 이 대화에서 직접 예시로 제시한 문구.
+    avoidExamples: [
+      {
+        bad: '무작정. 아무 생각 없이 한다고 말은 하지만,',
+        good: '무작정 퍼즐을 맞춘다. 손은 조각을 고르는데 마음은 자꾸 다른 곳으로 간다.',
+        label: '해석 동사가 많음',
+        source: 'vase_pair'
+      },
+      {
+        bad: '요즘 카메라에는 너무 당연하게 들어 있는 기능들이 그때의 카메라에는 대부분 없었다.',
+        good: '불편한 점이 많았다.',
+        label: '설명형 비교문',
+        source: 'vase_pair'
+      },
+      {
+        bad: '너와 함께라 참 행복했다. 하루하루 소중하지 않은 날이 없었다.',
+        good: '너와 함께라 매일이 달랐다. 같은 하루도 두 번 오지 않았다.',
+        label: '감정을 직접 설명',
+        source: 'vase_pair'
+      },
+      {
+        bad: '그냥 있었다. 서두르지 않았다. 빠르지도 느리지도 않았다.',
+        good: '커피잔 손잡이와 고양이 꼬리 사이, 손가락 두 개 정도 거리.',
+        label: '안전한 관찰 리듬 반복',
+        source: 'vase_dictated'
+      },
+      {
+        bad: '그런 오후였다. 그것만으로 충분했다.',
+        good: '식은 차 옆에 다 읽지 못한 책이 엎어져 있었다.',
+        label: '익숙한 결말로 수렴',
+        source: 'vase_dictated'
+      }
     ]
   };
 
@@ -292,6 +343,18 @@
 
   function buildRuntimeRulesText() {
     return RUNTIME_RULES.map((r,i) => `${i+1}. ${r}`).join('\n');
+  }
+
+  // 2026-07-02 추가: bad → good 대조 예시 텍스트 빌더.
+  // Magazine/Carousel/Skyline/Postcard/Writing Studio 전 도구가 이 함수를 통해서만
+  // 대조 예시를 프롬프트에 넣는다. 개별 파일에 예시를 하드코딩하지 않는다.
+  function buildAvoidExamplesText() {
+    const ex = SAPMANRI_CONSTITUTION.avoidExamples || [];
+    if (!ex.length) return '';
+    const lines = ex.map(e => `❌ ${e.bad}\n⭕ ${e.good}`).join('\n\n');
+    return `## 안전한 추상 리듬 대신 구체 장면으로 (예시)\n` +
+      `아래는 방향을 보여주는 예시입니다. 이 정확한 표현을 그대로 반복하지 말고,\n` +
+      `매번 그 장면에 맞는 새로운 구체적 디테일을 스스로 찾아내세요.\n\n${lines}`;
   }
 
   /**
@@ -408,6 +471,7 @@
     // 빌더 함수
     buildConstitutionText,
     buildRuntimeRulesText,
+    buildAvoidExamplesText,
     buildAvoidPhraseText,
     buildRecentStyleMemoryText,
     getVoiceForType,
